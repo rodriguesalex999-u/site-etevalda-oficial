@@ -2,14 +2,14 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <meta name="description" content="Grupo Etevalda MT - Joias de Luxo Exclusivas em Mato Grosso">
-    <meta name="keywords" content="joias, ouro, diamantes, anéis, colares, luxo, Cuiabá, Várzea Grande">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Grupo Etevalda MT - A maior loja de variedades de Mato Grosso">
+    <meta name="keywords" content="joias, presentes, variedades, Cuiabá, Várzea Grande">
     <meta name="theme-color" content="#D4AF37">
-    <meta property="og:title" content="Grupo Etevalda MT - Joias de Luxo">
-    <meta property="og:description" content="Descubra nossa coleção exclusiva de joias finas com entrega imediata em MT">
+    <meta property="og:title" content="Grupo Etevalda MT">
+    <meta property="og:description" content="Variedade imbatível com entrega hoje! Pague só na entrega.">
     <meta property="og:image" content="https://i.postimg.cc/1Xw1PC9m/Grupo-Etevalda-MT.png">
-    <title>Grupo Etevalda MT | Joias de Luxo Exclusivas</title>
+    <title>Grupo Etevalda MT | Variedades</title>
 
     <!-- Google Fonts Premium -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -52,7 +52,6 @@
                                 <small>MT</small>
                             </h1>
                         </a>
-                        <p class="logo-tagline">A maior loja de variedades de Mato Grosso</p>
                     </div>
 
                     <!-- Busca Premium com Dropdown Preditivo -->
@@ -62,7 +61,7 @@
                                 type="text"
                                 id="searchInput"
                                 class="search-input"
-                                placeholder="Buscar joias, anéis, colares..."
+                                placeholder="Buscar..."
                                 autocomplete="off"
                             >
                             <button id="searchBtn" class="search-btn" aria-label="Buscar">
@@ -76,7 +75,7 @@
 
                     <!-- Ações do Header -->
                     <div class="header-actions">
-                        <button id="cartBtn" class="cart-btn" aria-label="Carrinho de compras">
+                        <button id="cartBtn" class="cart-btn" aria-label="Carrinho">
                             <i class="fas fa-shopping-bag"></i>
                             <span id="cartCount" class="cart-count">0</span>
                         </button>
@@ -95,47 +94,80 @@
         </nav>
     </header>
 
-    <!-- BANNER PRINCIPAL COM IMAGEM OFICIAL -->
-    <section class="hero-banner hero-banner-xl">
-        <div class="hero-image-container hero-image-container-xl">
-            <img src="https://i.postimg.cc/1Xw1PC9m/Grupo-Etevalda-MT.png" alt="Grupo Etevalda MT" class="hero-image hero-image-xl">
-        </div>
-    </section>
-
-    <!-- CALLOUT DE ENTREGA PREMIUM -->
-    <section class="delivery-callout">
-        <div class="container-fluid">
-            <div class="callout-content">
-                <i class="fas fa-truck-fast"></i>
-                <div class="callout-text">
-                    <strong>ENTREGAMOS HOJE NA SUA CASA</strong>
-                    <span class="highlight-red">VOCÊ SÓ PAGA NA HORA DA ENTREGA!</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- FILTROS MOBILE -->
-    <div class="mobile-filters">
-        <button id="filterToggle" class="filter-btn">
-            <i class="fas fa-filter"></i> Filtrar
-        </button>
-        <span id="productCount" class="product-count">0 produtos</span>
-    </div>
-
     <!-- MAIN CONTENT -->
     <main class="main-content">
         <div class="container-fluid">
-            <!-- Seção de Produtos -->
+            <!-- Seção de Produtos (sem título) -->
             <section class="products-section">
-                <div class="products-header">
-                    <h2 class="section-title">Coleção Exclusiva</h2>
-                    <p class="section-subtitle">Variedade e Qualidade para você</p>
-                </div>
-
                 <!-- Grid de Produtos -->
                 <div id="productsContainer" class="products-grid">
-                    <!-- Será preenchido pelo JavaScript -->
+                    <!-- Skeleton Screens serão exibidos enquanto carrega -->
+                    <div class="product-card skeleton">
+                        <div class="skeleton-image"></div>
+                        <div class="product-info">
+                            <div class="skeleton-text skeleton-title"></div>
+                            <div class="skeleton-text skeleton-price"></div>
+                            <div class="product-buttons">
+                                <div class="skeleton-text skeleton-button"></div>
+                                <div class="skeleton-text skeleton-button"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-card skeleton">
+                        <div class="skeleton-image"></div>
+                        <div class="product-info">
+                            <div class="skeleton-text skeleton-title"></div>
+                            <div class="skeleton-text skeleton-price"></div>
+                            <div class="product-buttons">
+                                <div class="skeleton-text skeleton-button"></div>
+                                <div class="skeleton-text skeleton-button"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-card skeleton">
+                        <div class="skeleton-image"></div>
+                        <div class="product-info">
+                            <div class="skeleton-text skeleton-title"></div>
+                            <div class="skeleton-text skeleton-price"></div>
+                            <div class="product-buttons">
+                                <div class="skeleton-text skeleton-button"></div>
+                                <div class="skeleton-text skeleton-button"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-card skeleton">
+                        <div class="skeleton-image"></div>
+                        <div class="product-info">
+                            <div class="skeleton-text skeleton-title"></div>
+                            <div class="skeleton-text skeleton-price"></div>
+                            <div class="product-buttons">
+                                <div class="skeleton-text skeleton-button"></div>
+                                <div class="skeleton-text skeleton-button"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-card skeleton">
+                        <div class="skeleton-image"></div>
+                        <div class="product-info">
+                            <div class="skeleton-text skeleton-title"></div>
+                            <div class="skeleton-text skeleton-price"></div>
+                            <div class="product-buttons">
+                                <div class="skeleton-text skeleton-button"></div>
+                                <div class="skeleton-text skeleton-button"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="product-card skeleton">
+                        <div class="skeleton-image"></div>
+                        <div class="product-info">
+                            <div class="skeleton-text skeleton-title"></div>
+                            <div class="skeleton-text skeleton-price"></div>
+                            <div class="product-buttons">
+                                <div class="skeleton-text skeleton-button"></div>
+                                <div class="skeleton-text skeleton-button"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -143,7 +175,7 @@
             <section class="social-proof-section">
                 <div class="section-header">
                     <h2 class="section-title">Quem Confia, Recomenda</h2>
-                    <p class="section-subtitle">Clientes satisfeitos em todo Mato Grosso</p>
+                    <p class="section-subtitle">Clientes em todo Mato Grosso</p>
                 </div>
                 <div id="socialProofGrid" class="social-proof-grid">
                     <!-- Será preenchido pelo JavaScript -->
@@ -154,7 +186,7 @@
             <section class="faq-section">
                 <div class="section-header">
                     <h2 class="section-title">Perguntas Frequentes</h2>
-                    <p class="section-subtitle">Clique para ouvir a resposta em áudio</p>
+                    <p class="section-subtitle">Clique e ouça a resposta</p>
                 </div>
                 <div id="faqGrid" class="faq-grid">
                     <!-- Será preenchido pelo JavaScript -->
@@ -171,16 +203,16 @@
                         </div>
                     </div>
                     <div class="team-info">
-                        <h3 class="team-title">Excelência por trás de cada joia</h3>
-                        <p class="team-description">Nossa equipe está sempre pronta para ajudar você a encontrar a joia perfeita. Com mais de 20 anos de experiência, garantimos qualidade e satisfação em cada compra.</p>
+                        <h3 class="team-title">Variedade Imbatível</h3>
+                        <p class="team-description">Mais de 20 anos oferecendo o melhor em variedades. Diferencial: você só paga na hora da entrega! Garantia em todos os produtos.</p>
                         <div class="team-features">
-                            <div class="feature-item"><i class="fas fa-check-circle"></i> Joias Autênticas Certificadas</div>
-                            <div class="feature-item"><i class="fas fa-check-circle"></i> Garantia de Fábrica</div>
-                            <div class="feature-item"><i class="fas fa-check-circle"></i> Entrega Rápida em MT</div>
-                            <div class="feature-item"><i class="fas fa-check-circle"></i> Atendimento WhatsApp 24h</div>
+                            <div class="feature-item"><i class="fas fa-check-circle"></i> Pague na Entrega</div>
+                            <div class="feature-item"><i class="fas fa-check-circle"></i> Garantia Total</div>
+                            <div class="feature-item"><i class="fas fa-check-circle"></i> Entrega Hoje em MT</div>
+                            <div class="feature-item"><i class="fas fa-check-circle"></i> Atendimento WhatsApp</div>
                         </div>
                         <a href="https://wa.me/5565993337205" class="team-whatsapp-btn" target="_blank">
-                            <i class="fab fa-whatsapp"></i> Fale com nossa equipe
+                            <i class="fab fa-whatsapp"></i> Fale conosco
                         </a>
                     </div>
                 </div>
@@ -189,7 +221,7 @@
             <!-- Carrossel Infinito Premium -->
             <section class="carousel-section">
                 <div class="section-header">
-                    <h2 class="carousel-title"><i class="fas fa-compass"></i> Descubra mais joias</h2>
+                    <h2 class="carousel-title"><i class="fas fa-compass"></i> Descubra mais</h2>
                 </div>
                 <div class="carousel-container">
                     <div class="carousel-gradient-left"></div>
@@ -202,15 +234,12 @@
         </div>
     </main>
 
-    <!-- MODAL DE PRODUTO PREMIUM -->
+    <!-- MODAL DE PRODUTO PREMIUM (Mobile-First - Luxo) -->
     <div id="productModal" class="modal">
         <div id="modalOverlay" class="modal-overlay"></div>
         <div class="modal-content">
-            <button id="modalCloseBtn" class="modal-close-btn modal-close-btn-xl" aria-label="Fechar">
+            <button id="modalCloseBtn" class="modal-close-btn" aria-label="Fechar">
                 <i class="fas fa-times"></i>
-            </button>
-            <button id="modalSecondaryCloseBtn" class="modal-secondary-close-btn" aria-label="Fechar também">
-                <i class="fas fa-arrow-left"></i> Voltar
             </button>
             <div id="modalContainer" class="modal-container">
                 <!-- Será preenchido pelo JavaScript -->
@@ -234,7 +263,7 @@
                 <span>Total:</span>
                 <strong id="cartTotal">R$ 0,00</strong>
             </div>
-            <p class="cart-shipping">Frete calculado no WhatsApp</p>
+            <p class="cart-shipping">Pague na entrega</p>
             <button id="checkoutBtn" class="btn-whatsapp-cart">
                 <i class="fab fa-whatsapp"></i> Finalizar Pedido
             </button>
@@ -257,11 +286,11 @@
                 <div class="footer-section">
                     <h3>Grupo Etevalda MT</h3>
                     <p><strong>CNPJ:</strong> 55.347.120/0001-51</p>
-                    <p>A maior loja de variedades de Mato Grosso</p>
+                    <p>A maior loja de variedades de MT</p>
                     <div class="trust-badges">
                         <span class="badge"><i class="fas fa-shield-alt"></i> Site Seguro</span>
-                        <span class="badge"><i class="fas fa-certificate"></i> Garantia de Fábrica</span>
-                        <span class="badge"><i class="fas fa-check-circle"></i> CNPJ Verificado</span>
+                        <span class="badge"><i class="fas fa-certificate"></i> Garantia Total</span>
+                        <span class="badge"><i class="fas fa-check-circle"></i> Pague na Entrega</span>
                     </div>
                 </div>
                 <div class="footer-section">
@@ -286,6 +315,13 @@
             </div>
         </div>
     </footer>
+
+    <!-- SEO FOOTER AREA (Texto para Google) -->
+    <section class="seo-footer-area">
+        <div class="container-fluid">
+            <p class="seo-text">Etevalda Joias Cuiabá é referência em joias finas, alianças de ouro, prata 925 e presentes especiais em Mato Grosso. Com mais de 20 anos de tradição, oferecemos variedade imbatível, garantia em todos os produtos e a comodidade de pagar apenas na hora da entrega. Atendemos em Cuiabá, Várzea Grande e todo o estado de MT. Conheça nossa coleção de anéis, colares, brincos e conjuntos exclusivos. O presente perfeito para quem você ama está aqui na Etevalda. Joias com qualidade e procedência, entregues com segurança e carinho.</p>
+        </div>
+    </section>
 
     <!-- TAWK.TO - Carrega após 30 segundos -->
     <script>

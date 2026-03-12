@@ -46,6 +46,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO ATUALIZADA
     --shadow-lg: 0 8px 32px rgba(212, 175, 55, 0.2);
     --shadow-xl: 0 12px 48px rgba(0, 0, 0, 0.2);
     --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.25);
+    --shadow-gold: 0 0 15px rgba(212, 175, 55, 0.6);
     
     /* Bordas */
     --radius-sm: 8px;
@@ -368,11 +369,6 @@ button {
     animation: cartBounce 0.5s ease;
 }
 
-@keyframes cartBounce {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
-}
-
 .cart-count {
     position: absolute;
     top: -5px;
@@ -494,11 +490,6 @@ button {
     animation: truckMove 2s infinite;
 }
 
-@keyframes truckMove {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(10px); }
-}
-
 .callout-text {
     display: flex;
     flex-direction: column;
@@ -599,13 +590,8 @@ button {
     width: 100%;
 }
 
-@keyframes skeletonLoading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-
 /* ========================================
-8. PRODUCTS GRID (ATUALIZADO - Botões WhatsApp)
+8. PRODUCTS GRID (ATUALIZADO - 2 COLUNAS MOBILE)
 ======================================== */
 .main-content {
     padding: var(--spacing-xxl) 0;
@@ -695,11 +681,6 @@ button {
     background-size: 200% 100%;
     animation: shimmerBadge 5s infinite;
     color: var(--black-soft);
-}
-
-@keyframes shimmerBadge {
-    0% { background-position: -200% center; }
-    100% { background-position: 200% center; }
 }
 
 .badge-offer {
@@ -835,22 +816,6 @@ button {
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
     animation: none;
-}
-
-/* Animação de pulso para os botões de WhatsApp */
-@keyframes pulseWhatsappButton {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
-    }
-    50% {
-        transform: scale(1.02);
-        box-shadow: 0 8px 20px rgba(37, 211, 102, 0.5);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
-    }
 }
 
 /* ========================================
@@ -1157,11 +1122,6 @@ button {
     animation: compassSpin 8s linear infinite;
 }
 
-@keyframes compassSpin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
 .carousel-container {
     position: relative;
     overflow: hidden;
@@ -1199,11 +1159,6 @@ button {
 
 .infinite-carousel:hover {
     animation-play-state: paused;
-}
-
-@keyframes carouselScroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(calc(-280px * 6 - 120px)); }
 }
 
 .carousel-item {
@@ -1263,17 +1218,6 @@ button {
     max-width: 350px;
     display: none;
     animation: slideInLeft 0.4s ease;
-}
-
-@keyframes slideInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-100px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
 }
 
 .geo-content {
@@ -1336,17 +1280,6 @@ button {
     animation: slideUp 0.3s ease;
 }
 
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 /* ========================================
 15. WHATSAPP FLUTUANTE
 ======================================== */
@@ -1369,18 +1302,13 @@ button {
     animation: pulseWhatsapp 2s infinite;
 }
 
-@keyframes pulseWhatsapp {
-    0%, 100% { transform: scale(1); box-shadow: 0 8px 30px rgba(37, 211, 102, 0.4); }
-    50% { transform: scale(1.1); box-shadow: 0 15px 40px rgba(37, 211, 102, 0.6); }
-}
-
 .whatsapp-float:hover {
     transform: scale(1.15);
     box-shadow: 0 15px 40px rgba(37, 211, 102, 0.6);
 }
 
 /* ========================================
-16. MODAL DE PRODUTO PREMIUM
+16. MODAL DE PRODUTO PREMIUM (ATUALIZADO - FOTO NORMAL)
 ======================================== */
 .modal {
     display: none;
@@ -1394,8 +1322,7 @@ button {
 
 .modal.active {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-end;
 }
 
 .modal-overlay {
@@ -1417,20 +1344,18 @@ button {
 .modal-content {
     position: relative;
     background: var(--white);
-    border-radius: var(--radius-lg);
-    max-width: 1200px;
-    width: 95%;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    width: 100%;
     max-height: 90vh;
     overflow-y: auto;
+    transform: translateY(100%);
+    transition: transform 0.4s ease;
+    z-index: 1001;
     box-shadow: var(--shadow-xl);
-    transform: scale(0.9);
-    opacity: 0;
-    transition: all var(--transition-normal);
 }
 
 .modal.active .modal-content {
-    transform: scale(1);
-    opacity: 1;
+    transform: translateY(0);
 }
 
 .modal-close-btn {
@@ -1439,68 +1364,42 @@ button {
     right: 20px;
     background: var(--gold-primary);
     color: var(--white);
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all var(--transition-normal);
-    z-index: 10;
+    z-index: 20;
     box-shadow: var(--shadow-lg);
+    border: none;
+    cursor: pointer;
 }
 
 .modal-close-btn:hover {
     background: var(--gold-dark);
     transform: rotate(90deg);
-    box-shadow: var(--shadow-xl);
-}
-
-.modal-secondary-close-btn {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--white);
-    color: var(--black-soft);
-    border: 2px solid var(--gold-primary);
-    padding: var(--spacing-sm) var(--spacing-lg);
-    border-radius: var(--radius-full);
-    font-size: 1rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    transition: all var(--transition-normal);
-    z-index: 10;
-    box-shadow: var(--shadow-md);
-}
-
-.modal-secondary-close-btn:hover {
-    background: var(--gold-primary);
-    color: var(--white);
 }
 
 .modal-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-lg);
-    padding: var(--spacing-lg);
+    padding: 0;
 }
 
-/* Galeria do Modal */
+/* Mídia - Foto Normal (sem zoom) */
 .modal-gallery {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
+    width: 100%;
+    background: var(--black-soft);
+    aspect-ratio: 1 / 1;
+    max-height: 45vh;
+    overflow: hidden;
 }
 
 .modal-main-media {
     width: 100%;
-    height: 450px;
-    background: var(--gray-light);
-    border-radius: var(--radius-md);
+    height: 100%;
+    background: var(--gray-luxury);
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -1512,24 +1411,28 @@ button {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    background-color: var(--black-soft);
 }
 
+/* Miniaturas */
 .modal-thumbnails {
     display: flex;
-    gap: var(--spacing-sm);
+    gap: 10px;
     overflow-x: auto;
-    padding: var(--spacing-xs) 0;
+    padding: 15px 20px;
+    background: var(--white);
+    border-bottom: 1px solid var(--gold-light);
 }
 
 .modal-thumb {
-    flex: 0 0 80px;
-    width: 80px;
-    height: 80px;
+    flex: 0 0 70px;
+    width: 70px;
+    height: 70px;
     border-radius: var(--radius-sm);
     overflow: hidden;
     cursor: pointer;
-    border: 3px solid transparent;
-    transition: all var(--transition-normal);
+    border: 2px solid transparent;
+    transition: all var(--transition-fast);
     position: relative;
 }
 
@@ -1543,8 +1446,7 @@ button {
     box-shadow: var(--shadow-gold);
 }
 
-.modal-thumb img,
-.modal-thumb video {
+.modal-thumb img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -1558,22 +1460,20 @@ button {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    color: var(--white);
+    color: white;
     background: rgba(0,0,0,0.6);
-    width: 30px;
-    height: 30px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
 }
 
 /* Informações do Modal */
 .modal-info {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
+    padding: 20px;
 }
 
 .modal-category {
@@ -1582,79 +1482,73 @@ button {
     color: var(--gold-primary);
     letter-spacing: 1px;
     font-weight: 600;
+    display: block;
+    margin-bottom: 5px;
 }
 
 .modal-title {
     font-family: var(--font-display);
-    font-size: 2rem;
+    font-size: 1.8rem;
+    font-weight: 700;
     color: var(--black-soft);
     line-height: 1.2;
+    margin-bottom: 10px;
 }
 
 .modal-price-main {
-    font-size: 2.2rem;
+    font-size: 2rem;
     font-weight: 700;
     color: var(--gold-primary);
+    margin-bottom: 20px;
 }
 
 .modal-description {
     color: var(--gray-medium);
-    line-height: 1.8;
-    font-size: 0.95rem;
-    padding: var(--spacing-md) 0;
+    line-height: 1.6;
+    margin: 20px 0;
+    padding: 15px 0;
     border-top: 1px solid var(--gold-light);
     border-bottom: 1px solid var(--gold-light);
-}
-
-/* Descrição automática para alianças */
-.product-description-auto {
-    background: var(--gold-light);
-    padding: var(--spacing-sm);
-    border-radius: var(--radius-sm);
-    margin: var(--spacing-sm) 0;
-    font-weight: 500;
-    color: var(--black-soft);
 }
 
 .delivery-highlight {
     color: var(--highlight-red);
     font-weight: 700;
     font-size: 1.1rem;
-    margin: var(--spacing-sm) 0;
+    margin: 10px 0;
+    background: rgba(255, 51, 51, 0.05);
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    text-align: center;
 }
 
 .modal-buttons {
     display: flex;
-    gap: var(--spacing-md);
-    margin: var(--spacing-md) 0;
+    gap: 15px;
+    margin: 20px 0;
 }
 
-/* Botão WhatsApp do Modal - ATUALIZADO */
 .btn-whatsapp-modal {
     flex: 1;
-    padding: var(--spacing-sm) var(--spacing-md);
-    border: 2px solid var(--whatsapp);
+    padding: 15px;
+    border: none;
     border-radius: var(--radius-sm);
     font-weight: 600;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-xs);
+    gap: 8px;
     transition: all var(--transition-normal);
     background: var(--whatsapp);
     color: var(--white);
     box-shadow: var(--shadow-md);
-    position: relative;
-    overflow: hidden;
     animation: pulseWhatsappButton 2s infinite ease-in-out;
+    cursor: pointer;
 }
 
 .btn-whatsapp-modal:hover {
     background: var(--whatsapp-dark);
-    border-color: var(--whatsapp-dark);
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
     animation: none;
@@ -1662,21 +1556,20 @@ button {
 
 .btn-add-cart-modal {
     flex: 1;
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: 15px;
     border: none;
     border-radius: var(--radius-sm);
     font-weight: 600;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-xs);
+    gap: 8px;
     transition: all var(--transition-normal);
     background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
     color: var(--white);
     box-shadow: var(--shadow-md);
+    cursor: pointer;
 }
 
 .btn-add-cart-modal:hover {
@@ -1684,52 +1577,101 @@ button {
     box-shadow: var(--shadow-lg);
 }
 
-.scroll-indicator {
+/* Recomendações - Scroll Horizontal */
+.recommendations-section {
+    margin: 20px 0;
+}
+
+.recommendations-title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--gold-dark);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.recommendations-grid {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+    scrollbar-width: thin;
+}
+
+.rec-card {
+    flex: 0 0 140px;
+    background: var(--gray-light);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    border: 1px solid transparent;
     text-align: center;
-    color: var(--gray-medium);
-    font-size: 0.9rem;
-    animation: bounce 2s infinite;
+    padding: 10px;
 }
 
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(5px); }
+.rec-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--gold-primary);
 }
 
-/* Reviews no Modal */
+.rec-card img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+}
+
+.rec-card h4 {
+    font-size: 0.8rem;
+    color: var(--black-soft);
+    font-weight: 600;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rec-card .price {
+    color: var(--gold-primary);
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+/* Reviews */
 .reviews-section {
     border-top: 1px solid var(--gold-light);
-    padding-top: var(--spacing-md);
+    padding-top: 20px;
+    margin-top: 20px;
 }
 
 .reviews-title {
     font-family: var(--font-display);
     font-size: 1.2rem;
     color: var(--gold-dark);
-    margin-bottom: var(--spacing-md);
+    margin-bottom: 15px;
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.reviews-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-md);
+    gap: 8px;
 }
 
 .review-card {
     background: var(--gray-light);
-    padding: var(--spacing-md);
+    padding: 15px;
     border-radius: var(--radius-sm);
     border-left: 3px solid var(--gold-primary);
+    margin-bottom: 10px;
 }
 
 .review-header {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-sm);
+    gap: 10px;
+    margin-bottom: 8px;
 }
 
 .review-avatar {
@@ -1747,75 +1689,101 @@ button {
 
 .review-stars {
     color: var(--gold-primary);
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     letter-spacing: 2px;
 }
 
 .review-comment {
     color: var(--gray-medium);
     font-size: 0.9rem;
-    line-height: 1.6;
+    line-height: 1.4;
 }
 
-/* Recomendações no Modal (Upsell) */
-.recommendations-section {
-    border-top: 1px solid var(--gold-light);
-    padding-top: var(--spacing-md);
-}
-
-.recommendations-title {
-    font-family: var(--font-display);
-    font-size: 1.2rem;
-    color: var(--gold-dark);
-    margin-bottom: var(--spacing-md);
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.recommendations-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-sm);
-}
-
-.rec-card {
-    background: var(--gray-light);
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    border: 1px solid var(--gold-light);
-}
-
-.rec-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--gold-primary);
-}
-
-.rec-card img {
-    width: 100%;
-    height: 100px;
-    object-fit: cover;
-}
-
-.rec-card h4 {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: 0.8rem;
-    color: var(--black-soft);
-    font-weight: 600;
-}
-
-.rec-card .price {
-    padding: 0 var(--spacing-sm) var(--spacing-sm);
-    color: var(--gold-primary);
-    font-weight: 700;
-    font-size: 0.85rem;
+.scroll-indicator {
+    text-align: center;
+    color: var(--gray-medium);
+    font-size: 0.9rem;
+    margin-top: 20px;
+    animation: bounce 2s infinite;
 }
 
 /* ========================================
-17. CARRINHO SIDEBAR
+17. SEO FOOTER AREA
+======================================== */
+.seo-footer-area {
+    background: var(--white);
+    padding: 20px 0;
+    border-top: 1px solid var(--gold-light);
+    opacity: 0.4;
+    transition: opacity var(--transition-normal);
+}
+
+.seo-footer-area:hover {
+    opacity: 0.8;
+}
+
+.seo-text {
+    font-size: 11px;
+    color: var(--gray-medium);
+    line-height: 1.4;
+    text-align: justify;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* ========================================
+18. ESTRELAS DE AVALIAÇÃO (ATUALIZADO - 3x MAIOR E CENTRALIZADO)
+======================================== */
+.stars {
+    color: var(--gold-primary);
+    font-size: 2.4rem; /* 3x maior que o original (0.8rem x 3 = 2.4rem) */
+    letter-spacing: 6px; /* 3x maior */
+    display: block;
+    text-align: center;
+    margin: 15px 0;
+    line-height: 1;
+}
+
+.product-rating {
+    margin: 15px 0;
+    text-align: center;
+    width: 100%;
+}
+
+.product-rating-large {
+    font-size: 2.8rem; /* Ainda maior no modal */
+    letter-spacing: 8px;
+    margin: 20px 0;
+    color: var(--gold-primary);
+    text-align: center;
+}
+
+.review-stars {
+    color: var(--gold-primary);
+    font-size: 2rem; /* 3x maior */
+    letter-spacing: 4px;
+}
+
+/* Ajuste para mobile */
+@media (max-width: 768px) {
+    .stars {
+        font-size: 2rem; /* 2.4rem x 0.8 = 2rem */
+        letter-spacing: 4px;
+    }
+    
+    .product-rating-large {
+        font-size: 2.4rem;
+        letter-spacing: 6px;
+    }
+    
+    .review-stars {
+        font-size: 1.8rem;
+        letter-spacing: 3px;
+    }
+}
+
+/* ========================================
+19. CARRINHO SIDEBAR
 ======================================== */
 .cart-sidebar {
     position: fixed;
@@ -2051,7 +2019,7 @@ button {
 }
 
 /* ========================================
-18. FOOTER PREMIUM
+20. FOOTER PREMIUM
 ======================================== */
 .footer {
     background: linear-gradient(135deg, var(--gray-luxury) 0%, var(--black-soft) 100%);
@@ -2159,7 +2127,7 @@ button {
 }
 
 /* ========================================
-19. RESPONSIVE DESIGN
+21. RESPONSIVE DESIGN
 ======================================== */
 @media (max-width: 1024px) {
     .header-top-content {
@@ -2172,7 +2140,6 @@ button {
     }
 
     .modal-content {
-        grid-template-columns: 1fr;
         max-height: 95vh;
     }
 
@@ -2229,26 +2196,36 @@ button {
         font-size: 0.8rem;
     }
 
+    /* MOBILE: 2 COLUNAS FORÇADO */
     .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: var(--spacing-sm);
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
     }
 
     .product-image {
-        height: 200px;
+        height: 180px;
     }
 
     .product-name {
-        font-size: 1rem;
-        min-height: auto;
+        font-size: 0.9rem;
+        min-height: 2.2em;
     }
 
     .product-price {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
+    }
+
+    .product-info {
+        padding: 10px;
     }
 
     .product-buttons {
-        flex-direction: column;
+        flex-direction: row;
+    }
+
+    .btn-primary, .btn-secondary {
+        padding: 6px 4px;
+        font-size: 0.7rem;
     }
 
     .section-title {
@@ -2264,7 +2241,7 @@ button {
     }
 
     .team-image-wrapper {
-        height: 300px;
+        height: 250px;
     }
 
     .team-title {
@@ -2281,13 +2258,8 @@ button {
     }
 
     .faq-grid,
-    .social-proof-grid,
-    .reviews-grid {
+    .social-proof-grid {
         grid-template-columns: 1fr;
-    }
-
-    .recommendations-grid {
-        grid-template-columns: repeat(2, 1fr);
     }
 
     .cart-sidebar {
@@ -2295,18 +2267,14 @@ button {
         right: -100%;
     }
 
-    .modal-content {
-        width: 98%;
-    }
-
     .modal-close-btn {
-        width: 50px;
-        height: 50px;
+        width: 44px;
+        height: 44px;
         font-size: 1.2rem;
     }
 
-    .modal-main-media {
-        height: 300px;
+    .modal-gallery {
+        max-height: 40vh;
     }
 
     .modal-title {
@@ -2318,7 +2286,16 @@ button {
     }
 
     .modal-buttons {
-        flex-direction: column;
+        flex-direction: row;
+    }
+
+    .btn-whatsapp-modal, .btn-add-cart-modal {
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+
+    .rec-card {
+        flex: 0 0 120px;
     }
 
     .geo-notification {
@@ -2341,11 +2318,11 @@ button {
     }
 
     .carousel-item {
-        flex: 0 0 200px;
+        flex: 0 0 180px;
     }
 
     .carousel-item img {
-        height: 200px;
+        height: 180px;
     }
 
     .hero-image-xl {
@@ -2375,15 +2352,29 @@ button {
     }
 
     .products-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
     }
 
     .product-image {
-        height: 250px;
+        height: 160px;
     }
 
-    .product-card {
-        max-width: 100%;
+    .product-name {
+        font-size: 0.85rem;
+    }
+
+    .product-price {
+        font-size: 1rem;
+    }
+
+    .product-buttons {
+        flex-direction: column;
+    }
+
+    .btn-primary, .btn-secondary {
+        width: 100%;
+        padding: 8px 4px;
     }
 
     .cart-btn {
@@ -2402,25 +2393,26 @@ button {
         font-size: 1.3rem;
     }
 
-    .modal-content {
-        width: 100%;
-        max-height: 100vh;
-        border-radius: 0;
-    }
-
-    .modal-close-btn {
-        top: 10px;
-        right: 10px;
-    }
-
-    .modal-main-media {
-        height: 250px;
+    .modal-gallery {
+        max-height: 35vh;
     }
 
     .modal-thumb {
         flex: 0 0 60px;
         width: 60px;
         height: 60px;
+    }
+
+    .modal-title {
+        font-size: 1.3rem;
+    }
+
+    .modal-price-main {
+        font-size: 1.6rem;
+    }
+
+    .rec-card {
+        flex: 0 0 100px;
     }
 
     .callout-text strong {
@@ -2456,14 +2448,10 @@ button {
     .hero-image-xl {
         max-height: 180px;
     }
-
-    .recommendations-grid {
-        grid-template-columns: 1fr;
-    }
 }
 
 /* ========================================
-20. ACESSIBILIDADE
+22. ACESSIBILIDADE
 ======================================== */
 @media (prefers-reduced-motion: reduce) {
     * {
@@ -2482,7 +2470,7 @@ input:focus-visible {
 }
 
 /* ========================================
-21. IMPRESSÃO
+23. IMPRESSÃO
 ======================================== */
 @media print {
     .header,
@@ -2493,11 +2481,118 @@ input:focus-visible {
     .toast,
     .whatsapp-float,
     .mobile-filters,
-    .delivery-callout {
+    .delivery-callout,
+    .seo-footer-area {
         display: none !important;
     }
 
     .products-grid {
         grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* ========================================
+24. KEYFRAMES (TODAS AS ANIMAÇÕES)
+======================================== */
+
+/* Animação do Carrinho */
+@keyframes cartBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+
+/* Animação do Carrossel Infinito */
+@keyframes carouselScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(-280px * 6 - 120px)); }
+}
+
+/* Animação de pulso para botões WhatsApp */
+@keyframes pulseWhatsappButton {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+    }
+    50% {
+        transform: scale(1.02);
+        box-shadow: 0 8px 20px rgba(37, 211, 102, 0.5);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+    }
+}
+
+/* Animação de pulso para o ícone flutuante */
+@keyframes pulseWhatsapp {
+    0%, 100% { 
+        transform: scale(1); 
+        box-shadow: 0 8px 30px rgba(37, 211, 102, 0.4); 
+    }
+    50% { 
+        transform: scale(1.1); 
+        box-shadow: 0 15px 40px rgba(37, 211, 102, 0.6); 
+    }
+}
+
+/* Animação do caminhão de entrega */
+@keyframes truckMove {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(10px); }
+}
+
+/* Animação do shimmer para badges */
+@keyframes shimmerBadge {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+/* Animação do shimmer para skeleton loading */
+@keyframes skeletonLoading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Animação do compasso no título do carrossel */
+@keyframes compassSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Animação do slideInLeft para notificação geolocalizada */
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-100px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Animação do slideUp para toast */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Animação do bounce para scroll indicator */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(5px); }
+}
+
+/* Versão mobile do carrossel */
+@media (max-width: 768px) {
+    @keyframes carouselScroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(calc(-200px * 6 - 60px)); }
     }
 }
