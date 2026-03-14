@@ -1,5 +1,5 @@
 /* ========================================
-GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO CORRIGIDA
+GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
 ======================================== */
 /* ========================================
 1. VARIÁVEIS CSS (DESIGN TOKENS)
@@ -374,7 +374,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO CORRIGIDA
     border-bottom-color: var(--gold-primary);
     }
     /* ========================================
-    4. HERO BANNER (ATUALIZADO - Centralizado)
+    4. HERO BANNER
     ======================================== */
     .hero-banner {
     background: var(--white);
@@ -472,7 +472,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO CORRIGIDA
     font-size: 0.9rem;
     }
     /* ========================================
-    7. SKELETON SCREENS (ATUALIZADO PARA MOBILE)
+    7. SKELETON SCREENS
     ======================================== */
     .product-card.skeleton {
     cursor: default;
@@ -651,7 +651,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO CORRIGIDA
     color: var(--gold-primary);
     font-size: 0.65rem;
     }
-    /* Prova Social - Vendas + Estrelas */
+    /* Prova Social - Vendas */
     .product-social-proof {
     display: flex;
     align-items: center;
@@ -663,20 +663,6 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO CORRIGIDA
     .product-sales {
     color: var(--gray-medium);
     font-weight: 500;
-    }
-    .product-rating-compact {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    }
-    .product-rating-compact .stars {
-    font-size: 0.7rem;
-    letter-spacing: 1px;
-    color: #ff9500;
-    }
-    .product-rating-compact .rating-count {
-    font-size: 0.6rem;
-    color: var(--gray-medium);
     }
     /* Botões da Vitrine (Ocultos no Mobile) */
     .product-buttons {
@@ -723,7 +709,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO CORRIGIDA
     animation: none;
     }
     /* ========================================
-    9. CARROSSEL DE AVALIAÇÕES (NOVO)
+    9. CARROSSEL DE AVALIAÇÕES
     ======================================== */
     .reviews-carousel-section {
     margin: var(--spacing-lg) 0;
@@ -771,17 +757,6 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO CORRIGIDA
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid var(--gold-primary);
-    }
-    .review-carousel-avatar-placeholder {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--gold-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--gold-primary);
-    font-size: 1.2rem;
     }
     .review-carousel-name {
     font-weight: 600;
@@ -1547,7 +1522,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO CORRIGIDA
     font-weight: 700;
     font-size: 0.85rem;
     }
-    /* Reviews */
+    /* Reviews no Modal */
     .reviews-section {
     border-top: 1px solid var(--gold-light);
     padding-top: 20px;
@@ -1604,7 +1579,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO CORRIGIDA
     animation: bounce 2s infinite;
     }
     /* ========================================
-    NOVO: GRID PARA CROSS-SELL NO MODAL (IGUAL À VITRINE)
+    CROSS-SELL GRID NO MODAL (IGUAL À VITRINE)
     ======================================== */
     .cross-sell-section {
     margin: 20px 0;
@@ -1704,7 +1679,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO CORRIGIDA
     margin: 0 auto;
     }
     /* ========================================
-    19. ESTRELAS DE AVALIAÇÃO
+    19. ESTRELAS DE AVALIAÇÃO (APENAS NO MODAL)
     ======================================== */
     .stars {
     color: var(--gold-primary);
@@ -2117,9 +2092,6 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO CORRIGIDA
     }
     .product-social-proof {
     font-size: 0.6rem;
-    }
-    .product-rating-compact .stars {
-    font-size: 0.65rem;
     }
     .section-title {
     font-size: 1.3rem;

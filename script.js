@@ -1,6 +1,6 @@
 // ========================================
 // GRUPO ETEVALDA MT - MOBILE-FIRST SCRIPT
-// VERSÃO COM HOVER/HOVER PARA SEGUNDA IMAGEM
+// VERSÃO PERFEITA COM HISTORY API
 // ========================================
 // ========================================
 // 1. CONFIGURAÇÃO DO SUPABASE
@@ -22,6 +22,8 @@ let searchQuery = '';
 // Variáveis do modal
 let currentModalProduct = null;
 let currentMediaList = [];
+// Link do WhatsApp com mensagem pré-definida
+const WHATSAPP_BASE_URL = 'https://api.whatsapp.com/send/?phone=5565993337205&text=Já%20vi%20seu%20catálogo,%20quero%20comprar,%20consegue%20me%20entregar%20hoje?&type=phone_number&app_absent=0';
 // ========================================
 // 3. DICIONÁRIO DE BAIRROS
 // ========================================
@@ -54,6 +56,7 @@ renderCarousel();
 renderSocialProof();
 renderFaqs();
 setupEventListeners();
+setupHistoryAPI(); // ✅ History API para botão voltar
 startTeamTimer();
 initPredictiveSearch();
 initGeoLocationBackground();
@@ -70,7 +73,23 @@ const el = document.getElementById('loading');
 if (el) el.style.display = status ? 'flex' : 'none';
 }
 // ========================================
-// 5. FUNÇÕES DE CARREGAMENTO
+// 5. HISTORY API - CONTROLE DO BOTÃO VOLTAR
+// ========================================
+function setupHistoryAPI() {
+// Listener para o botão voltar do navegador/celular
+window.addEventListener('popstate', (event) => {
+// Se o estado tiver modal aberto, fecha o modal
+if (event.state?.modalOpen || location.hash.startsWith('#product-')) {
+closeProductModal();
+// Limpa o hash da URL
+if (location.hash.startsWith('#product-')) {
+history.replaceState(null, '', location.pathname + location.search);
+}
+}
+});
+}
+// ========================================
+// 6. FUNÇÕES DE CARREGAMENTO
 // ========================================
 async function loadCategories() {
 const { data } = await _supabase.from('categories').select('*').order('id');
@@ -103,7 +122,7 @@ const { data } = await _supabase
 socialProofImages = data || [];
 }
 // ========================================
-// 6. RENDERIZAÇÃO
+// 7. RENDERIZAÇÃO
 // ========================================
 function renderCategories() {
 const list = document.getElementById('categoryList');
@@ -118,6 +137,8 @@ list.querySelectorAll('li').forEach(el => el.classList.remove('active'));
 li.classList.add('active');
 currentCategory = li.dataset.category;
 renderProducts();
+// ✅ Scroll para o topo ao mudar categoria
+window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 });
 }
@@ -201,26 +222,25 @@ return `
 `;
 }).join('');
 }
-// Função para gerar estrelas
+// Função para gerar estrelas (usada apenas no modal)
 function renderStars(rating) {
 const fullStars = '★'.repeat(rating);
 const emptyStars = '☆'.repeat(5 - rating);
 return `<span class="stars">${fullStars}${emptyStars}</span>`;
 }
 // ========================================
-// 7. RENDERIZAÇÃO DE PRODUTOS (COM HOVER PARA SEGUNDA IMAGEM)
+// 8. RENDERIZAÇÃO DE PRODUTOS (SEM ESTRELAS NA VITRINE)
 // ========================================
 function renderProductCard(p) {
 const images = Array.isArray(p.images) ? p.images : [];
 const mainImage = images[0] || 'https://via.placeholder.com/200';
-const secondImage = images[1] || mainImage; // Se não tiver segunda, usa a primeira (não troca)
+const secondImage = images[1] || mainImage;
 const priceFormatted = p.price.toFixed(2).replace('.', ',');
-// Define uma avaliação padrão (5 estrelas) se não existir
-const rating = p.default_rating || 5;
 // SOLITÁRIO: só aparece se tiver e o preço for maior que zero
 const solitarioHtml = p.tem_solitario && p.solitario_price && p.solitario_price > 0
 ? `<div class="product-solitario"><i class="fas fa-gem"></i> Solitário: R$ ${p.solitario_price.toFixed(2).replace('.', ',')}</div>`
 : '';
+// ✅ REMOVIDO: Estrelas de avaliação da vitrine principal
 return `
 <div class="product-card"
 onclick="openProductModal(${p.id})"
@@ -239,7 +259,6 @@ ${p.badge_text ? `<div class="product-badge">${p.badge_text}</div>` : ''}
 <h3 class="product-name">${p.name}</h3>
 <div class="product-price">R$ ${priceFormatted}</div>
 ${solitarioHtml}
-<div class="product-rating">${renderStars(rating)}</div>
 <div class="product-buttons" onclick="event.stopPropagation()">
 <button class="btn-primary" onclick="addToCart(${p.id})">
 <i class="fas fa-cart-plus"></i>
@@ -256,7 +275,6 @@ ${solitarioHtml}
 window.hoverImage = function(card, secondImage) {
 const img = card.querySelector('.product-image img');
 const mainImage = card.dataset.mainImage;
-// Só troca se a segunda imagem for diferente da primeira
 if (secondImage !== mainImage) {
 img.src = secondImage;
 }
@@ -285,16 +303,14 @@ filtered = filtered.sort(() => Math.random() - 0.5);
 container.innerHTML = filtered.map(p => renderProductCard(p)).join('');
 }
 // ========================================
-// 8. MODAL DE PRODUTO (COM GRID INFINITO E WHATSAPP ATUALIZADO)
+// 9. MODAL DE PRODUTO (COM HISTORY API E GRID CROSS-SELL)
 // ========================================
-// Link do WhatsApp com mensagem pré-definida
-const WHATSAPP_BASE_URL = 'https://api.whatsapp.com/send/?phone=5565993337205&text=Já%20vi%20seu%20catálogo,%20quero%20comprar,%20consegue%20me%20entregar%20hoje?&type=phone_number&app_absent=0';
-
 function openProductModal(id) {
 const product = products.find(p => p.id === id);
 if (!product) return;
 currentModalProduct = product;
 currentMediaList = [];
+// Vídeo
 if (product.video_url && product.video_url.trim()) {
 currentMediaList.push({
 type: 'video',
@@ -302,6 +318,7 @@ url: product.video_url,
 thumbnail: product.images?.[0] || ''
 });
 }
+// Imagens
 let images = [];
 if (Array.isArray(product.images)) {
 images = product.images;
@@ -318,6 +335,7 @@ thumbnail: img
 }
 });
 const productReviews = allReviews.filter(r => r.is_general || r.product_id === id);
+// Upsell por categoria
 let upsellProducts = [];
 if (product.upsell_category) {
 upsellProducts = products.filter(p =>
@@ -330,7 +348,7 @@ p.id !== product.id &&
 p.category_id === product.category_id
 ).slice(0, 12);
 }
-// NAVEGAÇÃO INFINITA - Complemente seu Estilo (categoria secundária) - GRID LAYOUT
+// Cross-sell por keywords relacionadas (GRID LAYOUT)
 let crossSellProducts = [];
 if (product.related_keywords) {
 const keywords = product.related_keywords.toLowerCase().split(',').map(k => k.trim());
@@ -341,7 +359,6 @@ const productKeywords = p.related_keywords.toLowerCase().split(',').map(k => k.t
 return keywords.some(k => productKeywords.includes(k));
 }).slice(0, 12);
 }
-// Se não tiver keywords relacionadas, usa categoria como fallback
 if (crossSellProducts.length === 0 && product.category_id) {
 crossSellProducts = products.filter(p =>
 p.id !== product.id &&
@@ -447,6 +464,8 @@ ${r.image_url ? `<img src="${r.image_url}" class="review-avatar" alt="${r.custom
 document.getElementById('modalContainer').innerHTML = modalHtml;
 document.getElementById('productModal').classList.add('active');
 document.body.style.overflow = 'hidden';
+// ✅ History API: Adiciona estado ao abrir modal
+history.pushState({ modalOpen: true, productId: id }, '', `#product-${id}`);
 // Scroll para o topo do modal
 scrollToTop();
 }
@@ -474,40 +493,10 @@ document.getElementById('productModal').classList.remove('active');
 document.body.style.overflow = '';
 currentModalProduct = null;
 currentMediaList = [];
+// ✅ History API: Limpa estado ao fechar modal
+if (history.state?.modalOpen) {
+history.replaceState(null, '', location.pathname + location.search);
 }
-// ========================================
-// 9. WHATSAPP - LINK ATUALIZADO
-// ========================================
-function buyViaWhatsApp(id) {
-const p = products.find(p => p.id === id);
-if (!p) {
-// Se não tiver produto, abre link padrão
-window.open(WHATSAPP_BASE_URL, '_blank');
-return;
-}
-const msg = `Olá! Quero este produto: *${p.name}* - R$ ${p.price.toFixed(2).replace('.', ',')}`;
-const url = `https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}&type=phone_number&app_absent=0`;
-window.open(url, '_blank');
-}
-function checkoutWhatsApp() {
-if (cart.length === 0) {
-showToast('Carrinho vazio!');
-return;
-}
-let itemsList = '';
-let total = 0;
-cart.forEach((item, index) => {
-const subtotal = item.price * item.quantity;
-total += subtotal;
-itemsList += `${index + 1}. ${item.name} (x${item.quantity}) - R$ ${subtotal.toFixed(2).replace('.', ',')}
-`;
-});
-const message = `🛍️ *NOVO PEDIDO*
-${itemsList}
-💰 *Total: R$ ${total.toFixed(2).replace('.', ',')}*
-Pago na entrega.`;
-const url = `https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
-window.open(url, '_blank');
 }
 // ========================================
 // 10. BUSCA E FILTROS
@@ -525,6 +514,7 @@ document.querySelectorAll('.category-list li').forEach(li => {
 li.classList.toggle('active', li.dataset.category === 'all');
 });
 renderProducts();
+window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 // ========================================
 // 11. CARRINHO DE COMPRAS
@@ -632,7 +622,40 @@ document.getElementById('cartOverlay').classList.remove('active');
 document.body.style.overflow = '';
 }
 // ========================================
-// 12. GEOLOCALIZAÇÃO
+// 12. WHATSAPP - LINK ATUALIZADO
+// ========================================
+function buyViaWhatsApp(id) {
+const p = products.find(p => p.id === id);
+if (!p) {
+window.open(WHATSAPP_BASE_URL, '_blank');
+return;
+}
+const msg = `Olá! Quero este produto: *${p.name}* - R$ ${p.price.toFixed(2).replace('.', ',')}`;
+const url = `https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}&type=phone_number&app_absent=0`;
+window.open(url, '_blank');
+}
+function checkoutWhatsApp() {
+if (cart.length === 0) {
+showToast('Carrinho vazio!');
+return;
+}
+let itemsList = '';
+let total = 0;
+cart.forEach((item, index) => {
+const subtotal = item.price * item.quantity;
+total += subtotal;
+itemsList += `${index + 1}. ${item.name} (x${item.quantity}) - R$ ${subtotal.toFixed(2).replace('.', ',')}
+`;
+});
+const message = `🛍️ *NOVO PEDIDO*
+${itemsList}
+💰 *Total: R$ ${total.toFixed(2).replace('.', ',')}*
+Pago na entrega.`;
+const url = `https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
+window.open(url, '_blank');
+}
+// ========================================
+// 13. GEOLOCALIZAÇÃO
 // ========================================
 async function initGeoLocationBackground() {
 try {
@@ -664,7 +687,7 @@ setTimeout(() => notification.style.display = 'none', 8000);
 }
 }
 // ========================================
-// 13. BUSCA PREDITIVA
+// 14. BUSCA PREDITIVA
 // ========================================
 function initPredictiveSearch() {
 const searchInput = document.getElementById('searchInput');
@@ -703,7 +726,7 @@ searchDropdown.style.display = 'block';
 }, 200));
 }
 // ========================================
-// 14. TIMER DA EQUIPE
+// 15. TIMER DA EQUIPE
 // ========================================
 function startTeamTimer() {
 setTimeout(() => {
@@ -715,7 +738,7 @@ setTimeout(() => section.classList.add('visible'), 100);
 }, 20000);
 }
 // ========================================
-// 15. EVENT LISTENERS
+// 16. EVENT LISTENERS
 // ========================================
 function setupEventListeners() {
 document.getElementById('modalCloseBtn')?.addEventListener('click', closeProductModal);
@@ -740,7 +763,7 @@ closeCart();
 });
 }
 // ========================================
-// 16. UTILITÁRIOS
+// 17. UTILITÁRIOS
 // ========================================
 function showToast(msg) {
 const toast = document.getElementById('toast');
@@ -757,7 +780,7 @@ timeout = setTimeout(() => fn(...args), wait);
 };
 }
 // ========================================
-// 17. EXPOR FUNÇÕES GLOBAIS
+// 18. EXPOR FUNÇÕES GLOBAIS
 // ========================================
 window.openProductModal = openProductModal;
 window.changeModalMedia = changeModalMedia;
