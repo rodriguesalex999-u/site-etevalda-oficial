@@ -1,6 +1,6 @@
 // ========================================
 // GRUPO ETEVALDA MT - MOBILE-FIRST SCRIPT
-// VERSÃO PERFEITA COM HISTORY API + SUPER ZOOM + ÁUDIO INTELIGENTE
+// VERSÃO PERFEITA COM DESLIZE TOUCH
 // ========================================
 
 // ========================================
@@ -26,17 +26,17 @@ let searchQuery = '';
 let currentModalProduct = null;
 let currentMediaList = [];
 
-// Variáveis do Super Zoom
+// Variáveis do Super Zoom e Touch
 let superZoomCurrentIndex = 0;
 let superZoomMediaList = [];
 let superZoomClickCount = 0;
+let touchStartX = 0;
+let touchEndX = 0;
 
-// Link do WhatsApp com mensagem pré-definida
+// Link do WhatsApp
 const WHATSAPP_BASE_URL = 'https://api.whatsapp.com/send/?phone=5565993337205&text=Já%20vi%20seu%20catálogo,%20quero%20comprar,%20consegue%20me%20entregar%20hoje?&type=phone_number&app_absent=0';
 
-// ========================================
-// 3. DICIONÁRIO DE BAIRROS
-// ========================================
+// Bairros para geolocalização
 const NEIGHBORHOODS = {
     'Cuiabá': ['CPA', 'Pedra 90', 'Boa Esperança', 'Jardim das Américas', 'Centro', 'Jardim Europa', 'Bandeirantes', 'Goiabeiras'],
     'Várzea Grande': ['Cristo Rei', 'Parque do Lago', 'Mapim', 'Centro', 'Jardim América', 'Morada do Ouro']
@@ -50,10 +50,10 @@ const CUSTOMER_NAMES = [
 let detectedLocation = { city: 'Cuiabá', neighborhoods: NEIGHBORHOODS['Cuiabá'] };
 
 // ========================================
-// 4. INICIALIZAÇÃO PRINCIPAL
+// 3. INICIALIZAÇÃO
 // ========================================
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Grupo Etevalda MT - Modo Cinema');
+    console.log('🚀 Grupo Etevalda MT - Com Deslize Touch');
     showLoading(true);
     
     try {
@@ -71,6 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setupEventListeners();
         setupHistoryAPI();
         setupSuperZoomListeners();
+        setupTouchListeners(); // NOVA FUNÇÃO PARA DESLIZE
         startTeamTimer();
         initPredictiveSearch();
         initGeoLocationBackground();
@@ -94,7 +95,55 @@ function showLoading(status) {
 }
 
 // ========================================
-// 5. HISTORY API - CONTROLE DO BOTÃO VOLTAR
+// 4. NOVA FUNÇÃO: SETUP TOUCH LISTENERS
+// ========================================
+function setupTouchListeners() {
+    const superZoomOverlay = document.getElementById('superZoomOverlay');
+    
+    if (superZoomOverlay) {
+        superZoomOverlay.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+        
+        superZoomOverlay.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipeGesture();
+        });
+    }
+}
+
+function handleSwipeGesture() {
+    const swipeThreshold = 50; // Sensibilidade do deslize
+    
+    if (touchEndX < touchStartX - swipeThreshold) {
+        // Deslizou para esquerda - próxima foto
+        nextSuperZoomPhoto();
+    }
+    
+    if (touchEndX > touchStartX + swipeThreshold) {
+        // Deslizou para direita - foto anterior
+        prevSuperZoomPhoto();
+    }
+}
+
+function nextSuperZoomPhoto() {
+    if (!superZoomMediaList.length) return;
+    
+    superZoomCurrentIndex = (superZoomCurrentIndex + 1) % superZoomMediaList.length;
+    displaySuperZoomMedia(superZoomCurrentIndex);
+    showToast('→ Foto ' + (superZoomCurrentIndex + 1) + ' de ' + superZoomMediaList.length);
+}
+
+function prevSuperZoomPhoto() {
+    if (!superZoomMediaList.length) return;
+    
+    superZoomCurrentIndex = (superZoomCurrentIndex - 1 + superZoomMediaList.length) % superZoomMediaList.length;
+    displaySuperZoomMedia(superZoomCurrentIndex);
+    showToast('← Foto ' + (superZoomCurrentIndex + 1) + ' de ' + superZoomMediaList.length);
+}
+
+// ========================================
+// 5. HISTORY API
 // ========================================
 function setupHistoryAPI() {
     window.addEventListener('popstate', (event) => {
@@ -108,25 +157,39 @@ function setupHistoryAPI() {
 }
 
 // ========================================
-// 6. SUPER ZOOM - FUNÇÕES DE ZOOM LUXO
+// 6. SUPER ZOOM FUNCTIONS
 // ========================================
 function openSuperZoom(mediaUrl, type = 'image') {
     const overlay = document.getElementById('superZoomOverlay');
     const content = document.getElementById('superZoomContent');
     const wppBtn = document.getElementById('superZoomWppBtn');
+    const nextBtn = document.getElementById('nextPhotoBtn');
+    
     if (!overlay || !content) return;
 
-    // Reinicia o estado
     superZoomClickCount = 1;
     superZoomCurrentIndex = 0;
     superZoomMediaList = currentMediaList;
 
-    // Exibe a primeira mídia
     displaySuperZoomMedia(superZoomCurrentIndex);
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
 
-    // Configura o botão do WhatsApp
+    // Mostrar botão de próxima foto se houver mais de uma mídia
+    if (nextBtn) {
+        if (superZoomMediaList.length > 1) {
+            nextBtn.style.display = 'flex';
+            // Adicionar evento ao botão
+            nextBtn.onclick = (e) => {
+                e.stopPropagation();
+                nextSuperZoomPhoto();
+            };
+        } else {
+            nextBtn.style.display = 'none';
+        }
+    }
+
+    // Configurar botão WhatsApp
     if (currentModalProduct) {
         const msg = `Olá! Quero este produto: *${currentModalProduct.name}* - R$ ${currentModalProduct.price.toFixed(2).replace('.', ',')}`;
         wppBtn.href = `https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}&type=phone_number&app_absent=0`;
@@ -134,7 +197,6 @@ function openSuperZoom(mediaUrl, type = 'image') {
         wppBtn.classList.remove('highlight');
     }
 
-    // Adiciona listener para o próximo clique
     overlay.onclick = handleSuperZoomClick;
 }
 
@@ -150,7 +212,7 @@ function displaySuperZoomMedia(index) {
         content.innerHTML = `<img src="${media.url}" alt="">`;
     }
 
-    // Destaca o botão do WhatsApp se for a última mídia
+    // Destacar botão WhatsApp na última foto
     if (index === superZoomMediaList.length - 1) {
         wppBtn.classList.add('highlight');
     } else {
@@ -159,20 +221,15 @@ function displaySuperZoomMedia(index) {
 }
 
 function handleSuperZoomClick(e) {
-    // Impede que cliques no botão do WhatsApp fechem o overlay
-    if (e.target.closest('.super-zoom-wpp-btn') || e.target.closest('.super-zoom-close')) {
+    if (e.target.closest('.super-zoom-wpp-btn') || e.target.closest('.super-zoom-close') || e.target.closest('.btn-next-photo')) {
         return;
     }
 
     superZoomClickCount++;
 
-    // Lógica dos cliques
     if (superZoomClickCount === 2) {
-        // Segundo clique: avança para a próxima mídia
-        superZoomCurrentIndex = (superZoomCurrentIndex + 1) % superZoomMediaList.length;
-        displaySuperZoomMedia(superZoomCurrentIndex);
+        nextSuperZoomPhoto();
     } else if (superZoomClickCount >= 3) {
-        // Terceiro clique: fecha o zoom
         closeSuperZoom();
     }
 }
@@ -181,12 +238,15 @@ function closeSuperZoom() {
     const overlay = document.getElementById('superZoomOverlay');
     const content = document.getElementById('superZoomContent');
     const wppBtn = document.getElementById('superZoomWppBtn');
+    const nextBtn = document.getElementById('nextPhotoBtn');
+    
     if (!overlay || !content) return;
 
     overlay.classList.remove('active');
     content.innerHTML = '';
     wppBtn.style.display = 'none';
     wppBtn.classList.remove('highlight');
+    if (nextBtn) nextBtn.style.display = 'none';
     document.body.style.overflow = '';
     superZoomClickCount = 0;
     superZoomMediaList = [];
@@ -209,7 +269,7 @@ function setupSuperZoomListeners() {
 }
 
 // ========================================
-// 7. CONTROLE DE ÁUDIO INTELIGENTE PARA VÍDEO
+// 7. CONTROLE DE ÁUDIO
 // ========================================
 function setupVideoAudioControl(videoElement) {
     if (!videoElement) return;
@@ -472,9 +532,6 @@ function renderProducts() {
         return matchCat && matchSearch;
     });
     
-    const productCount = document.getElementById('productCount');
-    if (productCount) productCount.textContent = `${filtered.length} itens`;
-    
     if (filtered.length === 0) {
         container.innerHTML = '<p style="text-align:center; padding:40px;">Nenhum produto encontrado</p>';
         return;
@@ -524,6 +581,7 @@ function openProductModal(id) {
     
     const productReviews = allReviews.filter(r => r.is_general || r.product_id === id);
     
+    // Upsell e cross-sell (mantido igual)
     let upsellProducts = [];
     if (product.upsell_category) {
         upsellProducts = products.filter(p =>
@@ -565,9 +623,7 @@ function openProductModal(id) {
         </div>
     `).join('');
     
-    const swipeIndicatorHtml = currentMediaList.length > 1
-        ? `<div class="swipe-indicator"><i class="fas fa-arrow-left"></i> Deslize para mais fotos <i class="fas fa-arrow-right"></i></div>`
-        : '';
+    // NOTA: O swipe-indicator foi REMOVIDO (display: none no CSS)
     
     const modalHtml = `
         <div class="modal-gallery">
@@ -576,7 +632,6 @@ function openProductModal(id) {
                     ? `<video src="${currentMediaList[0].url}" autoplay muted loop playsinline></video>`
                     : `<img src="${currentMediaList[0]?.url || ''}" alt="${product.name}">`}
             </div>
-            ${swipeIndicatorHtml}
         </div>
         <div class="modal-thumbnails">
             ${thumbnailsHtml}
@@ -770,7 +825,7 @@ function resetFilters() {
 }
 
 // ========================================
-// 13. CARRINHO DE COMPRAS
+// 13. CARRINHO
 // ========================================
 function addToCart(productId) {
     const product = products.find(p => p.id === productId);
@@ -1050,14 +1105,11 @@ function setupEventListeners() {
         if (input) handleSearch(input.value);
     });
     
-    document.getElementById('filterToggle')?.addEventListener('click', () => {
-        document.querySelector('.nav-categories')?.scrollIntoView({ behavior: 'smooth' });
-    });
-    
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeProductModal();
             closeCart();
+            closeSuperZoom();
         }
     });
 }
@@ -1103,3 +1155,5 @@ window.scrollToTop = scrollToTop;
 window.openSuperZoom = openSuperZoom;
 window.closeSuperZoom = closeSuperZoom;
 window.selectSuggestion = selectSuggestion;
+window.nextSuperZoomPhoto = nextSuperZoomPhoto;
+window.prevSuperZoomPhoto = prevSuperZoomPhoto;

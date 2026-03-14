@@ -1,12 +1,9 @@
 /* ========================================
-GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
+GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM
 ======================================== */
 
-/* ========================================
-1. VARIÁVEIS CSS (DESIGN TOKENS)
-======================================== */
 :root {
-    /* Cores Primárias Luxuosas */
+    /* Cores Primárias */
     --gold-primary: #D4AF37;
     --gold-dark: #B8860B;
     --gold-light: #F4E4C1;
@@ -28,7 +25,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     --info: #3498DB;
     --highlight-red: #FF3333;
     
-    /* Tipografia - ALTERADO PARA SANS-SERIF (Inter e Poppins) */
+    /* Tipografia */
     --font-display: 'Inter', 'Poppins', sans-serif;
     --font-body: 'Inter', 'Poppins', sans-serif;
     
@@ -40,7 +37,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     --spacing-xl: 3rem;
     --spacing-xxl: 4rem;
     
-    /* Sombras Premium */
+    /* Sombras */
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
     --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.12);
     --shadow-lg: 0 8px 32px rgba(212, 175, 55, 0.2);
@@ -62,7 +59,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
 }
 
 /* ========================================
-2. RESET E ESTILOS GLOBAIS
+RESET E ESTILOS GLOBAIS
 ======================================== */
 * {
     margin: 0;
@@ -123,7 +120,7 @@ button {
 }
 
 /* ========================================
-3. HEADER PREMIUM
+HEADER PREMIUM
 ======================================== */
 .header {
     background: var(--white);
@@ -145,7 +142,6 @@ button {
     gap: var(--spacing-lg);
 }
 
-/* Logo Premium */
 .header-logo {
     flex-shrink: 0;
 }
@@ -188,15 +184,7 @@ button {
     letter-spacing: 1px;
 }
 
-.logo-tagline {
-    font-size: 0.7rem;
-    color: var(--gray-medium);
-    margin-top: 4px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* Busca Premium com Dropdown */
+/* Busca Premium */
 .header-search {
     flex: 1;
     max-width: 500px;
@@ -254,11 +242,7 @@ button {
     box-shadow: var(--shadow-md);
 }
 
-.search-btn:active {
-    transform: scale(0.95);
-}
-
-/* Dropdown de Busca Preditiva */
+/* Dropdown de Busca */
 .search-dropdown {
     position: absolute;
     top: 100%;
@@ -290,8 +274,7 @@ button {
     border-left: 3px solid transparent;
 }
 
-.search-result-item:hover,
-.search-result-item.active {
+.search-result-item:hover {
     background: var(--gold-light);
     border-left-color: var(--gold-primary);
 }
@@ -324,19 +307,6 @@ button {
     font-size: 0.9rem;
 }
 
-.search-result-category {
-    color: var(--gray-medium);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.search-no-results {
-    padding: var(--spacing-md);
-    text-align: center;
-    color: var(--gray-medium);
-}
-
 /* Header Actions */
 .header-actions {
     display: flex;
@@ -363,10 +333,6 @@ button {
     background: var(--gold-dark);
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
-}
-
-.cart-btn.animate {
-    animation: cartBounce 0.5s ease;
 }
 
 .cart-count {
@@ -432,172 +398,12 @@ button {
 }
 
 /* ========================================
-4. HERO BANNER
-======================================== */
-.hero-banner {
-    background: var(--white);
-    padding: var(--spacing-md) 0;
-}
-
-.hero-banner-xl {
-    padding: var(--spacing-xl) 0;
-}
-
-.hero-image-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    text-align: center;
-}
-
-.hero-image-container-xl {
-    max-width: 1400px;
-}
-
-.hero-image {
-    max-width: 100%;
-    max-height: 180px;
-    width: auto;
-    height: auto;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    object-fit: contain;
-}
-
-.hero-image-xl {
-    max-height: 350px;
-}
-
-/* ========================================
-5. DELIVERY CALLOUT
-======================================== */
-.delivery-callout {
-    background: var(--gold-gradient);
-    padding: var(--spacing-md) 0;
-    margin: var(--spacing-xs) 0;
-}
-
-.callout-content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-lg);
-    color: var(--white);
-}
-
-.callout-content i {
-    font-size: 2.5rem;
-    animation: truckMove 2s infinite;
-}
-
-.callout-text {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.callout-text strong {
-    font-size: 1.3rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.callout-text .highlight-red {
-    font-size: 1.1rem;
-    margin-top: var(--spacing-xs);
-}
-
-/* ========================================
-6. MOBILE FILTERS
-======================================== */
-.mobile-filters {
-    display: none;
-    padding: var(--spacing-sm) var(--spacing-md);
-    background: var(--white);
-    border-bottom: 1px solid var(--gold-light);
-    justify-content: space-between;
-    align-items: center;
-    position: sticky;
-    top: 114px;
-    z-index: 90;
-}
-
-.filter-btn {
-    background: var(--black-soft);
-    color: var(--white);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--radius-md);
-    font-size: 0.9rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    transition: all var(--transition-normal);
-}
-
-.filter-btn:hover {
-    background: var(--gold-primary);
-}
-
-.product-count {
-    color: var(--gray-medium);
-    font-size: 0.9rem;
-}
-
-/* ========================================
-7. SKELETON SCREENS
-======================================== */
-.product-card.skeleton {
-    cursor: default;
-    pointer-events: none;
-    background: var(--white);
-}
-
-.product-card.skeleton:hover {
-    transform: none;
-    box-shadow: var(--shadow-md);
-}
-
-.skeleton-image {
-    background: linear-gradient(90deg, var(--gray-light) 25%, #f0f0f0 50%, var(--gray-light) 75%);
-    background-size: 200% 100%;
-    animation: skeletonLoading 1.5s infinite;
-    height: 140px;
-    width: 100%;
-}
-
-.skeleton-text {
-    background: linear-gradient(90deg, var(--gray-light) 25%, #f0f0f0 50%, var(--gray-light) 75%);
-    background-size: 200% 100%;
-    animation: skeletonLoading 1.5s infinite;
-    border-radius: var(--radius-sm);
-    margin-bottom: var(--spacing-xs);
-}
-
-.skeleton-title {
-    height: 14px;
-    width: 90%;
-}
-
-.skeleton-price {
-    height: 12px;
-    width: 50%;
-}
-
-.skeleton-button {
-    height: 40px;
-    width: 100%;
-}
-
-/* ========================================
-8. PRODUCTS GRID (LAYOUT ALIEXPRESS MOBILE)
+PRODUCTS GRID
 ======================================== */
 .main-content {
     padding: var(--spacing-md) 0;
 }
 
-.products-header,
 .section-header {
     text-align: center;
     margin-bottom: var(--spacing-lg);
@@ -620,7 +426,7 @@ button {
     letter-spacing: 0.5px;
 }
 
-/* GRID PRINCIPAL - 2 COLUNAS MOBILE */
+/* GRID PRINCIPAL - 2 COLUNAS */
 .products-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -629,7 +435,7 @@ button {
     padding: 0 8px;
 }
 
-/* Product Card - Estilo AliExpress */
+/* Product Card */
 .product-card {
     background: var(--white);
     border-radius: 8px;
@@ -687,11 +493,6 @@ button {
     color: var(--black-soft);
 }
 
-.badge-offer {
-    background: linear-gradient(90deg, var(--danger), #FF6B6B);
-    color: var(--white);
-}
-
 .product-info {
     padding: 8px;
     flex: 1;
@@ -719,7 +520,6 @@ button {
     line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    min-height: 1.2em;
 }
 
 .product-price {
@@ -746,181 +546,49 @@ button {
     border-radius: 4px;
 }
 
-.product-solitario i {
-    color: var(--gold-primary);
-    font-size: 0.65rem;
+/* Skeleton Loading */
+.product-card.skeleton {
+    cursor: default;
+    pointer-events: none;
 }
 
-/* Prova Social - Vendas */
-.product-social-proof {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.65rem;
-    color: var(--gray-medium);
-    margin-top: 2px;
+.skeleton-image {
+    background: linear-gradient(90deg, var(--gray-light) 25%, #f0f0f0 50%, var(--gray-light) 75%);
+    background-size: 200% 100%;
+    animation: skeletonLoading 1.5s infinite;
+    height: 140px;
+    width: 100%;
 }
 
-.product-sales {
-    color: var(--gray-medium);
-    font-weight: 500;
-}
-
-/* Botões da Vitrine (Ocultos no Mobile) */
-.product-buttons {
-    display: none;
-}
-
-.product-buttons .btn-primary,
-.product-buttons .btn-secondary {
-    flex: 1;
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border: none;
+.skeleton-text {
+    background: linear-gradient(90deg, var(--gray-light) 25%, #f0f0f0 50%, var(--gray-light) 75%);
+    background-size: 200% 100%;
+    animation: skeletonLoading 1.5s infinite;
     border-radius: var(--radius-sm);
-    font-weight: 600;
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-xs);
 }
 
-.btn-primary {
-    background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
-    color: var(--white);
-    box-shadow: var(--shadow-sm);
+.skeleton-title {
+    height: 14px;
+    width: 90%;
 }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+.skeleton-price {
+    height: 12px;
+    width: 50%;
 }
 
-.btn-secondary {
-    background: var(--whatsapp);
-    color: var(--white);
-    border: 2px solid var(--whatsapp);
-    box-shadow: var(--shadow-sm);
-    animation: pulseWhatsappButton 2s infinite ease-in-out;
-}
-
-.btn-secondary:hover {
-    background: var(--whatsapp-dark);
-    border-color: var(--whatsapp-dark);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-    animation: none;
-}
-
-/* ========================================
-9. CARROSSEL DE AVALIAÇÕES
-======================================== */
-.reviews-carousel-section {
-    margin: var(--spacing-lg) 0;
-    padding: 0 8px;
-}
-
-.reviews-carousel-title {
-    font-family: var(--font-display);
-    font-size: 1.1rem;
-    color: var(--gold-dark);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.reviews-carousel {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 12px;
-    scrollbar-width: none;
-}
-
-.reviews-carousel::-webkit-scrollbar {
-    display: none;
-}
-
-.review-carousel-card {
-    flex: 0 0 280px;
-    background: var(--white);
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    border: 1px solid #f0f0f0;
-    scroll-snap-align: start;
-}
-
-.review-carousel-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.review-carousel-avatar {
-    width: 40px;
+.skeleton-button {
     height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--gold-primary);
-}
-
-.review-carousel-name {
-    font-weight: 600;
-    color: var(--black-soft);
-    font-size: 0.9rem;
-}
-
-.review-carousel-stars {
-    color: #ff9500;
-    font-size: 0.85rem;
-    letter-spacing: 1px;
-}
-
-.review-carousel-comment {
-    color: var(--gray-medium);
-    font-size: 0.85rem;
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.review-carousel-image {
-    margin-top: 10px;
     width: 100%;
-    height: 120px;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.review-carousel-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.reviews-carousel-indicator {
-    text-align: center;
-    color: var(--gray-medium);
-    font-size: 0.75rem;
-    margin-top: 8px;
 }
 
 /* ========================================
-10. SOCIAL PROOF SECTION
+SOCIAL PROOF, FAQS E CARROSSEL
 ======================================== */
-.social-proof-section {
+.social-proof-section,
+.faq-section,
+.carousel-section {
     margin-bottom: var(--spacing-xxl);
 }
 
@@ -980,29 +648,7 @@ button {
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
-.social-proof-icon {
-    position: absolute;
-    top: var(--spacing-md);
-    right: var(--spacing-md);
-    width: 50px;
-    height: 50px;
-    background: var(--gold-primary);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--white);
-    font-size: 1.3rem;
-    box-shadow: var(--shadow-lg);
-}
-
-/* ========================================
-11. FAQ SECTION MODERNA
-======================================== */
-.faq-section {
-    margin-bottom: var(--spacing-xxl);
-}
-
+/* FAQ Grid */
 .faq-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -1071,140 +717,7 @@ button {
     border-radius: var(--radius-full);
 }
 
-.faq-audio audio::-webkit-media-controls-panel {
-    background: var(--gold-light);
-}
-
-/* ========================================
-12. TEAM SECTION
-======================================== */
-.team-section {
-    background: linear-gradient(135deg, var(--gold-light) 0%, var(--white) 100%);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-xl);
-    margin-bottom: var(--spacing-xxl);
-    display: none;
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
-}
-
-.team-section.visible {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.team-content {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-xxl);
-    align-items: center;
-}
-
-.team-image-wrapper {
-    position: relative;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    height: 400px;
-    box-shadow: var(--shadow-lg);
-}
-
-.team-image-wrapper img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.8s ease;
-}
-
-.team-section:hover .team-image-wrapper img {
-    transform: scale(1.05);
-}
-
-.team-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-    padding: var(--spacing-lg);
-    color: var(--white);
-    text-align: center;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-.team-info {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
-.team-title {
-    font-family: var(--font-display);
-    font-size: 2rem;
-    color: var(--gold-dark);
-    margin-bottom: var(--spacing-sm);
-}
-
-.team-description {
-    color: var(--gray-medium);
-    line-height: 1.8;
-    font-size: 1rem;
-}
-
-.team-features {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-sm);
-    margin: var(--spacing-md) 0;
-}
-
-.feature-item {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    color: var(--black-soft);
-    font-weight: 500;
-    font-size: 0.95rem;
-}
-
-.feature-item i {
-    color: var(--success);
-    font-size: 1rem;
-}
-
-.team-whatsapp-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--spacing-sm);
-    background: var(--whatsapp);
-    color: var(--white);
-    padding: var(--spacing-md) var(--spacing-lg);
-    border-radius: var(--radius-full);
-    font-weight: 600;
-    font-size: 1rem;
-    transition: all var(--transition-normal);
-    box-shadow: var(--shadow-md);
-    width: fit-content;
-}
-
-.team-whatsapp-btn:hover {
-    background: var(--whatsapp-dark);
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lg);
-}
-
-/* ========================================
-13. CARROSSEL INFINITO PREMIUM
-======================================== */
-.carousel-section {
-    margin-bottom: var(--spacing-xxl);
-}
-
+/* Carrossel Infinito */
 .carousel-title {
     text-align: center;
     font-size: 2rem;
@@ -1302,7 +815,126 @@ button {
 }
 
 /* ========================================
-14. NOTIFICAÇÃO GEOLOCALIZADA
+TEAM SECTION
+======================================== */
+.team-section {
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--white) 100%);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xxl);
+    display: none;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.team-section.visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.team-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-xxl);
+    align-items: center;
+}
+
+.team-image-wrapper {
+    position: relative;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    height: 400px;
+    box-shadow: var(--shadow-lg);
+}
+
+.team-image-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s ease;
+}
+
+.team-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    padding: var(--spacing-lg);
+    color: var(--white);
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.team-info {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.team-title {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--gold-dark);
+    margin-bottom: var(--spacing-sm);
+}
+
+.team-description {
+    color: var(--gray-medium);
+    line-height: 1.8;
+    font-size: 1rem;
+}
+
+.team-features {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+    margin: var(--spacing-md) 0;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    color: var(--black-soft);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.feature-item i {
+    color: var(--success);
+    font-size: 1rem;
+}
+
+.team-whatsapp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    background: var(--whatsapp);
+    color: var(--white);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-md);
+    width: fit-content;
+}
+
+.team-whatsapp-btn:hover {
+    background: var(--whatsapp-dark);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* ========================================
+NOTIFICAÇÕES
 ======================================== */
 .geo-notification {
     position: fixed;
@@ -1353,9 +985,6 @@ button {
     color: var(--danger);
 }
 
-/* ========================================
-15. TOAST NOTIFICATION
-======================================== */
 .toast {
     position: fixed;
     bottom: 30px;
@@ -1380,7 +1009,7 @@ button {
 }
 
 /* ========================================
-16. WHATSAPP FLUTUANTE
+WHATSAPP FLUTUANTE
 ======================================== */
 .whatsapp-float {
     position: fixed;
@@ -1407,7 +1036,7 @@ button {
 }
 
 /* ========================================
-17. MODAL DE PRODUTO PREMIUM
+MODAL DE PRODUTO
 ======================================== */
 .modal {
     display: none;
@@ -1457,45 +1086,75 @@ button {
     transform: translateY(0);
 }
 
-/* BOTÃO DE FECHAR MODAL - FIXO, MAIOR, COM PULSO */
-.modal-close-btn {
+/* BOTÃO DE FECHAR MODAL - 3x MAIOR E COM PULSO */
+.modal-close-btn,
+.super-zoom-close {
+    font-size: 3rem !important;
+    padding: 20px !important;
+    width: auto !important;
+    height: auto !important;
+    top: 20px !important;
+    right: 20px !important;
+    z-index: 99999 !important;
+    background: var(--gold-primary) !important;
+    color: var(--white) !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    border: none !important;
+    box-shadow: var(--shadow-lg) !important;
+    position: fixed !important;
+    animation: pulseClose 2s infinite !important;
+    line-height: 1 !important;
+}
+
+@keyframes pulseClose {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.2); opacity: 1; text-shadow: 0 0 10px #fff; }
+    100% { transform: scale(1); opacity: 0.8; }
+}
+
+/* BOTÃO DE INCENTIVO PARA PRÓXIMA FOTO */
+.btn-next-photo {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    background: var(--gold-primary);
-    color: var(--white);
-    width: 55px;
-    height: 55px;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(212, 175, 55, 0.9);
+    color: white;
+    border: none;
     border-radius: 50%;
-    font-size: 1.5rem;
+    width: 70px;
+    height: 70px;
+    font-size: 30px;
+    z-index: 10000;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all var(--transition-normal);
-    z-index: 1100;
-    box-shadow: var(--shadow-lg);
-    border: none;
     cursor: pointer;
-    animation: softPulse 2s infinite;
+    animation: bounceRight 1.5s infinite;
+    box-shadow: var(--shadow-lg);
+    border: 2px solid white;
 }
 
-.modal-close-btn:hover {
-    background: var(--gold-dark);
-    transform: rotate(90deg);
-    animation: none;
+@keyframes bounceRight {
+    0%, 100% { transform: translate(0, -50%); }
+    50% { transform: translate(10px, -50%); }
 }
 
-@keyframes softPulse {
-    0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
-    70% { box-shadow: 0 0 0 15px rgba(212, 175, 55, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
+/* REMOVER TEXTO "DESLIZE" QUE NÃO FUNCIONA */
+.swipe-indicator,
+.swipe-instruction {
+    display: none !important;
 }
 
 .modal-container {
     padding: 0;
 }
 
-/* Mídia - Foto Normal */
+/* Galeria do Modal */
 .modal-gallery {
     width: 100%;
     background: var(--black-soft);
@@ -1523,35 +1182,6 @@ button {
     object-fit: contain;
     background-color: var(--black-soft);
     cursor: zoom-in;
-}
-
-/* INDICADOR DE SWIPE */
-.swipe-indicator {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,0,0,0.6);
-    color: white;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    z-index: 20;
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    pointer-events: none;
-    border: 1px solid var(--gold-primary);
-}
-
-.swipe-indicator i {
-    animation: slideHint 1.5s infinite;
-}
-
-@keyframes slideHint {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(5px); }
 }
 
 /* Miniaturas */
@@ -1718,228 +1348,8 @@ button {
     box-shadow: var(--shadow-lg);
 }
 
-/* Recomendações - Scroll Horizontal */
-.recommendations-section {
-    margin: 20px 0;
-}
-
-.recommendations-title {
-    font-family: var(--font-display);
-    font-size: 1.2rem;
-    color: var(--gold-dark);
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.recommendations-grid {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    padding-bottom: 10px;
-    scrollbar-width: thin;
-}
-
-.rec-card {
-    flex: 0 0 140px;
-    background: var(--gray-light);
-    border-radius: var(--radius-sm);
-    overflow: hidden;
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    border: 1px solid transparent;
-    text-align: center;
-    padding: 10px;
-}
-
-.rec-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--gold-primary);
-}
-
-.rec-card img {
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    object-fit: cover;
-    border-radius: var(--radius-sm);
-    margin-bottom: 8px;
-}
-
-.rec-card h4 {
-    font-size: 0.8rem;
-    color: var(--black-soft);
-    font-weight: 600;
-    margin-bottom: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.rec-card .price {
-    color: var(--gold-primary);
-    font-weight: 700;
-    font-size: 0.85rem;
-}
-
-/* Reviews no Modal */
-.reviews-section {
-    border-top: 1px solid var(--gold-light);
-    padding-top: 20px;
-    margin-top: 20px;
-}
-
-.reviews-title {
-    font-family: var(--font-display);
-    font-size: 1.2rem;
-    color: var(--gold-dark);
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.review-card {
-    background: var(--gray-light);
-    padding: 15px;
-    border-radius: var(--radius-sm);
-    border-left: 3px solid var(--gold-primary);
-    margin-bottom: 10px;
-}
-
-.review-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-}
-
-.review-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--gold-primary);
-}
-
-.review-name {
-    font-weight: 600;
-    color: var(--black-soft);
-}
-
-.review-stars {
-    color: var(--gold-primary);
-    font-size: 0.9rem;
-    letter-spacing: 2px;
-}
-
-.review-comment {
-    color: var(--gray-medium);
-    font-size: 0.9rem;
-    line-height: 1.4;
-}
-
-.scroll-indicator {
-    text-align: center;
-    color: var(--gray-medium);
-    font-size: 0.9rem;
-    margin-top: 20px;
-    animation: bounce 2s infinite;
-}
-
 /* ========================================
-CROSS-SELL GRID NO MODAL
-======================================== */
-.cross-sell-section {
-    margin: 20px 0;
-    border-top: 2px solid var(--gold-light);
-    padding-top: 20px;
-}
-
-.cross-sell-title {
-    font-family: var(--font-display);
-    font-size: 1.3rem;
-    color: var(--gold-dark);
-    margin-bottom: 15px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* Grid igual à vitrine principal - 2 colunas no mobile */
-.cross-sell-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    padding: 0 8px;
-}
-
-/* Card de produto no grid do modal */
-.cross-sell-card {
-    background: var(--white);
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    transition: all 0.2s ease;
-    cursor: pointer;
-    border: 1px solid #f0f0f0;
-    display: flex;
-    flex-direction: column;
-}
-
-.cross-sell-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    border-color: var(--gold-primary);
-}
-
-.cross-sell-card img {
-    width: 100%;
-    height: 120px;
-    aspect-ratio: 1 / 1 !important;
-    object-fit: cover !important;
-    transition: transform 0.4s ease;
-}
-
-.cross-sell-card:hover img {
-    transform: scale(1.05);
-}
-
-.cross-sell-card .info {
-    padding: 8px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.cross-sell-card .name {
-    font-size: 0.75rem;
-    color: var(--black-soft);
-    font-weight: 500;
-    line-height: 1.2;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.cross-sell-card .price {
-    color: var(--gold-primary);
-    font-weight: 700;
-    font-size: 0.9rem;
-}
-
-.cross-sell-card .price::before {
-    content: 'R$ ';
-    font-size: 0.7rem;
-    font-weight: 500;
-}
-
-/* ========================================
-SUPER ZOOM OVERLAY - LUXO FULL SCREEN
+SUPER ZOOM OVERLAY
 ======================================== */
 .super-zoom-overlay {
     position: fixed;
@@ -1960,30 +1370,6 @@ SUPER ZOOM OVERLAY - LUXO FULL SCREEN
     display: flex;
 }
 
-.super-zoom-close {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: var(--gold-primary);
-    color: var(--white);
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    font-size: 1.3rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    cursor: pointer;
-    transition: all var(--transition-normal);
-    z-index: 10000;
-}
-
-.super-zoom-close:hover {
-    background: var(--gold-dark);
-    transform: rotate(90deg);
-}
-
 .super-zoom-content {
     max-width: 100%;
     max-height: 80vh;
@@ -2001,7 +1387,7 @@ SUPER ZOOM OVERLAY - LUXO FULL SCREEN
     box-shadow: var(--shadow-xl);
 }
 
-/* Botão WhatsApp Flutuante no Super Zoom */
+/* Botão WhatsApp no Super Zoom */
 .super-zoom-wpp-btn {
     background: var(--whatsapp);
     color: white;
@@ -2032,7 +1418,6 @@ SUPER ZOOM OVERLAY - LUXO FULL SCREEN
     font-size: 1.5rem;
 }
 
-/* Destaque na última foto */
 .super-zoom-wpp-btn.highlight {
     animation: pulseWhatsappButton 1.5s infinite;
     box-shadow: 0 0 30px var(--whatsapp);
@@ -2064,28 +1449,7 @@ SUPER ZOOM OVERLAY - LUXO FULL SCREEN
 }
 
 /* ========================================
-18. ESTRELAS DE AVALIAÇÃO (APENAS NO MODAL)
-======================================== */
-.stars {
-    color: var(--gold-primary);
-    font-size: 2.4rem;
-    letter-spacing: 6px;
-    display: block;
-    text-align: center;
-    margin: 15px 0;
-    line-height: 1;
-}
-
-.product-rating-large {
-    font-size: 2.8rem;
-    letter-spacing: 8px;
-    margin: 20px 0;
-    color: var(--gold-primary);
-    text-align: center;
-}
-
-/* ========================================
-19. CARRINHO SIDEBAR
+CARRINHO LATERAL
 ======================================== */
 .cart-sidebar {
     position: fixed;
@@ -2321,7 +1685,7 @@ SUPER ZOOM OVERLAY - LUXO FULL SCREEN
 }
 
 /* ========================================
-20. FOOTER PREMIUM
+FOOTER
 ======================================== */
 .footer {
     background: linear-gradient(135deg, var(--gray-luxury) 0%, var(--black-soft) 100%);
@@ -2343,14 +1707,6 @@ SUPER ZOOM OVERLAY - LUXO FULL SCREEN
     color: var(--gold-primary);
     margin-bottom: var(--spacing-md);
     font-family: var(--font-display);
-}
-
-.footer-section h3 {
-    font-size: 1.3rem;
-}
-
-.footer-section h4 {
-    font-size: 1.1rem;
 }
 
 .footer-section p {
@@ -2429,7 +1785,7 @@ SUPER ZOOM OVERLAY - LUXO FULL SCREEN
 }
 
 /* ========================================
-21. SEO FOOTER AREA
+SEO FOOTER
 ======================================== */
 .seo-footer-area {
     background: var(--white);
@@ -2453,397 +1809,72 @@ SUPER ZOOM OVERLAY - LUXO FULL SCREEN
 }
 
 /* ========================================
-22. RESPONSIVE DESIGN
+RESPONSIVE
 ======================================== */
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
     .header-top-content {
         flex-wrap: wrap;
-    }
-    .header-search {
-        flex: 1;
-        min-width: 300px;
-    }
-    .modal-content {
-        max-height: 95vh;
-    }
-    .team-content {
-        grid-template-columns: 1fr;
-    }
-    .hero-image-xl {
-        max-height: 280px;
-    }
-}
-
-@media (max-width: 768px) {
-    .logo-text span {
-        font-size: 1.3rem;
-    }
-    .logo-tagline {
-        font-size: 0.6rem;
     }
     .header-search {
         min-width: 100%;
         order: 3;
     }
-    .search-input {
-        font-size: 0.85rem;
-    }
-    .mobile-filters {
-        display: flex;
-        top: 140px;
-    }
-    .nav-categories {
-        top: 0;
-    }
-    .category-list {
-        gap: 0;
-    }
-    .category-list li {
-        padding: var(--spacing-xs) var(--spacing-sm);
-        font-size: 0.8rem;
-    }
-    
-    /* MOBILE: 2 COLUNAS FORÇADO */
     .products-grid {
-        grid-template-columns: repeat(2, 1fr);
         gap: 6px;
         padding: 0 6px;
     }
     .product-image {
         height: 130px;
-        aspect-ratio: 1 / 1 !important;
-    }
-    .product-image img {
-        aspect-ratio: 1 / 1 !important;
-        object-fit: cover !important;
     }
     .product-name {
         font-size: 0.75rem;
-        -webkit-line-clamp: 2;
-        line-clamp: 2;
     }
-    .product-price {
-        font-size: 0.95rem;
+    .modal-close-btn,
+    .super-zoom-close {
+        font-size: 2.5rem !important;
+        padding: 15px !important;
     }
-    .product-info {
-        padding: 6px;
-        gap: 3px;
+    .btn-next-photo {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
     }
-    
-    /* CARROSSEL DE AVALIAÇÕES MOBILE */
-    .review-carousel-card {
-        flex: 0 0 260px;
-        padding: 12px;
-    }
-    .review-carousel-comment {
-        font-size: 0.8rem;
-        -webkit-line-clamp: 2;
-        line-clamp: 2;
-    }
-    
-    .team-section {
-        padding: var(--spacing-lg);
-    }
-    .team-image-wrapper {
-        height: 250px;
-    }
-    .team-title {
-        font-size: 1.5rem;
-    }
-    .team-features {
-        grid-template-columns: 1fr;
-    }
-    .team-whatsapp-btn {
-        width: 100%;
-        justify-content: center;
-    }
-    .faq-grid,
-    .social-proof-grid {
+    .team-content {
         grid-template-columns: 1fr;
     }
     .cart-sidebar {
         width: 100%;
         right: -100%;
     }
-    .modal-close-btn {
-        width: 44px;
-        height: 44px;
-        font-size: 1.2rem;
-    }
-    .modal-gallery {
-        max-height: 40vh;
-    }
-    .modal-title {
-        font-size: 1.5rem;
-    }
-    .modal-price-main {
-        font-size: 1.8rem;
-    }
-    .modal-buttons {
-        flex-direction: row;
-    }
-    .btn-whatsapp-modal, .btn-add-cart-modal {
-        padding: 12px;
-        font-size: 0.9rem;
-    }
-    .rec-card {
-        flex: 0 0 120px;
-    }
-    .geo-notification {
-        left: 10px;
-        right: 10px;
-        bottom: 80px;
-        max-width: none;
-    }
-    .whatsapp-float {
-        width: 55px;
-        height: 55px;
-        font-size: 1.8rem;
-        bottom: 20px;
-        right: 20px;
-    }
-    .infinite-carousel {
-        animation-duration: 30s;
-    }
-    .carousel-item {
-        flex: 0 0 180px;
-    }
-    .carousel-item img {
-        height: 180px;
-    }
-    .hero-image-xl {
-        max-height: 220px;
-    }
-    
-    /* ESTRELAS MOBILE */
-    .stars {
-        font-size: 2rem;
-        letter-spacing: 4px;
-    }
-    .product-rating-large {
-        font-size: 2.4rem;
-        letter-spacing: 6px;
-    }
-    
-    /* GRID CROSS-SELL NO MODAL - MOBILE */
-    .cross-sell-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 6px;
-        padding: 0 6px;
-    }
-    .cross-sell-card img {
-        height: 120px;
-    }
-    .cross-sell-card .name {
-        font-size: 0.7rem;
-    }
-    .cross-sell-card .price {
-        font-size: 0.85rem;
-    }
-    
-    /* SUPER ZOOM MOBILE */
-    .super-zoom-close {
-        width: 44px;
-        height: 44px;
-        font-size: 1.1rem;
-    }
-    .super-zoom-wpp-btn {
-        font-size: 1rem;
-        padding: 12px 20px;
-    }
 }
 
 @media (max-width: 480px) {
-    .header-top {
-        padding: var(--spacing-sm) 0;
-    }
-    .logo-link i {
-        font-size: 1.8rem;
-    }
-    .logo-text span {
-        font-size: 1.1rem;
-    }
-    .logo-text small {
-        font-size: 0.6rem;
-    }
-    .search-input {
-        font-size: 0.8rem;
-    }
-    .products-grid {
-        gap: 5px;
-        padding: 0 5px;
-    }
     .product-image {
         height: 120px;
-        aspect-ratio: 1 / 1 !important;
     }
-    .product-image img {
-        aspect-ratio: 1 / 1 !important;
-        object-fit: cover !important;
+    .modal-close-btn,
+    .super-zoom-close {
+        font-size: 2rem !important;
+        padding: 12px !important;
     }
-    .product-name {
-        font-size: 0.7rem;
-    }
-    .product-price {
-        font-size: 0.9rem;
-    }
-    .product-info {
-        padding: 5px;
-    }
-    .cart-btn {
-        width: 45px;
-        height: 45px;
-        font-size: 1.1rem;
-    }
-    .cart-count {
-        width: 20px;
-        height: 20px;
-        font-size: 0.65rem;
-    }
-    .section-title {
-        font-size: 1.3rem;
-    }
-    .modal-gallery {
-        max-height: 35vh;
-    }
-    .modal-thumb {
-        flex: 0 0 60px;
-        width: 60px;
-        height: 60px;
-    }
-    .modal-title {
-        font-size: 1.3rem;
-    }
-    .modal-price-main {
-        font-size: 1.6rem;
-    }
-    .rec-card {
-        flex: 0 0 100px;
-    }
-    .callout-text strong {
-        font-size: 1rem;
-    }
-    .callout-text .highlight-red {
-        font-size: 0.9rem;
-    }
-    .callout-content {
-        flex-direction: column;
-        gap: var(--spacing-xs);
-    }
-    .footer-content {
-        grid-template-columns: 1fr;
-        text-align: center;
-    }
-    .footer-section p {
-        justify-content: center;
-    }
-    .trust-badges {
-        align-items: center;
-    }
-    .social-links {
-        justify-content: center;
-    }
-    .hero-image-xl {
-        max-height: 180px;
-    }
-    
-    /* GRID CROSS-SELL NO MODAL - TELAS MUITO PEQUENAS */
-    .cross-sell-grid {
-        gap: 5px;
-        padding: 0 5px;
-    }
-    .cross-sell-card img {
-        height: 110px;
+    .btn-next-photo {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
     }
 }
 
 /* ========================================
-23. ACESSIBILIDADE
+KEYFRAMES
 ======================================== */
-@media (prefers-reduced-motion: reduce) {
-    * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-button:focus-visible,
-a:focus-visible,
-input:focus-visible {
-    outline: 3px solid var(--gold-primary);
-    outline-offset: 2px;
-}
-
-/* ========================================
-24. IMPRESSÃO
-======================================== */
-@media print {
-    .header,
-    .footer,
-    .cart-btn,
-    .modal,
-    .geo-notification,
-    .toast,
-    .whatsapp-float,
-    .mobile-filters,
-    .delivery-callout,
-    .seo-footer-area,
-    .super-zoom-overlay {
-        display: none !important;
-    }
-    .products-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* ========================================
-25. KEYFRAMES
-======================================== */
-@keyframes cartBounce {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
+@keyframes skeletonLoading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
 @keyframes carouselScroll {
     0% { transform: translateX(0); }
-    100% { transform: translateX(calc(-280px * 6 - 120px)); }
-}
-
-@keyframes pulseWhatsappButton {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
-    }
-    50% {
-        transform: scale(1.02);
-        box-shadow: 0 8px 20px rgba(37, 211, 102, 0.5);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
-    }
-}
-
-@keyframes pulseWhatsapp {
-    0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 8px 30px rgba(37, 211, 102, 0.4);
-    }
-    50% {
-        transform: scale(1.1);
-        box-shadow: 0 15px 40px rgba(37, 211, 102, 0.6);
-    }
-}
-
-@keyframes truckMove {
-    0%, 100% { transform: translateX(0); }
-    50% { transform: translateX(10px); }
-}
-
-@keyframes skeletonLoading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    100% { transform: translateX(calc(-250px * 6 - 120px)); }
 }
 
 @keyframes compassSpin {
@@ -2873,14 +1904,20 @@ input:focus-visible {
     }
 }
 
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(5px); }
+@keyframes pulseWhatsapp {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+@keyframes pulseWhatsappButton {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
 }
 
 @media (max-width: 768px) {
     @keyframes carouselScroll {
         0% { transform: translateX(0); }
-        100% { transform: translateX(calc(-200px * 6 - 60px)); }
+        100% { transform: translateX(calc(-180px * 6 - 60px)); }
     }
 }

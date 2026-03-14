@@ -6,22 +6,30 @@
     <meta name="description" content="Grupo Etevalda MT - A maior loja de variedades de Mato Grosso">
     <meta name="keywords" content="joias, presentes, variedades, Cuiabá, Várzea Grande">
     <meta name="theme-color" content="#D4AF37">
-    <!-- PWA META TAGS - MODO APP FULL SCREEN -->
+    
+    <!-- META TAGS PWA - ESSENCIAIS PARA OCULTAR BARRA DE URL -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Etevalda MT">
+    <meta name="application-name" content="Etevalda MT">
+    
     <meta property="og:title" content="Grupo Etevalda MT">
     <meta property="og:description" content="Variedade imbatível com entrega hoje! Pague só na entrega.">
     <meta property="og:image" content="https://i.postimg.cc/1Xw1PC9m/Grupo-Etevalda-MT.png">
     <title>Grupo Etevalda MT | Variedades</title>
-    <!-- Google Fonts Premium - Agora com Inter e Poppins (Sans-Serif) -->
+    
+    <!-- Google Fonts Premium -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <!-- CSS Principal -->
     <link rel="stylesheet" href="style.css">
 </head>
@@ -38,7 +46,7 @@
     <!-- TOAST NOTIFICATION -->
     <div class="toast" id="toast"></div>
 
-    <!-- HEADER LUXUOSO - SEM BARRA FICTÍCIA (removida completamente) -->
+    <!-- HEADER LUXUOSO - SEM BARRA FICTÍCIA -->
     <header class="header">
         <div class="header-top">
             <div class="container-fluid">
@@ -113,6 +121,7 @@
                             </div>
                         </div>
                     </div>
+                    <!-- Mais skeletons... -->
                     <div class="product-card skeleton">
                         <div class="skeleton-image"></div>
                         <div class="product-info">
@@ -234,7 +243,7 @@
         </div>
     </main>
 
-    <!-- MODAL DE PRODUTO PREMIUM (Mobile-First - Luxo) -->
+    <!-- MODAL DE PRODUTO PREMIUM -->
     <div id="productModal" class="modal">
         <div id="modalOverlay" class="modal-overlay"></div>
         <div class="modal-content">
@@ -251,6 +260,10 @@
     <div id="superZoomOverlay" class="super-zoom-overlay">
         <button id="superZoomClose" class="super-zoom-close" aria-label="Fechar zoom">
             <i class="fas fa-times"></i>
+        </button>
+        <!-- Botão de incentivo para próxima foto (aparece quando há mais de uma mídia) -->
+        <button id="nextPhotoBtn" class="btn-next-photo" style="display: none;">
+            <i class="fas fa-chevron-right"></i>
         </button>
         <div class="super-zoom-content" id="superZoomContent">
             <!-- Imagem ou vídeo será inserido aqui dinamicamente -->
@@ -330,7 +343,7 @@
         </div>
     </footer>
 
-    <!-- SEO FOOTER AREA (Texto para Google) -->
+    <!-- SEO FOOTER AREA -->
     <section class="seo-footer-area">
         <div class="container-fluid">
             <p class="seo-text">Etevalda Joias Cuiabá é referência em joias finas, alianças de ouro, prata 925 e presentes especiais em Mato Grosso. Com mais de 20 anos de tradição, oferecemos variedade imbatível, garantia em todos os produtos e a comodidade de pagar apenas na hora da entrega. Atendemos em Cuiabá, Várzea Grande e todo o estado de MT. Conheça nossa coleção de anéis, colares, brincos e conjuntos exclusivos. O presente perfeito para quem você ama está aqui na Etevalda. Joias com qualidade e procedência, entregues com segurança e carinho.</p>
