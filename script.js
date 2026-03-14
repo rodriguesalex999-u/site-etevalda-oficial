@@ -1,6 +1,6 @@
 // ========================================
 // GRUPO ETEVALDA MT - MOBILE-FIRST SCRIPT
-// VERSÃO PERFEITA COM DESLIZE TOUCH
+// VERSÃO PERFEITA COM HISTORY API + SUPER ZOOM + ÁUDIO INTELIGENTE + TOUCH SWIPE
 // ========================================
 
 // ========================================
@@ -21,41 +21,37 @@ let socialProofImages = [];
 let cart = [];
 let currentCategory = 'all';
 let searchQuery = '';
-
 // Variáveis do modal
 let currentModalProduct = null;
 let currentMediaList = [];
-
-// Variáveis do Super Zoom e Touch
-let superZoomCurrentIndex = 0;
-let superZoomMediaList = [];
-let superZoomClickCount = 0;
+// Variáveis do Super Zoom
+let currentZoomIndex = 0;
+// Variáveis para Touch Swipe
 let touchStartX = 0;
 let touchEndX = 0;
-
-// Link do WhatsApp
+// Link do WhatsApp com mensagem pré-definida
 const WHATSAPP_BASE_URL = 'https://api.whatsapp.com/send/?phone=5565993337205&text=Já%20vi%20seu%20catálogo,%20quero%20comprar,%20consegue%20me%20entregar%20hoje?&type=phone_number&app_absent=0';
 
-// Bairros para geolocalização
+// ========================================
+// 3. DICIONÁRIO DE BAIRROS
+// ========================================
 const NEIGHBORHOODS = {
     'Cuiabá': ['CPA', 'Pedra 90', 'Boa Esperança', 'Jardim das Américas', 'Centro', 'Jardim Europa', 'Bandeirantes', 'Goiabeiras'],
     'Várzea Grande': ['Cristo Rei', 'Parque do Lago', 'Mapim', 'Centro', 'Jardim América', 'Morada do Ouro']
 };
-
 const CUSTOMER_NAMES = [
     'Ana', 'Bruna', 'Carla', 'Daniela', 'Fernanda', 'Gabriela', 'Helena', 'Isabela',
     'João', 'Pedro', 'Lucas', 'Mateus', 'Rafael', 'Thiago'
 ];
-
 let detectedLocation = { city: 'Cuiabá', neighborhoods: NEIGHBORHOODS['Cuiabá'] };
+let geoNotificationTimeout = null;
 
 // ========================================
-// 3. INICIALIZAÇÃO
+// 4. INICIALIZAÇÃO PRINCIPAL
 // ========================================
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Grupo Etevalda MT - Com Deslize Touch');
+    console.log('🚀 Grupo Etevalda MT - Modo Cinema');
     showLoading(true);
-    
     try {
         await loadCategories();
         await loadProducts();
@@ -69,13 +65,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderSocialProof();
         renderFaqs();
         setupEventListeners();
-        setupHistoryAPI();
-        setupSuperZoomListeners();
-        setupTouchListeners(); // NOVA FUNÇÃO PARA DESLIZE
+        setupHistoryAPI(); // History API para botão voltar
+        setupSuperZoomListeners(); // Super Zoom listeners
+        setupTouchListeners(); // Touch Swipe listeners
         startTeamTimer();
         initPredictiveSearch();
         initGeoLocationBackground();
-        
         console.log(`✅ ${products.length} produtos carregados`);
     } catch (error) {
         console.error('❌ Erro:', error);
@@ -86,69 +81,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function showLoading(status) {
-    const skeletons = document.querySelectorAll('.product-card.skeleton');
-    if (status) {
-        skeletons.forEach(s => s.style.display = 'block');
-    } else {
-        skeletons.forEach(s => s.style.display = 'none');
-    }
+    const el = document.getElementById('loading');
+    if (el) el.style.display = status ? 'flex' : 'none';
 }
 
 // ========================================
-// 4. NOVA FUNÇÃO: SETUP TOUCH LISTENERS
-// ========================================
-function setupTouchListeners() {
-    const superZoomOverlay = document.getElementById('superZoomOverlay');
-    
-    if (superZoomOverlay) {
-        superZoomOverlay.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-        });
-        
-        superZoomOverlay.addEventListener('touchend', e => {
-            touchEndX = e.changedTouches[0].screenX;
-            handleSwipeGesture();
-        });
-    }
-}
-
-function handleSwipeGesture() {
-    const swipeThreshold = 50; // Sensibilidade do deslize
-    
-    if (touchEndX < touchStartX - swipeThreshold) {
-        // Deslizou para esquerda - próxima foto
-        nextSuperZoomPhoto();
-    }
-    
-    if (touchEndX > touchStartX + swipeThreshold) {
-        // Deslizou para direita - foto anterior
-        prevSuperZoomPhoto();
-    }
-}
-
-function nextSuperZoomPhoto() {
-    if (!superZoomMediaList.length) return;
-    
-    superZoomCurrentIndex = (superZoomCurrentIndex + 1) % superZoomMediaList.length;
-    displaySuperZoomMedia(superZoomCurrentIndex);
-    showToast('→ Foto ' + (superZoomCurrentIndex + 1) + ' de ' + superZoomMediaList.length);
-}
-
-function prevSuperZoomPhoto() {
-    if (!superZoomMediaList.length) return;
-    
-    superZoomCurrentIndex = (superZoomCurrentIndex - 1 + superZoomMediaList.length) % superZoomMediaList.length;
-    displaySuperZoomMedia(superZoomCurrentIndex);
-    showToast('← Foto ' + (superZoomCurrentIndex + 1) + ' de ' + superZoomMediaList.length);
-}
-
-// ========================================
-// 5. HISTORY API
+// 5. HISTORY API - CONTROLE DO BOTÃO VOLTAR
 // ========================================
 function setupHistoryAPI() {
+    // Listener para o botão voltar do navegador/celular
     window.addEventListener('popstate', (event) => {
+        // Se o estado tiver modal aberto, fecha o modal
         if (event.state?.modalOpen || location.hash.startsWith('#product-')) {
             closeProductModal();
+            // Limpa o hash da URL
             if (location.hash.startsWith('#product-')) {
                 history.replaceState(null, '', location.pathname + location.search);
             }
@@ -157,110 +103,124 @@ function setupHistoryAPI() {
 }
 
 // ========================================
-// 6. SUPER ZOOM FUNCTIONS
+// 6. TOUCH SWIPE - FUNÇÕES PARA PASSAR FOTOS
+// ========================================
+function setupTouchListeners() {
+    const modalContent = document.querySelector('.modal-content');
+    if (!modalContent) return;
+    
+    modalContent.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    
+    modalContent.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, { passive: true });
+}
+
+function handleSwipe() {
+    const swipeThreshold = 50; // Sensibilidade do deslize
+    
+    if (touchEndX < touchStartX - swipeThreshold) {
+        // Deslizou para esquerda - próxima foto
+        nextMedia();
+    }
+    
+    if (touchEndX > touchStartX + swipeThreshold) {
+        // Deslizou para direita - foto anterior
+        prevMedia();
+    }
+}
+
+function nextMedia() {
+    if (!currentMediaList || currentMediaList.length === 0) return;
+    
+    // Encontra o índice atual
+    const activeThumb = document.querySelector('.modal-thumb.active');
+    if (!activeThumb) return;
+    
+    const thumbs = document.querySelectorAll('.modal-thumb');
+    let currentIndex = 0;
+    
+    thumbs.forEach((thumb, index) => {
+        if (thumb.classList.contains('active')) {
+            currentIndex = index;
+        }
+    });
+    
+    // Avança para o próximo
+    const nextIndex = (currentIndex + 1) % thumbs.length;
+    changeModalMedia(nextIndex);
+    
+    // Feedback visual com toast
+    showToast(`Foto ${nextIndex + 1} de ${thumbs.length}`);
+}
+
+function prevMedia() {
+    if (!currentMediaList || currentMediaList.length === 0) return;
+    
+    // Encontra o índice atual
+    const activeThumb = document.querySelector('.modal-thumb.active');
+    if (!activeThumb) return;
+    
+    const thumbs = document.querySelectorAll('.modal-thumb');
+    let currentIndex = 0;
+    
+    thumbs.forEach((thumb, index) => {
+        if (thumb.classList.contains('active')) {
+            currentIndex = index;
+        }
+    });
+    
+    // Volta para o anterior
+    const prevIndex = (currentIndex - 1 + thumbs.length) % thumbs.length;
+    changeModalMedia(prevIndex);
+    
+    // Feedback visual com toast
+    showToast(`Foto ${prevIndex + 1} de ${thumbs.length}`);
+}
+
+// ========================================
+// 7. SUPER ZOOM - FUNÇÕES DE ZOOM LUXO
 // ========================================
 function openSuperZoom(mediaUrl, type = 'image') {
     const overlay = document.getElementById('superZoomOverlay');
     const content = document.getElementById('superZoomContent');
-    const wppBtn = document.getElementById('superZoomWppBtn');
-    const nextBtn = document.getElementById('nextPhotoBtn');
-    
     if (!overlay || !content) return;
-
-    superZoomClickCount = 1;
-    superZoomCurrentIndex = 0;
-    superZoomMediaList = currentMediaList;
-
-    displaySuperZoomMedia(superZoomCurrentIndex);
+    
+    if (type === 'video') {
+        content.innerHTML = `<video src="${mediaUrl}" controls autoplay loop playsinline style="max-width:100%;max-height:90vh;object-fit:contain;"></video>`;
+    } else {
+        content.innerHTML = `<img src="${mediaUrl}" alt="Zoom" style="max-width:100%;max-height:90vh;object-fit:contain;">`;
+    }
+    
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
-
-    // Mostrar botão de próxima foto se houver mais de uma mídia
-    if (nextBtn) {
-        if (superZoomMediaList.length > 1) {
-            nextBtn.style.display = 'flex';
-            // Adicionar evento ao botão
-            nextBtn.onclick = (e) => {
-                e.stopPropagation();
-                nextSuperZoomPhoto();
-            };
-        } else {
-            nextBtn.style.display = 'none';
-        }
-    }
-
-    // Configurar botão WhatsApp
-    if (currentModalProduct) {
-        const msg = `Olá! Quero este produto: *${currentModalProduct.name}* - R$ ${currentModalProduct.price.toFixed(2).replace('.', ',')}`;
-        wppBtn.href = `https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}&type=phone_number&app_absent=0`;
-        wppBtn.style.display = 'flex';
-        wppBtn.classList.remove('highlight');
-    }
-
-    overlay.onclick = handleSuperZoomClick;
-}
-
-function displaySuperZoomMedia(index) {
-    const content = document.getElementById('superZoomContent');
-    const wppBtn = document.getElementById('superZoomWppBtn');
-    if (!content || !superZoomMediaList[index]) return;
-
-    const media = superZoomMediaList[index];
-    if (media.type === 'video') {
-        content.innerHTML = `<video src="${media.url}" autoplay muted loop playsinline></video>`;
-    } else {
-        content.innerHTML = `<img src="${media.url}" alt="">`;
-    }
-
-    // Destacar botão WhatsApp na última foto
-    if (index === superZoomMediaList.length - 1) {
-        wppBtn.classList.add('highlight');
-    } else {
-        wppBtn.classList.remove('highlight');
-    }
-}
-
-function handleSuperZoomClick(e) {
-    if (e.target.closest('.super-zoom-wpp-btn') || e.target.closest('.super-zoom-close') || e.target.closest('.btn-next-photo')) {
-        return;
-    }
-
-    superZoomClickCount++;
-
-    if (superZoomClickCount === 2) {
-        nextSuperZoomPhoto();
-    } else if (superZoomClickCount >= 3) {
-        closeSuperZoom();
-    }
 }
 
 function closeSuperZoom() {
     const overlay = document.getElementById('superZoomOverlay');
     const content = document.getElementById('superZoomContent');
-    const wppBtn = document.getElementById('superZoomWppBtn');
-    const nextBtn = document.getElementById('nextPhotoBtn');
-    
     if (!overlay || !content) return;
-
+    
     overlay.classList.remove('active');
     content.innerHTML = '';
-    wppBtn.style.display = 'none';
-    wppBtn.classList.remove('highlight');
-    if (nextBtn) nextBtn.style.display = 'none';
     document.body.style.overflow = '';
-    superZoomClickCount = 0;
-    superZoomMediaList = [];
 }
 
 function setupSuperZoomListeners() {
+    // Fechar ao clicar no overlay
     document.getElementById('superZoomOverlay')?.addEventListener('click', (e) => {
         if (e.target.id === 'superZoomOverlay') {
             closeSuperZoom();
         }
     });
     
+    // Fechar ao clicar no botão X
     document.getElementById('superZoomClose')?.addEventListener('click', closeSuperZoom);
     
+    // Fechar com tecla ESC
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeSuperZoom();
@@ -269,36 +229,42 @@ function setupSuperZoomListeners() {
 }
 
 // ========================================
-// 7. CONTROLE DE ÁUDIO
+// 8. CONTROLE DE ÁUDIO INTELIGENTE PARA VÍDEO
 // ========================================
 function setupVideoAudioControl(videoElement) {
     if (!videoElement) return;
     
+    // Configurações iniciais do vídeo
     videoElement.muted = true;
     videoElement.autoplay = true;
     videoElement.playsInline = true;
     videoElement.loop = true;
     
+    // Criar botão de áudio
     const audioBtn = document.createElement('button');
     audioBtn.className = 'video-audio-toggle';
     audioBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
     audioBtn.setAttribute('aria-label', 'Ativar áudio');
     
+    // Adicionar evento de clique
     audioBtn.onclick = (e) => {
         e.stopPropagation();
         if (videoElement.muted) {
+            // REINICIAR vídeo e ativar áudio
             videoElement.currentTime = 0;
             videoElement.muted = false;
             videoElement.play().catch(err => console.log('Autoplay bloqueado:', err));
             audioBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
             audioBtn.setAttribute('aria-label', 'Desativar áudio');
         } else {
+            // Desativar áudio (sem reiniciar)
             videoElement.muted = true;
             audioBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
             audioBtn.setAttribute('aria-label', 'Ativar áudio');
         }
     };
     
+    // Adicionar botão ao container do vídeo
     const container = videoElement.parentElement;
     if (container) {
         container.style.position = 'relative';
@@ -307,7 +273,7 @@ function setupVideoAudioControl(videoElement) {
 }
 
 // ========================================
-// 8. FUNÇÕES DE CARREGAMENTO
+// 9. FUNÇÕES DE CARREGAMENTO
 // ========================================
 async function loadCategories() {
     const { data } = await _supabase.from('categories').select('*').order('id');
@@ -345,7 +311,7 @@ async function loadSocialProof() {
 }
 
 // ========================================
-// 9. RENDERIZAÇÃO
+// 10. RENDERIZAÇÃO
 // ========================================
 function renderCategories() {
     const list = document.getElementById('categoryList');
@@ -363,6 +329,7 @@ function renderCategories() {
             li.classList.add('active');
             currentCategory = li.dataset.category;
             renderProducts();
+            // Scroll para o topo ao mudar categoria
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });
@@ -413,7 +380,6 @@ function renderSocialProof() {
             { image: 'https://i.postimg.cc/HnbpfGbh/Equipeee.jpg', text: 'Clientes satisfeitos' },
             { image: 'https://i.postimg.cc/wj65vgfr/Funcionarios.jpg', text: 'Tradição em MT' }
         ];
-        
         grid.innerHTML = fallbackCards.map(item => `
             <div class="social-proof-card">
                 <div class="social-proof-image">
@@ -444,7 +410,6 @@ function renderCarousel() {
     if (!carousel || !products.length) return;
     
     const carouselProducts = [...products, ...products];
-    
     carousel.innerHTML = carouselProducts.map(p => {
         const images = Array.isArray(p.images) ? p.images : [];
         return `
@@ -459,6 +424,7 @@ function renderCarousel() {
     }).join('');
 }
 
+// Função para gerar estrelas (usada apenas no modal)
 function renderStars(rating) {
     const fullStars = '★'.repeat(rating);
     const emptyStars = '☆'.repeat(5 - rating);
@@ -466,7 +432,7 @@ function renderStars(rating) {
 }
 
 // ========================================
-// 10. RENDERIZAÇÃO DE PRODUTOS
+// 11. RENDERIZAÇÃO DE PRODUTOS (SEM ESTRELAS NA VITRINE)
 // ========================================
 function renderProductCard(p) {
     const images = Array.isArray(p.images) ? p.images : [];
@@ -474,6 +440,7 @@ function renderProductCard(p) {
     const secondImage = images[1] || mainImage;
     const priceFormatted = p.price.toFixed(2).replace('.', ',');
     
+    // SOLITÁRIO: só aparece se tiver e o preço for maior que zero
     const solitarioHtml = p.tem_solitario && p.solitario_price && p.solitario_price > 0
         ? `<div class="product-solitario"><i class="fas fa-gem"></i> Solitário: R$ ${p.solitario_price.toFixed(2).replace('.', ',')}</div>`
         : '';
@@ -509,6 +476,7 @@ function renderProductCard(p) {
     `;
 }
 
+// Função para trocar a imagem no hover (mouse) ou toque (celular)
 window.hoverImage = function(card, secondImage) {
     const img = card.querySelector('.product-image img');
     const mainImage = card.dataset.mainImage;
@@ -532,6 +500,9 @@ function renderProducts() {
         return matchCat && matchSearch;
     });
     
+    const productCount = document.getElementById('productCount');
+    if (productCount) productCount.textContent = `${filtered.length} itens`;
+    
     if (filtered.length === 0) {
         container.innerHTML = '<p style="text-align:center; padding:40px;">Nenhum produto encontrado</p>';
         return;
@@ -545,7 +516,7 @@ function renderProducts() {
 }
 
 // ========================================
-// 11. MODAL DE PRODUTO
+// 12. MODAL DE PRODUTO (COM HISTORY API, SUPER ZOOM E ÁUDIO INTELIGENTE)
 // ========================================
 function openProductModal(id) {
     const product = products.find(p => p.id === id);
@@ -554,6 +525,7 @@ function openProductModal(id) {
     currentModalProduct = product;
     currentMediaList = [];
     
+    // Vídeo
     if (product.video_url && product.video_url.trim()) {
         currentMediaList.push({
             type: 'video',
@@ -562,6 +534,7 @@ function openProductModal(id) {
         });
     }
     
+    // Imagens
     let images = [];
     if (Array.isArray(product.images)) {
         images = product.images;
@@ -581,7 +554,7 @@ function openProductModal(id) {
     
     const productReviews = allReviews.filter(r => r.is_general || r.product_id === id);
     
-    // Upsell e cross-sell (mantido igual)
+    // Upsell por categoria
     let upsellProducts = [];
     if (product.upsell_category) {
         upsellProducts = products.filter(p =>
@@ -595,6 +568,7 @@ function openProductModal(id) {
         ).slice(0, 12);
     }
     
+    // Cross-sell por keywords relacionadas (GRID LAYOUT)
     let crossSellProducts = [];
     if (product.related_keywords) {
         const keywords = product.related_keywords.toLowerCase().split(',').map(k => k.trim());
@@ -622,8 +596,6 @@ function openProductModal(id) {
             <img src="${media.thumbnail}" alt="">
         </div>
     `).join('');
-    
-    // NOTA: O swipe-indicator foi REMOVIDO (display: none no CSS)
     
     const modalHtml = `
         <div class="modal-gallery">
@@ -677,7 +649,7 @@ function openProductModal(id) {
                     <h4 class="cross-sell-title"><i class="fas fa-link"></i> Complemente seu Estilo</h4>
                     <div class="cross-sell-grid">
                         ${crossSellProducts.map(r => `
-                            <div class="cross-sell-card" onclick="openProductModal(${r.id})">
+                            <div class="cross-sell-card" onclick="openProductModal(${r.id}); scrollToTop();">
                                 <img src="${Array.isArray(r.images) ? r.images[0] : ''}" alt="${r.name}">
                                 <div class="info">
                                     <div class="name">${r.name}</div>
@@ -718,13 +690,39 @@ function openProductModal(id) {
     document.getElementById('productModal').classList.add('active');
     document.body.style.overflow = 'hidden';
     
+    // History API: Adiciona estado ao abrir modal
     history.pushState({ modalOpen: true, productId: id }, '', `#product-${id}`);
     
+    // Setup Super Zoom: habilita clique para zoom nas mídias
     setupModalMediaClick();
+    
+    // Setup Áudio Inteligente para vídeo
     setupModalVideoAudio();
+    
+    // Configurar botão de próxima foto
+    setupNextPhotoButton();
+    
+    // Scroll para o topo do modal
     scrollToTop();
 }
 
+// Configurar botão de próxima foto
+function setupNextPhotoButton() {
+    const nextBtn = document.getElementById('nextPhotoBtn');
+    if (!nextBtn) return;
+    
+    if (currentMediaList.length > 1) {
+        nextBtn.style.display = 'flex';
+        nextBtn.onclick = (e) => {
+            e.stopPropagation();
+            nextMedia();
+        };
+    } else {
+        nextBtn.style.display = 'none';
+    }
+}
+
+// Setup Super Zoom para mídias do modal
 function setupModalMediaClick() {
     const mainMedia = document.getElementById('modalMainMedia');
     if (!mainMedia) return;
@@ -749,6 +747,7 @@ function setupModalMediaClick() {
     }
 }
 
+// Setup Áudio Inteligente para vídeo do modal
 function setupModalVideoAudio() {
     const mainMedia = document.getElementById('modalMainMedia');
     if (!mainMedia) return;
@@ -774,10 +773,13 @@ function changeModalMedia(index) {
     
     if (media.type === 'video') {
         mainContainer.innerHTML = `<video src="${media.url}" autoplay muted loop playsinline></video>`;
+        // Re-aplicar controle de áudio
         setupModalVideoAudio();
+        // Re-aplicar Super Zoom
         setupModalMediaClick();
     } else {
         mainContainer.innerHTML = `<img src="${media.url}" alt="">`;
+        // Re-aplicar Super Zoom
         setupModalMediaClick();
     }
     
@@ -792,22 +794,18 @@ function closeProductModal() {
     currentModalProduct = null;
     currentMediaList = [];
     
+    // History API: Limpa estado ao fechar modal
     if (history.state?.modalOpen) {
         history.replaceState(null, '', location.pathname + location.search);
     }
 }
 
 // ========================================
-// 12. BUSCA E FILTROS
+// 13. BUSCA E FILTROS
 // ========================================
 function handleSearch(query) {
     searchQuery = query;
     renderProducts();
-    
-    const dropdown = document.getElementById('searchDropdown');
-    if (dropdown) {
-        setTimeout(() => { dropdown.style.display = 'none'; }, 200);
-    }
 }
 
 function resetFilters() {
@@ -815,24 +813,21 @@ function resetFilters() {
     currentCategory = 'all';
     const searchInput = document.getElementById('searchInput');
     if (searchInput) searchInput.value = '';
-    
     document.querySelectorAll('.category-list li').forEach(li => {
         li.classList.toggle('active', li.dataset.category === 'all');
     });
-    
     renderProducts();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ========================================
-// 13. CARRINHO
+// 14. CARRINHO DE COMPRAS
 // ========================================
 function addToCart(productId) {
     const product = products.find(p => p.id === productId);
     if (!product) return;
     
     const existingItem = cart.find(item => item.id === productId);
-    
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
@@ -861,7 +856,6 @@ function updateQuantity(productId, change) {
     if (!item) return;
     
     item.quantity += change;
-    
     if (item.quantity <= 0) {
         removeFromCart(productId);
     } else {
@@ -895,6 +889,7 @@ function updateCartUI() {
     const container = document.getElementById('cartItems');
     const totalEl = document.getElementById('cartTotal');
     const countEl = document.getElementById('cartCount');
+    
     if (!container) return;
     
     let total = 0;
@@ -948,7 +943,7 @@ function closeCart() {
 }
 
 // ========================================
-// 14. WHATSAPP
+// 15. WHATSAPP - LINK ATUALIZADO
 // ========================================
 function buyViaWhatsApp(id) {
     const p = products.find(p => p.id === id);
@@ -956,7 +951,6 @@ function buyViaWhatsApp(id) {
         window.open(WHATSAPP_BASE_URL, '_blank');
         return;
     }
-    
     const msg = `Olá! Quero este produto: *${p.name}* - R$ ${p.price.toFixed(2).replace('.', ',')}`;
     const url = `https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}&type=phone_number&app_absent=0`;
     window.open(url, '_blank');
@@ -983,7 +977,7 @@ function checkoutWhatsApp() {
 }
 
 // ========================================
-// 15. GEOLOCALIZAÇÃO
+// 16. GEOLOCALIZAÇÃO
 // ========================================
 async function initGeoLocationBackground() {
     try {
@@ -1021,12 +1015,13 @@ function showGeoNotification() {
 }
 
 // ========================================
-// 16. BUSCA PREDITIVA
+// 17. BUSCA PREDITIVA
 // ========================================
 function initPredictiveSearch() {
     const searchInput = document.getElementById('searchInput');
     const searchDropdown = document.getElementById('searchDropdown');
     const searchResults = document.getElementById('searchResults');
+    
     if (!searchInput) return;
     
     document.addEventListener('click', (e) => {
@@ -1037,7 +1032,6 @@ function initPredictiveSearch() {
     
     searchInput.addEventListener('input', debounce((e) => {
         const query = e.target.value.trim().toLowerCase();
-        handleSearch(query);
         
         if (query.length < 2 || !searchDropdown || !searchResults) {
             if (searchDropdown) searchDropdown.style.display = 'none';
@@ -1050,7 +1044,7 @@ function initPredictiveSearch() {
         
         if (results.length > 0) {
             searchResults.innerHTML = results.map(p => `
-                <div class="search-result-item" onclick="selectSuggestion('${p.name.replace(/'/g, "\\'")}'); openProductModal(${p.id});">
+                <div class="search-result-item" onclick="openProductModal(${p.id}); searchDropdown.style.display='none';">
                     <img src="${Array.isArray(p.images) ? p.images[0] : ''}" alt="">
                     <div class="search-result-info">
                         <div class="search-result-name">${p.name}</div>
@@ -1066,17 +1060,8 @@ function initPredictiveSearch() {
     }, 200));
 }
 
-window.selectSuggestion = function(productName) {
-    const input = document.getElementById('searchInput');
-    if (input) {
-        input.value = productName;
-        handleSearch(productName);
-    }
-    document.getElementById('searchDropdown').style.display = 'none';
-};
-
 // ========================================
-// 17. TIMER DA EQUIPE
+// 18. TIMER DA EQUIPE
 // ========================================
 function startTeamTimer() {
     setTimeout(() => {
@@ -1089,7 +1074,7 @@ function startTeamTimer() {
 }
 
 // ========================================
-// 18. EVENT LISTENERS
+// 19. EVENT LISTENERS
 // ========================================
 function setupEventListeners() {
     document.getElementById('modalCloseBtn')?.addEventListener('click', closeProductModal);
@@ -1099,12 +1084,13 @@ function setupEventListeners() {
     document.getElementById('cartOverlay')?.addEventListener('click', closeCart);
     document.getElementById('checkoutBtn')?.addEventListener('click', checkoutWhatsApp);
     document.getElementById('clearCartBtn')?.addEventListener('click', clearCart);
-    
     document.getElementById('searchBtn')?.addEventListener('click', () => {
         const input = document.getElementById('searchInput');
         if (input) handleSearch(input.value);
     });
-    
+    document.getElementById('filterToggle')?.addEventListener('click', () => {
+        document.querySelector('.nav-categories')?.scrollIntoView({ behavior: 'smooth' });
+    });
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeProductModal();
@@ -1115,7 +1101,7 @@ function setupEventListeners() {
 }
 
 // ========================================
-// 19. UTILITÁRIOS
+// 20. UTILITÁRIOS
 // ========================================
 function showToast(msg) {
     const toast = document.getElementById('toast');
@@ -1135,7 +1121,7 @@ function debounce(fn, wait) {
 }
 
 // ========================================
-// 20. EXPOR FUNÇÕES GLOBAIS
+// 21. EXPOR FUNÇÕES GLOBAIS
 // ========================================
 window.openProductModal = openProductModal;
 window.changeModalMedia = changeModalMedia;
@@ -1154,6 +1140,7 @@ window.playFaqAudio = playFaqAudio;
 window.scrollToTop = scrollToTop;
 window.openSuperZoom = openSuperZoom;
 window.closeSuperZoom = closeSuperZoom;
-window.selectSuggestion = selectSuggestion;
-window.nextSuperZoomPhoto = nextSuperZoomPhoto;
-window.prevSuperZoomPhoto = prevSuperZoomPhoto;
+window.hoverImage = hoverImage;
+window.unhoverImage = unhoverImage;
+window.nextMedia = nextMedia;
+window.prevMedia = prevMedia;
