@@ -1311,6 +1311,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
     }
     .modal-main-media img,
     .modal-main-media video {
@@ -1318,6 +1319,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     height: 100%;
     object-fit: contain;
     background-color: var(--black-soft);
+    cursor: zoom-in;
     }
     /* Miniaturas */
     .modal-thumbnails {
@@ -1656,6 +1658,85 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     content: 'R$ ';
     font-size: 0.7rem;
     font-weight: 500;
+    }
+    /* ========================================
+    SUPER ZOOM OVERLAY - LUXO FULL SCREEN
+    ======================================== */
+    .super-zoom-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    }
+    .super-zoom-overlay.active {
+    display: flex;
+    }
+    .super-zoom-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--gold-primary);
+    color: var(--white);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    z-index: 10000;
+    }
+    .super-zoom-close:hover {
+    background: var(--gold-dark);
+    transform: rotate(90deg);
+    }
+    .super-zoom-content {
+    max-width: 100%;
+    max-height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    }
+    .super-zoom-content img,
+    .super-zoom-content video {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-xl);
+    }
+    /* Botão de áudio do vídeo */
+    .video-audio-toggle {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+    }
+    .video-audio-toggle:hover {
+    background: var(--gold-primary);
+    transform: scale(1.1);
     }
     /* ========================================
     18. SEO FOOTER AREA
@@ -2210,6 +2291,12 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     .cross-sell-card .price {
     font-size: 0.85rem;
     }
+    /* SUPER ZOOM MOBILE */
+    .super-zoom-close {
+    width: 44px;
+    height: 44px;
+    font-size: 1.1rem;
+    }
     }
     @media (max-width: 480px) {
     .header-top {
@@ -2350,7 +2437,8 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     .whatsapp-float,
     .mobile-filters,
     .delivery-callout,
-    .seo-footer-area {
+    .seo-footer-area,
+    .super-zoom-overlay {
     display: none !important;
     }
     .products-grid {

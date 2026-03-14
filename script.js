@@ -1,6 +1,6 @@
 // ========================================
 // GRUPO ETEVALDA MT - MOBILE-FIRST SCRIPT
-// VERSÃO PERFEITA COM HISTORY API
+// VERSÃO PERFEITA COM HISTORY API + SUPER ZOOM + ÁUDIO INTELIGENTE
 // ========================================
 // ========================================
 // 1. CONFIGURAÇÃO DO SUPABASE
@@ -57,6 +57,7 @@ renderSocialProof();
 renderFaqs();
 setupEventListeners();
 setupHistoryAPI(); // ✅ History API para botão voltar
+setupSuperZoomListeners(); // ✅ Super Zoom listeners
 startTeamTimer();
 initPredictiveSearch();
 initGeoLocationBackground();
@@ -89,7 +90,85 @@ history.replaceState(null, '', location.pathname + location.search);
 });
 }
 // ========================================
-// 6. FUNÇÕES DE CARREGAMENTO
+// 6. SUPER ZOOM - FUNÇÕES DE ZOOM LUXO
+// ========================================
+function openSuperZoom(mediaUrl, type = 'image') {
+const overlay = document.getElementById('superZoomOverlay');
+const content = document.getElementById('superZoomContent');
+if (!overlay || !content) return;
+if (type === 'video') {
+content.innerHTML = `<video src="${mediaUrl}" controls autoplay loop playsinline style="max-width:100%;max-height:90vh;object-fit:contain;"></video>`;
+} else {
+content.innerHTML = `<img src="${mediaUrl}" alt="Zoom" style="max-width:100%;max-height:90vh;object-fit:contain;">`;
+}
+overlay.classList.add('active');
+document.body.style.overflow = 'hidden';
+}
+function closeSuperZoom() {
+const overlay = document.getElementById('superZoomOverlay');
+const content = document.getElementById('superZoomContent');
+if (!overlay || !content) return;
+overlay.classList.remove('active');
+content.innerHTML = '';
+document.body.style.overflow = '';
+}
+function setupSuperZoomListeners() {
+// Fechar ao clicar no overlay
+document.getElementById('superZoomOverlay')?.addEventListener('click', (e) => {
+if (e.target.id === 'superZoomOverlay') {
+closeSuperZoom();
+}
+});
+// Fechar ao clicar no botão X
+document.getElementById('superZoomClose')?.addEventListener('click', closeSuperZoom);
+// Fechar com tecla ESC
+document.addEventListener('keydown', (e) => {
+if (e.key === 'Escape') {
+closeSuperZoom();
+}
+});
+}
+// ========================================
+// 7. CONTROLE DE ÁUDIO INTELIGENTE PARA VÍDEO
+// ========================================
+function setupVideoAudioControl(videoElement) {
+if (!videoElement) return;
+// Configurações iniciais do vídeo
+videoElement.muted = true;
+videoElement.autoplay = true;
+videoElement.playsInline = true;
+videoElement.loop = true;
+// Criar botão de áudio
+const audioBtn = document.createElement('button');
+audioBtn.className = 'video-audio-toggle';
+audioBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+audioBtn.setAttribute('aria-label', 'Ativar áudio');
+// Adicionar evento de clique
+audioBtn.onclick = (e) => {
+e.stopPropagation();
+if (videoElement.muted) {
+// REINICIAR vídeo e ativar áudio
+videoElement.currentTime = 0;
+videoElement.muted = false;
+videoElement.play().catch(err => console.log('Autoplay bloqueado:', err));
+audioBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+audioBtn.setAttribute('aria-label', 'Desativar áudio');
+} else {
+// Desativar áudio (sem reiniciar)
+videoElement.muted = true;
+audioBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+audioBtn.setAttribute('aria-label', 'Ativar áudio');
+}
+};
+// Adicionar botão ao container do vídeo
+const container = videoElement.parentElement;
+if (container) {
+container.style.position = 'relative';
+container.appendChild(audioBtn);
+}
+}
+// ========================================
+// 8. FUNÇÕES DE CARREGAMENTO
 // ========================================
 async function loadCategories() {
 const { data } = await _supabase.from('categories').select('*').order('id');
@@ -122,7 +201,7 @@ const { data } = await _supabase
 socialProofImages = data || [];
 }
 // ========================================
-// 7. RENDERIZAÇÃO
+// 9. RENDERIZAÇÃO
 // ========================================
 function renderCategories() {
 const list = document.getElementById('categoryList');
@@ -229,7 +308,7 @@ const emptyStars = '☆'.repeat(5 - rating);
 return `<span class="stars">${fullStars}${emptyStars}</span>`;
 }
 // ========================================
-// 8. RENDERIZAÇÃO DE PRODUTOS (SEM ESTRELAS NA VITRINE)
+// 10. RENDERIZAÇÃO DE PRODUTOS (SEM ESTRELAS NA VITRINE)
 // ========================================
 function renderProductCard(p) {
 const images = Array.isArray(p.images) ? p.images : [];
@@ -303,7 +382,7 @@ filtered = filtered.sort(() => Math.random() - 0.5);
 container.innerHTML = filtered.map(p => renderProductCard(p)).join('');
 }
 // ========================================
-// 9. MODAL DE PRODUTO (COM HISTORY API E GRID CROSS-SELL)
+// 11. MODAL DE PRODUTO (COM HISTORY API, SUPER ZOOM E ÁUDIO INTELIGENTE)
 // ========================================
 function openProductModal(id) {
 const product = products.find(p => p.id === id);
@@ -466,8 +545,42 @@ document.getElementById('productModal').classList.add('active');
 document.body.style.overflow = 'hidden';
 // ✅ History API: Adiciona estado ao abrir modal
 history.pushState({ modalOpen: true, productId: id }, '', `#product-${id}`);
+// ✅ Setup Super Zoom: habilita clique para zoom nas mídias
+setupModalMediaClick();
+// ✅ Setup Áudio Inteligente para vídeo
+setupModalVideoAudio();
 // Scroll para o topo do modal
 scrollToTop();
+}
+// Setup Super Zoom para mídias do modal
+function setupModalMediaClick() {
+const mainMedia = document.getElementById('modalMainMedia');
+if (!mainMedia) return;
+const img = mainMedia.querySelector('img');
+const video = mainMedia.querySelector('video');
+if (img) {
+img.style.cursor = 'zoom-in';
+img.onclick = (e) => {
+e.stopPropagation();
+openSuperZoom(img.src, 'image');
+};
+}
+if (video) {
+video.style.cursor = 'zoom-in';
+video.onclick = (e) => {
+e.stopPropagation();
+openSuperZoom(video.src, 'video');
+};
+}
+}
+// Setup Áudio Inteligente para vídeo do modal
+function setupModalVideoAudio() {
+const mainMedia = document.getElementById('modalMainMedia');
+if (!mainMedia) return;
+const video = mainMedia.querySelector('video');
+if (video) {
+setupVideoAudioControl(video);
+}
 }
 function scrollToTop() {
 const modalContent = document.querySelector('.modal-content');
@@ -481,8 +594,14 @@ const media = currentMediaList[index];
 const mainContainer = document.getElementById('modalMainMedia');
 if (media.type === 'video') {
 mainContainer.innerHTML = `<video src="${media.url}" autoplay muted loop playsinline></video>`;
+// Re-aplicar controle de áudio
+setupModalVideoAudio();
+// Re-aplicar Super Zoom
+setupModalMediaClick();
 } else {
 mainContainer.innerHTML = `<img src="${media.url}" alt="">`;
+// Re-aplicar Super Zoom
+setupModalMediaClick();
 }
 document.querySelectorAll('.modal-thumb').forEach((thumb, i) => {
 thumb.classList.toggle('active', i === index);
@@ -499,7 +618,7 @@ history.replaceState(null, '', location.pathname + location.search);
 }
 }
 // ========================================
-// 10. BUSCA E FILTROS
+// 12. BUSCA E FILTROS
 // ========================================
 function handleSearch(query) {
 searchQuery = query;
@@ -517,7 +636,7 @@ renderProducts();
 window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 // ========================================
-// 11. CARRINHO DE COMPRAS
+// 13. CARRINHO DE COMPRAS
 // ========================================
 function addToCart(productId) {
 const product = products.find(p => p.id === productId);
@@ -622,7 +741,7 @@ document.getElementById('cartOverlay').classList.remove('active');
 document.body.style.overflow = '';
 }
 // ========================================
-// 12. WHATSAPP - LINK ATUALIZADO
+// 14. WHATSAPP - LINK ATUALIZADO
 // ========================================
 function buyViaWhatsApp(id) {
 const p = products.find(p => p.id === id);
@@ -655,7 +774,7 @@ const url = `https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURI
 window.open(url, '_blank');
 }
 // ========================================
-// 13. GEOLOCALIZAÇÃO
+// 15. GEOLOCALIZAÇÃO
 // ========================================
 async function initGeoLocationBackground() {
 try {
@@ -687,7 +806,7 @@ setTimeout(() => notification.style.display = 'none', 8000);
 }
 }
 // ========================================
-// 14. BUSCA PREDITIVA
+// 16. BUSCA PREDITIVA
 // ========================================
 function initPredictiveSearch() {
 const searchInput = document.getElementById('searchInput');
@@ -726,7 +845,7 @@ searchDropdown.style.display = 'block';
 }, 200));
 }
 // ========================================
-// 15. TIMER DA EQUIPE
+// 17. TIMER DA EQUIPE
 // ========================================
 function startTeamTimer() {
 setTimeout(() => {
@@ -738,7 +857,7 @@ setTimeout(() => section.classList.add('visible'), 100);
 }, 20000);
 }
 // ========================================
-// 16. EVENT LISTENERS
+// 18. EVENT LISTENERS
 // ========================================
 function setupEventListeners() {
 document.getElementById('modalCloseBtn')?.addEventListener('click', closeProductModal);
@@ -763,7 +882,7 @@ closeCart();
 });
 }
 // ========================================
-// 17. UTILITÁRIOS
+// 19. UTILITÁRIOS
 // ========================================
 function showToast(msg) {
 const toast = document.getElementById('toast');
@@ -780,7 +899,7 @@ timeout = setTimeout(() => fn(...args), wait);
 };
 }
 // ========================================
-// 18. EXPOR FUNÇÕES GLOBAIS
+// 20. EXPOR FUNÇÕES GLOBAIS
 // ========================================
 window.openProductModal = openProductModal;
 window.changeModalMedia = changeModalMedia;
@@ -797,3 +916,5 @@ window.clearCart = clearCart;
 window.handleSearch = handleSearch;
 window.playFaqAudio = playFaqAudio;
 window.scrollToTop = scrollToTop;
+window.openSuperZoom = openSuperZoom;
+window.closeSuperZoom = closeSuperZoom;
