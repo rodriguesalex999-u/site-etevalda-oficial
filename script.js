@@ -1,6 +1,6 @@
 // ========================================
 // GRUPO ETEVALDA MT - MOBILE-FIRST SCRIPT
-// VERSÃO COMPLETA COM HEADER COLLAPSIBLE
+// VERSÃO COMPLETA COM GATILHOS DE VENDA
 // ========================================
 
 // ========================================
@@ -39,6 +39,9 @@ let currentZoomIndex = 0;
 // Variáveis para Touch Swipe
 let touchStartX = 0;
 let touchEndX = 0;
+
+// Variáveis para o cronômetro de entrega
+let deliveryTimerInterval = null;
 
 // Link do WhatsApp
 const WHATSAPP_BASE_URL = 'https://api.whatsapp.com/send/?phone=5565993337205&text=Já%20vi%20seu%20catálogo,%20quero%20comprar,%20consegue%20me%20entregar%20hoje?&type=phone_number&app_absent=0';
@@ -170,7 +173,7 @@ function createManifest() {
 // 6. INICIALIZAÇÃO PRINCIPAL
 // ========================================
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Grupo Etevalda MT - Versão Completa com Header Collapsible');
+    console.log('🚀 Grupo Etevalda MT - Versão com Gatilhos de Venda');
     showLoading(true);
     
     // Criar manifest PWA
@@ -193,7 +196,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setupSuperZoomListeners();
         setupTouchListeners();
         setupInfiniteScroll();
-        setupScrollListener(); // NOVO: Listener para scroll do header
+        setupScrollListener(); // Header collapsible
         startTeamTimer();
         initPredictiveSearch();
         initGeoLocationBackground();
@@ -216,7 +219,24 @@ function showLoading(status) {
 }
 
 // ========================================
-// 7. NOVO: SCROLL LISTENER PARA HEADER COLLAPSIBLE
+// 7. HISTORY API - CONTROLE DO BOTÃO VOLTAR
+// ========================================
+function setupHistoryAPI() {
+    window.addEventListener('popstate', (event) => {
+        // Se o estado tiver modalOpen, fecha o modal
+        if (event.state?.modalOpen) {
+            closeProductModal();
+        }
+        // Se houver hash de produto na URL, fecha também
+        if (location.hash.startsWith('#product-')) {
+            closeProductModal();
+            history.replaceState(null, '', location.pathname + location.search);
+        }
+    });
+}
+
+// ========================================
+// 8. SCROLL LISTENER PARA HEADER COLLAPSIBLE
 // ========================================
 function setupScrollListener() {
     const header = document.querySelector('.header');
@@ -230,11 +250,11 @@ function setupScrollListener() {
         } else {
             header.classList.remove('header-collapsed');
         }
-    }, 10)); // Debounce pequeno para performance
+    }, 10));
 }
 
 // ========================================
-// 8. ANIMAÇÃO DO CARRINHO
+// 9. ANIMAÇÃO DO CARRINHO
 // ========================================
 function animateCart() {
     const cartBtn = document.getElementById('cartBtn');
@@ -248,7 +268,7 @@ function animateCart() {
 }
 
 // ========================================
-// 9. LAZY LOADING
+// 10. LAZY LOADING
 // ========================================
 async function loadProducts(reset = false) {
     if (reset) {
@@ -329,20 +349,6 @@ function showLoadingMore() {
 function hideLoadingMore() {
     const loadingEl = document.getElementById('loadingMore');
     if (loadingEl) loadingEl.remove();
-}
-
-// ========================================
-// 10. HISTORY API
-// ========================================
-function setupHistoryAPI() {
-    window.addEventListener('popstate', (event) => {
-        if (event.state?.modalOpen || location.hash.startsWith('#product-')) {
-            closeProductModal();
-            if (location.hash.startsWith('#product-')) {
-                history.replaceState(null, '', location.pathname + location.search);
-            }
-        }
-    });
 }
 
 // ========================================
@@ -658,6 +664,7 @@ function renderProductCard(p) {
         ? `<div class="product-solitario"><i class="fas fa-gem"></i> Solitário: R$ ${p.solitario_price.toFixed(2).replace('.', ',')}</div>`
         : '';
     
+    // SELO VENDIDO HOJE
     const soldTodayHtml = p.sold_today ? `<div class="product-sold-today">Vendido Hoje</div>` : '';
     
     return `
@@ -731,7 +738,78 @@ function renderProducts() {
 }
 
 // ========================================
-// 17. MODAL DE PRODUTO
+// 17. FUNÇÕES PARA GATILHOS DE VENDA
+// ========================================
+
+// Gerar número aleatório de pessoas vendo
+function getRandomViewers() {
+    return Math.floor(Math.random() * 9) + 4; // 4 a 12
+}
+
+// Cronômetro de entrega
+function startDeliveryTimer() {
+    const timerElement = document.getElementById('deliveryTimer');
+    if (!timerElement) return;
+    
+    // Limpar intervalo anterior se existir
+    if (deliveryTimerInterval) {
+        clearInterval(deliveryTimerInterval);
+    }
+    
+    function updateTimer() {
+        const now = new Date();
+        const limit = new Date(now);
+        limit.setHours(17, 0, 0, 0); // 17:00
+        
+        if (now > limit) {
+            // Já passou das 17h
+            timerElement.innerHTML = `
+                <i class="fas fa-clock"></i>
+                <span>Entregamos em sua casa HOJE</span>
+            `;
+            return;
+        }
+        
+        const diff = limit - now;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        
+        timerElement.innerHTML = `
+            <i class="fas fa-clock"></i>
+            <span>${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s</span>
+            <span>para receber hoje!</span>
+        `;
+    }
+    
+    updateTimer();
+    deliveryTimerInterval = setInterval(updateTimer, 1000);
+}
+
+// Compartilhar via Web Share API
+async function shareProduct(product) {
+    const shareData = {
+        title: product.name,
+        text: `Olha só essa joia incrível da Etevalda MT: ${product.name} por apenas R$ ${product.price.toFixed(2).replace('.', ',')}!`,
+        url: window.location.href.split('#')[0] + `#product-${product.id}`
+    };
+    
+    try {
+        if (navigator.share) {
+            await navigator.share(shareData);
+            showToast('Compartilhado com sucesso!');
+        } else {
+            // Fallback para navegadores sem suporte
+            navigator.clipboard.writeText(shareData.url);
+            showToast('Link copiado para a área de transferência!');
+        }
+    } catch (err) {
+        console.log('Compartilhamento cancelado ou erro:', err);
+    }
+}
+
+// ========================================
+// 18. MODAL DE PRODUTO (COM GATILHOS DE VENDA)
 // ========================================
 function openProductModal(id) {
     const product = allProductsLoaded.find(p => p.id === id);
@@ -802,6 +880,9 @@ function openProductModal(id) {
     const solitarioFormatted = product.solitario_price?.toFixed(2).replace('.', ',');
     const rating = product.default_rating || 5;
     
+    // Número aleatório de pessoas vendo
+    const viewersCount = getRandomViewers();
+    
     const thumbnailsHtml = currentMediaList.map((media, index) => `
         <div class="modal-thumb ${media.type === 'video' ? 'video-thumb' : ''} ${index === 0 ? 'active' : ''}" onclick="changeModalMedia(${index})">
             <img src="${media.thumbnail}" alt="">
@@ -823,12 +904,32 @@ function openProductModal(id) {
             <span class="modal-category">${product.categories?.name || ''}</span>
             <h2 class="modal-title">${product.name}</h2>
             <div class="modal-price-main">R$ ${priceFormatted}</div>
+            
+            <!-- NOVO: Prova Social em tempo real -->
+            <div class="looking-now">
+                <i class="fas fa-eye"></i> ${viewersCount} pessoas estão vendo este produto agora
+            </div>
+            
+            <!-- NOVO: Caixa de urgência com cronômetro -->
+            <div class="urgency-box">
+                <div class="delivery-timer" id="deliveryTimer">
+                    <i class="fas fa-clock"></i>
+                    <span>00h 00m 00s</span>
+                    <span>para receber hoje!</span>
+                </div>
+                <div class="trust-badge">
+                    <i class="fas fa-check-circle"></i> Você só paga na hora da entrega!
+                </div>
+            </div>
+            
             ${product.tem_solitario && product.solitario_price > 0 ? `
                 <div style="font-size:1rem; color:var(--gold-dark); margin:10px 0; background:var(--gold-light); padding:10px; border-radius:var(--radius-sm); text-align:center;">
                     <i class="fas fa-gem"></i> Solitário vendido separadamente: R$ ${solitarioFormatted}
                 </div>
             ` : ''}
             <div class="product-rating-large">${renderStars(rating)}</div>
+            
+            <!-- NOVO: Botões com compartilhamento -->
             <div class="modal-buttons">
                 <button class="btn-add-cart-modal" onclick="addToCart(${product.id})">
                     <i class="fas fa-cart-plus"></i> Carrinho
@@ -836,11 +937,16 @@ function openProductModal(id) {
                 <button class="btn-whatsapp-modal" onclick="buyViaWhatsApp(${product.id})">
                     <i class="fab fa-whatsapp"></i> WhatsApp
                 </button>
+                <button class="btn-share" onclick="shareProduct(${JSON.stringify(product).replace(/"/g, '&quot;')})" aria-label="Compartilhar">
+                    <i class="fas fa-share-alt"></i>
+                </button>
             </div>
+            
             <div class="modal-description">
                 ${product.description || ''}
                 <div class="delivery-highlight">💰 Pague só na entrega!</div>
             </div>
+            
             ${upsellProducts.length > 0 ? `
                 <div class="recommendations-section">
                     <h4 class="recommendations-title"><i class="fas fa-handshake"></i> Quem viu, também gostou</h4>
@@ -855,6 +961,7 @@ function openProductModal(id) {
                     </div>
                 </div>
             ` : ''}
+            
             ${crossSellProducts.length > 0 ? `
                 <div class="cross-sell-section">
                     <h4 class="cross-sell-title"><i class="fas fa-link"></i> Complemente seu Estilo</h4>
@@ -871,6 +978,7 @@ function openProductModal(id) {
                     </div>
                 </div>
             ` : ''}
+            
             ${productReviews.length > 0 ? `
                 <div class="reviews-section">
                     <h4 class="reviews-title"><i class="fas fa-star"></i> Avaliações</h4>
@@ -891,6 +999,7 @@ function openProductModal(id) {
                     `).join('')}
                 </div>
             ` : ''}
+            
             <div class="scroll-indicator">
                 <i class="fas fa-chevron-up"></i> Arraste para ver mais
             </div>
@@ -901,6 +1010,10 @@ function openProductModal(id) {
     document.getElementById('productModal').classList.add('active');
     document.body.style.overflow = 'hidden';
     
+    // Iniciar cronômetro de entrega
+    startDeliveryTimer();
+    
+    // Adiciona estado no history para controle do botão voltar
     history.pushState({ modalOpen: true, productId: id }, '', `#product-${id}`);
     
     setupModalMediaClick();
@@ -991,13 +1104,20 @@ function closeProductModal() {
     currentModalProduct = null;
     currentMediaList = [];
     
+    // Limpar intervalo do cronômetro
+    if (deliveryTimerInterval) {
+        clearInterval(deliveryTimerInterval);
+        deliveryTimerInterval = null;
+    }
+    
+    // Remove o estado do history
     if (history.state?.modalOpen) {
         history.replaceState(null, '', location.pathname + location.search);
     }
 }
 
 // ========================================
-// 18. BUSCA E FILTROS
+// 19. BUSCA E FILTROS
 // ========================================
 function handleSearch(query) {
     searchQuery = query;
@@ -1024,7 +1144,7 @@ function resetFilters() {
 }
 
 // ========================================
-// 19. CARRINHO
+// 20. CARRINHO
 // ========================================
 function addToCart(productId) {
     const product = allProductsLoaded.find(p => p.id === productId);
@@ -1046,7 +1166,7 @@ function addToCart(productId) {
     
     saveCart();
     updateCartUI();
-    animateCart();
+    animateCart(); // ANIMAÇÃO DO CARRINHO
     showToast('Adicionado ao carrinho!');
 }
 
@@ -1149,7 +1269,7 @@ function closeCart() {
 }
 
 // ========================================
-// 20. WHATSAPP
+// 21. WHATSAPP
 // ========================================
 function buyViaWhatsApp(id) {
     const p = allProductsLoaded.find(p => p.id === id);
@@ -1184,7 +1304,7 @@ function checkoutWhatsApp() {
 }
 
 // ========================================
-// 21. GEOLOCALIZAÇÃO
+// 22. GEOLOCALIZAÇÃO
 // ========================================
 async function initGeoLocationBackground() {
     try {
@@ -1222,7 +1342,7 @@ function showGeoNotification() {
 }
 
 // ========================================
-// 22. BUSCA PREDITIVA
+// 23. BUSCA PREDITIVA
 // ========================================
 function initPredictiveSearch() {
     const searchInput = document.getElementById('searchInput');
@@ -1269,7 +1389,7 @@ function initPredictiveSearch() {
 }
 
 // ========================================
-// 23. TIMER DA EQUIPE
+// 24. TIMER DA EQUIPE
 // ========================================
 function startTeamTimer() {
     setTimeout(() => {
@@ -1282,7 +1402,7 @@ function startTeamTimer() {
 }
 
 // ========================================
-// 24. EVENT LISTENERS
+// 25. EVENT LISTENERS
 // ========================================
 function setupEventListeners() {
     document.getElementById('modalCloseBtn')?.addEventListener('click', closeProductModal);
@@ -1309,7 +1429,7 @@ function setupEventListeners() {
 }
 
 // ========================================
-// 25. UTILITÁRIOS
+// 26. UTILITÁRIOS
 // ========================================
 function showToast(msg) {
     const toast = document.getElementById('toast');
@@ -1329,7 +1449,7 @@ function debounce(fn, wait) {
 }
 
 // ========================================
-// 26. EXPOR FUNÇÕES GLOBAIS
+// 27. EXPOR FUNÇÕES GLOBAIS
 // ========================================
 window.openProductModal = openProductModal;
 window.changeModalMedia = changeModalMedia;
@@ -1352,3 +1472,4 @@ window.hoverImage = hoverImage;
 window.unhoverImage = unhoverImage;
 window.nextMedia = nextMedia;
 window.prevMedia = prevMedia;
+window.shareProduct = shareProduct; // Exportar função de compartilhamento

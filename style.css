@@ -1,6 +1,6 @@
 /* ========================================
 GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM
-VERSÃO COMPLETA COM HEADER COLLAPSIBLE
+VERSÃO COMPLETA COM GATILHOS DE VENDA
 ======================================== */
 
 :root {
@@ -26,6 +26,10 @@ VERSÃO COMPLETA COM HEADER COLLAPSIBLE
     /* Selo Vendido Hoje */
     --sold-bg: rgba(231, 76, 60, 0.9);
     --sold-text: #FFFFFF;
+    /* Urgência */
+    --urgency-bg: rgba(255, 51, 51, 0.1);
+    --urgency-border: #FF3333;
+    --urgency-text: #FF3333;
     /* Tipografia */
     --font-display: 'Playfair Display', serif;
     --font-body: 'Poppins', sans-serif;
@@ -1506,6 +1510,192 @@ VERSÃO COMPLETA COM HEADER COLLAPSIBLE
     justify-content: center;
     font-size: 0.7rem;
     }
+    
+    /* ========================================
+    NOVAS SEÇÕES: GATILHOS DE VENDA NO MODAL
+    ======================================== */
+    
+    /* Urgency Box - Caixa de urgência */
+    .urgency-box {
+    background: var(--urgency-bg);
+    border-left: 4px solid var(--urgency-border);
+    border-radius: var(--radius-sm);
+    padding: 15px;
+    margin: 15px 0;
+    font-family: var(--font-body);
+    }
+    
+    .delivery-timer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--urgency-text);
+    margin-bottom: 8px;
+    }
+    
+    .delivery-timer i {
+    font-size: 1.2rem;
+    animation: pulse 2s infinite;
+    }
+    
+    .delivery-timer span {
+    background: var(--white);
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    font-family: monospace;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    box-shadow: var(--shadow-sm);
+    }
+    
+    .delivery-tomorrow {
+    font-size: 1rem;
+    color: var(--gold-dark);
+    font-weight: 600;
+    text-align: center;
+    }
+    
+    .trust-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--gold-light);
+    color: var(--success);
+    font-size: 0.9rem;
+    font-weight: 500;
+    }
+    
+    .trust-badge i {
+    font-size: 1rem;
+    }
+    
+    /* Looking Now - Pessoas vendo */
+    .looking-now {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--gold-light), var(--white));
+    border-radius: var(--radius-full);
+    padding: 8px 15px;
+    margin: 10px 0;
+    font-size: 0.9rem;
+    color: var(--gold-dark);
+    font-weight: 500;
+    border: 1px solid var(--gold-primary);
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    }
+    
+    .looking-now i {
+    color: var(--info);
+    animation: blink 2s infinite;
+    }
+    
+    @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+    }
+    
+    /* Botão de Compartilhar */
+    .modal-buttons {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+    }
+    
+    .btn-add-cart-modal,
+    .btn-whatsapp-modal {
+    flex: 1;
+    padding: 14px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all var(--transition-normal);
+    cursor: pointer;
+    }
+    
+    .btn-add-cart-modal {
+    background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
+    color: var(--white);
+    box-shadow: var(--shadow-md);
+    }
+    
+    .btn-add-cart-modal:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    }
+    
+    .btn-whatsapp-modal {
+    background: var(--whatsapp);
+    color: var(--white);
+    box-shadow: var(--shadow-md);
+    animation: pulseWhatsappButton 2s infinite ease-in-out;
+    }
+    
+    .btn-whatsapp-modal:hover {
+    background: var(--whatsapp-dark);
+    transform: translateY(-2px);
+    animation: none;
+    }
+    
+    .btn-share {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--gold-primary);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    border: none;
+    flex-shrink: 0;
+    }
+    
+    .btn-share:hover {
+    background: var(--gold-dark);
+    transform: scale(1.1);
+    box-shadow: var(--shadow-md);
+    }
+    
+    /* Ajuste para mobile */
+    @media (max-width: 480px) {
+    .modal-buttons {
+    flex-wrap: wrap;
+    }
+    .btn-add-cart-modal,
+    .btn-whatsapp-modal {
+    flex: 1 1 calc(50% - 25px);
+    }
+    .btn-share {
+    width: 45px;
+    height: 45px;
+    font-size: 1rem;
+    }
+    .delivery-timer {
+    font-size: 0.95rem;
+    flex-wrap: wrap;
+    }
+    .delivery-timer span {
+    font-size: 1rem;
+    }
+    }
+    
     /* Informações do Modal */
     .modal-info {
     padding: 20px;
@@ -1552,56 +1742,7 @@ VERSÃO COMPLETA COM HEADER COLLAPSIBLE
     border-radius: var(--radius-sm);
     text-align: center;
     }
-    .modal-buttons {
-    display: flex;
-    gap: 15px;
-    margin: 20px 0;
-    }
-    .btn-whatsapp-modal {
-    flex: 1;
-    padding: 15px;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all var(--transition-normal);
-    background: var(--whatsapp);
-    color: var(--white);
-    box-shadow: var(--shadow-md);
-    animation: pulseWhatsappButton 2s infinite ease-in-out;
-    cursor: pointer;
-    }
-    .btn-whatsapp-modal:hover {
-    background: var(--whatsapp-dark);
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lg);
-    animation: none;
-    }
-    .btn-add-cart-modal {
-    flex: 1;
-    padding: 15px;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-weight: 600;
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all var(--transition-normal);
-    background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
-    color: var(--white);
-    box-shadow: var(--shadow-md);
-    cursor: pointer;
-    }
-    .btn-add-cart-modal:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow-lg);
-    }
+    
     /* Recomendações - Scroll Horizontal */
     .recommendations-section {
     margin: 20px 0;
@@ -2517,12 +2658,15 @@ VERSÃO COMPLETA COM HEADER COLLAPSIBLE
     .modal-price-main {
     font-size: 1.8rem;
     }
-    .modal-buttons {
-    flex-direction: row;
-    }
-    .btn-whatsapp-modal, .btn-add-cart-modal {
+    .urgency-box {
     padding: 12px;
-    font-size: 0.9rem;
+    }
+    .delivery-timer {
+    font-size: 0.95rem;
+    }
+    .looking-now {
+    font-size: 0.8rem;
+    padding: 6px 12px;
     }
     .rec-card {
     flex: 0 0 120px;
@@ -2666,6 +2810,20 @@ VERSÃO COMPLETA COM HEADER COLLAPSIBLE
     .modal-price-main {
     font-size: 1.6rem;
     }
+    .urgency-box {
+    padding: 10px;
+    }
+    .delivery-timer {
+    font-size: 0.85rem;
+    flex-direction: column;
+    gap: 5px;
+    }
+    .delivery-timer span {
+    font-size: 0.9rem;
+    }
+    .looking-now {
+    font-size: 0.75rem;
+    }
     .rec-card {
     flex: 0 0 100px;
     }
@@ -2735,7 +2893,10 @@ VERSÃO COMPLETA COM HEADER COLLAPSIBLE
     .mobile-filters,
     .delivery-callout,
     .seo-footer-area,
-    .super-zoom-overlay {
+    .super-zoom-overlay,
+    .urgency-box,
+    .looking-now,
+    .btn-share {
     display: none !important;
     }
     .products-grid {
