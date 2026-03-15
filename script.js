@@ -1,6 +1,6 @@
 // ========================================
 // GRUPO ETEVALDA MT - MOBILE-FIRST SCRIPT
-// VERSÃO PERFEITA COM HISTORY API + SUPER ZOOM + ÁUDIO INTELIGENTE + TOUCH SWIPE
+// VERSÃO COMPLETA COM HEADER COLLAPSIBLE
 // ========================================
 
 // ========================================
@@ -21,15 +21,26 @@ let socialProofImages = [];
 let cart = [];
 let currentCategory = 'all';
 let searchQuery = '';
+
+// Variáveis para Lazy Loading
+let currentPage = 1;
+let productsPerPage = 20;
+let hasMoreProducts = true;
+let isLoadingMore = false;
+let allProductsLoaded = [];
+
 // Variáveis do modal
 let currentModalProduct = null;
 let currentMediaList = [];
+
 // Variáveis do Super Zoom
 let currentZoomIndex = 0;
+
 // Variáveis para Touch Swipe
 let touchStartX = 0;
 let touchEndX = 0;
-// Link do WhatsApp com mensagem pré-definida
+
+// Link do WhatsApp
 const WHATSAPP_BASE_URL = 'https://api.whatsapp.com/send/?phone=5565993337205&text=Já%20vi%20seu%20catálogo,%20quero%20comprar,%20consegue%20me%20entregar%20hoje?&type=phone_number&app_absent=0';
 
 // ========================================
@@ -44,17 +55,130 @@ const CUSTOMER_NAMES = [
     'João', 'Pedro', 'Lucas', 'Mateus', 'Rafael', 'Thiago'
 ];
 let detectedLocation = { city: 'Cuiabá', neighborhoods: NEIGHBORHOODS['Cuiabá'] };
-let geoNotificationTimeout = null;
 
 // ========================================
-// 4. INICIALIZAÇÃO PRINCIPAL
+// 4. PWA - SMART INSTALL PROMPT
+// ========================================
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    const hasSeenPrompt = localStorage.getItem('pwa_prompt_shown');
+    
+    if (!hasSeenPrompt) {
+        setTimeout(() => {
+            showInstallPrompt();
+        }, 30000);
+    }
+});
+
+function showInstallPrompt() {
+    if (localStorage.getItem('pwa_prompt_shown')) return;
+    
+    const promptBanner = document.createElement('div');
+    promptBanner.id = 'pwa-install-banner';
+    promptBanner.className = 'pwa-install-banner';
+    promptBanner.innerHTML = `
+        <div class="pwa-banner-content">
+            <div class="pwa-icon"><i class="fas fa-crown"></i></div>
+            <div class="pwa-text">
+                <strong>Instale o App Etevalda MT</strong>
+                <span>Tenha acesso rápido e ofertas exclusivas</span>
+            </div>
+            <div class="pwa-buttons">
+                <button class="pwa-install-btn">Instalar App</button>
+                <button class="pwa-later-btn">Agora não</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(promptBanner);
+    
+    setTimeout(() => {
+        promptBanner.classList.add('show');
+    }, 100);
+    
+    promptBanner.querySelector('.pwa-install-btn').addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === 'accepted') {
+            console.log('Usuário aceitou instalar o PWA');
+            trackPWAInteraction('installed');
+        }
+        
+        deferredPrompt = null;
+        promptBanner.remove();
+    });
+    
+    promptBanner.querySelector('.pwa-later-btn').addEventListener('click', () => {
+        trackPWAInteraction('dismissed');
+        promptBanner.remove();
+    });
+}
+
+function trackPWAInteraction(action) {
+    localStorage.setItem('pwa_prompt_shown', 'true');
+    localStorage.setItem('pwa_action', action);
+    localStorage.setItem('pwa_timestamp', Date.now().toString());
+}
+
+// ========================================
+// 5. MANIFEST.JSON
+// ========================================
+function createManifest() {
+    const manifest = {
+        name: 'Etevalda MT',
+        short_name: 'Etevalda',
+        description: 'A maior loja de variedades de Mato Grosso',
+        start_url: '/',
+        display: 'standalone',
+        background_color: '#D4AF37',
+        theme_color: '#D4AF37',
+        icons: [
+            {
+                src: 'https://i.postimg.cc/1Xw1PC9m/Grupo-Etevalda-MT.png',
+                sizes: '192x192',
+                type: 'image/png'
+            },
+            {
+                src: 'https://i.postimg.cc/1Xw1PC9m/Grupo-Etevalda-MT.png',
+                sizes: '512x512',
+                type: 'image/png'
+            }
+        ]
+    };
+    
+    const manifestString = JSON.stringify(manifest);
+    const blob = new Blob([manifestString], { type: 'application/json' });
+    const manifestURL = URL.createObjectURL(blob);
+    
+    let link = document.querySelector('link[rel="manifest"]');
+    if (!link) {
+        link = document.createElement('link');
+        link.rel = 'manifest';
+        document.head.appendChild(link);
+    }
+    link.href = manifestURL;
+}
+
+// ========================================
+// 6. INICIALIZAÇÃO PRINCIPAL
 // ========================================
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Grupo Etevalda MT - Modo Cinema');
+    console.log('🚀 Grupo Etevalda MT - Versão Completa com Header Collapsible');
     showLoading(true);
+    
+    // Criar manifest PWA
+    createManifest();
+    
     try {
         await loadCategories();
-        await loadProducts();
+        await loadProducts(true);
         await loadReviews();
         await loadFaqs();
         await loadSocialProof();
@@ -65,13 +189,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderSocialProof();
         renderFaqs();
         setupEventListeners();
-        setupHistoryAPI(); // History API para botão voltar
-        setupSuperZoomListeners(); // Super Zoom listeners
-        setupTouchListeners(); // Touch Swipe listeners
+        setupHistoryAPI();
+        setupSuperZoomListeners();
+        setupTouchListeners();
+        setupInfiniteScroll();
+        setupScrollListener(); // NOVO: Listener para scroll do header
         startTeamTimer();
         initPredictiveSearch();
         initGeoLocationBackground();
-        console.log(`✅ ${products.length} produtos carregados`);
+        console.log(`✅ ${allProductsLoaded.length} produtos carregados inicialmente`);
     } catch (error) {
         console.error('❌ Erro:', error);
         showToast('Erro ao carregar produtos');
@@ -81,20 +207,137 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function showLoading(status) {
-    const el = document.getElementById('loading');
-    if (el) el.style.display = status ? 'flex' : 'none';
+    const skeletons = document.querySelectorAll('.product-card.skeleton');
+    if (status) {
+        skeletons.forEach(s => s.style.display = 'block');
+    } else {
+        skeletons.forEach(s => s.style.display = 'none');
+    }
 }
 
 // ========================================
-// 5. HISTORY API - CONTROLE DO BOTÃO VOLTAR
+// 7. NOVO: SCROLL LISTENER PARA HEADER COLLAPSIBLE
+// ========================================
+function setupScrollListener() {
+    const header = document.querySelector('.header');
+    const scrollThreshold = 50;
+    
+    window.addEventListener('scroll', debounce(() => {
+        const scrollPosition = window.scrollY;
+        
+        if (scrollPosition > scrollThreshold) {
+            header.classList.add('header-collapsed');
+        } else {
+            header.classList.remove('header-collapsed');
+        }
+    }, 10)); // Debounce pequeno para performance
+}
+
+// ========================================
+// 8. ANIMAÇÃO DO CARRINHO
+// ========================================
+function animateCart() {
+    const cartBtn = document.getElementById('cartBtn');
+    if (!cartBtn) return;
+    
+    cartBtn.classList.add('cart-bounce', 'cart-glow');
+    
+    setTimeout(() => {
+        cartBtn.classList.remove('cart-bounce', 'cart-glow');
+    }, 500);
+}
+
+// ========================================
+// 9. LAZY LOADING
+// ========================================
+async function loadProducts(reset = false) {
+    if (reset) {
+        currentPage = 1;
+        allProductsLoaded = [];
+        hasMoreProducts = true;
+    }
+    
+    if (!hasMoreProducts || isLoadingMore) return;
+    
+    isLoadingMore = true;
+    
+    if (!reset) {
+        showLoadingMore();
+    }
+    
+    try {
+        const from = (currentPage - 1) * productsPerPage;
+        const to = from + productsPerPage - 1;
+        
+        const { data, error } = await _supabase
+            .from('products')
+            .select('*, categories!category_id(name)')
+            .order('id')
+            .range(from, to);
+            
+        if (error) throw error;
+        
+        if (data.length > 0) {
+            allProductsLoaded = reset ? data : [...allProductsLoaded, ...data];
+            products = allProductsLoaded;
+            
+            if (data.length < productsPerPage) {
+                hasMoreProducts = false;
+            }
+            
+            currentPage++;
+        } else {
+            hasMoreProducts = false;
+        }
+        
+        console.log(`📦 Carregados ${allProductsLoaded.length} produtos`);
+        
+    } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
+        showToast('Erro ao carregar mais produtos');
+    } finally {
+        isLoadingMore = false;
+        hideLoadingMore();
+    }
+}
+
+function setupInfiniteScroll() {
+    window.addEventListener('scroll', debounce(() => {
+        const scrollPosition = window.innerHeight + window.scrollY;
+        const threshold = document.documentElement.scrollHeight - 1000;
+        
+        if (scrollPosition >= threshold && !isLoadingMore && hasMoreProducts) {
+            loadProducts(false);
+        }
+    }, 200));
+}
+
+function showLoadingMore() {
+    const container = document.getElementById('productsContainer');
+    if (!container) return;
+    
+    const loadingEl = document.createElement('div');
+    loadingEl.id = 'loadingMore';
+    loadingEl.className = 'loading-more';
+    loadingEl.innerHTML = `
+        <div class="loading-spinner"></div>
+        <p>Carregando mais produtos...</p>
+    `;
+    container.appendChild(loadingEl);
+}
+
+function hideLoadingMore() {
+    const loadingEl = document.getElementById('loadingMore');
+    if (loadingEl) loadingEl.remove();
+}
+
+// ========================================
+// 10. HISTORY API
 // ========================================
 function setupHistoryAPI() {
-    // Listener para o botão voltar do navegador/celular
     window.addEventListener('popstate', (event) => {
-        // Se o estado tiver modal aberto, fecha o modal
         if (event.state?.modalOpen || location.hash.startsWith('#product-')) {
             closeProductModal();
-            // Limpa o hash da URL
             if (location.hash.startsWith('#product-')) {
                 history.replaceState(null, '', location.pathname + location.search);
             }
@@ -103,7 +346,7 @@ function setupHistoryAPI() {
 }
 
 // ========================================
-// 6. TOUCH SWIPE - FUNÇÕES PARA PASSAR FOTOS
+// 11. TOUCH SWIPE
 // ========================================
 function setupTouchListeners() {
     const modalContent = document.querySelector('.modal-content');
@@ -120,15 +363,13 @@ function setupTouchListeners() {
 }
 
 function handleSwipe() {
-    const swipeThreshold = 50; // Sensibilidade do deslize
+    const swipeThreshold = 50;
     
     if (touchEndX < touchStartX - swipeThreshold) {
-        // Deslizou para esquerda - próxima foto
         nextMedia();
     }
     
     if (touchEndX > touchStartX + swipeThreshold) {
-        // Deslizou para direita - foto anterior
         prevMedia();
     }
 }
@@ -136,7 +377,6 @@ function handleSwipe() {
 function nextMedia() {
     if (!currentMediaList || currentMediaList.length === 0) return;
     
-    // Encontra o índice atual
     const activeThumb = document.querySelector('.modal-thumb.active');
     if (!activeThumb) return;
     
@@ -149,18 +389,14 @@ function nextMedia() {
         }
     });
     
-    // Avança para o próximo
     const nextIndex = (currentIndex + 1) % thumbs.length;
     changeModalMedia(nextIndex);
-    
-    // Feedback visual com toast
     showToast(`Foto ${nextIndex + 1} de ${thumbs.length}`);
 }
 
 function prevMedia() {
     if (!currentMediaList || currentMediaList.length === 0) return;
     
-    // Encontra o índice atual
     const activeThumb = document.querySelector('.modal-thumb.active');
     if (!activeThumb) return;
     
@@ -173,16 +409,13 @@ function prevMedia() {
         }
     });
     
-    // Volta para o anterior
     const prevIndex = (currentIndex - 1 + thumbs.length) % thumbs.length;
     changeModalMedia(prevIndex);
-    
-    // Feedback visual com toast
     showToast(`Foto ${prevIndex + 1} de ${thumbs.length}`);
 }
 
 // ========================================
-// 7. SUPER ZOOM - FUNÇÕES DE ZOOM LUXO
+// 12. SUPER ZOOM
 // ========================================
 function openSuperZoom(mediaUrl, type = 'image') {
     const overlay = document.getElementById('superZoomOverlay');
@@ -210,17 +443,14 @@ function closeSuperZoom() {
 }
 
 function setupSuperZoomListeners() {
-    // Fechar ao clicar no overlay
     document.getElementById('superZoomOverlay')?.addEventListener('click', (e) => {
         if (e.target.id === 'superZoomOverlay') {
             closeSuperZoom();
         }
     });
     
-    // Fechar ao clicar no botão X
     document.getElementById('superZoomClose')?.addEventListener('click', closeSuperZoom);
     
-    // Fechar com tecla ESC
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeSuperZoom();
@@ -229,42 +459,36 @@ function setupSuperZoomListeners() {
 }
 
 // ========================================
-// 8. CONTROLE DE ÁUDIO INTELIGENTE PARA VÍDEO
+// 13. CONTROLE DE ÁUDIO
 // ========================================
 function setupVideoAudioControl(videoElement) {
     if (!videoElement) return;
     
-    // Configurações iniciais do vídeo
     videoElement.muted = true;
     videoElement.autoplay = true;
     videoElement.playsInline = true;
     videoElement.loop = true;
     
-    // Criar botão de áudio
     const audioBtn = document.createElement('button');
     audioBtn.className = 'video-audio-toggle';
     audioBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
     audioBtn.setAttribute('aria-label', 'Ativar áudio');
     
-    // Adicionar evento de clique
     audioBtn.onclick = (e) => {
         e.stopPropagation();
         if (videoElement.muted) {
-            // REINICIAR vídeo e ativar áudio
             videoElement.currentTime = 0;
             videoElement.muted = false;
             videoElement.play().catch(err => console.log('Autoplay bloqueado:', err));
             audioBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
             audioBtn.setAttribute('aria-label', 'Desativar áudio');
         } else {
-            // Desativar áudio (sem reiniciar)
             videoElement.muted = true;
             audioBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
             audioBtn.setAttribute('aria-label', 'Ativar áudio');
         }
     };
     
-    // Adicionar botão ao container do vídeo
     const container = videoElement.parentElement;
     if (container) {
         container.style.position = 'relative';
@@ -273,19 +497,11 @@ function setupVideoAudioControl(videoElement) {
 }
 
 // ========================================
-// 9. FUNÇÕES DE CARREGAMENTO
+// 14. FUNÇÕES DE CARREGAMENTO
 // ========================================
 async function loadCategories() {
     const { data } = await _supabase.from('categories').select('*').order('id');
     categories = data || [];
-}
-
-async function loadProducts() {
-    const { data } = await _supabase
-        .from('products')
-        .select('*, categories!category_id(name)')
-        .order('id');
-    products = data || [];
 }
 
 async function loadReviews() {
@@ -311,7 +527,7 @@ async function loadSocialProof() {
 }
 
 // ========================================
-// 10. RENDERIZAÇÃO
+// 15. RENDERIZAÇÃO
 // ========================================
 function renderCategories() {
     const list = document.getElementById('categoryList');
@@ -329,7 +545,6 @@ function renderCategories() {
             li.classList.add('active');
             currentCategory = li.dataset.category;
             renderProducts();
-            // Scroll para o topo ao mudar categoria
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });
@@ -407,9 +622,9 @@ function renderSocialProof() {
 
 function renderCarousel() {
     const carousel = document.getElementById('infiniteCarousel');
-    if (!carousel || !products.length) return;
+    if (!carousel || !allProductsLoaded.length) return;
     
-    const carouselProducts = [...products, ...products];
+    const carouselProducts = [...allProductsLoaded, ...allProductsLoaded];
     carousel.innerHTML = carouselProducts.map(p => {
         const images = Array.isArray(p.images) ? p.images : [];
         return `
@@ -424,7 +639,6 @@ function renderCarousel() {
     }).join('');
 }
 
-// Função para gerar estrelas (usada apenas no modal)
 function renderStars(rating) {
     const fullStars = '★'.repeat(rating);
     const emptyStars = '☆'.repeat(5 - rating);
@@ -432,7 +646,7 @@ function renderStars(rating) {
 }
 
 // ========================================
-// 11. RENDERIZAÇÃO DE PRODUTOS (SEM ESTRELAS NA VITRINE)
+// 16. RENDERIZAÇÃO DE PRODUTOS
 // ========================================
 function renderProductCard(p) {
     const images = Array.isArray(p.images) ? p.images : [];
@@ -440,10 +654,11 @@ function renderProductCard(p) {
     const secondImage = images[1] || mainImage;
     const priceFormatted = p.price.toFixed(2).replace('.', ',');
     
-    // SOLITÁRIO: só aparece se tiver e o preço for maior que zero
     const solitarioHtml = p.tem_solitario && p.solitario_price && p.solitario_price > 0
         ? `<div class="product-solitario"><i class="fas fa-gem"></i> Solitário: R$ ${p.solitario_price.toFixed(2).replace('.', ',')}</div>`
         : '';
+    
+    const soldTodayHtml = p.sold_today ? `<div class="product-sold-today">Vendido Hoje</div>` : '';
     
     return `
         <div class="product-card"
@@ -455,6 +670,7 @@ function renderProductCard(p) {
             data-main-image="${mainImage}"
             data-second-image="${secondImage}">
             <div class="product-image">
+                ${soldTodayHtml}
                 ${p.badge_text ? `<div class="product-badge">${p.badge_text}</div>` : ''}
                 <img src="${mainImage}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/200'">
             </div>
@@ -476,7 +692,6 @@ function renderProductCard(p) {
     `;
 }
 
-// Função para trocar a imagem no hover (mouse) ou toque (celular)
 window.hoverImage = function(card, secondImage) {
     const img = card.querySelector('.product-image img');
     const mainImage = card.dataset.mainImage;
@@ -494,7 +709,7 @@ function renderProducts() {
     const container = document.getElementById('productsContainer');
     if (!container) return;
     
-    let filtered = products.filter(p => {
+    let filtered = allProductsLoaded.filter(p => {
         const matchCat = currentCategory === 'all' || p.category_id == currentCategory;
         const matchSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase());
         return matchCat && matchSearch;
@@ -516,16 +731,15 @@ function renderProducts() {
 }
 
 // ========================================
-// 12. MODAL DE PRODUTO (COM HISTORY API, SUPER ZOOM E ÁUDIO INTELIGENTE)
+// 17. MODAL DE PRODUTO
 // ========================================
 function openProductModal(id) {
-    const product = products.find(p => p.id === id);
+    const product = allProductsLoaded.find(p => p.id === id);
     if (!product) return;
     
     currentModalProduct = product;
     currentMediaList = [];
     
-    // Vídeo
     if (product.video_url && product.video_url.trim()) {
         currentMediaList.push({
             type: 'video',
@@ -534,7 +748,6 @@ function openProductModal(id) {
         });
     }
     
-    // Imagens
     let images = [];
     if (Array.isArray(product.images)) {
         images = product.images;
@@ -554,25 +767,23 @@ function openProductModal(id) {
     
     const productReviews = allReviews.filter(r => r.is_general || r.product_id === id);
     
-    // Upsell por categoria
     let upsellProducts = [];
     if (product.upsell_category) {
-        upsellProducts = products.filter(p =>
+        upsellProducts = allProductsLoaded.filter(p =>
             p.id !== product.id &&
             p.categories?.name?.toLowerCase().includes(product.upsell_category.toLowerCase())
         ).slice(0, 12);
     } else if (product.category_id) {
-        upsellProducts = products.filter(p =>
+        upsellProducts = allProductsLoaded.filter(p =>
             p.id !== product.id &&
             p.category_id === product.category_id
         ).slice(0, 12);
     }
     
-    // Cross-sell por keywords relacionadas (GRID LAYOUT)
     let crossSellProducts = [];
     if (product.related_keywords) {
         const keywords = product.related_keywords.toLowerCase().split(',').map(k => k.trim());
-        crossSellProducts = products.filter(p => {
+        crossSellProducts = allProductsLoaded.filter(p => {
             if (p.id === product.id) return false;
             if (!p.related_keywords) return false;
             const productKeywords = p.related_keywords.toLowerCase().split(',').map(k => k.trim());
@@ -581,7 +792,7 @@ function openProductModal(id) {
     }
     
     if (crossSellProducts.length === 0 && product.category_id) {
-        crossSellProducts = products.filter(p =>
+        crossSellProducts = allProductsLoaded.filter(p =>
             p.id !== product.id &&
             p.category_id === product.category_id
         ).slice(0, 12);
@@ -690,23 +901,14 @@ function openProductModal(id) {
     document.getElementById('productModal').classList.add('active');
     document.body.style.overflow = 'hidden';
     
-    // History API: Adiciona estado ao abrir modal
     history.pushState({ modalOpen: true, productId: id }, '', `#product-${id}`);
     
-    // Setup Super Zoom: habilita clique para zoom nas mídias
     setupModalMediaClick();
-    
-    // Setup Áudio Inteligente para vídeo
     setupModalVideoAudio();
-    
-    // Configurar botão de próxima foto
     setupNextPhotoButton();
-    
-    // Scroll para o topo do modal
     scrollToTop();
 }
 
-// Configurar botão de próxima foto
 function setupNextPhotoButton() {
     const nextBtn = document.getElementById('nextPhotoBtn');
     if (!nextBtn) return;
@@ -722,7 +924,6 @@ function setupNextPhotoButton() {
     }
 }
 
-// Setup Super Zoom para mídias do modal
 function setupModalMediaClick() {
     const mainMedia = document.getElementById('modalMainMedia');
     if (!mainMedia) return;
@@ -747,7 +948,6 @@ function setupModalMediaClick() {
     }
 }
 
-// Setup Áudio Inteligente para vídeo do modal
 function setupModalVideoAudio() {
     const mainMedia = document.getElementById('modalMainMedia');
     if (!mainMedia) return;
@@ -773,13 +973,10 @@ function changeModalMedia(index) {
     
     if (media.type === 'video') {
         mainContainer.innerHTML = `<video src="${media.url}" autoplay muted loop playsinline></video>`;
-        // Re-aplicar controle de áudio
         setupModalVideoAudio();
-        // Re-aplicar Super Zoom
         setupModalMediaClick();
     } else {
         mainContainer.innerHTML = `<img src="${media.url}" alt="">`;
-        // Re-aplicar Super Zoom
         setupModalMediaClick();
     }
     
@@ -794,18 +991,22 @@ function closeProductModal() {
     currentModalProduct = null;
     currentMediaList = [];
     
-    // History API: Limpa estado ao fechar modal
     if (history.state?.modalOpen) {
         history.replaceState(null, '', location.pathname + location.search);
     }
 }
 
 // ========================================
-// 13. BUSCA E FILTROS
+// 18. BUSCA E FILTROS
 // ========================================
 function handleSearch(query) {
     searchQuery = query;
     renderProducts();
+    
+    const dropdown = document.getElementById('searchDropdown');
+    if (dropdown) {
+        setTimeout(() => { dropdown.style.display = 'none'; }, 200);
+    }
 }
 
 function resetFilters() {
@@ -813,21 +1014,24 @@ function resetFilters() {
     currentCategory = 'all';
     const searchInput = document.getElementById('searchInput');
     if (searchInput) searchInput.value = '';
+    
     document.querySelectorAll('.category-list li').forEach(li => {
         li.classList.toggle('active', li.dataset.category === 'all');
     });
+    
     renderProducts();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ========================================
-// 14. CARRINHO DE COMPRAS
+// 19. CARRINHO
 // ========================================
 function addToCart(productId) {
-    const product = products.find(p => p.id === productId);
+    const product = allProductsLoaded.find(p => p.id === productId);
     if (!product) return;
     
     const existingItem = cart.find(item => item.id === productId);
+    
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
@@ -842,6 +1046,7 @@ function addToCart(productId) {
     
     saveCart();
     updateCartUI();
+    animateCart();
     showToast('Adicionado ao carrinho!');
 }
 
@@ -856,6 +1061,7 @@ function updateQuantity(productId, change) {
     if (!item) return;
     
     item.quantity += change;
+    
     if (item.quantity <= 0) {
         removeFromCart(productId);
     } else {
@@ -943,14 +1149,15 @@ function closeCart() {
 }
 
 // ========================================
-// 15. WHATSAPP - LINK ATUALIZADO
+// 20. WHATSAPP
 // ========================================
 function buyViaWhatsApp(id) {
-    const p = products.find(p => p.id === id);
+    const p = allProductsLoaded.find(p => p.id === id);
     if (!p) {
         window.open(WHATSAPP_BASE_URL, '_blank');
         return;
     }
+    
     const msg = `Olá! Quero este produto: *${p.name}* - R$ ${p.price.toFixed(2).replace('.', ',')}`;
     const url = `https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}&type=phone_number&app_absent=0`;
     window.open(url, '_blank');
@@ -977,7 +1184,7 @@ function checkoutWhatsApp() {
 }
 
 // ========================================
-// 16. GEOLOCALIZAÇÃO
+// 21. GEOLOCALIZAÇÃO
 // ========================================
 async function initGeoLocationBackground() {
     try {
@@ -998,11 +1205,11 @@ function startGeoNotifications() {
 }
 
 function showGeoNotification() {
-    if (!products.length) return;
+    if (!allProductsLoaded.length) return;
     
     const neighborhood = detectedLocation.neighborhoods[Math.floor(Math.random() * detectedLocation.neighborhoods.length)];
     const customerName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
-    const randomProduct = products[Math.floor(Math.random() * products.length)];
+    const randomProduct = allProductsLoaded[Math.floor(Math.random() * allProductsLoaded.length)];
     
     const notification = document.getElementById('geoNotification');
     const notificationText = document.getElementById('geoNotificationText');
@@ -1015,7 +1222,7 @@ function showGeoNotification() {
 }
 
 // ========================================
-// 17. BUSCA PREDITIVA
+// 22. BUSCA PREDITIVA
 // ========================================
 function initPredictiveSearch() {
     const searchInput = document.getElementById('searchInput');
@@ -1032,13 +1239,14 @@ function initPredictiveSearch() {
     
     searchInput.addEventListener('input', debounce((e) => {
         const query = e.target.value.trim().toLowerCase();
+        handleSearch(query);
         
         if (query.length < 2 || !searchDropdown || !searchResults) {
             if (searchDropdown) searchDropdown.style.display = 'none';
             return;
         }
         
-        const results = products.filter(p =>
+        const results = allProductsLoaded.filter(p =>
             p.name.toLowerCase().includes(query)
         ).slice(0, 5);
         
@@ -1057,11 +1265,11 @@ function initPredictiveSearch() {
             searchResults.innerHTML = '<div class="search-no-results">Nada encontrado</div>';
             searchDropdown.style.display = 'block';
         }
-    }, 200));
+    }, 300));
 }
 
 // ========================================
-// 18. TIMER DA EQUIPE
+// 23. TIMER DA EQUIPE
 // ========================================
 function startTeamTimer() {
     setTimeout(() => {
@@ -1074,7 +1282,7 @@ function startTeamTimer() {
 }
 
 // ========================================
-// 19. EVENT LISTENERS
+// 24. EVENT LISTENERS
 // ========================================
 function setupEventListeners() {
     document.getElementById('modalCloseBtn')?.addEventListener('click', closeProductModal);
@@ -1101,7 +1309,7 @@ function setupEventListeners() {
 }
 
 // ========================================
-// 20. UTILITÁRIOS
+// 25. UTILITÁRIOS
 // ========================================
 function showToast(msg) {
     const toast = document.getElementById('toast');
@@ -1121,7 +1329,7 @@ function debounce(fn, wait) {
 }
 
 // ========================================
-// 21. EXPOR FUNÇÕES GLOBAIS
+// 26. EXPOR FUNÇÕES GLOBAIS
 // ========================================
 window.openProductModal = openProductModal;
 window.changeModalMedia = changeModalMedia;

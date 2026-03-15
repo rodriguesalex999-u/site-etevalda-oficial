@@ -225,6 +225,34 @@
             padding-bottom: 15px;
         }
 
+        /* Barra de busca na tabela */
+        .search-bar {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .search-bar input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+        
+        .search-bar i {
+            color: var(--gold-primary);
+            font-size: 1.2rem;
+        }
+
         .form-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -262,6 +290,21 @@
             border-color: var(--gold-primary);
         }
 
+        /* Checkbox estilizado */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--gold-primary);
+        }
+
         /* Grupo de Tag com cor */
         .tag-group {
             display: flex;
@@ -286,13 +329,6 @@
             display: inline-block;
             background: var(--tag-yellow);
             color: #000000;
-        }
-
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 0;
         }
 
         /* Opção de áudio */
@@ -630,6 +666,15 @@
                         <div id="tagPreview" class="tag-preview" style="background: #FBBF24; color: #000000;">Prévia da Tag</div>
                     </div>
 
+                    <!-- NOVO CAMPO: VENDIDO HOJE (ESCASSEZ) -->
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-fire"></i> Selo de Escassez</label>
+                        <div class="checkbox-group" style="background: var(--gold-light); padding: 15px; border-radius: var(--radius-sm);">
+                            <input type="checkbox" id="soldToday">
+                            <label for="soldToday"><strong>Exibir selo "Vendido Hoje"</strong> (cria senso de urgência)</label>
+                        </div>
+                    </div>
+
                     <!-- NOVO CAMPO: Categoria de Sugestão (Upsell) -->
                     <div class="form-group full-width">
                         <label><i class="fas fa-handshake"></i> Categoria de Sugestão (Upsell) *</label>
@@ -674,6 +719,13 @@
 
         <div class="table-section">
             <h2 class="section-title"><i class="fas fa-list"></i> Produtos Cadastrados</h2>
+            
+            <!-- Barra de busca em tempo real -->
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="productSearch" placeholder="Buscar produtos por nome..." autocomplete="off">
+            </div>
+            
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -684,13 +736,14 @@
                             <th>Preço</th>
                             <th>Solitário</th>
                             <th>Categoria</th>
+                            <th>Vendido Hoje</th>
                             <th>Upsell</th>
                             <th>Tag</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
                     <tbody id="productsTableBody">
-                        <tr><td colspan="9" style="text-align:center; padding:40px;">
+                        <tr><td colspan="10" style="text-align:center; padding:40px;">
                             <i class="fas fa-spinner fa-spin fa-3x" style="color:var(--gold-primary);"></i>
                             <p style="margin-top:15px;">Carregando produtos...</p>
                         </td></tr>
@@ -961,6 +1014,15 @@
                 </div>
             </div>
             
+            <!-- NOVO CAMPO: VENDIDO HOJE NA EDIÇÃO -->
+            <div class="form-group full-width">
+                <label><i class="fas fa-fire"></i> Selo de Escassez</label>
+                <div class="checkbox-group" style="background: var(--gold-light); padding: 15px; border-radius: var(--radius-sm);">
+                    <input type="checkbox" id="editSoldToday">
+                    <label for="editSoldToday"><strong>Exibir selo "Vendido Hoje"</strong> (cria senso de urgência)</label>
+                </div>
+            </div>
+            
             <div class="form-group full-width">
                 <label>Categoria de Sugestão (Upsell)</label>
                 <select id="editUpsellCategory"></select>
@@ -1013,20 +1075,32 @@
     const SUPABASE_URL = 'https://vnrfmsyanrvqqhmqyixk.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_xGLDFQarl-DhshRW0932FQ_asug0TUK';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const SENHA_ADMIN = '14659832';
+    
+    // Senha hasheada (SHA-256 de '14659832')
+    const ADMIN_PASSWORD_HASH = '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92';
+
+    async function hashPassword(password) {
+        const msgBuffer = new TextEncoder().encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
 
     let currentTab = 'products';
     let deleteId = null;
     let deleteType = null;
     let currentRating = 5;
     let categoriesList = [];
+    let allProducts = [];
 
     // ========================================
     // LOGIN
     // ========================================
-    function checkPassword() {
+    async function checkPassword() {
         const input = document.getElementById('passwordInput').value;
-        if (input === SENHA_ADMIN) {
+        const hashedInput = await hashPassword(input);
+        
+        if (hashedInput === ADMIN_PASSWORD_HASH) {
             document.getElementById('loginArea').style.display = 'none';
             document.getElementById('adminArea').style.display = 'block';
             loadAllData();
@@ -1100,7 +1174,6 @@
         
         preview.style.background = color;
         
-        // Ajusta cor do texto para contraste
         if (color === '#FBBF24' || color === '#10B981') {
             preview.style.color = '#000000';
         } else {
@@ -1202,18 +1275,23 @@
             .select('*, categories(name)')
             .order('id', { ascending: false });
 
+        allProducts = data || [];
+        renderProductTable(allProducts);
+    }
+
+    function renderProductTable(productsToShow) {
         const tbody = document.getElementById('productsTableBody');
         if (!tbody) return;
 
-        if (!data || data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:40px;">
+        if (!productsToShow || productsToShow.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:40px;">
                 <i class="fas fa-box-open fa-3x" style="color:var(--medium-gray);"></i>
-                <p>Nenhum produto cadastrado</p>
+                <p>Nenhum produto encontrado</p>
             </td></tr>`;
             return;
         }
 
-        tbody.innerHTML = data.map(p => {
+        tbody.innerHTML = productsToShow.map(p => {
             const img = p.images?.[0] || 'https://via.placeholder.com/60';
             const priceFormatted = parseFloat(p.price).toFixed(2).replace('.', ',');
             const solitarioFormatted = p.solitario_price && p.solitario_price > 0
@@ -1221,8 +1299,8 @@
                 : '—';
             const categoryName = p.categories?.name || 'Sem categoria';
             const upsellCategory = p.upsell_category || '—';
+            const soldToday = p.sold_today ? '✅ Sim' : '❌ Não';
             
-            // Determina cor da tag
             let tagStyle = '';
             if (p.badge_color) {
                 tagStyle = `style="background: ${p.badge_color}; color: ${p.badge_color === '#FBBF24' || p.badge_color === '#10B981' ? '#000000' : '#FFFFFF'}; padding: 4px 8px; border-radius: 20px;"`;
@@ -1235,6 +1313,7 @@
                 <td><strong>R$ ${priceFormatted}</strong></td>
                 <td>${solitarioFormatted}</td>
                 <td>${categoryName}</td>
+                <td>${soldToday}</td>
                 <td>${upsellCategory}</td>
                 <td>${p.badge_text ? `<span ${tagStyle}>${p.badge_text}</span>` : '—'}</td>
                 <td>
@@ -1247,8 +1326,28 @@
         }).join('');
     }
 
+    function setupProductSearch() {
+        const searchInput = document.getElementById('productSearch');
+        if (!searchInput) return;
+        
+        searchInput.addEventListener('input', debounce((e) => {
+            const query = e.target.value.trim().toLowerCase();
+            
+            if (!query) {
+                renderProductTable(allProducts);
+                return;
+            }
+            
+            const filtered = allProducts.filter(p => 
+                p.name.toLowerCase().includes(query)
+            );
+            
+            renderProductTable(filtered);
+        }, 300));
+    }
+
     // ========================================
-    // EDIÇÃO DE PRODUTO (CORRIGIDO)
+    // EDIÇÃO DE PRODUTO
     // ========================================
     async function editProduct(id) {
         const { data: product } = await _supabase
@@ -1262,7 +1361,6 @@
             return;
         }
         
-        // Preenche o formulário de edição
         document.getElementById('editProductId').value = product.id;
         document.getElementById('editProductName').value = product.name || '';
         document.getElementById('editProductPrice').value = product.price ? product.price.toFixed(2).replace('.', ',') : '';
@@ -1271,12 +1369,12 @@
         document.getElementById('editTemSolitario').checked = product.tem_solitario || false;
         document.getElementById('editBadgeText').value = product.badge_text || '';
         document.getElementById('editBadgeColor').value = product.badge_color || '#FBBF24';
+        document.getElementById('editSoldToday').checked = product.sold_today || false;
         document.getElementById('editUpsellCategory').value = product.upsell_category || '';
         document.getElementById('editVideoUrl').value = product.video_url || '';
-        document.getElementById('editVideoHasAudio').checked = true; // Padrão
+        document.getElementById('editVideoHasAudio').checked = true;
         document.getElementById('editDescription').value = product.description || '';
         
-        // Imagens
         if (product.images) {
             if (Array.isArray(product.images)) {
                 document.getElementById('editImages').value = product.images.join('\n');
@@ -1285,7 +1383,6 @@
             }
         }
         
-        // Abre o modal
         document.getElementById('editProductModal').classList.add('active');
     }
 
@@ -1293,7 +1390,6 @@
         document.getElementById('editProductModal').classList.remove('active');
     }
 
-    // Salvar edição
     document.getElementById('editProductForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -1305,6 +1401,7 @@
         const temSolitario = document.getElementById('editTemSolitario').checked;
         const badgeText = document.getElementById('editBadgeText').value.trim() || null;
         const badgeColor = document.getElementById('editBadgeColor').value;
+        const soldToday = document.getElementById('editSoldToday').checked;
         const upsellCategory = document.getElementById('editUpsellCategory').value || null;
         const videoUrl = document.getElementById('editVideoUrl').value.trim() || null;
         const description = document.getElementById('editDescription').value.trim() || null;
@@ -1342,6 +1439,7 @@
             tem_solitario: temSolitario,
             badge_text: badgeText,
             badge_color: badgeColor,
+            sold_today: soldToday,
             upsell_category: upsellCategory,
             video_url: videoUrl,
             description,
@@ -1365,7 +1463,7 @@
     });
 
     // ========================================
-    // FORMULÁRIO DE CADASTRO (CORRIGIDO)
+    // FORMULÁRIO DE CADASTRO
     // ========================================
     document.getElementById('productForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -1377,6 +1475,7 @@
         const temSolitario = document.getElementById('temSolitario').checked;
         const badgeText = document.getElementById('badgeSelect').value.trim() || null;
         const badgeColor = document.getElementById('badgeColor').value;
+        const soldToday = document.getElementById('soldToday').checked;
         const upsellCategory = document.getElementById('upsellCategory').value || null;
         const relatedKeywords = document.getElementById('relatedKeywords').value.trim() || null;
         const videoUrl = document.getElementById('videoUrl').value.trim() || null;
@@ -1415,6 +1514,7 @@
             tem_solitario: temSolitario,
             badge_text: badgeText,
             badge_color: badgeColor,
+            sold_today: soldToday,
             upsell_category: upsellCategory,
             related_keywords: relatedKeywords,
             video_url: videoUrl,
@@ -1429,6 +1529,7 @@
             e.target.reset();
             document.getElementById('upsellCategory').value = '';
             document.getElementById('badgeColor').value = '#FBBF24';
+            document.getElementById('soldToday').checked = false;
             updateTagPreview();
             await loadProducts();
             updateStats();
@@ -1705,10 +1806,22 @@
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
+    function debounce(fn, wait) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => fn(...args), wait);
+        };
+    }
+
     // ========================================
     // INICIALIZAÇÃO
     // ========================================
     updateTagPreview();
+    
+    setTimeout(() => {
+        setupProductSearch();
+    }, 1000);
 </script>
 </body>
 </html>

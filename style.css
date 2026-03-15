@@ -1,9 +1,8 @@
 /* ========================================
-GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
+GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM
+VERSÃO COMPLETA COM HEADER COLLAPSIBLE
 ======================================== */
-/* ========================================
-1. VARIÁVEIS CSS (DESIGN TOKENS)
-======================================== */
+
 :root {
     /* Cores Primárias Luxuosas */
     --gold-primary: #D4AF37;
@@ -24,6 +23,9 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     --success: #27AE60;
     --info: #3498DB;
     --highlight-red: #FF3333;
+    /* Selo Vendido Hoje */
+    --sold-bg: rgba(231, 76, 60, 0.9);
+    --sold-text: #FFFFFF;
     /* Tipografia */
     --font-display: 'Playfair Display', serif;
     --font-body: 'Poppins', sans-serif;
@@ -107,7 +109,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     }
     
     /* ========================================
-    3. HEADER PREMIUM
+    3. HEADER PREMIUM - COM EFEITO COLLAPSIBLE
     ======================================== */
     .header {
     background: var(--white);
@@ -116,10 +118,48 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     top: 0;
     z-index: 100;
     border-bottom: 2px solid var(--gold-primary);
+    transition: all var(--transition-normal);
     }
+    
+    /* HEADER TOP - Logo e Carrinho (desaparece no scroll) */
     .header-top {
     padding: var(--spacing-md) 0;
+    transition: all var(--transition-normal);
+    opacity: 1;
+    height: auto;
+    overflow: hidden;
     }
+    
+    /* Quando o header estiver colapsado, esconde a parte superior */
+    .header.header-collapsed .header-top {
+    opacity: 0;
+    height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin: 0;
+    }
+    
+    /* Navegação de Categorias - SEMPRE VISÍVEL */
+    .nav-categories {
+    background: var(--white);
+    border-top: 1px solid var(--gold-light);
+    border-bottom: 1px solid var(--gold-light);
+    padding: var(--spacing-xs) 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    transition: all var(--transition-normal);
+    }
+    
+    .nav-categories::-webkit-scrollbar {
+    display: none;
+    }
+    
+    /* Garantir que a busca também fique sempre visível */
+    .header-search {
+    transition: all var(--transition-normal);
+    }
+    
     .header-top-content {
     display: flex;
     align-items: center;
@@ -317,8 +357,20 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
     }
-    .cart-btn.animate {
+    /* Animações do Carrinho */
+    .cart-btn.cart-bounce {
     animation: cartBounce 0.5s ease;
+    }
+    .cart-btn.cart-glow {
+    animation: cartGlow 0.5s ease;
+    }
+    @keyframes cartBounce {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    }
+    @keyframes cartGlow {
+    0%, 100% { box-shadow: 0 0 0 0 var(--gold-primary); }
+    50% { box-shadow: 0 0 30px 10px var(--gold-primary); }
     }
     .cart-count {
     position: absolute;
@@ -586,6 +638,30 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     }
     .product-card:hover .product-image img {
     transform: scale(1.05);
+    }
+    /* SELO VENDIDO HOJE - Escassez */
+    .product-sold-today {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    background: var(--sold-bg);
+    color: var(--sold-text);
+    padding: 5px 15px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 15;
+    border: 1px solid rgba(255,255,255,0.3);
+    white-space: nowrap;
+    animation: pulseSold 2s infinite;
+    }
+    @keyframes pulseSold {
+    0%, 100% { opacity: 1; transform: translate(-50%, -50%) rotate(-15deg) scale(1); }
+    50% { opacity: 0.9; transform: translate(-50%, -50%) rotate(-15deg) scale(1.05); }
     }
     /* Badges */
     .product-badge {
@@ -1285,47 +1361,52 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     .modal.active .modal-content {
     transform: translateY(0);
     }
-    /* BOTÃO FECHAR FIXO COM PULSE - ATUALIZADO (maior, 48px) */
+    
+    /* BOTÃO FECHAR - 2X MAIOR, FIXO, COM PULSO */
     .modal-close-btn {
     position: fixed !important;
-    top: 15px;
-    right: 15px;
+    top: 20px;
+    right: 20px;
     background: var(--gold-primary);
     color: var(--white);
-    width: 48px;
-    height: 48px;
+    width: 80px !important;
+    height: 80px !important;
     border-radius: 50%;
-    font-size: 1.4rem;
-    display: flex;
+    font-size: 2.5rem !important;
+    display: flex !important;
     align-items: center;
     justify-content: center;
     transition: all var(--transition-normal);
-    z-index: 9999 !important;
-    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4);
-    animation: pulseButton 2s infinite ease-in-out;
-    border: none;
+    z-index: 99999 !important;
+    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.5);
+    animation: pulseClose 2s infinite ease-in-out;
+    border: 3px solid white;
     cursor: pointer;
     }
+    
     .modal-close-btn:hover {
     background: var(--gold-dark);
+    transform: scale(1.1);
     animation: none;
     }
-    @keyframes pulseButton {
-    0%, 100% { box-shadow: 0 4px 20px rgba(212, 175, 55, 0.4); }
-    50% { box-shadow: 0 4px 35px rgba(212, 175, 55, 0.8); }
+    
+    @keyframes pulseClose {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
+    50% { box-shadow: 0 0 0 20px rgba(212, 175, 55, 0); }
     }
-    /* Botão de próxima foto (NOVO) */
+    
+    /* Botão de próxima foto */
     .next-photo-btn {
     position: fixed;
-    right: 15px;
+    right: 20px;
     top: 50%;
     transform: translateY(-50%);
     background: rgba(212, 175, 55, 0.9);
     color: white;
-    width: 48px;
-    height: 48px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
-    font-size: 1.2rem;
+    font-size: 1.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1335,13 +1416,16 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     cursor: pointer;
     animation: bounceRight 1.5s infinite;
     }
+    
     .next-photo-btn:hover {
     background: var(--gold-dark);
     }
+    
     @keyframes bounceRight {
     0%, 100% { transform: translateY(-50%) translateX(0); }
-    50% { transform: translateY(-50%) translateX(5px); }
+    50% { transform: translateY(-50%) translateX(10px); }
     }
+    
     .modal-container {
     padding: 0;
     }
@@ -1633,7 +1717,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     }
     
     /* ========================================
-    CROSS-SELL GRID NO MODAL (IGUAL À VITRINE)
+    CROSS-SELL GRID NO MODAL
     ======================================== */
     .cross-sell-section {
     margin: 20px 0;
@@ -1713,7 +1797,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     }
     
     /* ========================================
-    SUPER ZOOM OVERLAY - LUXO FULL SCREEN
+    SUPER ZOOM OVERLAY
     ======================================== */
     .super-zoom-overlay {
     position: fixed;
@@ -1737,10 +1821,10 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     right: 20px;
     background: var(--gold-primary);
     color: var(--white);
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     border-radius: 50%;
-    font-size: 1.3rem;
+    font-size: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2178,7 +2262,118 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     }
     
     /* ========================================
-    22. RESPONSIVE DESIGN - MOBILE OTIMIZADO
+    22. PWA INSTALL BANNER
+    ======================================== */
+    .pwa-install-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold-primary));
+    color: white;
+    padding: 15px;
+    z-index: 1000;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
+    }
+    
+    .pwa-install-banner.show {
+    transform: translateY(0);
+    }
+    
+    .pwa-banner-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 600px;
+    margin: 0 auto;
+    gap: 15px;
+    }
+    
+    .pwa-icon {
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold-primary);
+    font-size: 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .pwa-text {
+    flex: 1;
+    }
+    
+    .pwa-text strong {
+    display: block;
+    font-size: 1rem;
+    margin-bottom: 3px;
+    font-family: var(--font-display);
+    }
+    
+    .pwa-text span {
+    font-size: 0.8rem;
+    opacity: 0.9;
+    }
+    
+    .pwa-buttons {
+    display: flex;
+    gap: 10px;
+    }
+    
+    .pwa-install-btn {
+    background: white;
+    color: var(--gold-dark);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .pwa-install-btn:hover {
+    transform: scale(1.05);
+    background: #f8f8f8;
+    }
+    
+    .pwa-later-btn {
+    background: transparent;
+    color: white;
+    border: 1px solid rgba(255,255,255,0.5);
+    padding: 10px 15px;
+    border-radius: 30px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    }
+    
+    .pwa-later-btn:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: white;
+    }
+    
+    @media (max-width: 480px) {
+    .pwa-banner-content {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    }
+    .pwa-buttons {
+    width: 100%;
+    justify-content: center;
+    }
+    }
+    
+    /* ========================================
+    23. RESPONSIVE DESIGN - MOBILE OTIMIZADO
     ======================================== */
     @media (max-width: 1024px) {
     .header-top-content {
@@ -2220,7 +2415,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     }
     .mobile-filters {
     display: flex;
-    top: 140px;
+    top: 114px; /* Ajustado para quando o header está colapsado */
     }
     .nav-categories {
     top: 0;
@@ -2232,7 +2427,6 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     padding: var(--spacing-xs) var(--spacing-sm);
     font-size: 0.8rem;
     }
-    /* MOBILE: 2 COLUNAS FORÇADO - 4 PRODUTOS NA DOBRA */
     .products-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 6px;
@@ -2258,6 +2452,10 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     padding: 6px;
     gap: 3px;
     }
+    .product-sold-today {
+    font-size: 0.65rem;
+    padding: 4px 10px;
+    }
     .product-social-proof {
     font-size: 0.6rem;
     }
@@ -2267,7 +2465,6 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     .main-content {
     padding: var(--spacing-sm) 0;
     }
-    /* CARROSSEL DE AVALIAÇÕES MOBILE */
     .review-carousel-card {
     flex: 0 0 260px;
     padding: 12px;
@@ -2302,14 +2499,14 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     right: -100%;
     }
     .modal-close-btn {
-    width: 44px;
-    height: 44px;
-    font-size: 1.2rem;
+    width: 70px !important;
+    height: 70px !important;
+    font-size: 2rem !important;
     }
     .next-photo-btn {
-    width: 44px;
-    height: 44px;
-    font-size: 1.2rem;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
     }
     .modal-gallery {
     max-height: 40vh;
@@ -2355,7 +2552,6 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     .hero-image-xl {
     max-height: 220px;
     }
-    /* ESTRELAS MOBILE */
     .stars {
     font-size: 2rem;
     letter-spacing: 4px;
@@ -2368,7 +2564,6 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     font-size: 1.8rem;
     letter-spacing: 3px;
     }
-    /* GRID CROSS-SELL NO MODAL - MOBILE */
     .cross-sell-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 6px;
@@ -2383,11 +2578,10 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     .cross-sell-card .price {
     font-size: 0.85rem;
     }
-    /* SUPER ZOOM MOBILE */
     .super-zoom-close {
-    width: 44px;
-    height: 44px;
-    font-size: 1.1rem;
+    width: 50px;
+    height: 50px;
+    font-size: 1.5rem;
     }
     }
     @media (max-width: 480px) {
@@ -2427,6 +2621,10 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     .product-info {
     padding: 5px;
     }
+    .product-sold-today {
+    font-size: 0.6rem;
+    padding: 3px 8px;
+    }
     .product-buttons {
     flex-direction: column;
     }
@@ -2454,6 +2652,13 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     flex: 0 0 60px;
     width: 60px;
     height: 60px;
+    }
+    .modal-close-btn {
+    width: 60px !important;
+    height: 60px !important;
+    font-size: 1.8rem !important;
+    top: 10px;
+    right: 10px;
     }
     .modal-title {
     font-size: 1.3rem;
@@ -2490,7 +2695,6 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     .hero-image-xl {
     max-height: 180px;
     }
-    /* GRID CROSS-SELL NO MODAL - TELAS MUITO PEQUENAS */
     .cross-sell-grid {
     gap: 5px;
     padding: 0 5px;
@@ -2501,7 +2705,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     }
     
     /* ========================================
-    23. ACESSIBILIDADE
+    24. ACESSIBILIDADE
     ======================================== */
     @media (prefers-reduced-motion: reduce) {
     * {
@@ -2510,7 +2714,6 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     transition-duration: 0.01ms !important;
     }
     }
-    /* Focus visible para navegação por teclado */
     button:focus-visible,
     a:focus-visible,
     input:focus-visible {
@@ -2519,7 +2722,7 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     }
     
     /* ========================================
-    24. IMPRESSÃO
+    25. IMPRESSÃO
     ======================================== */
     @media print {
     .header,
@@ -2541,19 +2744,20 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     }
     
     /* ========================================
-    25. KEYFRAMES (TODAS AS ANIMAÇÕES)
+    26. KEYFRAMES
     ======================================== */
-    /* Animação do Carrinho */
     @keyframes cartBounce {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.15); }
+    50% { transform: scale(1.2); }
     }
-    /* Animação do Carrossel Infinito */
+    @keyframes cartGlow {
+    0%, 100% { box-shadow: 0 0 0 0 var(--gold-primary); }
+    50% { box-shadow: 0 0 30px 10px var(--gold-primary); }
+    }
     @keyframes carouselScroll {
     0% { transform: translateX(0); }
     100% { transform: translateX(calc(-280px * 6 - 120px)); }
     }
-    /* Animação de pulso para botões WhatsApp */
     @keyframes pulseWhatsappButton {
     0% {
     transform: scale(1);
@@ -2568,7 +2772,6 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
     }
     }
-    /* Animação de pulso para o ícone flutuante */
     @keyframes pulseWhatsapp {
     0%, 100% {
     transform: scale(1);
@@ -2579,27 +2782,18 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     box-shadow: 0 15px 40px rgba(37, 211, 102, 0.6);
     }
     }
-    /* Animação do caminhão de entrega */
     @keyframes truckMove {
     0%, 100% { transform: translateX(0); }
     50% { transform: translateX(10px); }
     }
-    /* Animação do shimmer para badges */
-    @keyframes shimmerBadge {
-    0% { background-position: -200% center; }
-    100% { background-position: 200% center; }
-    }
-    /* Animação do shimmer para skeleton loading */
     @keyframes skeletonLoading {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
     }
-    /* Animação do compasso no título do carrossel */
     @keyframes compassSpin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
     }
-    /* Animação do slideInLeft para notificação geolocalizada */
     @keyframes slideInLeft {
     from {
     opacity: 0;
@@ -2610,7 +2804,6 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     transform: translateX(0);
     }
     }
-    /* Animação do slideUp para toast */
     @keyframes slideUp {
     from {
     opacity: 0;
@@ -2621,15 +2814,40 @@ GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM - VERSÃO PERFEITA
     transform: translateY(0);
     }
     }
-    /* Animação do bounce para scroll indicator */
     @keyframes bounce {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(5px); }
     }
-    /* Versão mobile do carrossel */
     @media (max-width: 768px) {
     @keyframes carouselScroll {
     0% { transform: translateX(0); }
     100% { transform: translateX(calc(-200px * 6 - 60px)); }
     }
+    }
+    
+    /* ========================================
+    27. LOADING MORE - LAZY LOADING
+    ======================================== */
+    .loading-more {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    }
+    
+    .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--gold-light);
+    border-top: 4px solid var(--gold-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
     }
