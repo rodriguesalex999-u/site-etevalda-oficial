@@ -760,42 +760,50 @@ function getRandomViewers() {
     return Math.floor(Math.random() * 9) + 4; // 4 a 12
 }
 
-// Cronômetro de entrega (COM TEXTO ATUALIZADO)
+// Cronômetro de entrega (COM CONTADOR REGRESSIVO DE 2 HORAS)
 function startDeliveryTimer() {
     const timerElement = document.getElementById('deliveryTimer');
     if (!timerElement) return;
-
+    
     // Limpar intervalo anterior se existir
     if (deliveryTimerInterval) {
         clearInterval(deliveryTimerInterval);
     }
-
+    
+    // Obter tempo salvo no sessionStorage ou iniciar com 2 horas
+    let savedTime = sessionStorage.getItem('deliveryTimerTime');
+    let startTime = savedTime ? parseInt(savedTime) : Date.now();
+    const totalTime = 2 * 60 * 60 * 1000; // 2 horas em milissegundos
+    
     function updateTimer() {
-        const now = new Date();
-        const limit = new Date(now);
-        limit.setHours(17, 0, 0, 0); // 17:00
-
-        if (now > limit) {
-            // Já passou das 17h - TEXTO ATUALIZADO
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, totalTime - elapsed);
+        
+        if (remaining === 0) {
+            // Tempo esgotado - mostrar mensagem padrão
             timerElement.innerHTML = `
                 <i class="fas fa-clock"></i>
                 <span class="delivery-today">Receba hoje e só pague na entrega</span>
             `;
+            sessionStorage.removeItem('deliveryTimerTime');
             return;
         }
-
-        const diff = limit - now;
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
+        
+        const totalSeconds = Math.floor(remaining / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        
         timerElement.innerHTML = `
             <i class="fas fa-clock"></i>
-            <span class="timer-countdown">${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s</span>
+            <span class="timer-countdown">${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</span>
             <span class="timer-text">para receber hoje!</span>
         `;
+        
+        // Salvar tempo atual no sessionStorage
+        sessionStorage.setItem('deliveryTimerTime', startTime.toString());
     }
-
+    
     updateTimer();
     deliveryTimerInterval = setInterval(updateTimer, 1000);
 }
