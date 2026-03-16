@@ -144,18 +144,7 @@ function createManifest() {
         display: 'standalone',
         background_color: '#D4AF37',
         theme_color: '#D4AF37',
-        icons: [
-            {
-                src: 'https://i.postimg.cc/1Xw1PC9m/Grupo-Etevalda-MT.png',
-                sizes: '192x192',
-                type: 'image/png'
-            },
-            {
-                src: 'https://i.postimg.cc/1Xw1PC9m/Grupo-Etevalda-MT.png',
-                sizes: '512x512',
-                type: 'image/png'
-            }
-        ]
+        icons: []
     };
 
     const manifestString = JSON.stringify(manifest);
