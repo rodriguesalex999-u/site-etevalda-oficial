@@ -303,7 +303,7 @@ async function loadProducts(reset = false) {
         const { data, error } = await _supabase
             .from('products')
             .select('*, categories!category_id(name)')
-            .order('id')
+            .order('id', { ascending: false }) // CORRIGIDO: Agora pega os mais novos primeiro
             .range(from, to);
 
         if (error) throw error;
