@@ -1,6 +1,6 @@
 /* ========================================
 GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM
-VERSÃO COMPLETA COM GATILHOS DE VENDA
+VERSÃO COMPLETA COM GATILHOS DE VENDA OTIMIZADOS
 ======================================== */
 
 :root {
@@ -16,6 +16,7 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     --gray-luxury: #2D2D2D;
     --gray-medium: #666666;
     --gray-light: #F5F5F5;
+    --gray-soft: #E0E0E0;
     /* Cores Secundárias */
     --whatsapp: #25D366;
     --whatsapp-dark: #128C7E;
@@ -57,21 +58,21 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     --transition-fast: 0.2s ease;
     --transition-normal: 0.3s ease;
     --transition-slow: 0.5s ease;
-    }
-    
-    /* ========================================
-    2. RESET E ESTILOS GLOBAIS
-    ======================================== */
-    * {
+}
+
+/* ========================================
+2. RESET E ESTILOS GLOBAIS
+======================================== */
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    }
-    html {
+}
+html {
     scroll-behavior: smooth;
     font-size: 16px;
-    }
-    body {
+}
+body {
     font-family: var(--font-body);
     color: var(--black-soft);
     background-color: var(--gray-light);
@@ -79,43 +80,43 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    }
-    h1, h2, h3, h4, h5, h6 {
+}
+h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     font-weight: 700;
     line-height: 1.3;
-    }
-    img {
+}
+img {
     max-width: 100%;
     height: auto;
     display: block;
-    }
-    a {
+}
+a {
     text-decoration: none;
     color: inherit;
-    }
-    button {
+}
+button {
     font-family: inherit;
     cursor: pointer;
     border: none;
     background: none;
-    }
-    .container-fluid {
+}
+.container-fluid {
     width: 100%;
     max-width: 1440px;
     margin: 0 auto;
     padding: 0 var(--spacing-md);
-    }
-    .highlight-red {
+}
+.highlight-red {
     color: var(--highlight-red);
     font-weight: 700;
     text-shadow: 0 2px 4px rgba(255, 51, 51, 0.2);
-    }
-    
-    /* ========================================
-    3. HEADER PREMIUM - COM EFEITO COLLAPSIBLE
-    ======================================== */
-    .header {
+}
+
+/* ========================================
+3. HEADER PREMIUM - COM EFEITO COLLAPSIBLE
+======================================== */
+.header {
     background: var(--white);
     box-shadow: var(--shadow-md);
     position: sticky;
@@ -123,28 +124,28 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     z-index: 100;
     border-bottom: 2px solid var(--gold-primary);
     transition: all var(--transition-normal);
-    }
-    
-    /* HEADER TOP - Logo e Carrinho (desaparece no scroll) */
-    .header-top {
+}
+
+/* HEADER TOP - Logo e Carrinho (desaparece no scroll) */
+.header-top {
     padding: var(--spacing-md) 0;
     transition: all var(--transition-normal);
     opacity: 1;
     height: auto;
     overflow: hidden;
-    }
-    
-    /* Quando o header estiver colapsado, esconde a parte superior */
-    .header.header-collapsed .header-top {
+}
+
+/* Quando o header estiver colapsado, esconde a parte superior */
+.header.header-collapsed .header-top {
     opacity: 0;
     height: 0;
     padding-top: 0;
     padding-bottom: 0;
     margin: 0;
-    }
-    
-    /* Navegação de Categorias - SEMPRE VISÍVEL */
-    .nav-categories {
+}
+
+/* Navegação de Categorias - SEMPRE VISÍVEL */
+.nav-categories {
     background: var(--white);
     border-top: 1px solid var(--gold-light);
     border-bottom: 1px solid var(--gold-light);
@@ -153,72 +154,72 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     transition: all var(--transition-normal);
-    }
-    
-    .nav-categories::-webkit-scrollbar {
+}
+
+.nav-categories::-webkit-scrollbar {
     display: none;
-    }
-    
-    /* Garantir que a busca também fique sempre visível */
-    .header-search {
+}
+
+/* Garantir que a busca também fique sempre visível */
+.header-search {
     transition: all var(--transition-normal);
-    }
-    
-    .header-top-content {
+}
+
+.header-top-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--spacing-lg);
-    }
-    /* Logo Premium */
-    .header-logo {
+}
+/* Logo Premium */
+.header-logo {
     flex-shrink: 0;
-    }
-    .logo-link {
+}
+.logo-link {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    }
-    .logo-link i {
+}
+.logo-link i {
     font-size: 2.2rem;
     color: var(--gold-primary);
     transform: rotate(-10deg);
     transition: transform var(--transition-normal);
-    }
-    .logo-link:hover i {
+}
+.logo-link:hover i {
     transform: rotate(0deg) scale(1.1);
-    }
-    .logo-text {
+}
+.logo-text {
     display: flex;
     flex-direction: column;
     line-height: 1.1;
-    }
-    .logo-text span {
+}
+.logo-text span {
     font-family: var(--font-display);
     font-size: 1.6rem;
     font-weight: 800;
     color: var(--gold-dark);
     letter-spacing: 2px;
-    }
-    .logo-text small {
+}
+.logo-text small {
     font-size: 0.7rem;
     font-weight: 400;
     color: var(--gray-medium);
     letter-spacing: 1px;
-    }
-    .logo-tagline {
+}
+.logo-tagline {
     font-size: 0.7rem;
     color: var(--gray-medium);
     margin-top: 4px;
     text-transform: uppercase;
     letter-spacing: 1px;
-    }
-    /* Busca Premium com Dropdown */
-    .header-search {
+}
+/* Busca Premium com Dropdown */
+.header-search {
     flex: 1;
     max-width: 500px;
-    }
-    .search-wrapper {
+}
+.search-wrapper {
     position: relative;
     display: flex;
     align-items: center;
@@ -228,12 +229,12 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     padding: 0 var(--spacing-sm);
     box-shadow: var(--shadow-sm);
     transition: all var(--transition-normal);
-    }
-    .search-wrapper:focus-within {
+}
+.search-wrapper:focus-within {
     border-color: var(--gold-primary);
     box-shadow: var(--shadow-lg);
-    }
-    .search-input {
+}
+.search-input {
     flex: 1;
     border: none;
     outline: none;
@@ -242,11 +243,11 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     font-size: 0.95rem;
     background: transparent;
     color: var(--black-soft);
-    }
-    .search-input::placeholder {
+}
+.search-input::placeholder {
     color: var(--gray-medium);
-    }
-    .search-btn {
+}
+.search-btn {
     background: var(--gold-primary);
     color: var(--white);
     width: 42px;
@@ -258,17 +259,17 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     font-size: 1rem;
     transition: all var(--transition-normal);
     flex-shrink: 0;
-    }
-    .search-btn:hover {
+}
+.search-btn:hover {
     background: var(--gold-dark);
     transform: scale(1.05);
     box-shadow: var(--shadow-md);
-    }
-    .search-btn:active {
+}
+.search-btn:active {
     transform: scale(0.95);
-    }
-    /* Dropdown de Busca Preditiva */
-    .search-dropdown {
+}
+/* Dropdown de Busca Preditiva */
+.search-dropdown {
     position: absolute;
     top: 100%;
     left: 0;
@@ -282,11 +283,11 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     display: none;
     z-index: 1000;
     border: 1px solid var(--gold-light);
-    }
-    .search-results {
+}
+.search-results {
     padding: var(--spacing-sm);
-    }
-    .search-result-item {
+}
+.search-result-item {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
@@ -295,54 +296,54 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     cursor: pointer;
     transition: all var(--transition-fast);
     border-left: 3px solid transparent;
-    }
-    .search-result-item:hover,
-    .search-result-item.active {
+}
+.search-result-item:hover,
+.search-result-item.active {
     background: var(--gold-light);
     border-left-color: var(--gold-primary);
-    }
-    .search-result-item img {
+}
+.search-result-item img {
     width: 50px;
     height: 50px;
     object-fit: cover;
     border-radius: var(--radius-sm);
     border: 2px solid var(--gold-primary);
-    }
-    .search-result-info {
+}
+.search-result-info {
     flex: 1;
     min-width: 0;
-    }
-    .search-result-name {
+}
+.search-result-name {
     font-weight: 600;
     color: var(--black-soft);
     font-size: 0.95rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    }
-    .search-result-price {
+}
+.search-result-price {
     color: var(--gold-primary);
     font-weight: 700;
     font-size: 0.9rem;
-    }
-    .search-result-category {
+}
+.search-result-category {
     color: var(--gray-medium);
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    }
-    .search-no-results {
+}
+.search-no-results {
     padding: var(--spacing-md);
     text-align: center;
     color: var(--gray-medium);
-    }
-    /* Header Actions */
-    .header-actions {
+}
+/* Header Actions */
+.header-actions {
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
-    }
-    .cart-btn {
+}
+.cart-btn {
     position: relative;
     background: var(--gold-primary);
     color: var(--white);
@@ -355,28 +356,28 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     font-size: 1.3rem;
     transition: all var(--transition-normal);
     box-shadow: var(--shadow-md);
-    }
-    .cart-btn:hover {
+}
+.cart-btn:hover {
     background: var(--gold-dark);
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
-    }
-    /* Animações do Carrinho */
-    .cart-btn.cart-bounce {
+}
+/* Animações do Carrinho */
+.cart-btn.cart-bounce {
     animation: cartBounce 0.5s ease;
-    }
-    .cart-btn.cart-glow {
+}
+.cart-btn.cart-glow {
     animation: cartGlow 0.5s ease;
-    }
-    @keyframes cartBounce {
+}
+@keyframes cartBounce {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.2); }
-    }
-    @keyframes cartGlow {
+}
+@keyframes cartGlow {
     0%, 100% { box-shadow: 0 0 0 0 var(--gold-primary); }
     50% { box-shadow: 0 0 30px 10px var(--gold-primary); }
-    }
-    .cart-count {
+}
+.cart-count {
     position: absolute;
     top: -5px;
     right: -5px;
@@ -391,9 +392,9 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     font-size: 0.7rem;
     font-weight: 700;
     box-shadow: var(--shadow-sm);
-    }
-    /* Navegação de Categorias */
-    .nav-categories {
+}
+/* Navegação de Categorias */
+.nav-categories {
     background: var(--white);
     border-top: 1px solid var(--gold-light);
     border-bottom: 1px solid var(--gold-light);
@@ -401,18 +402,18 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    }
-    .nav-categories::-webkit-scrollbar {
+}
+.nav-categories::-webkit-scrollbar {
     display: none;
-    }
-    .category-list {
+}
+.category-list {
     display: flex;
     gap: var(--spacing-sm);
     list-style: none;
     padding: 0;
     margin: 0;
-    }
-    .category-list li {
+}
+.category-list li {
     padding: var(--spacing-sm) var(--spacing-md);
     cursor: pointer;
     font-weight: 600;
@@ -423,34 +424,34 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     transition: all var(--transition-normal);
     border-bottom: 3px solid transparent;
     white-space: nowrap;
-    }
-    .category-list li:hover {
+}
+.category-list li:hover {
     color: var(--gold-primary);
-    }
-    .category-list li.active {
+}
+.category-list li.active {
     color: var(--gold-dark);
     border-bottom-color: var(--gold-primary);
-    }
-    
-    /* ========================================
-    4. HERO BANNER
-    ======================================== */
-    .hero-banner {
+}
+
+/* ========================================
+4. HERO BANNER
+======================================== */
+.hero-banner {
     background: var(--white);
     padding: var(--spacing-md) 0;
-    }
-    .hero-banner-xl {
+}
+.hero-banner-xl {
     padding: var(--spacing-xl) 0;
-    }
-    .hero-image-container {
+}
+.hero-image-container {
     max-width: 1200px;
     margin: 0 auto;
     text-align: center;
-    }
-    .hero-image-container-xl {
+}
+.hero-image-container-xl {
     max-width: 1400px;
-    }
-    .hero-image {
+}
+.hero-image {
     max-width: 100%;
     max-height: 180px;
     width: auto;
@@ -459,50 +460,50 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     margin-left: auto;
     margin-right: auto;
     object-fit: contain;
-    }
-    .hero-image-xl {
+}
+.hero-image-xl {
     max-height: 350px;
-    }
-    
-    /* ========================================
-    5. DELIVERY CALLOUT
-    ======================================== */
-    .delivery-callout {
+}
+
+/* ========================================
+5. DELIVERY CALLOUT
+======================================== */
+.delivery-callout {
     background: var(--gold-gradient);
     padding: var(--spacing-md) 0;
     margin: var(--spacing-xs) 0;
-    }
-    .callout-content {
+}
+.callout-content {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: var(--spacing-lg);
     color: var(--white);
-    }
-    .callout-content i {
+}
+.callout-content i {
     font-size: 2.5rem;
     animation: truckMove 2s infinite;
-    }
-    .callout-text {
+}
+.callout-text {
     display: flex;
     flex-direction: column;
     align-items: center;
-    }
-    .callout-text strong {
+}
+.callout-text strong {
     font-size: 1.3rem;
     font-weight: 700;
     text-transform: uppercase;
     text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    .callout-text .highlight-red {
+}
+.callout-text .highlight-red {
     font-size: 1.1rem;
     margin-top: var(--spacing-xs);
-    }
-    
-    /* ========================================
-    6. MOBILE FILTERS
-    ======================================== */
-    .mobile-filters {
+}
+
+/* ========================================
+6. MOBILE FILTERS
+======================================== */
+.mobile-filters {
     display: none;
     padding: var(--spacing-sm) var(--spacing-md);
     background: var(--white);
@@ -512,8 +513,8 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     position: sticky;
     top: 114px;
     z-index: 90;
-    }
-    .filter-btn {
+}
+.filter-btn {
     background: var(--black-soft);
     color: var(--white);
     padding: var(--spacing-sm) var(--spacing-md);
@@ -524,66 +525,66 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     align-items: center;
     gap: var(--spacing-xs);
     transition: all var(--transition-normal);
-    }
-    .filter-btn:hover {
+}
+.filter-btn:hover {
     background: var(--gold-primary);
-    }
-    .product-count {
+}
+.product-count {
     color: var(--gray-medium);
     font-size: 0.9rem;
-    }
-    
-    /* ========================================
-    7. SKELETON SCREENS
-    ======================================== */
-    .product-card.skeleton {
+}
+
+/* ========================================
+7. SKELETON SCREENS
+======================================== */
+.product-card.skeleton {
     cursor: default;
     pointer-events: none;
     background: var(--white);
-    }
-    .product-card.skeleton:hover {
+}
+.product-card.skeleton:hover {
     transform: none;
     box-shadow: var(--shadow-md);
-    }
-    .skeleton-image {
+}
+.skeleton-image {
     background: linear-gradient(90deg, var(--gray-light) 25%, #f0f0f0 50%, var(--gray-light) 75%);
     background-size: 200% 100%;
     animation: skeletonLoading 1.5s infinite;
     height: 140px;
     width: 100%;
-    }
-    .skeleton-text {
+}
+.skeleton-text {
     background: linear-gradient(90deg, var(--gray-light) 25%, #f0f0f0 50%, var(--gray-light) 75%);
     background-size: 200% 100%;
     animation: skeletonLoading 1.5s infinite;
     border-radius: var(--radius-sm);
     margin-bottom: var(--spacing-xs);
-    }
-    .skeleton-title {
+}
+.skeleton-title {
     height: 14px;
     width: 90%;
-    }
-    .skeleton-price {
+}
+.skeleton-price {
     height: 12px;
     width: 50%;
-    }
-    .skeleton-button {
+}
+.skeleton-button {
     height: 40px;
     width: 100%;
-    }
-    
-    /* ========================================
-    8. PRODUCTS GRID (LAYOUT ALIEXPRESS MOBILE)
-    ======================================== */
-    .main-content {
+}
+
+/* ========================================
+8. PRODUCTS GRID (LAYOUT ALIEXPRESS MOBILE)
+======================================== */
+.main-content {
     padding: var(--spacing-md) 0;
-    }
-    .products-header,
-    .section-header {
+}
+.products-header,
+.section-header {
     text-align: center;
     margin-bottom: var(--spacing-lg);
-    }
-    .section-title {
+}
+.section-title {
     font-family: var(--font-display);
     font-size: 1.5rem;
     font-weight: 700;
@@ -591,23 +592,23 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     margin-bottom: var(--spacing-xs);
     text-transform: uppercase;
     letter-spacing: 1px;
-    }
-    .section-subtitle {
+}
+.section-subtitle {
     font-size: 0.85rem;
     color: var(--gray-medium);
     font-weight: 300;
     letter-spacing: 0.5px;
-    }
-    /* GRID PRINCIPAL - 2 COLUNAS MOBILE */
-    .products-grid {
+}
+/* GRID PRINCIPAL - 2 COLUNAS MOBILE */
+.products-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
     margin-bottom: var(--spacing-xl);
     padding: 0 8px;
-    }
-    /* Product Card - Estilo AliExpress */
-    .product-card {
+}
+/* Product Card - Estilo AliExpress */
+.product-card {
     background: var(--white);
     border-radius: 8px;
     overflow: hidden;
@@ -618,13 +619,13 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     position: relative;
     display: flex;
     flex-direction: column;
-    }
-    .product-card:hover {
+}
+.product-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     border-color: var(--gold-primary);
-    }
-    .product-image {
+}
+.product-image {
     position: relative;
     width: 100%;
     height: 140px;
@@ -632,19 +633,19 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     overflow: hidden;
     background: var(--gray-light);
     flex-shrink: 0;
-    }
-    .product-image img {
+}
+.product-image img {
     width: 100% !important;
     height: 100% !important;
     aspect-ratio: 1 / 1 !important;
     object-fit: cover !important;
     transition: transform 0.4s ease;
-    }
-    .product-card:hover .product-image img {
+}
+.product-card:hover .product-image img {
     transform: scale(1.05);
-    }
-    /* SELO VENDIDO HOJE - Escassez */
-    .product-sold-today {
+}
+/* SELO VENDIDO HOJE - Escassez */
+.product-sold-today {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -662,13 +663,13 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     border: 1px solid rgba(255,255,255,0.3);
     white-space: nowrap;
     animation: pulseSold 2s infinite;
-    }
-    @keyframes pulseSold {
+}
+@keyframes pulseSold {
     0%, 100% { opacity: 1; transform: translate(-50%, -50%) rotate(-15deg) scale(1); }
     50% { opacity: 0.9; transform: translate(-50%, -50%) rotate(-15deg) scale(1.05); }
-    }
-    /* Badges */
-    .product-badge {
+}
+/* Badges */
+.product-badge {
     position: absolute;
     top: 6px;
     left: 6px;
@@ -681,26 +682,26 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     z-index: 10;
     background: linear-gradient(90deg, var(--gold-primary), var(--gold-light));
     color: var(--black-soft);
-    }
-    .badge-offer {
+}
+.badge-offer {
     background: linear-gradient(90deg, var(--danger), #FF6B6B);
     color: var(--white);
-    }
-    .product-info {
+}
+.product-info {
     padding: 8px;
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 4px;
-    }
-    .product-category {
+}
+.product-category {
     font-size: 0.6rem;
     text-transform: uppercase;
     color: var(--gray-medium);
     letter-spacing: 0.5px;
     font-weight: 500;
-    }
-    .product-name {
+}
+.product-name {
     font-family: var(--font-body);
     font-size: 0.8rem;
     font-weight: 500;
@@ -712,18 +713,18 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     -webkit-box-orient: vertical;
     overflow: hidden;
     min-height: 1.2em;
-    }
-    .product-price {
+}
+.product-price {
     font-size: 1rem;
     font-weight: 700;
     color: var(--gold-primary);
-    }
-    .product-price::before {
+}
+.product-price::before {
     content: 'R$ ';
     font-size: 0.75rem;
     font-weight: 500;
-    }
-    .product-solitario {
+}
+.product-solitario {
     font-size: 0.7rem;
     font-weight: 700;
     color: var(--gold-dark);
@@ -733,30 +734,30 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     background: var(--gold-light);
     padding: 4px 6px;
     border-radius: 4px;
-    }
-    .product-solitario i {
+}
+.product-solitario i {
     color: var(--gold-primary);
     font-size: 0.65rem;
-    }
-    /* Prova Social - Vendas */
-    .product-social-proof {
+}
+/* Prova Social - Vendas */
+.product-social-proof {
     display: flex;
     align-items: center;
     gap: 6px;
     font-size: 0.65rem;
     color: var(--gray-medium);
     margin-top: 2px;
-    }
-    .product-sales {
+}
+.product-sales {
     color: var(--gray-medium);
     font-weight: 500;
-    }
-    /* Botões da Vitrine (Ocultos no Mobile) */
-    .product-buttons {
+}
+/* Botões da Vitrine (Ocultos no Mobile) */
+.product-buttons {
     display: none;
-    }
-    .product-buttons .btn-primary,
-    .product-buttons .btn-secondary {
+}
+.product-buttons .btn-primary,
+.product-buttons .btn-secondary {
     flex: 1;
     padding: var(--spacing-xs) var(--spacing-sm);
     border: none;
@@ -771,39 +772,39 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     align-items: center;
     justify-content: center;
     gap: var(--spacing-xs);
-    }
-    .btn-primary {
+}
+.btn-primary {
     background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
     color: var(--white);
     box-shadow: var(--shadow-sm);
-    }
-    .btn-primary:hover {
+}
+.btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
-    }
-    .btn-secondary {
+}
+.btn-secondary {
     background: var(--whatsapp);
     color: var(--white);
     border: 2px solid var(--whatsapp);
     box-shadow: var(--shadow-sm);
     animation: pulseWhatsappButton 2s infinite ease-in-out;
-    }
-    .btn-secondary:hover {
+}
+.btn-secondary:hover {
     background: var(--whatsapp-dark);
     border-color: var(--whatsapp-dark);
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg);
     animation: none;
-    }
-    
-    /* ========================================
-    9. CARROSSEL DE AVALIAÇÕES
-    ======================================== */
-    .reviews-carousel-section {
+}
+
+/* ========================================
+9. CARROSSEL DE AVALIAÇÕES
+======================================== */
+.reviews-carousel-section {
     margin: var(--spacing-lg) 0;
     padding: 0 8px;
-    }
-    .reviews-carousel-title {
+}
+.reviews-carousel-title {
     font-family: var(--font-display);
     font-size: 1.1rem;
     color: var(--gold-dark);
@@ -811,8 +812,8 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     display: flex;
     align-items: center;
     gap: 8px;
-    }
-    .reviews-carousel {
+}
+.reviews-carousel {
     display: flex;
     gap: 12px;
     overflow-x: auto;
@@ -820,11 +821,11 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     -webkit-overflow-scrolling: touch;
     padding-bottom: 12px;
     scrollbar-width: none;
-    }
-    .reviews-carousel::-webkit-scrollbar {
+}
+.reviews-carousel::-webkit-scrollbar {
     display: none;
-    }
-    .review-carousel-card {
+}
+.review-carousel-card {
     flex: 0 0 280px;
     background: var(--white);
     border-radius: 12px;
@@ -832,31 +833,31 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     border: 1px solid #f0f0f0;
     scroll-snap-align: start;
-    }
-    .review-carousel-header {
+}
+.review-carousel-header {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 10px;
-    }
-    .review-carousel-avatar {
+}
+.review-carousel-avatar {
     width: 40px;
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid var(--gold-primary);
-    }
-    .review-carousel-name {
+}
+.review-carousel-name {
     font-weight: 600;
     color: var(--black-soft);
     font-size: 0.9rem;
-    }
-    .review-carousel-stars {
+}
+.review-carousel-stars {
     color: #ff9500;
     font-size: 0.85rem;
     letter-spacing: 1px;
-    }
-    .review-carousel-comment {
+}
+.review-carousel-comment {
     color: var(--gray-medium);
     font-size: 0.85rem;
     line-height: 1.4;
@@ -865,64 +866,64 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    }
-    .review-carousel-image {
+}
+.review-carousel-image {
     margin-top: 10px;
     width: 100%;
     height: 120px;
     border-radius: 8px;
     overflow: hidden;
-    }
-    .review-carousel-image img {
+}
+.review-carousel-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    }
-    .reviews-carousel-indicator {
+}
+.reviews-carousel-indicator {
     text-align: center;
     color: var(--gray-medium);
     font-size: 0.75rem;
     margin-top: 8px;
-    }
-    
-    /* ========================================
-    10. SOCIAL PROOF SECTION
-    ======================================== */
-    .social-proof-section {
+}
+
+/* ========================================
+10. SOCIAL PROOF SECTION
+======================================== */
+.social-proof-section {
     margin-bottom: var(--spacing-xxl);
-    }
-    .social-proof-grid {
+}
+.social-proof-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: var(--spacing-lg);
-    }
-    .social-proof-card {
+}
+.social-proof-card {
     position: relative;
     border-radius: var(--radius-md);
     overflow: hidden;
     height: 350px;
     box-shadow: var(--shadow-md);
     transition: all var(--transition-normal);
-    }
-    .social-proof-card:hover {
+}
+.social-proof-card:hover {
     transform: translateY(-10px);
     box-shadow: var(--shadow-hover);
-    }
-    .social-proof-image {
+}
+.social-proof-image {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    }
-    .social-proof-image img {
+}
+.social-proof-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.8s ease;
-    }
-    .social-proof-card:hover .social-proof-image img {
+}
+.social-proof-card:hover .social-proof-image img {
     transform: scale(1.1);
-    }
-    .social-proof-overlay {
+}
+.social-proof-overlay {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -931,15 +932,15 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     padding: var(--spacing-xl) var(--spacing-md) var(--spacing-md);
     color: var(--white);
     text-align: center;
-    }
-    .social-proof-text {
+}
+.social-proof-text {
     font-size: 1.1rem;
     font-weight: 600;
     font-family: var(--font-display);
     line-height: 1.4;
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-    .social-proof-icon {
+}
+.social-proof-icon {
     position: absolute;
     top: var(--spacing-md);
     right: var(--spacing-md);
@@ -953,20 +954,20 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     color: var(--white);
     font-size: 1.3rem;
     box-shadow: var(--shadow-lg);
-    }
-    
-    /* ========================================
-    11. FAQ SECTION MODERNA
-    ======================================== */
-    .faq-section {
+}
+
+/* ========================================
+11. FAQ SECTION MODERNA
+======================================== */
+.faq-section {
     margin-bottom: var(--spacing-xxl);
-    }
-    .faq-grid {
+}
+.faq-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: var(--spacing-lg);
-    }
-    .faq-card {
+}
+.faq-card {
     background: var(--white);
     padding: var(--spacing-lg);
     border-radius: var(--radius-lg);
@@ -975,13 +976,13 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     transition: all var(--transition-normal);
     cursor: pointer;
     text-align: center;
-    }
-    .faq-card:hover {
+}
+.faq-card:hover {
     transform: translateY(-8px);
     box-shadow: var(--shadow-xl);
     border-color: var(--gold-primary);
-    }
-    .faq-icon {
+}
+.faq-icon {
     width: 70px;
     height: 70px;
     background: var(--gold-primary);
@@ -994,19 +995,19 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     font-size: 2rem;
     box-shadow: var(--shadow-md);
     transition: transform var(--transition-normal);
-    }
-    .faq-card:hover .faq-icon {
+}
+.faq-card:hover .faq-icon {
     transform: scale(1.1);
-    }
-    .faq-card h3 {
+}
+.faq-card h3 {
     font-family: var(--font-display);
     font-size: 1.3rem;
     font-weight: 600;
     color: var(--gold-dark);
     margin-bottom: var(--spacing-md);
     line-height: 1.4;
-    }
-    .faq-audio {
+}
+.faq-audio {
     margin-top: var(--spacing-md);
     background: var(--gray-light);
     padding: var(--spacing-sm);
@@ -1014,21 +1015,21 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     display: flex;
     align-items: center;
     justify-content: center;
-    }
-    .faq-audio audio {
+}
+.faq-audio audio {
     width: 100%;
     height: 40px;
     outline: none;
     border-radius: var(--radius-full);
-    }
-    .faq-audio audio::-webkit-media-controls-panel {
+}
+.faq-audio audio::-webkit-media-controls-panel {
     background: var(--gold-light);
-    }
-    
-    /* ========================================
-    12. TEAM SECTION
-    ======================================== */
-    .team-section {
+}
+
+/* ========================================
+12. TEAM SECTION
+======================================== */
+.team-section {
     background: linear-gradient(135deg, var(--gold-light) 0%, var(--white) 100%);
     border-radius: var(--radius-lg);
     padding: var(--spacing-xl);
@@ -1037,35 +1038,35 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     opacity: 0;
     transform: translateY(30px);
     transition: opacity 0.8s ease, transform 0.8s ease;
-    }
-    .team-section.visible {
+}
+.team-section.visible {
     display: block;
     opacity: 1;
     transform: translateY(0);
-    }
-    .team-content {
+}
+.team-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--spacing-xxl);
     align-items: center;
-    }
-    .team-image-wrapper {
+}
+.team-image-wrapper {
     position: relative;
     border-radius: var(--radius-md);
     overflow: hidden;
     height: 400px;
     box-shadow: var(--shadow-lg);
-    }
-    .team-image-wrapper img {
+}
+.team-image-wrapper img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.8s ease;
-    }
-    .team-section:hover .team-image-wrapper img {
+}
+.team-section:hover .team-image-wrapper img {
     transform: scale(1.05);
-    }
-    .team-overlay {
+}
+.team-overlay {
     position: absolute;
     bottom: 0;
     left: 0;
@@ -1078,42 +1079,42 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 2px;
-    }
-    .team-info {
+}
+.team-info {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
-    }
-    .team-title {
+}
+.team-title {
     font-family: var(--font-display);
     font-size: 2rem;
     color: var(--gold-dark);
     margin-bottom: var(--spacing-sm);
-    }
-    .team-description {
+}
+.team-description {
     color: var(--gray-medium);
     line-height: 1.8;
     font-size: 1rem;
-    }
-    .team-features {
+}
+.team-features {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-sm);
     margin: var(--spacing-md) 0;
-    }
-    .feature-item {
+}
+.feature-item {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
     color: var(--black-soft);
     font-weight: 500;
     font-size: 0.95rem;
-    }
-    .feature-item i {
+}
+.feature-item i {
     color: var(--success);
     font-size: 1rem;
-    }
-    .team-whatsapp-btn {
+}
+.team-whatsapp-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1127,20 +1128,20 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     transition: all var(--transition-normal);
     box-shadow: var(--shadow-md);
     width: fit-content;
-    }
-    .team-whatsapp-btn:hover {
+}
+.team-whatsapp-btn:hover {
     background: var(--whatsapp-dark);
     transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
-    }
-    
-    /* ========================================
-    13. CARROSSEL INFINITO PREMIUM
-    ======================================== */
-    .carousel-section {
+}
+
+/* ========================================
+13. CARROSSEL INFINITO PREMIUM
+======================================== */
+.carousel-section {
     margin-bottom: var(--spacing-xxl);
-    }
-    .carousel-title {
+}
+.carousel-title {
     text-align: center;
     font-size: 2rem;
     color: var(--gold-dark);
@@ -1149,45 +1150,45 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     align-items: center;
     justify-content: center;
     gap: var(--spacing-sm);
-    }
-    .carousel-title i {
+}
+.carousel-title i {
     color: var(--gold-primary);
     animation: compassSpin 8s linear infinite;
-    }
-    .carousel-container {
+}
+.carousel-container {
     position: relative;
     overflow: hidden;
     border-radius: var(--radius-md);
     background: var(--white);
     padding: var(--spacing-lg) 0;
-    }
-    .carousel-gradient-left,
-    .carousel-gradient-right {
+}
+.carousel-gradient-left,
+.carousel-gradient-right {
     position: absolute;
     top: 0;
     width: 100px;
     height: 100%;
     z-index: 2;
     pointer-events: none;
-    }
-    .carousel-gradient-left {
+}
+.carousel-gradient-left {
     left: 0;
     background: linear-gradient(90deg, var(--white), transparent);
-    }
-    .carousel-gradient-right {
+}
+.carousel-gradient-right {
     right: 0;
     background: linear-gradient(-90deg, var(--white), transparent);
-    }
-    .infinite-carousel {
+}
+.infinite-carousel {
     display: flex;
     gap: var(--spacing-lg);
     animation: carouselScroll 40s linear infinite;
     width: fit-content;
-    }
-    .infinite-carousel:hover {
+}
+.infinite-carousel:hover {
     animation-play-state: paused;
-    }
-    .carousel-item {
+}
+.carousel-item {
     flex: 0 0 250px;
     background: var(--white);
     border-radius: var(--radius-md);
@@ -1196,37 +1197,37 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     transition: all var(--transition-normal);
     cursor: pointer;
     border: 1px solid var(--gold-light);
-    }
-    .carousel-item:hover {
+}
+.carousel-item:hover {
     transform: scale(1.05);
     box-shadow: var(--shadow-lg);
     border-color: var(--gold-primary);
-    }
-    .carousel-item img {
+}
+.carousel-item img {
     width: 100%;
     height: 250px;
     object-fit: cover;
-    }
-    .carousel-item-info {
+}
+.carousel-item-info {
     padding: var(--spacing-md);
     text-align: center;
-    }
-    .carousel-item-name {
+}
+.carousel-item-name {
     font-weight: 600;
     color: var(--black-soft);
     margin-bottom: var(--spacing-xs);
     font-size: 0.95rem;
-    }
-    .carousel-item-price {
+}
+.carousel-item-price {
     color: var(--gold-primary);
     font-weight: 700;
     font-size: 1.1rem;
-    }
-    
-    /* ========================================
-    14. NOTIFICAÇÃO GEOLOCALIZADA
-    ======================================== */
-    .geo-notification {
+}
+
+/* ========================================
+14. NOTIFICAÇÃO GEOLOCALIZADA
+======================================== */
+.geo-notification {
     position: fixed;
     bottom: 100px;
     left: 30px;
@@ -1239,40 +1240,40 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     max-width: 350px;
     display: none;
     animation: slideInLeft 0.4s ease;
-    }
-    .geo-content {
+}
+.geo-content {
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    }
-    .geo-content i {
+}
+.geo-content i {
     font-size: 1.5rem;
     color: var(--gold-primary);
-    }
-    .geo-text {
+}
+.geo-text {
     flex: 1;
     font-size: 0.9rem;
     line-height: 1.4;
     color: var(--black-soft);
-    }
-    .geo-text strong {
+}
+.geo-text strong {
     color: var(--gold-dark);
     font-weight: 700;
-    }
-    .geo-close {
+}
+.geo-close {
     color: var(--gray-medium);
     font-size: 0.9rem;
     padding: var(--spacing-xs);
     transition: color var(--transition-fast);
-    }
-    .geo-close:hover {
+}
+.geo-close:hover {
     color: var(--danger);
-    }
-    
-    /* ========================================
-    15. TOAST NOTIFICATION
-    ======================================== */
-    .toast {
+}
+
+/* ========================================
+15. TOAST NOTIFICATION
+======================================== */
+.toast {
     position: fixed;
     bottom: 30px;
     right: 30px;
@@ -1288,16 +1289,16 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     align-items: center;
     gap: var(--spacing-sm);
     border-left: 4px solid var(--gold-primary);
-    }
-    .toast.show {
+}
+.toast.show {
     display: flex;
     animation: slideUp 0.3s ease;
-    }
-    
-    /* ========================================
-    16. WHATSAPP FLUTUANTE
-    ======================================== */
-    .whatsapp-float {
+}
+
+/* ========================================
+16. WHATSAPP FLUTUANTE
+======================================== */
+.whatsapp-float {
     position: fixed;
     bottom: 30px;
     right: 30px;
@@ -1314,16 +1315,16 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     z-index: 150;
     transition: all var(--transition-normal);
     animation: pulseWhatsapp 2s infinite;
-    }
-    .whatsapp-float:hover {
+}
+.whatsapp-float:hover {
     transform: scale(1.15);
     box-shadow: 0 15px 40px rgba(37, 211, 102, 0.6);
-    }
-    
-    /* ========================================
-    17. MODAL DE PRODUTO PREMIUM
-    ======================================== */
-    .modal {
+}
+
+/* ========================================
+17. MODAL DE PRODUTO PREMIUM
+======================================== */
+.modal {
     display: none;
     position: fixed;
     top: 0;
@@ -1331,12 +1332,12 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     right: 0;
     bottom: 0;
     z-index: 1000;
-    }
-    .modal.active {
+}
+.modal.active {
     display: flex;
     align-items: flex-end;
-    }
-    .modal-overlay {
+}
+.modal-overlay {
     position: absolute;
     top: 0;
     left: 0;
@@ -1346,11 +1347,11 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     backdrop-filter: blur(5px);
     opacity: 0;
     transition: opacity var(--transition-normal);
-    }
-    .modal.active .modal-overlay {
+}
+.modal.active .modal-overlay {
     opacity: 1;
-    }
-    .modal-content {
+}
+.modal-content {
     position: relative;
     background: var(--white);
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
@@ -1361,13 +1362,13 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     transition: transform 0.4s ease;
     z-index: 1001;
     box-shadow: var(--shadow-xl);
-    }
-    .modal.active .modal-content {
+}
+.modal.active .modal-content {
     transform: translateY(0);
-    }
-    
-    /* BOTÃO FECHAR - 2X MAIOR, FIXO, COM PULSO */
-    .modal-close-btn {
+}
+
+/* BOTÃO FECHAR - 2X MAIOR, FIXO, COM PULSO */
+.modal-close-btn {
     position: fixed !important;
     top: 20px;
     right: 20px;
@@ -1386,21 +1387,21 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     animation: pulseClose 2s infinite ease-in-out;
     border: 3px solid white;
     cursor: pointer;
-    }
-    
-    .modal-close-btn:hover {
+}
+
+.modal-close-btn:hover {
     background: var(--gold-dark);
     transform: scale(1.1);
     animation: none;
-    }
-    
-    @keyframes pulseClose {
+}
+
+@keyframes pulseClose {
     0%, 100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.7); }
     50% { box-shadow: 0 0 0 20px rgba(212, 175, 55, 0); }
-    }
-    
-    /* Botão de próxima foto */
-    .next-photo-btn {
+}
+
+/* Botão de próxima foto */
+.next-photo-btn {
     position: fixed;
     right: 20px;
     top: 50%;
@@ -1419,29 +1420,29 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     border: 2px solid white;
     cursor: pointer;
     animation: bounceRight 1.5s infinite;
-    }
-    
-    .next-photo-btn:hover {
+}
+
+.next-photo-btn:hover {
     background: var(--gold-dark);
-    }
-    
-    @keyframes bounceRight {
+}
+
+@keyframes bounceRight {
     0%, 100% { transform: translateY(-50%) translateX(0); }
     50% { transform: translateY(-50%) translateX(10px); }
-    }
-    
-    .modal-container {
+}
+
+.modal-container {
     padding: 0;
-    }
-    /* Mídia - Foto Normal */
-    .modal-gallery {
+}
+/* Mídia - Foto Normal */
+.modal-gallery {
     width: 100%;
     background: var(--black-soft);
     aspect-ratio: 1 / 1;
     max-height: 45vh;
     overflow: hidden;
-    }
-    .modal-main-media {
+}
+.modal-main-media {
     width: 100%;
     height: 100%;
     background: var(--gray-luxury);
@@ -1450,25 +1451,25 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     align-items: center;
     justify-content: center;
     position: relative;
-    }
-    .modal-main-media img,
-    .modal-main-media video {
+}
+.modal-main-media img,
+.modal-main-media video {
     width: 100%;
     height: 100%;
     object-fit: contain;
     background-color: var(--black-soft);
     cursor: zoom-in;
-    }
-    /* Miniaturas */
-    .modal-thumbnails {
+}
+/* Miniaturas */
+.modal-thumbnails {
     display: flex;
     gap: 10px;
     overflow-x: auto;
     padding: 15px 20px;
     background: var(--white);
     border-bottom: 1px solid var(--gold-light);
-    }
-    .modal-thumb {
+}
+.modal-thumb {
     flex: 0 0 70px;
     width: 70px;
     height: 70px;
@@ -1478,21 +1479,21 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     border: 2px solid transparent;
     transition: all var(--transition-fast);
     position: relative;
-    }
-    .modal-thumb:hover {
+}
+.modal-thumb:hover {
     border-color: var(--gold-primary);
     transform: scale(1.05);
-    }
-    .modal-thumb.active {
+}
+.modal-thumb.active {
     border-color: var(--gold-primary);
     box-shadow: var(--shadow-gold);
-    }
-    .modal-thumb img {
+}
+.modal-thumb img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    }
-    .modal-thumb.video-thumb::after {
+}
+.modal-thumb.video-thumb::after {
     content: '\f04b';
     font-family: 'Font Awesome 6 Free';
     font-weight: 900;
@@ -1509,198 +1510,228 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     align-items: center;
     justify-content: center;
     font-size: 0.7rem;
-    }
-    
-    /* ========================================
-    NOVAS SEÇÕES: GATILHOS DE VENDA NO MODAL
-    ======================================== */
-    
-    /* Urgency Box - Caixa de urgência */
-    .urgency-box {
+}
+
+/* ========================================
+NOVAS SEÇÕES: GATILHOS DE VENDA NO MODAL (OTIMIZADOS)
+======================================== */
+
+/* Selo solitário discreto */
+.solitario-discreto {
+    font-size: 0.75rem;
+    color: var(--gray-medium);
+    background: var(--gray-light);
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    margin: 10px 0;
+    text-align: center;
+    border: 1px solid var(--gray-soft);
+}
+
+.solitario-discreto i {
+    color: var(--gold-primary);
+    font-size: 0.7rem;
+    margin-right: 4px;
+}
+
+/* Urgency Box - Caixa de urgência */
+.urgency-box {
     background: var(--urgency-bg);
     border-left: 4px solid var(--urgency-border);
     border-radius: var(--radius-sm);
-    padding: 15px;
-    margin: 15px 0;
+    padding: 12px;
+    margin: 10px 0;
     font-family: var(--font-body);
-    }
-    
-    .delivery-timer {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--urgency-text);
-    margin-bottom: 8px;
-    }
-    
-    .delivery-timer i {
-    font-size: 1.2rem;
-    animation: pulse 2s infinite;
-    }
-    
-    .delivery-timer span {
-    background: var(--white);
-    padding: 5px 10px;
-    border-radius: var(--radius-sm);
-    font-family: monospace;
-    font-size: 1.2rem;
-    letter-spacing: 2px;
-    box-shadow: var(--shadow-sm);
-    }
-    
-    .delivery-tomorrow {
-    font-size: 1rem;
-    color: var(--gold-dark);
-    font-weight: 600;
-    text-align: center;
-    }
-    
-    .trust-badge {
+}
+
+.delivery-timer {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px dashed var(--gold-light);
-    color: var(--success);
-    font-size: 0.9rem;
-    font-weight: 500;
-    }
-    
-    .trust-badge i {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--urgency-text);
+    flex-wrap: wrap;
+}
+
+.delivery-timer i {
     font-size: 1rem;
-    }
-    
-    /* Looking Now - Pessoas vendo */
-    .looking-now {
+    animation: pulse 2s infinite;
+}
+
+.timer-countdown {
+    background: var(--white);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
+    font-family: monospace;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    box-shadow: var(--shadow-sm);
+}
+
+.timer-text {
+    color: var(--urgency-text);
+}
+
+.delivery-today {
+    font-size: 0.95rem;
+    color: var(--success);
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Looking Now - Pessoas vendo */
+.looking-now {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     background: linear-gradient(135deg, var(--gold-light), var(--white));
     border-radius: var(--radius-full);
-    padding: 8px 15px;
-    margin: 10px 0;
-    font-size: 0.9rem;
+    padding: 6px 12px;
+    margin: 8px 0;
+    font-size: 0.8rem;
     color: var(--gold-dark);
     font-weight: 500;
     border: 1px solid var(--gold-primary);
     width: fit-content;
     margin-left: auto;
     margin-right: auto;
-    }
-    
-    .looking-now i {
+}
+
+.looking-now i {
     color: var(--info);
     animation: blink 2s infinite;
-    }
-    
-    @keyframes blink {
+}
+
+@keyframes blink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.5; }
-    }
-    
-    /* Botão de Compartilhar */
-    .modal-buttons {
+}
+
+/* Botão de Compartilhar Melhorado */
+.modal-buttons {
     display: flex;
-    gap: 10px;
-    margin: 20px 0;
-    }
-    
-    .btn-add-cart-modal,
-    .btn-whatsapp-modal {
+    gap: 8px;
+    margin: 15px 0;
+}
+
+.btn-add-cart-modal,
+.btn-whatsapp-modal {
     flex: 1;
-    padding: 14px;
+    padding: 12px;
     border-radius: var(--radius-sm);
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.9rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     transition: all var(--transition-normal);
     cursor: pointer;
-    }
-    
-    .btn-add-cart-modal {
+}
+
+.btn-add-cart-modal {
     background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
     color: var(--white);
-    box-shadow: var(--shadow-md);
-    }
-    
-    .btn-add-cart-modal:hover {
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-add-cart-modal:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-    }
-    
-    .btn-whatsapp-modal {
+    box-shadow: var(--shadow-md);
+}
+
+.btn-whatsapp-modal {
     background: var(--whatsapp);
     color: var(--white);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
     animation: pulseWhatsappButton 2s infinite ease-in-out;
-    }
-    
-    .btn-whatsapp-modal:hover {
+}
+
+.btn-whatsapp-modal:hover {
     background: var(--whatsapp-dark);
     transform: translateY(-2px);
     animation: none;
-    }
-    
-    .btn-share {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
+}
+
+.btn-share {
+    min-width: 100px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
     background: var(--gold-primary);
     color: var(--white);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    gap: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     transition: all var(--transition-normal);
     box-shadow: var(--shadow-sm);
     cursor: pointer;
     border: none;
     flex-shrink: 0;
-    }
-    
-    .btn-share:hover {
+    line-height: 1.2;
+}
+
+.btn-share i {
+    font-size: 1rem;
+}
+
+.btn-share:hover {
     background: var(--gold-dark);
-    transform: scale(1.1);
+    transform: scale(1.05);
     box-shadow: var(--shadow-md);
-    }
-    
-    /* Ajuste para mobile */
-    @media (max-width: 480px) {
+}
+
+/* Ajuste para mobile */
+@media (max-width: 768px) {
     .modal-buttons {
-    flex-wrap: wrap;
+        flex-wrap: wrap;
     }
     .btn-add-cart-modal,
     .btn-whatsapp-modal {
-    flex: 1 1 calc(50% - 25px);
+        flex: 1 1 calc(50% - 4px);
+        font-size: 0.85rem;
+        padding: 10px;
     }
     .btn-share {
-    width: 45px;
-    height: 45px;
-    font-size: 1rem;
+        width: 100%;
+        margin-top: 5px;
+        font-size: 0.65rem;
+        padding: 8px;
+    }
+    .btn-share i {
+        font-size: 0.9rem;
     }
     .delivery-timer {
-    font-size: 0.95rem;
-    flex-wrap: wrap;
+        font-size: 0.85rem;
+        flex-direction: row;
+        gap: 5px;
     }
-    .delivery-timer span {
-    font-size: 1rem;
+    .timer-countdown {
+        font-size: 0.85rem;
+        padding: 3px 6px;
     }
+    .looking-now {
+        font-size: 0.75rem;
+        padding: 4px 10px;
     }
-    
-    /* Informações do Modal */
-    .modal-info {
+    .solitario-discreto {
+        font-size: 0.7rem;
+        padding: 6px 10px;
+    }
+}
+
+/* Informações do Modal */
+.modal-info {
     padding: 20px;
-    }
-    .modal-category {
+}
+.modal-category {
     font-size: 0.8rem;
     text-transform: uppercase;
     color: var(--gold-primary);
@@ -1708,63 +1739,53 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     font-weight: 600;
     display: block;
     margin-bottom: 5px;
-    }
-    .modal-title {
+}
+.modal-title {
     font-family: var(--font-display);
     font-size: 1.8rem;
     font-weight: 700;
     color: var(--black-soft);
     line-height: 1.2;
     margin-bottom: 10px;
-    }
-    .modal-price-main {
+}
+.modal-price-main {
     font-size: 2rem;
     font-weight: 700;
     color: var(--gold-primary);
-    margin-bottom: 20px;
-    }
-    .modal-description {
+    margin-bottom: 15px;
+}
+.modal-description {
     color: var(--gray-medium);
     line-height: 1.6;
-    margin: 20px 0;
+    margin: 15px 0;
     padding: 15px 0;
     border-top: 1px solid var(--gold-light);
     border-bottom: 1px solid var(--gold-light);
     white-space: pre-wrap;
-    }
-    .delivery-highlight {
-    color: var(--highlight-red);
-    font-weight: 700;
-    font-size: 1.1rem;
-    margin: 10px 0;
-    background: rgba(255, 51, 51, 0.05);
-    padding: 8px;
-    border-radius: var(--radius-sm);
-    text-align: center;
-    }
-    
-    /* Recomendações - Scroll Horizontal */
-    .recommendations-section {
-    margin: 20px 0;
-    }
-    .recommendations-title {
+}
+
+/* Recomendações - Scroll Horizontal */
+.recommendations-section {
+    margin: 15px 0;
+}
+.recommendations-title {
     font-family: var(--font-display);
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--gold-dark);
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     gap: 8px;
-    }
-    .recommendations-grid {
+}
+.recommendations-grid {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     overflow-x: auto;
-    padding-bottom: 10px;
+    padding-bottom: 8px;
     scrollbar-width: thin;
-    }
-    .rec-card {
-    flex: 0 0 140px;
+}
+.rec-card {
+    flex: 0 0 120px;
     background: var(--gray-light);
     border-radius: var(--radius-sm);
     overflow: hidden;
@@ -1772,151 +1793,152 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     transition: all var(--transition-normal);
     border: 1px solid transparent;
     text-align: center;
-    padding: 10px;
-    }
-    .rec-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-md);
+    padding: 8px;
+}
+.rec-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-sm);
     border-color: var(--gold-primary);
-    }
-    .rec-card img {
+}
+.rec-card img {
     width: 100%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
     border-radius: var(--radius-sm);
-    margin-bottom: 8px;
-    }
-    .rec-card h4 {
-    font-size: 0.8rem;
+    margin-bottom: 6px;
+}
+.rec-card h4 {
+    font-size: 0.7rem;
     color: var(--black-soft);
     font-weight: 600;
     margin-bottom: 4px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    }
-    .rec-card .price {
+}
+.rec-card .price {
     color: var(--gold-primary);
-    font-weight: 700;
-    font-size: 0.85rem;
-    }
-    /* Reviews no Modal */
-    .reviews-section {
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+/* Reviews no Modal */
+.reviews-section {
     border-top: 1px solid var(--gold-light);
-    padding-top: 20px;
-    margin-top: 20px;
-    }
-    .reviews-title {
+    padding-top: 15px;
+    margin-top: 15px;
+}
+.reviews-title {
     font-family: var(--font-display);
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--gold-dark);
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     gap: 8px;
-    }
-    .review-card {
+}
+.review-card {
     background: var(--gray-light);
-    padding: 15px;
+    padding: 12px;
     border-radius: var(--radius-sm);
     border-left: 3px solid var(--gold-primary);
-    margin-bottom: 10px;
-    }
-    .review-header {
+    margin-bottom: 8px;
+}
+.review-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
-    }
-    .review-avatar {
-    width: 40px;
-    height: 40px;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+.review-avatar {
+    width: 35px;
+    height: 35px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid var(--gold-primary);
-    }
-    .review-name {
+}
+.review-name {
     font-weight: 600;
     color: var(--black-soft);
-    }
-    .review-stars {
+    font-size: 0.85rem;
+}
+.review-stars {
     color: var(--gold-primary);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     letter-spacing: 2px;
-    }
-    .review-comment {
+}
+.review-comment {
     color: var(--gray-medium);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     line-height: 1.4;
-    }
-    .scroll-indicator {
+}
+.scroll-indicator {
     text-align: center;
     color: var(--gray-medium);
-    font-size: 0.9rem;
-    margin-top: 20px;
+    font-size: 0.85rem;
+    margin-top: 15px;
     animation: bounce 2s infinite;
-    }
-    
-    /* ========================================
-    CROSS-SELL GRID NO MODAL
-    ======================================== */
-    .cross-sell-section {
-    margin: 20px 0;
+}
+
+/* ========================================
+CROSS-SELL GRID NO MODAL
+======================================== */
+.cross-sell-section {
+    margin: 15px 0;
     border-top: 2px solid var(--gold-light);
-    padding-top: 20px;
-    }
-    .cross-sell-title {
+    padding-top: 15px;
+}
+.cross-sell-title {
     font-family: var(--font-display);
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     color: var(--gold-dark);
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     gap: 8px;
-    }
-    /* Grid igual à vitrine principal - 2 colunas no mobile */
-    .cross-sell-grid {
+}
+/* Grid igual à vitrine principal - 2 colunas no mobile */
+.cross-sell-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
+    gap: 6px;
     padding: 0 8px;
-    }
-    /* Card de produto no grid do modal */
-    .cross-sell-card {
+}
+/* Card de produto no grid do modal */
+.cross-sell-card {
     background: var(--white);
-    border-radius: 8px;
+    border-radius: 6px;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     transition: all 0.2s ease;
     cursor: pointer;
     border: 1px solid #f0f0f0;
     display: flex;
     flex-direction: column;
-    }
-    .cross-sell-card:hover {
+}
+.cross-sell-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
     border-color: var(--gold-primary);
-    }
-    .cross-sell-card img {
+}
+.cross-sell-card img {
     width: 100%;
-    height: 120px;
+    height: 100px;
     aspect-ratio: 1 / 1 !important;
     object-fit: cover !important;
-    transition: transform 0.4s ease;
-    }
-    .cross-sell-card:hover img {
+    transition: transform 0.3s ease;
+}
+.cross-sell-card:hover img {
     transform: scale(1.05);
-    }
-    .cross-sell-card .info {
-    padding: 8px;
+}
+.cross-sell-card .info {
+    padding: 6px;
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    }
-    .cross-sell-card .name {
-    font-size: 0.75rem;
+    gap: 3px;
+}
+.cross-sell-card .name {
+    font-size: 0.65rem;
     color: var(--black-soft);
     font-weight: 500;
     line-height: 1.2;
@@ -1925,22 +1947,22 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    }
-    .cross-sell-card .price {
+}
+.cross-sell-card .price {
     color: var(--gold-primary);
-    font-weight: 700;
-    font-size: 0.9rem;
-    }
-    .cross-sell-card .price::before {
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+.cross-sell-card .price::before {
     content: 'R$ ';
-    font-size: 0.7rem;
+    font-size: 0.6rem;
     font-weight: 500;
-    }
-    
-    /* ========================================
-    SUPER ZOOM OVERLAY
-    ======================================== */
-    .super-zoom-overlay {
+}
+
+/* ========================================
+SUPER ZOOM OVERLAY
+======================================== */
+.super-zoom-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -1952,11 +1974,11 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     align-items: center;
     justify-content: center;
     padding: 20px;
-    }
-    .super-zoom-overlay.active {
+}
+.super-zoom-overlay.active {
     display: flex;
-    }
-    .super-zoom-close {
+}
+.super-zoom-close {
     position: absolute;
     top: 20px;
     right: 20px;
@@ -1973,28 +1995,28 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     cursor: pointer;
     transition: all var(--transition-normal);
     z-index: 10000;
-    }
-    .super-zoom-close:hover {
+}
+.super-zoom-close:hover {
     background: var(--gold-dark);
     transform: rotate(90deg);
-    }
-    .super-zoom-content {
+}
+.super-zoom-content {
     max-width: 100%;
     max-height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    }
-    .super-zoom-content img,
-    .super-zoom-content video {
+}
+.super-zoom-content img,
+.super-zoom-content video {
     max-width: 100%;
     max-height: 90vh;
     object-fit: contain;
     border-radius: var(--radius-sm);
     box-shadow: var(--shadow-xl);
-    }
-    /* Botão WhatsApp no Zoom */
-    .zoom-whatsapp-btn {
+}
+/* Botão WhatsApp no Zoom */
+.zoom-whatsapp-btn {
     position: fixed;
     bottom: 20px;
     left: 50%;
@@ -2011,19 +2033,19 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     box-shadow: 0 8px 30px rgba(37, 211, 102, 0.5);
     z-index: 10000;
     transition: all 0.3s;
-    }
-    .zoom-whatsapp-btn:hover {
+}
+.zoom-whatsapp-btn:hover {
     transform: translateX(-50%) scale(1.05);
-    }
-    .zoom-whatsapp-btn.highlighted {
+}
+.zoom-whatsapp-btn.highlighted {
     animation: highlightPulse 1.5s infinite;
-    }
-    @keyframes highlightPulse {
+}
+@keyframes highlightPulse {
     0%, 100% { box-shadow: 0 8px 30px rgba(37, 211, 102, 0.5); transform: translateX(-50%) scale(1); }
     50% { box-shadow: 0 15px 45px rgba(37, 211, 102, 0.9); transform: translateX(-50%) scale(1.08); }
-    }
-    /* Botão de áudio do vídeo */
-    .video-audio-toggle {
+}
+/* Botão de áudio do vídeo */
+.video-audio-toggle {
     position: absolute;
     bottom: 20px;
     right: 20px;
@@ -2040,68 +2062,68 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     z-index: 10;
     transition: all 0.3s ease;
     font-size: 1rem;
-    }
-    .video-audio-toggle:hover {
+}
+.video-audio-toggle:hover {
     background: var(--gold-primary);
     transform: scale(1.1);
-    }
-    
-    /* ========================================
-    18. SEO FOOTER AREA
-    ======================================== */
-    .seo-footer-area {
+}
+
+/* ========================================
+18. SEO FOOTER AREA
+======================================== */
+.seo-footer-area {
     background: var(--white);
     padding: 20px 0;
     border-top: 1px solid var(--gold-light);
     opacity: 0.4;
     transition: opacity var(--transition-normal);
-    }
-    .seo-footer-area:hover {
+}
+.seo-footer-area:hover {
     opacity: 0.8;
-    }
-    .seo-text {
+}
+.seo-text {
     font-size: 11px;
     color: var(--gray-medium);
     line-height: 1.4;
     text-align: justify;
     max-width: 800px;
     margin: 0 auto;
-    }
-    
-    /* ========================================
-    19. ESTRELAS DE AVALIAÇÃO (APENAS NO MODAL)
-    ======================================== */
-    .stars {
+}
+
+/* ========================================
+19. ESTRELAS DE AVALIAÇÃO (APENAS NO MODAL)
+======================================== */
+.stars {
     color: var(--gold-primary);
     font-size: 2.4rem;
     letter-spacing: 6px;
     display: block;
     text-align: center;
-    margin: 15px 0;
+    margin: 10px 0;
     line-height: 1;
-    }
-    .product-rating {
-    margin: 15px 0;
+}
+.product-rating {
+    margin: 10px 0;
     text-align: center;
     width: 100%;
-    }
-    .product-rating-large {
-    font-size: 2.8rem;
-    letter-spacing: 8px;
-    margin: 20px 0;
+}
+.product-rating-large {
+    font-size: 2.4rem;
+    letter-spacing: 6px;
+    margin: 10px 0;
     color: var(--gold-primary);
     text-align: center;
-    }
-    .review-stars {
+}
+.review-stars {
     color: var(--gold-primary);
-    font-size: 2rem;
-    letter-spacing: 4px;
-    }
-    
-    /* ========================================
-    20. CARRINHO SIDEBAR
-    ======================================== */
-    .cart-sidebar {
+    font-size: 1.8rem;
+    letter-spacing: 3px;
+}
+
+/* ========================================
+20. CARRINHO SIDEBAR
+======================================== */
+.cart-sidebar {
     position: fixed;
     right: -400px;
     top: 0;
@@ -2114,26 +2136,26 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     display: flex;
     flex-direction: column;
     border-left: 2px solid var(--gold-primary);
-    }
-    .cart-sidebar.active {
+}
+.cart-sidebar.active {
     right: 0;
-    }
-    .cart-header {
+}
+.cart-header {
     padding: var(--spacing-lg);
     border-bottom: 1px solid var(--gold-light);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    }
-    .cart-header h3 {
+}
+.cart-header h3 {
     font-family: var(--font-display);
     font-size: 1.3rem;
     color: var(--gold-dark);
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    }
-    .close-cart-btn {
+}
+.close-cart-btn {
     background: none;
     border: none;
     font-size: 1.3rem;
@@ -2146,18 +2168,18 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     display: flex;
     align-items: center;
     justify-content: center;
-    }
-    .close-cart-btn:hover {
+}
+.close-cart-btn:hover {
     background: var(--danger);
     color: var(--white);
     transform: rotate(90deg);
-    }
-    .cart-items {
+}
+.cart-items {
     flex: 1;
     overflow-y: auto;
     padding: var(--spacing-md);
-    }
-    .cart-item {
+}
+.cart-item {
     display: flex;
     gap: var(--spacing-md);
     padding: var(--spacing-md);
@@ -2166,30 +2188,30 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     margin-bottom: var(--spacing-sm);
     border-left: 3px solid var(--gold-primary);
     position: relative;
-    }
-    .cart-item img {
+}
+.cart-item img {
     width: 70px;
     height: 70px;
     object-fit: cover;
     border-radius: var(--radius-sm);
     border: 2px solid var(--gold-primary);
-    }
-    .cart-item-info {
+}
+.cart-item-info {
     flex: 1;
-    }
-    .cart-item-name {
+}
+.cart-item-name {
     font-weight: 600;
     color: var(--black-soft);
     margin-bottom: 4px;
     font-size: 0.95rem;
-    }
-    .cart-item-price {
+}
+.cart-item-price {
     color: var(--gold-primary);
     font-weight: 700;
     margin-bottom: var(--spacing-xs);
     font-size: 0.95rem;
-    }
-    .cart-item-quantity {
+}
+.cart-item-quantity {
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
@@ -2197,8 +2219,8 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     border-radius: var(--radius-sm);
     padding: 2px;
     width: fit-content;
-    }
-    .cart-item-quantity button {
+}
+.cart-item-quantity button {
     background: none;
     border: none;
     color: var(--gold-primary);
@@ -2210,17 +2232,17 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     justify-content: center;
     transition: all var(--transition-fast);
     border-radius: 50%;
-    }
-    .cart-item-quantity button:hover {
+}
+.cart-item-quantity button:hover {
     background: var(--gold-light);
     transform: scale(1.1);
-    }
-    .cart-item-quantity span {
+}
+.cart-item-quantity span {
     min-width: 20px;
     text-align: center;
     font-weight: 600;
-    }
-    .cart-item-remove {
+}
+.cart-item-remove {
     background: none;
     border: none;
     color: var(--danger);
@@ -2230,30 +2252,30 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     position: absolute;
     top: var(--spacing-sm);
     right: var(--spacing-sm);
-    }
-    .cart-item-remove:hover {
+}
+.cart-item-remove:hover {
     transform: scale(1.2);
-    }
-    .cart-footer {
+}
+.cart-footer {
     padding: var(--spacing-lg);
     border-top: 1px solid var(--gold-light);
     background: var(--white);
-    }
-    .cart-total {
+}
+.cart-total {
     display: flex;
     justify-content: space-between;
     font-size: 1.2rem;
     font-weight: 700;
     color: var(--gold-dark);
     margin-bottom: var(--spacing-sm);
-    }
-    .cart-shipping {
+}
+.cart-shipping {
     font-size: 0.8rem;
     color: var(--gray-medium);
     text-align: center;
     margin-bottom: var(--spacing-md);
-    }
-    .btn-whatsapp-cart {
+}
+.btn-whatsapp-cart {
     width: 100%;
     background: var(--whatsapp);
     color: var(--white);
@@ -2268,13 +2290,13 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     gap: var(--spacing-sm);
     transition: all var(--transition-normal);
     margin-bottom: var(--spacing-sm);
-    }
-    .btn-whatsapp-cart:hover {
+}
+.btn-whatsapp-cart:hover {
     background: var(--whatsapp-dark);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
-    }
-    .btn-clear-cart {
+}
+.btn-clear-cart {
     width: 100%;
     background: var(--white);
     color: var(--danger);
@@ -2285,12 +2307,12 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     font-size: 0.9rem;
     cursor: pointer;
     transition: all var(--transition-normal);
-    }
-    .btn-clear-cart:hover {
+}
+.btn-clear-cart:hover {
     background: var(--danger);
     color: var(--white);
-    }
-    .cart-overlay {
+}
+.cart-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -2302,41 +2324,41 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     display: none;
     opacity: 0;
     transition: opacity var(--transition-normal);
-    }
-    .cart-overlay.active {
+}
+.cart-overlay.active {
     display: block;
     opacity: 1;
-    }
-    
-    /* ========================================
-    21. FOOTER PREMIUM
-    ======================================== */
-    .footer {
+}
+
+/* ========================================
+21. FOOTER PREMIUM
+======================================== */
+.footer {
     background: linear-gradient(135deg, var(--gray-luxury) 0%, var(--black-soft) 100%);
     color: var(--white);
     padding: var(--spacing-xxl) 0 var(--spacing-lg);
     border-top: 3px solid var(--gold-primary);
     margin-top: var(--spacing-xxl);
-    }
-    .footer-content {
+}
+.footer-content {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: var(--spacing-xl);
     margin-bottom: var(--spacing-xl);
-    }
-    .footer-section h3,
-    .footer-section h4 {
+}
+.footer-section h3,
+.footer-section h4 {
     color: var(--gold-primary);
     margin-bottom: var(--spacing-md);
     font-family: var(--font-display);
-    }
-    .footer-section h3 {
+}
+.footer-section h3 {
     font-size: 1.3rem;
-    }
-    .footer-section h4 {
+}
+.footer-section h4 {
     font-size: 1.1rem;
-    }
-    .footer-section p {
+}
+.footer-section p {
     color: var(--gray-light);
     line-height: 1.8;
     margin-bottom: var(--spacing-xs);
@@ -2344,26 +2366,26 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    }
-    .footer-section i {
+}
+.footer-section i {
     color: var(--gold-primary);
     width: 20px;
-    }
-    .footer-section a {
+}
+.footer-section a {
     color: var(--whatsapp);
     transition: color var(--transition-fast);
-    }
-    .footer-section a:hover {
+}
+.footer-section a:hover {
     color: var(--gold-primary);
     text-decoration: underline;
-    }
-    .trust-badges {
+}
+.trust-badges {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
     margin-top: var(--spacing-md);
-    }
-    .badge {
+}
+.badge {
     background: rgba(212, 175, 55, 0.15);
     color: var(--gold-light);
     padding: var(--spacing-xs) var(--spacing-sm);
@@ -2373,13 +2395,13 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     display: flex;
     align-items: center;
     gap: var(--spacing-xs);
-    }
-    .social-links {
+}
+.social-links {
     display: flex;
     gap: var(--spacing-sm);
     margin-top: var(--spacing-md);
-    }
-    .social-links a {
+}
+.social-links a {
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -2389,23 +2411,23 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     align-items: center;
     justify-content: center;
     transition: all var(--transition-normal);
-    }
-    .social-links a:hover {
+}
+.social-links a:hover {
     background: var(--gold-dark);
     transform: translateY(-3px);
-    }
-    .footer-bottom {
+}
+.footer-bottom {
     text-align: center;
     padding-top: var(--spacing-lg);
     border-top: 1px solid rgba(212, 175, 55, 0.2);
     color: var(--gray-light);
     font-size: 0.8rem;
-    }
-    
-    /* ========================================
-    22. PWA INSTALL BANNER
-    ======================================== */
-    .pwa-install-banner {
+}
+
+/* ========================================
+22. PWA INSTALL BANNER
+======================================== */
+.pwa-install-banner {
     position: fixed;
     bottom: 0;
     left: 0;
@@ -2417,22 +2439,22 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     transform: translateY(100%);
     transition: transform 0.3s ease;
     box-shadow: 0 -5px 20px rgba(0,0,0,0.2);
-    }
-    
-    .pwa-install-banner.show {
+}
+
+.pwa-install-banner.show {
     transform: translateY(0);
-    }
-    
-    .pwa-banner-content {
+}
+
+.pwa-banner-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
     max-width: 600px;
     margin: 0 auto;
     gap: 15px;
-    }
-    
-    .pwa-icon {
+}
+
+.pwa-icon {
     width: 50px;
     height: 50px;
     background: white;
@@ -2443,30 +2465,30 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     color: var(--gold-primary);
     font-size: 2rem;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    .pwa-text {
+}
+
+.pwa-text {
     flex: 1;
-    }
-    
-    .pwa-text strong {
+}
+
+.pwa-text strong {
     display: block;
     font-size: 1rem;
     margin-bottom: 3px;
     font-family: var(--font-display);
-    }
-    
-    .pwa-text span {
+}
+
+.pwa-text span {
     font-size: 0.8rem;
     opacity: 0.9;
-    }
-    
-    .pwa-buttons {
+}
+
+.pwa-buttons {
     display: flex;
     gap: 10px;
-    }
-    
-    .pwa-install-btn {
+}
+
+.pwa-install-btn {
     background: white;
     color: var(--gold-dark);
     border: none;
@@ -2477,14 +2499,14 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     cursor: pointer;
     transition: all 0.3s;
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    .pwa-install-btn:hover {
+}
+
+.pwa-install-btn:hover {
     transform: scale(1.05);
     background: #f8f8f8;
-    }
-    
-    .pwa-later-btn {
+}
+
+.pwa-later-btn {
     background: transparent;
     color: white;
     border: 1px solid rgba(255,255,255,0.5);
@@ -2494,395 +2516,388 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     font-size: 0.9rem;
     cursor: pointer;
     transition: all 0.3s;
-    }
-    
-    .pwa-later-btn:hover {
+}
+
+.pwa-later-btn:hover {
     background: rgba(255,255,255,0.1);
     border-color: white;
-    }
-    
-    @media (max-width: 480px) {
+}
+
+@media (max-width: 480px) {
     .pwa-banner-content {
-    flex-wrap: wrap;
-    justify-content: center;
-    text-align: center;
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
     }
     .pwa-buttons {
-    width: 100%;
-    justify-content: center;
+        width: 100%;
+        justify-content: center;
     }
-    }
-    
-    /* ========================================
-    23. RESPONSIVE DESIGN - MOBILE OTIMIZADO
-    ======================================== */
-    @media (max-width: 1024px) {
+}
+
+/* ========================================
+23. RESPONSIVE DESIGN - MOBILE OTIMIZADO
+======================================== */
+@media (max-width: 1024px) {
     .header-top-content {
-    flex-wrap: wrap;
+        flex-wrap: wrap;
     }
     .header-search {
-    flex: 1;
-    min-width: 300px;
+        flex: 1;
+        min-width: 300px;
     }
     .modal-content {
-    max-height: 95vh;
+        max-height: 95vh;
     }
     .team-content {
-    grid-template-columns: 1fr;
+        grid-template-columns: 1fr;
     }
     .products-grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     }
     .section-title {
-    font-size: 1.8rem;
+        font-size: 1.8rem;
     }
     .hero-image-xl {
-    max-height: 280px;
+        max-height: 280px;
     }
-    }
-    @media (max-width: 768px) {
+}
+@media (max-width: 768px) {
     .logo-text span {
-    font-size: 1.3rem;
+        font-size: 1.3rem;
     }
     .logo-tagline {
-    font-size: 0.6rem;
+        font-size: 0.6rem;
     }
     .header-search {
-    min-width: 100%;
-    order: 3;
+        min-width: 100%;
+        order: 3;
     }
     .search-input {
-    font-size: 0.85rem;
+        font-size: 0.85rem;
     }
     .mobile-filters {
-    display: flex;
-    top: 114px; /* Ajustado para quando o header está colapsado */
+        display: flex;
+        top: 114px; /* Ajustado para quando o header está colapsado */
     }
     .nav-categories {
-    top: 0;
+        top: 0;
     }
     .category-list {
-    gap: 0;
+        gap: 0;
     }
     .category-list li {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: 0.8rem;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.8rem;
     }
     .products-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-    padding: 0 6px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        padding: 0 6px;
     }
     .product-image {
-    height: 130px;
-    aspect-ratio: 1 / 1 !important;
+        height: 130px;
+        aspect-ratio: 1 / 1 !important;
     }
     .product-image img {
-    aspect-ratio: 1 / 1 !important;
-    object-fit: cover !important;
+        aspect-ratio: 1 / 1 !important;
+        object-fit: cover !important;
     }
     .product-name {
-    font-size: 0.75rem;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
+        font-size: 0.75rem;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
     }
     .product-price {
-    font-size: 0.95rem;
+        font-size: 0.95rem;
     }
     .product-info {
-    padding: 6px;
-    gap: 3px;
+        padding: 6px;
+        gap: 3px;
     }
     .product-sold-today {
-    font-size: 0.65rem;
-    padding: 4px 10px;
+        font-size: 0.65rem;
+        padding: 4px 10px;
     }
     .product-social-proof {
-    font-size: 0.6rem;
+        font-size: 0.6rem;
     }
     .section-title {
-    font-size: 1.3rem;
+        font-size: 1.3rem;
     }
     .main-content {
-    padding: var(--spacing-sm) 0;
+        padding: var(--spacing-sm) 0;
     }
     .review-carousel-card {
-    flex: 0 0 260px;
-    padding: 12px;
+        flex: 0 0 260px;
+        padding: 12px;
     }
     .review-carousel-comment {
-    font-size: 0.8rem;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
+        font-size: 0.8rem;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
     }
     .team-section {
-    padding: var(--spacing-lg);
+        padding: var(--spacing-lg);
     }
     .team-image-wrapper {
-    height: 250px;
+        height: 250px;
     }
     .team-title {
-    font-size: 1.5rem;
+        font-size: 1.5rem;
     }
     .team-features {
-    grid-template-columns: 1fr;
+        grid-template-columns: 1fr;
     }
     .team-whatsapp-btn {
-    width: 100%;
-    justify-content: center;
+        width: 100%;
+        justify-content: center;
     }
     .faq-grid,
     .social-proof-grid {
-    grid-template-columns: 1fr;
+        grid-template-columns: 1fr;
     }
     .cart-sidebar {
-    width: 100%;
-    right: -100%;
+        width: 100%;
+        right: -100%;
     }
     .modal-close-btn {
-    width: 70px !important;
-    height: 70px !important;
-    font-size: 2rem !important;
+        width: 70px !important;
+        height: 70px !important;
+        font-size: 2rem !important;
     }
     .next-photo-btn {
-    width: 50px;
-    height: 50px;
-    font-size: 1.5rem;
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
     }
     .modal-gallery {
-    max-height: 40vh;
+        max-height: 40vh;
     }
     .modal-title {
-    font-size: 1.5rem;
+        font-size: 1.5rem;
     }
     .modal-price-main {
-    font-size: 1.8rem;
+        font-size: 1.8rem;
     }
     .urgency-box {
-    padding: 12px;
+        padding: 10px;
     }
     .delivery-timer {
-    font-size: 0.95rem;
+        font-size: 0.85rem;
     }
     .looking-now {
-    font-size: 0.8rem;
-    padding: 6px 12px;
+        font-size: 0.75rem;
+        padding: 4px 10px;
     }
     .rec-card {
-    flex: 0 0 120px;
+        flex: 0 0 110px;
     }
     .geo-notification {
-    left: 10px;
-    right: 10px;
-    bottom: 80px;
-    max-width: none;
+        left: 10px;
+        right: 10px;
+        bottom: 80px;
+        max-width: none;
     }
     .whatsapp-float {
-    width: 55px;
-    height: 55px;
-    font-size: 1.8rem;
-    bottom: 20px;
-    right: 20px;
+        width: 55px;
+        height: 55px;
+        font-size: 1.8rem;
+        bottom: 20px;
+        right: 20px;
     }
     .infinite-carousel {
-    animation-duration: 30s;
+        animation-duration: 30s;
     }
     .carousel-item {
-    flex: 0 0 180px;
+        flex: 0 0 180px;
     }
     .carousel-item img {
-    height: 180px;
+        height: 180px;
     }
     .hero-image-xl {
-    max-height: 220px;
+        max-height: 220px;
     }
     .stars {
-    font-size: 2rem;
-    letter-spacing: 4px;
+        font-size: 2rem;
+        letter-spacing: 4px;
     }
     .product-rating-large {
-    font-size: 2.4rem;
-    letter-spacing: 6px;
+        font-size: 2rem;
+        letter-spacing: 4px;
     }
     .review-stars {
-    font-size: 1.8rem;
-    letter-spacing: 3px;
+        font-size: 1.5rem;
+        letter-spacing: 2px;
     }
     .cross-sell-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-    padding: 0 6px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 5px;
+        padding: 0 5px;
     }
     .cross-sell-card img {
-    height: 120px;
+        height: 100px;
     }
     .cross-sell-card .name {
-    font-size: 0.7rem;
+        font-size: 0.6rem;
     }
     .cross-sell-card .price {
-    font-size: 0.85rem;
+        font-size: 0.7rem;
     }
     .super-zoom-close {
-    width: 50px;
-    height: 50px;
-    font-size: 1.5rem;
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
     }
-    }
-    @media (max-width: 480px) {
+}
+@media (max-width: 480px) {
     .header-top {
-    padding: var(--spacing-sm) 0;
+        padding: var(--spacing-sm) 0;
     }
     .logo-link i {
-    font-size: 1.8rem;
+        font-size: 1.8rem;
     }
     .logo-text span {
-    font-size: 1.1rem;
+        font-size: 1.1rem;
     }
     .logo-text small {
-    font-size: 0.6rem;
+        font-size: 0.6rem;
     }
     .search-input {
-    font-size: 0.8rem;
+        font-size: 0.8rem;
     }
     .products-grid {
-    gap: 5px;
-    padding: 0 5px;
+        gap: 5px;
+        padding: 0 5px;
     }
     .product-image {
-    height: 120px;
-    aspect-ratio: 1 / 1 !important;
+        height: 120px;
+        aspect-ratio: 1 / 1 !important;
     }
     .product-image img {
-    aspect-ratio: 1 / 1 !important;
-    object-fit: cover !important;
+        aspect-ratio: 1 / 1 !important;
+        object-fit: cover !important;
     }
     .product-name {
-    font-size: 0.7rem;
+        font-size: 0.7rem;
     }
     .product-price {
-    font-size: 0.9rem;
+        font-size: 0.9rem;
     }
     .product-info {
-    padding: 5px;
+        padding: 5px;
     }
     .product-sold-today {
-    font-size: 0.6rem;
-    padding: 3px 8px;
+        font-size: 0.6rem;
+        padding: 3px 8px;
     }
     .product-buttons {
-    flex-direction: column;
+        flex-direction: column;
     }
     .btn-primary, .btn-secondary {
-    width: 100%;
-    padding: 8px 4px;
+        width: 100%;
+        padding: 8px 4px;
     }
     .cart-btn {
-    width: 45px;
-    height: 45px;
-    font-size: 1.1rem;
+        width: 45px;
+        height: 45px;
+        font-size: 1.1rem;
     }
     .cart-count {
-    width: 20px;
-    height: 20px;
-    font-size: 0.65rem;
+        width: 20px;
+        height: 20px;
+        font-size: 0.65rem;
     }
     .section-title {
-    font-size: 1.3rem;
+        font-size: 1.3rem;
     }
     .modal-gallery {
-    max-height: 35vh;
+        max-height: 35vh;
     }
     .modal-thumb {
-    flex: 0 0 60px;
-    width: 60px;
-    height: 60px;
+        flex: 0 0 55px;
+        width: 55px;
+        height: 55px;
     }
     .modal-close-btn {
-    width: 60px !important;
-    height: 60px !important;
-    font-size: 1.8rem !important;
-    top: 10px;
-    right: 10px;
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 1.8rem !important;
+        top: 10px;
+        right: 10px;
     }
     .modal-title {
-    font-size: 1.3rem;
+        font-size: 1.3rem;
     }
     .modal-price-main {
-    font-size: 1.6rem;
+        font-size: 1.5rem;
     }
-    .urgency-box {
-    padding: 10px;
-    }
-    .delivery-timer {
-    font-size: 0.85rem;
-    flex-direction: column;
-    gap: 5px;
-    }
-    .delivery-timer span {
-    font-size: 0.9rem;
+    .solitario-discreto {
+        font-size: 0.65rem;
+        padding: 5px 8px;
     }
     .looking-now {
-    font-size: 0.75rem;
+        font-size: 0.7rem;
     }
     .rec-card {
-    flex: 0 0 100px;
+        flex: 0 0 95px;
     }
     .callout-text strong {
-    font-size: 1rem;
+        font-size: 1rem;
     }
     .callout-text .highlight-red {
-    font-size: 0.9rem;
+        font-size: 0.9rem;
     }
     .callout-content {
-    flex-direction: column;
-    gap: var(--spacing-xs);
+        flex-direction: column;
+        gap: var(--spacing-xs);
     }
     .footer-content {
-    grid-template-columns: 1fr;
-    text-align: center;
+        grid-template-columns: 1fr;
+        text-align: center;
     }
     .footer-section p {
-    justify-content: center;
+        justify-content: center;
     }
     .trust-badges {
-    align-items: center;
+        align-items: center;
     }
     .social-links {
-    justify-content: center;
+        justify-content: center;
     }
     .hero-image-xl {
-    max-height: 180px;
+        max-height: 180px;
     }
     .cross-sell-grid {
-    gap: 5px;
-    padding: 0 5px;
+        gap: 4px;
+        padding: 0 4px;
     }
     .cross-sell-card img {
-    height: 110px;
+        height: 90px;
     }
-    }
-    
-    /* ========================================
-    24. ACESSIBILIDADE
-    ======================================== */
-    @media (prefers-reduced-motion: reduce) {
+}
+
+/* ========================================
+24. ACESSIBILIDADE
+======================================== */
+@media (prefers-reduced-motion: reduce) {
     * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
     }
-    }
-    button:focus-visible,
-    a:focus-visible,
-    input:focus-visible {
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
     outline: 3px solid var(--gold-primary);
     outline-offset: 2px;
-    }
-    
-    /* ========================================
-    25. IMPRESSÃO
-    ======================================== */
-    @media print {
+}
+
+/* ========================================
+25. IMPRESSÃO
+======================================== */
+@media print {
     .header,
     .footer,
     .cart-btn,
@@ -2897,99 +2912,99 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     .urgency-box,
     .looking-now,
     .btn-share {
-    display: none !important;
+        display: none !important;
     }
     .products-grid {
-    grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, 1fr);
     }
-    }
-    
-    /* ========================================
-    26. KEYFRAMES
-    ======================================== */
-    @keyframes cartBounce {
+}
+
+/* ========================================
+26. KEYFRAMES
+======================================== */
+@keyframes cartBounce {
     0%, 100% { transform: scale(1); }
     50% { transform: scale(1.2); }
-    }
-    @keyframes cartGlow {
+}
+@keyframes cartGlow {
     0%, 100% { box-shadow: 0 0 0 0 var(--gold-primary); }
     50% { box-shadow: 0 0 30px 10px var(--gold-primary); }
-    }
-    @keyframes carouselScroll {
+}
+@keyframes carouselScroll {
     0% { transform: translateX(0); }
     100% { transform: translateX(calc(-280px * 6 - 120px)); }
-    }
-    @keyframes pulseWhatsappButton {
+}
+@keyframes pulseWhatsappButton {
     0% {
-    transform: scale(1);
-    box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+        transform: scale(1);
+        box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
     }
     50% {
-    transform: scale(1.02);
-    box-shadow: 0 8px 20px rgba(37, 211, 102, 0.5);
+        transform: scale(1.02);
+        box-shadow: 0 8px 20px rgba(37, 211, 102, 0.5);
     }
     100% {
-    transform: scale(1);
-    box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+        transform: scale(1);
+        box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
     }
-    }
-    @keyframes pulseWhatsapp {
+}
+@keyframes pulseWhatsapp {
     0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 8px 30px rgba(37, 211, 102, 0.4);
+        transform: scale(1);
+        box-shadow: 0 8px 30px rgba(37, 211, 102, 0.4);
     }
     50% {
-    transform: scale(1.1);
-    box-shadow: 0 15px 40px rgba(37, 211, 102, 0.6);
+        transform: scale(1.1);
+        box-shadow: 0 15px 40px rgba(37, 211, 102, 0.6);
     }
-    }
-    @keyframes truckMove {
+}
+@keyframes truckMove {
     0%, 100% { transform: translateX(0); }
     50% { transform: translateX(10px); }
-    }
-    @keyframes skeletonLoading {
+}
+@keyframes skeletonLoading {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
-    }
-    @keyframes compassSpin {
+}
+@keyframes compassSpin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
-    }
-    @keyframes slideInLeft {
+}
+@keyframes slideInLeft {
     from {
-    opacity: 0;
-    transform: translateX(-100px);
+        opacity: 0;
+        transform: translateX(-100px);
     }
     to {
-    opacity: 1;
-    transform: translateX(0);
+        opacity: 1;
+        transform: translateX(0);
     }
-    }
-    @keyframes slideUp {
+}
+@keyframes slideUp {
     from {
-    opacity: 0;
-    transform: translateY(20px);
+        opacity: 0;
+        transform: translateY(20px);
     }
     to {
-    opacity: 1;
-    transform: translateY(0);
+        opacity: 1;
+        transform: translateY(0);
     }
-    }
-    @keyframes bounce {
+}
+@keyframes bounce {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(5px); }
-    }
-    @media (max-width: 768px) {
+}
+@media (max-width: 768px) {
     @keyframes carouselScroll {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(calc(-200px * 6 - 60px)); }
+        0% { transform: translateX(0); }
+        100% { transform: translateX(calc(-200px * 6 - 60px)); }
     }
-    }
-    
-    /* ========================================
-    27. LOADING MORE - LAZY LOADING
-    ======================================== */
-    .loading-more {
+}
+
+/* ========================================
+27. LOADING MORE - LAZY LOADING
+======================================== */
+.loading-more {
     grid-column: 1 / -1;
     text-align: center;
     padding: 30px;
@@ -2997,18 +3012,18 @@ VERSÃO COMPLETA COM GATILHOS DE VENDA
     flex-direction: column;
     align-items: center;
     gap: 15px;
-    }
-    
-    .loading-spinner {
+}
+
+.loading-spinner {
     width: 50px;
     height: 50px;
     border: 4px solid var(--gold-light);
     border-top: 4px solid var(--gold-primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
+}
+
+@keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-    }
+}

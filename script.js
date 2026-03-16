@@ -1,6 +1,6 @@
 // ========================================
 // GRUPO ETEVALDA MT - MOBILE-FIRST SCRIPT
-// VERSÃO COMPLETA COM GATILHOS DE VENDA
+// VERSÃO COMPLETA COM OTIMIZAÇÕES DE CONVERSÃO
 // ========================================
 
 // ========================================
@@ -60,7 +60,7 @@ const CUSTOMER_NAMES = [
 let detectedLocation = { city: 'Cuiabá', neighborhoods: NEIGHBORHOODS['Cuiabá'] };
 
 // ========================================
-// 4. PWA - SMART INSTALL PROMPT
+// 4. PWA - SMART INSTALL PROMPT (AGORA 165 SEGUNDOS)
 // ========================================
 let deferredPrompt;
 
@@ -71,9 +71,10 @@ window.addEventListener('beforeinstallprompt', (e) => {
     const hasSeenPrompt = localStorage.getItem('pwa_prompt_shown');
     
     if (!hasSeenPrompt) {
+        // ALTERADO: de 30 segundos para 165 segundos (2 minutos e 45 segundos)
         setTimeout(() => {
             showInstallPrompt();
-        }, 30000);
+        }, 165000);
     }
 });
 
@@ -173,7 +174,7 @@ function createManifest() {
 // 6. INICIALIZAÇÃO PRINCIPAL
 // ========================================
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Grupo Etevalda MT - Versão com Gatilhos de Venda');
+    console.log('🚀 Grupo Etevalda MT - Versão Otimizada');
     showLoading(true);
     
     // Criar manifest PWA
@@ -746,7 +747,7 @@ function getRandomViewers() {
     return Math.floor(Math.random() * 9) + 4; // 4 a 12
 }
 
-// Cronômetro de entrega
+// Cronômetro de entrega (COM TEXTO ATUALIZADO)
 function startDeliveryTimer() {
     const timerElement = document.getElementById('deliveryTimer');
     if (!timerElement) return;
@@ -762,10 +763,10 @@ function startDeliveryTimer() {
         limit.setHours(17, 0, 0, 0); // 17:00
         
         if (now > limit) {
-            // Já passou das 17h
+            // Já passou das 17h - TEXTO ATUALIZADO
             timerElement.innerHTML = `
                 <i class="fas fa-clock"></i>
-                <span>Entregamos em sua casa HOJE</span>
+                <span class="delivery-today">Receba hoje e só pague na entrega</span>
             `;
             return;
         }
@@ -777,8 +778,8 @@ function startDeliveryTimer() {
         
         timerElement.innerHTML = `
             <i class="fas fa-clock"></i>
-            <span>${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s</span>
-            <span>para receber hoje!</span>
+            <span class="timer-countdown">${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s</span>
+            <span class="timer-text">para receber hoje!</span>
         `;
     }
     
@@ -809,7 +810,7 @@ async function shareProduct(product) {
 }
 
 // ========================================
-// 18. MODAL DE PRODUTO (COM GATILHOS DE VENDA)
+// 18. MODAL DE PRODUTO (COM GATILHOS DE VENDA OTIMIZADOS)
 // ========================================
 function openProductModal(id) {
     const product = allProductsLoaded.find(p => p.id === id);
@@ -889,6 +890,14 @@ function openProductModal(id) {
         </div>
     `).join('');
     
+    // REMOVIDO: Bloco pesado de "Você só paga na entrega"
+    // ALTERADO: Selo solitário com estilo mais discreto
+    const solitarioHtml = product.tem_solitario && product.solitario_price > 0 ? `
+        <div class="solitario-discreto">
+            <i class="fas fa-gem"></i> Solitário vendido separadamente: R$ ${solitarioFormatted}
+        </div>
+    ` : '';
+    
     const modalHtml = `
         <div class="modal-gallery">
             <div class="modal-main-media" id="modalMainMedia">
@@ -905,31 +914,26 @@ function openProductModal(id) {
             <h2 class="modal-title">${product.name}</h2>
             <div class="modal-price-main">R$ ${priceFormatted}</div>
             
-            <!-- NOVO: Prova Social em tempo real -->
+            <!-- Selo solitário discreto -->
+            ${solitarioHtml}
+            
+            <!-- Prova Social em tempo real -->
             <div class="looking-now">
                 <i class="fas fa-eye"></i> ${viewersCount} pessoas estão vendo este produto agora
             </div>
             
-            <!-- NOVO: Caixa de urgência com cronômetro -->
+            <!-- Caixa de urgência com cronômetro -->
             <div class="urgency-box">
                 <div class="delivery-timer" id="deliveryTimer">
                     <i class="fas fa-clock"></i>
-                    <span>00h 00m 00s</span>
-                    <span>para receber hoje!</span>
-                </div>
-                <div class="trust-badge">
-                    <i class="fas fa-check-circle"></i> Você só paga na hora da entrega!
+                    <span class="timer-countdown">00h 00m 00s</span>
+                    <span class="timer-text">para receber hoje!</span>
                 </div>
             </div>
             
-            ${product.tem_solitario && product.solitario_price > 0 ? `
-                <div style="font-size:1rem; color:var(--gold-dark); margin:10px 0; background:var(--gold-light); padding:10px; border-radius:var(--radius-sm); text-align:center;">
-                    <i class="fas fa-gem"></i> Solitário vendido separadamente: R$ ${solitarioFormatted}
-                </div>
-            ` : ''}
             <div class="product-rating-large">${renderStars(rating)}</div>
             
-            <!-- NOVO: Botões com compartilhamento -->
+            <!-- Botões com compartilhamento melhorado -->
             <div class="modal-buttons">
                 <button class="btn-add-cart-modal" onclick="addToCart(${product.id})">
                     <i class="fas fa-cart-plus"></i> Carrinho
@@ -938,13 +942,12 @@ function openProductModal(id) {
                     <i class="fab fa-whatsapp"></i> WhatsApp
                 </button>
                 <button class="btn-share" onclick="shareProduct(${JSON.stringify(product).replace(/"/g, '&quot;')})" aria-label="Compartilhar">
-                    <i class="fas fa-share-alt"></i>
+                    <i class="fas fa-share-alt"></i> <span>COMPARTILHE<br>COM SEU AMOR</span>
                 </button>
             </div>
             
             <div class="modal-description">
                 ${product.description || ''}
-                <div class="delivery-highlight">💰 Pague só na entrega!</div>
             </div>
             
             ${upsellProducts.length > 0 ? `
@@ -1472,4 +1475,4 @@ window.hoverImage = hoverImage;
 window.unhoverImage = unhoverImage;
 window.nextMedia = nextMedia;
 window.prevMedia = prevMedia;
-window.shareProduct = shareProduct; // Exportar função de compartilhamento
+window.shareProduct = shareProduct;
