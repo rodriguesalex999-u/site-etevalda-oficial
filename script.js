@@ -1,6 +1,6 @@
 // ========================================
 // GRUPO ETEVALDA MT - MOBILE-FIRST SCRIPT
-// VERSÃO COMPLETA COM OTIMIZAÇÕES DE CONVERSÃO
+// VERSÃO OTIMIZADA PARA COREWEBVITALS
 // ========================================
 
 // ========================================
@@ -172,37 +172,71 @@ function createManifest() {
 }
 
 // ========================================
-// 6. INICIALIZAÇÃO PRINCIPAL
+// 6. INICIALIZAÇÃO PRINCIPAL - OTIMIZADA
 // ========================================
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Grupo Etevalda MT - Versão Otimizada');
+    console.log('🚀 Grupo Etevalda MT - Versão Otimizada para PageSpeed');
     showLoading(true);
 
     // Criar manifest PWA
     createManifest();
 
     try {
+        // CARREGAMENTO PRIORITÁRIO: Produtos e Categorias (essenciais)
         await loadCategories();
         await loadProducts(true);
-        await loadReviews();
-        await loadFaqs();
-        await loadSocialProof();
-        loadCartFromStorage();
+        
+        // Renderização imediata dos produtos
         renderCategories();
         renderProducts();
-        renderCarousel();
-        renderSocialProof();
-        renderFaqs();
+        
+        // Carregar carrinho do localStorage (rápido, não bloqueia)
+        loadCartFromStorage();
+        
+        // Configurar eventos essenciais
         setupEventListeners();
         setupHistoryAPI();
-        setupSuperZoomListeners();
-        setupTouchListeners();
         setupInfiniteScroll();
-        setupScrollListener(); // Header collapsible
-        startTeamTimer();
+        setupScrollListener();
+        
+        // Inicializar busca preditiva (importante para UX)
         initPredictiveSearch();
-        initGeoLocationBackground();
-        console.log(`✅ ${allProductsLoaded.length} produtos carregados inicialmente`);
+        
+        // CARREGAMENTO NÃO PRIORITÁRIO (após 3 segundos)
+        setTimeout(async () => {
+            try {
+                await loadReviews();
+                await loadFaqs();
+                await loadSocialProof();
+                
+                // Renderizar seções secundárias
+                renderCarousel();
+                renderSocialProof();
+                renderFaqs();
+                
+                // Mostrar as seções com fade-in
+                showSecondarySections();
+                
+                // Iniciar geolocalização (não essencial)
+                initGeoLocationBackground();
+                
+                // Timer da equipe (não essencial)
+                startTeamTimer();
+                
+                // SuperZoom listeners (só após o modal ser possível)
+                setupSuperZoomListeners();
+                
+                // Touch listeners (só para quem tem touch)
+                if ('ontouchstart' in window) {
+                    setupTouchListeners();
+                }
+                
+                console.log('✅ Seções secundárias carregadas');
+            } catch (error) {
+                console.error('Erro ao carregar seções secundárias:', error);
+            }
+        }, 3000);
+
     } catch (error) {
         console.error('❌ Erro:', error);
         showToast('Erro ao carregar produtos');
@@ -210,6 +244,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(() => showLoading(false), 500);
     }
 });
+
+// Função para mostrar seções secundárias com fade-in
+function showSecondarySections() {
+    const sections = [
+        'socialProofSection',
+        'faqSection',
+        'carouselSection'
+    ];
+    
+    sections.forEach(id => {
+        const section = document.getElementById(id);
+        if (section) {
+            section.style.opacity = '1';
+            section.style.height = 'auto';
+            section.style.overflow = 'visible';
+        }
+    });
+}
 
 function showLoading(status) {
     const skeletons = document.querySelectorAll('.product-card.skeleton');
@@ -1643,3 +1695,4 @@ window.hoverImage = hoverImage;
 window.unhoverImage = unhoverImage;
 window.nextMedia = nextMedia;
 window.prevMedia = prevMedia;
+window.shareProduct = shareProduct;

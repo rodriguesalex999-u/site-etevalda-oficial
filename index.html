@@ -19,18 +19,29 @@
 <meta property="og:image" content="https://i.postimg.cc/1Xw1PC9m/Grupo-Etevalda-MT.png">
 <title>Grupo Etevalda MT | Variedades</title>
 
-<!-- Google Fonts Premium -->
+<!-- Pré-conexões para melhorar tempo de carregamento -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://vnrfmsyanrvqqhmqyixk.supabase.co">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
-<!-- Font Awesome 6 -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Pré-carregamento da logo principal (LCP) -->
+<link rel="preload" as="image" href="https://i.postimg.cc/1Xw1PC9m/Grupo-Etevalda-MT.png" imagesrcset="https://i.postimg.cc/1Xw1PC9m/Grupo-Etevalda-MT.png 1x, https://i.postimg.cc/1Xw1PC9m/Grupo-Etevalda-MT.png 2x" imagesizes="100vw">
 
-<!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Google Fonts com display=swap (essencial para CLS) -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap"></noscript>
 
-<!-- CSS Principal -->
+<!-- Font Awesome com defer (não bloqueia renderização) -->
+<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+
+<!-- Supabase com defer (não bloqueia renderização) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+
+<!-- CSS Principal - carregado normalmente (é crítico) -->
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -112,7 +123,29 @@ autocomplete="off"
 
 <!-- Grid de Produtos -->
 <div id="productsContainer" class="products-grid">
-<!-- Skeleton Screens -->
+<!-- Skeleton Screens - 8 itens para preencher a tela inicial -->
+<div class="product-card skeleton">
+<div class="skeleton-image"></div>
+<div class="product-info">
+<div class="skeleton-text skeleton-title"></div>
+<div class="skeleton-text skeleton-price"></div>
+<div class="product-buttons">
+<div class="skeleton-text skeleton-button"></div>
+<div class="skeleton-text skeleton-button"></div>
+</div>
+</div>
+</div>
+<div class="product-card skeleton">
+<div class="skeleton-image"></div>
+<div class="product-info">
+<div class="skeleton-text skeleton-title"></div>
+<div class="skeleton-text skeleton-price"></div>
+<div class="product-buttons">
+<div class="skeleton-text skeleton-button"></div>
+<div class="skeleton-text skeleton-button"></div>
+</div>
+</div>
+</div>
 <div class="product-card skeleton">
 <div class="skeleton-image"></div>
 <div class="product-info">
@@ -182,8 +215,8 @@ autocomplete="off"
 </div>
 </section>
 
-<!-- Seção de Prova Social -->
-<section class="social-proof-section">
+<!-- Seção de Prova Social (será carregada após 3s) -->
+<section class="social-proof-section" id="socialProofSection" style="opacity:0; height:0; overflow:hidden; transition:opacity 0.5s;">
 <div class="section-header">
 <h2 class="section-title">Quem Confia, Recomenda</h2>
 <p class="section-subtitle">Clientes em todo Mato Grosso</p>
@@ -193,8 +226,8 @@ autocomplete="off"
 </div>
 </section>
 
-<!-- Seção de FAQs Moderna -->
-<section class="faq-section">
+<!-- Seção de FAQs Moderna (será carregada após 3s) -->
+<section class="faq-section" id="faqSection" style="opacity:0; height:0; overflow:hidden; transition:opacity 0.5s;">
 <div class="section-header">
 <h2 class="section-title">Perguntas Frequentes</h2>
 <p class="section-subtitle">Clique e ouça a resposta</p>
@@ -204,8 +237,8 @@ autocomplete="off"
 </div>
 </section>
 
-<!-- Seção Nossa Equipe -->
-<section id="teamSection" class="team-section">
+<!-- Seção Nossa Equipe (será carregada após 3s) -->
+<section id="teamSection" class="team-section" style="display:none;">
 <div class="team-content">
 <div class="team-image-wrapper">
 <img src="https://i.postimg.cc/HnbpfGbh/Equipeee.jpg" alt="Equipe Etevalda" loading="lazy">
@@ -229,8 +262,8 @@ autocomplete="off"
 </div>
 </section>
 
-<!-- Carrossel Infinito Premium -->
-<section class="carousel-section">
+<!-- Carrossel Infinito Premium (será carregado após 3s) -->
+<section class="carousel-section" id="carouselSection" style="opacity:0; height:0; overflow:hidden; transition:opacity 0.5s;">
 <div class="section-header">
 <h2 class="carousel-title"><i class="fas fa-compass"></i> Descubra mais</h2>
 </div>
@@ -352,7 +385,7 @@ Limpar Carrinho
 </div>
 </section>
 
-<!-- TAWK.TO -->
+<!-- TAWK.TO - Carregado após 60 segundos -->
 <script>
 setTimeout(function() {
 var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
@@ -364,10 +397,10 @@ s1.charset = 'UTF-8';
 s1.setAttribute('crossorigin', '*');
 s0.parentNode.insertBefore(s1, s0);
 })();
-}, 80000); // Alterado para 80 segundos (1m 20s)
+}, 60000); // 60 segundos
 </script>
 
-<!-- SCRIPT PRINCIPAL -->
-<script src="script.js"></script>
+<!-- SCRIPT PRINCIPAL - com defer para não bloquear renderização -->
+<script src="script.js" defer></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 /* ========================================
 GRUPO ETEVALDA MT - DESIGN SYSTEM LUXO PREMIUM
-VERSÃO COMPLETA COM GATILHOS DE VENDA OTIMIZADOS
+VERSÃO OTIMIZADA PARA COREWEBVITALS
 ======================================== */
 
 :root {
@@ -633,6 +633,8 @@ button {
     overflow: hidden;
     background: var(--gray-light);
     flex-shrink: 0;
+    /* CORREÇÃO CLS: Garantir altura mínima para evitar layout shift */
+    min-height: 140px;
 }
 .product-image img {
     width: 100% !important;
@@ -2006,6 +2008,7 @@ SUPER ZOOM OVERLAY
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 .super-zoom-content img,
 .super-zoom-content video {
@@ -2597,6 +2600,7 @@ SUPER ZOOM OVERLAY
     }
     .product-image {
         height: 130px;
+        min-height: 130px;
         aspect-ratio: 1 / 1 !important;
     }
     .product-image img {
@@ -2772,6 +2776,7 @@ SUPER ZOOM OVERLAY
     }
     .product-image {
         height: 120px;
+        min-height: 120px;
         aspect-ratio: 1 / 1 !important;
     }
     .product-image img {
