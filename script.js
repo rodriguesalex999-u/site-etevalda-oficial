@@ -224,13 +224,23 @@ function showLoading(status) {
 // ========================================
 function setupHistoryAPI() {
     window.addEventListener('popstate', (event) => {
-        // Se o estado tiver modalOpen, fecha o modal
-        if (event.state?.modalOpen) {
+        const modal = document.getElementById('productModal');
+        const isModalOpen = modal && modal.classList.contains('active');
+        
+        // Se o modal está ativo, fecha o modal
+        if (isModalOpen) {
+            event.preventDefault();
             closeProductModal();
+            
+            // Limpa o hash da URL sem recarregar a página
+            if (location.hash.startsWith('#product-')) {
+                history.replaceState(null, '', location.pathname + location.search);
+            }
+            return;
         }
-        // Se houver hash de produto na URL, fecha também
+        
+        // Se houver hash de produto na URL mas o modal não está ativo, limpa o hash
         if (location.hash.startsWith('#product-')) {
-            closeProductModal();
             history.replaceState(null, '', location.pathname + location.search);
         }
     });
@@ -747,7 +757,7 @@ function getRandomViewers() {
     return Math.floor(Math.random() * 9) + 4; // 4 a 12
 }
 
-// Cronômetro de entrega (COM TEXTO ATUALIZADO)
+// Cronômetro de entrega (COM CONTADOR REGRESSIVO DE 2 HORAS)
 function startDeliveryTimer() {
     const timerElement = document.getElementById('deliveryTimer');
     if (!timerElement) return;
@@ -757,30 +767,37 @@ function startDeliveryTimer() {
         clearInterval(deliveryTimerInterval);
     }
     
+    // Obter tempo salvo no sessionStorage ou iniciar com 2 horas
+    let savedTime = sessionStorage.getItem('deliveryTimerTime');
+    let startTime = savedTime ? parseInt(savedTime) : Date.now();
+    const totalTime = 2 * 60 * 60 * 1000; // 2 horas em milissegundos
+    
     function updateTimer() {
-        const now = new Date();
-        const limit = new Date(now);
-        limit.setHours(17, 0, 0, 0); // 17:00
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, totalTime - elapsed);
         
-        if (now > limit) {
-            // Já passou das 17h - TEXTO ATUALIZADO
+        if (remaining === 0) {
+            // Tempo esgotado - mostrar mensagem padrão
             timerElement.innerHTML = `
                 <i class="fas fa-clock"></i>
                 <span class="delivery-today">Receba hoje e só pague na entrega</span>
             `;
+            sessionStorage.removeItem('deliveryTimerTime');
             return;
         }
         
-        const diff = limit - now;
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        const hours = Math.floor(remaining / (1000 * 60 * 60));
+        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
         
         timerElement.innerHTML = `
             <i class="fas fa-clock"></i>
             <span class="timer-countdown">${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s</span>
             <span class="timer-text">para receber hoje!</span>
         `;
+        
+        // Salvar tempo atual no sessionStorage
+        sessionStorage.setItem('deliveryTimerTime', startTime.toString());
     }
     
     updateTimer();
@@ -936,19 +953,22 @@ function openProductModal(id) {
             <!-- Botões com compartilhamento melhorado -->
             <div class="modal-buttons">
                 <button class="btn-add-cart-modal" onclick="addToCart(${product.id})">
-                    <i class="fas fa-cart-plus"></i> Carrinho
+                    <i class="fas fa-cart-plus"></i>
                 </button>
                 <button class="btn-whatsapp-modal" onclick="buyViaWhatsApp(${product.id})">
-                    <i class="fab fa-whatsapp"></i> WhatsApp
+                    <i class="fab fa-whatsapp"></i>
                 </button>
                 <button class="btn-share" onclick="shareProduct(${JSON.stringify(product).replace(/"/g, '&quot;')})" aria-label="Compartilhar">
                     <i class="fas fa-share-alt"></i> <span>COMPARTILHE<br>COM SEU AMOR</span>
                 </button>
             </div>
             
-            <div class="modal-description">
-                ${product.description || ''}
-            </div>
+            <!-- Descrição condicional - só aparece se existir -->
+            ${product.description ? `
+                <div class="modal-description">
+                    ${product.description}
+                </div>
+            ` : ''}
             
             ${upsellProducts.length > 0 ? `
                 <div class="recommendations-section">
@@ -1017,7 +1037,7 @@ function openProductModal(id) {
     startDeliveryTimer();
     
     // Adiciona estado no history para controle do botão voltar
-    history.pushState({ modalOpen: true, productId: id }, '', `#product-${id}`);
+    history.pushState({ modalOpen: true }, '');
     
     setupModalMediaClick();
     setupModalVideoAudio();
@@ -1102,7 +1122,10 @@ function changeModalMedia(index) {
 }
 
 function closeProductModal() {
-    document.getElementById('productModal').classList.remove('active');
+    const modal = document.getElementById('productModal');
+    if (modal) {
+        modal.classList.remove('active');
+    }
     document.body.style.overflow = '';
     currentModalProduct = null;
     currentMediaList = [];
@@ -1113,7 +1136,7 @@ function closeProductModal() {
         deliveryTimerInterval = null;
     }
     
-    // Remove o estado do history
+    // Limpa o estado do history para evitar cliques fantasmas
     if (history.state?.modalOpen) {
         history.replaceState(null, '', location.pathname + location.search);
     }
