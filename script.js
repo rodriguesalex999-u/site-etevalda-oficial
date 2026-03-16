@@ -35,6 +35,7 @@ let currentMediaList = [];
 
 // Variáveis do Super Zoom
 let currentZoomIndex = 0;
+let superZoomMediaList = [];
 
 // Variáveis para Touch Swipe
 let touchStartX = 0;
@@ -444,22 +445,26 @@ function prevMedia() {
 // ========================================
 // 12. SUPER ZOOM
 // ========================================
-function openSuperZoom(mediaUrl, type = 'image') {
+function openSuperZoom(mediaUrl, type = 'image', mediaList = [], currentIndex = 0) {
     const overlay = document.getElementById('superZoomOverlay');
     const content = document.getElementById('superZoomContent');
     if (!overlay || !content) return;
-
-    if (type === 'video') {
-        content.innerHTML = `<video src="${mediaUrl}" controls autoplay loop playsinline style="max-width:100%;max-height:90vh;object-fit:contain;"></video>`;
-    } else {
-        content.innerHTML = `<img src="${mediaUrl}" alt="Zoom" style="max-width:100%;max-height:90vh;object-fit:contain;">`;
-    }
+    
+    // Salvar lista de mídias e índice atual
+    superZoomMediaList = mediaList.length > 0 ? mediaList : [{ url: mediaUrl, type: type }];
+    currentZoomIndex = currentIndex;
+    
+    // Renderizar mídia atual com navegação
+    renderSuperZoomMedia();
 
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
     
     // Adiciona estado no history para controle do botão voltar
     history.pushState({ superZoomOpen: true }, '');
+    
+    // Configurar navegação por swipe
+    setupSuperZoomSwipe();
 }
 
 function closeSuperZoom() {
@@ -491,6 +496,92 @@ function setupSuperZoomListeners() {
             closeSuperZoom();
         }
     });
+}
+
+// Funções de navegação do Super Zoom
+function renderSuperZoomMedia() {
+    const content = document.getElementById('superZoomContent');
+    if (!content || superZoomMediaList.length === 0) return;
+    
+    const currentMedia = superZoomMediaList[currentZoomIndex];
+    const hasMultiple = superZoomMediaList.length > 1;
+    
+    let navigationHTML = '';
+    if (hasMultiple) {
+        navigationHTML = `
+            <button class="super-zoom-nav super-zoom-prev" onclick="prevSuperZoomMedia()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="super-zoom-nav super-zoom-next" onclick="nextSuperZoomMedia()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="super-zoom-counter">${currentZoomIndex + 1} / ${superZoomMediaList.length}</div>
+        `;
+    }
+    
+    let mediaHTML = '';
+    if (currentMedia.type === 'video') {
+        mediaHTML = `<video src="${currentMedia.url}" controls autoplay loop playsinline style="max-width:100%;max-height:90vh;object-fit:contain;"></video>`;
+    } else {
+        mediaHTML = `<img src="${currentMedia.url}" alt="Zoom" style="max-width:100%;max-height:90vh;object-fit:contain;">`;
+    }
+    
+    content.innerHTML = `
+        ${navigationHTML}
+        <div class="super-zoom-media-container">
+            ${mediaHTML}
+        </div>
+    `;
+}
+
+function nextSuperZoomMedia() {
+    if (superZoomMediaList.length <= 1) return;
+    
+    currentZoomIndex = (currentZoomIndex + 1) % superZoomMediaList.length;
+    renderSuperZoomMedia();
+    
+    showToast(`Foto ${currentZoomIndex + 1} de ${superZoomMediaList.length}`);
+}
+
+function prevSuperZoomMedia() {
+    if (superZoomMediaList.length <= 1) return;
+    
+    currentZoomIndex = (currentZoomIndex - 1 + superZoomMediaList.length) % superZoomMediaList.length;
+    renderSuperZoomMedia();
+    
+    showToast(`Foto ${currentZoomIndex + 1} de ${superZoomMediaList.length}`);
+}
+
+function setupSuperZoomSwipe() {
+    const overlay = document.getElementById('superZoomOverlay');
+    if (!overlay) return;
+    
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    overlay.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    
+    overlay.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSuperZoomSwipe();
+    }, { passive: true });
+    
+    function handleSuperZoomSwipe() {
+        const swipeThreshold = 50;
+        const diff = touchStartX - touchEndX;
+        
+        if (Math.abs(diff) < swipeThreshold) return;
+        
+        if (diff > 0) {
+            // Swipe para esquerda - próxima mídia
+            nextSuperZoomMedia();
+        } else {
+            // Swipe para direita - mídia anterior
+            prevSuperZoomMedia();
+        }
+    }
 }
 
 // ========================================
@@ -1102,7 +1193,18 @@ function setupModalMediaClick() {
         img.style.cursor = 'zoom-in';
         img.onclick = (e) => {
             e.stopPropagation();
-            openSuperZoom(img.src, 'image');
+            // Encontrar o índice da mídia atual
+            const activeThumb = document.querySelector('.modal-thumb.active');
+            let currentIndex = 0;
+            if (activeThumb) {
+                const thumbs = document.querySelectorAll('.modal-thumb');
+                thumbs.forEach((thumb, index) => {
+                    if (thumb.classList.contains('active')) {
+                        currentIndex = index;
+                    }
+                });
+            }
+            openSuperZoom(img.src, 'image', currentMediaList, currentIndex);
         };
     }
 
@@ -1110,7 +1212,18 @@ function setupModalMediaClick() {
         video.style.cursor = 'zoom-in';
         video.onclick = (e) => {
             e.stopPropagation();
-            openSuperZoom(video.src, 'video');
+            // Encontrar o índice da mídia atual
+            const activeThumb = document.querySelector('.modal-thumb.active');
+            let currentIndex = 0;
+            if (activeThumb) {
+                const thumbs = document.querySelectorAll('.modal-thumb');
+                thumbs.forEach((thumb, index) => {
+                    if (thumb.classList.contains('active')) {
+                        currentIndex = index;
+                    }
+                });
+            }
+            openSuperZoom(video.src, 'video', currentMediaList, currentIndex);
         };
     }
 }
@@ -1523,9 +1636,10 @@ window.handleSearch = handleSearch;
 window.playFaqAudio = playFaqAudio;
 window.scrollToTop = scrollToTop;
 window.openSuperZoom = openSuperZoom;
+window.nextSuperZoomMedia = nextSuperZoomMedia;
+window.prevSuperZoomMedia = prevSuperZoomMedia;
 window.closeSuperZoom = closeSuperZoom;
 window.hoverImage = hoverImage;
 window.unhoverImage = unhoverImage;
 window.nextMedia = nextMedia;
 window.prevMedia = prevMedia;
-window.shareProduct = shareProduct;
