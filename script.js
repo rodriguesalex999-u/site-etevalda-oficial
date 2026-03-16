@@ -67,9 +67,9 @@ let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    
+
     const hasSeenPrompt = localStorage.getItem('pwa_prompt_shown');
-    
+
     if (!hasSeenPrompt) {
         // ALTERADO: de 30 segundos para 165 segundos (2 minutos e 45 segundos)
         setTimeout(() => {
@@ -80,7 +80,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
 
 function showInstallPrompt() {
     if (localStorage.getItem('pwa_prompt_shown')) return;
-    
+
     const promptBanner = document.createElement('div');
     promptBanner.id = 'pwa-install-banner';
     promptBanner.className = 'pwa-install-banner';
@@ -97,28 +97,28 @@ function showInstallPrompt() {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(promptBanner);
-    
+
     setTimeout(() => {
         promptBanner.classList.add('show');
     }, 100);
-    
+
     promptBanner.querySelector('.pwa-install-btn').addEventListener('click', async () => {
         if (!deferredPrompt) return;
-        
+
         deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
-        
+
         if (outcome === 'accepted') {
             console.log('Usuário aceitou instalar o PWA');
             trackPWAInteraction('installed');
         }
-        
+
         deferredPrompt = null;
         promptBanner.remove();
     });
-    
+
     promptBanner.querySelector('.pwa-later-btn').addEventListener('click', () => {
         trackPWAInteraction('dismissed');
         promptBanner.remove();
@@ -156,11 +156,11 @@ function createManifest() {
             }
         ]
     };
-    
+
     const manifestString = JSON.stringify(manifest);
     const blob = new Blob([manifestString], { type: 'application/json' });
     const manifestURL = URL.createObjectURL(blob);
-    
+
     let link = document.querySelector('link[rel="manifest"]');
     if (!link) {
         link = document.createElement('link');
@@ -176,10 +176,10 @@ function createManifest() {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🚀 Grupo Etevalda MT - Versão Otimizada');
     showLoading(true);
-    
+
     // Criar manifest PWA
     createManifest();
-    
+
     try {
         await loadCategories();
         await loadProducts(true);
@@ -224,23 +224,13 @@ function showLoading(status) {
 // ========================================
 function setupHistoryAPI() {
     window.addEventListener('popstate', (event) => {
-        const modal = document.getElementById('productModal');
-        const isModalOpen = modal && modal.classList.contains('active');
-        
-        // Se o modal está ativo, fecha o modal
-        if (isModalOpen) {
-            event.preventDefault();
+        // Se o estado tiver modalOpen, fecha o modal
+        if (event.state?.modalOpen) {
             closeProductModal();
-            
-            // Limpa o hash da URL sem recarregar a página
-            if (location.hash.startsWith('#product-')) {
-                history.replaceState(null, '', location.pathname + location.search);
-            }
-            return;
         }
-        
-        // Se houver hash de produto na URL mas o modal não está ativo, limpa o hash
+        // Se houver hash de produto na URL, fecha também
         if (location.hash.startsWith('#product-')) {
+            closeProductModal();
             history.replaceState(null, '', location.pathname + location.search);
         }
     });
@@ -252,10 +242,10 @@ function setupHistoryAPI() {
 function setupScrollListener() {
     const header = document.querySelector('.header');
     const scrollThreshold = 50;
-    
+
     window.addEventListener('scroll', debounce(() => {
         const scrollPosition = window.scrollY;
-        
+
         if (scrollPosition > scrollThreshold) {
             header.classList.add('header-collapsed');
         } else {
@@ -270,9 +260,9 @@ function setupScrollListener() {
 function animateCart() {
     const cartBtn = document.getElementById('cartBtn');
     if (!cartBtn) return;
-    
+
     cartBtn.classList.add('cart-bounce', 'cart-glow');
-    
+
     setTimeout(() => {
         cartBtn.classList.remove('cart-bounce', 'cart-glow');
     }, 500);
@@ -287,42 +277,42 @@ async function loadProducts(reset = false) {
         allProductsLoaded = [];
         hasMoreProducts = true;
     }
-    
+
     if (!hasMoreProducts || isLoadingMore) return;
-    
+
     isLoadingMore = true;
-    
+
     if (!reset) {
         showLoadingMore();
     }
-    
+
     try {
         const from = (currentPage - 1) * productsPerPage;
         const to = from + productsPerPage - 1;
-        
+
         const { data, error } = await _supabase
             .from('products')
             .select('*, categories!category_id(name)')
             .order('id')
             .range(from, to);
-            
+
         if (error) throw error;
-        
+
         if (data.length > 0) {
             allProductsLoaded = reset ? data : [...allProductsLoaded, ...data];
             products = allProductsLoaded;
-            
+
             if (data.length < productsPerPage) {
                 hasMoreProducts = false;
             }
-            
+
             currentPage++;
         } else {
             hasMoreProducts = false;
         }
-        
+
         console.log(`📦 Carregados ${allProductsLoaded.length} produtos`);
-        
+
     } catch (error) {
         console.error('Erro ao carregar produtos:', error);
         showToast('Erro ao carregar mais produtos');
@@ -336,7 +326,7 @@ function setupInfiniteScroll() {
     window.addEventListener('scroll', debounce(() => {
         const scrollPosition = window.innerHeight + window.scrollY;
         const threshold = document.documentElement.scrollHeight - 1000;
-        
+
         if (scrollPosition >= threshold && !isLoadingMore && hasMoreProducts) {
             loadProducts(false);
         }
@@ -346,7 +336,7 @@ function setupInfiniteScroll() {
 function showLoadingMore() {
     const container = document.getElementById('productsContainer');
     if (!container) return;
-    
+
     const loadingEl = document.createElement('div');
     loadingEl.id = 'loadingMore';
     loadingEl.className = 'loading-more';
@@ -368,11 +358,11 @@ function hideLoadingMore() {
 function setupTouchListeners() {
     const modalContent = document.querySelector('.modal-content');
     if (!modalContent) return;
-    
+
     modalContent.addEventListener('touchstart', (e) => {
         touchStartX = e.changedTouches[0].screenX;
     }, { passive: true });
-    
+
     modalContent.addEventListener('touchend', (e) => {
         touchEndX = e.changedTouches[0].screenX;
         handleSwipe();
@@ -381,11 +371,11 @@ function setupTouchListeners() {
 
 function handleSwipe() {
     const swipeThreshold = 50;
-    
+
     if (touchEndX < touchStartX - swipeThreshold) {
         nextMedia();
     }
-    
+
     if (touchEndX > touchStartX + swipeThreshold) {
         prevMedia();
     }
@@ -393,19 +383,19 @@ function handleSwipe() {
 
 function nextMedia() {
     if (!currentMediaList || currentMediaList.length === 0) return;
-    
+
     const activeThumb = document.querySelector('.modal-thumb.active');
     if (!activeThumb) return;
-    
+
     const thumbs = document.querySelectorAll('.modal-thumb');
     let currentIndex = 0;
-    
+
     thumbs.forEach((thumb, index) => {
         if (thumb.classList.contains('active')) {
             currentIndex = index;
         }
     });
-    
+
     const nextIndex = (currentIndex + 1) % thumbs.length;
     changeModalMedia(nextIndex);
     showToast(`Foto ${nextIndex + 1} de ${thumbs.length}`);
@@ -413,19 +403,19 @@ function nextMedia() {
 
 function prevMedia() {
     if (!currentMediaList || currentMediaList.length === 0) return;
-    
+
     const activeThumb = document.querySelector('.modal-thumb.active');
     if (!activeThumb) return;
-    
+
     const thumbs = document.querySelectorAll('.modal-thumb');
     let currentIndex = 0;
-    
+
     thumbs.forEach((thumb, index) => {
         if (thumb.classList.contains('active')) {
             currentIndex = index;
         }
     });
-    
+
     const prevIndex = (currentIndex - 1 + thumbs.length) % thumbs.length;
     changeModalMedia(prevIndex);
     showToast(`Foto ${prevIndex + 1} de ${thumbs.length}`);
@@ -438,13 +428,13 @@ function openSuperZoom(mediaUrl, type = 'image') {
     const overlay = document.getElementById('superZoomOverlay');
     const content = document.getElementById('superZoomContent');
     if (!overlay || !content) return;
-    
+
     if (type === 'video') {
         content.innerHTML = `<video src="${mediaUrl}" controls autoplay loop playsinline style="max-width:100%;max-height:90vh;object-fit:contain;"></video>`;
     } else {
         content.innerHTML = `<img src="${mediaUrl}" alt="Zoom" style="max-width:100%;max-height:90vh;object-fit:contain;">`;
     }
-    
+
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
@@ -453,7 +443,7 @@ function closeSuperZoom() {
     const overlay = document.getElementById('superZoomOverlay');
     const content = document.getElementById('superZoomContent');
     if (!overlay || !content) return;
-    
+
     overlay.classList.remove('active');
     content.innerHTML = '';
     document.body.style.overflow = '';
@@ -465,9 +455,9 @@ function setupSuperZoomListeners() {
             closeSuperZoom();
         }
     });
-    
+
     document.getElementById('superZoomClose')?.addEventListener('click', closeSuperZoom);
-    
+
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeSuperZoom();
@@ -476,40 +466,43 @@ function setupSuperZoomListeners() {
 }
 
 // ========================================
-// 13. CONTROLE DE ÁUDIO
+// 13. CONTROLE DE ÁUDIO (ATUALIZADO)
 // ========================================
-function setupVideoAudioControl(videoElement) {
+function setupVideoAudioControl(videoElement, hasAudio = true) {
     if (!videoElement) return;
-    
+
     videoElement.muted = true;
     videoElement.autoplay = true;
     videoElement.playsInline = true;
     videoElement.loop = true;
-    
-    const audioBtn = document.createElement('button');
-    audioBtn.className = 'video-audio-toggle';
-    audioBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-    audioBtn.setAttribute('aria-label', 'Ativar áudio');
-    
-    audioBtn.onclick = (e) => {
-        e.stopPropagation();
-        if (videoElement.muted) {
-            videoElement.currentTime = 0;
-            videoElement.muted = false;
-            videoElement.play().catch(err => console.log('Autoplay bloqueado:', err));
-            audioBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
-            audioBtn.setAttribute('aria-label', 'Desativar áudio');
-        } else {
-            videoElement.muted = true;
-            audioBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-            audioBtn.setAttribute('aria-label', 'Ativar áudio');
+
+    // CORREÇÃO: Só adiciona o botão de áudio se o vídeo tiver áudio (hasAudio for true)
+    if (hasAudio) {
+        const audioBtn = document.createElement('button');
+        audioBtn.className = 'video-audio-toggle';
+        audioBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+        audioBtn.setAttribute('aria-label', 'Ativar áudio');
+
+        audioBtn.onclick = (e) => {
+            e.stopPropagation();
+            if (videoElement.muted) {
+                videoElement.currentTime = 0;
+                videoElement.muted = false;
+                videoElement.play().catch(err => console.log('Autoplay bloqueado:', err));
+                audioBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                audioBtn.setAttribute('aria-label', 'Desativar áudio');
+            } else {
+                videoElement.muted = true;
+                audioBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                audioBtn.setAttribute('aria-label', 'Ativar áudio');
+            }
+        };
+
+        const container = videoElement.parentElement;
+        if (container) {
+            container.style.position = 'relative';
+            container.appendChild(audioBtn);
         }
-    };
-    
-    const container = videoElement.parentElement;
-    if (container) {
-        container.style.position = 'relative';
-        container.appendChild(audioBtn);
     }
 }
 
@@ -549,13 +542,13 @@ async function loadSocialProof() {
 function renderCategories() {
     const list = document.getElementById('categoryList');
     if (!list) return;
-    
+
     list.innerHTML = '<li class="active" data-category="all">Todos</li>';
-    
+
     categories.forEach(cat => {
         list.innerHTML += `<li data-category="${cat.id}">${cat.name}</li>`;
     });
-    
+
     list.querySelectorAll('li').forEach(li => {
         li.addEventListener('click', () => {
             list.querySelectorAll('li').forEach(el => el.classList.remove('active'));
@@ -570,12 +563,12 @@ function renderCategories() {
 function renderFaqs() {
     const grid = document.getElementById('faqGrid');
     if (!grid) return;
-    
+
     if (!faqs || faqs.length === 0) {
         grid.innerHTML = '<p>Nenhuma FAQ</p>';
         return;
     }
-    
+
     grid.innerHTML = faqs.map(f => `
         <div class="faq-card" onclick="playFaqAudio(this)">
             <div class="faq-icon"><i class="fas fa-play"></i></div>
@@ -606,7 +599,7 @@ window.playFaqAudio = function(card) {
 function renderSocialProof() {
     const grid = document.getElementById('socialProofGrid');
     if (!grid) return;
-    
+
     if (!socialProofImages || socialProofImages.length === 0) {
         const fallbackCards = [
             { image: 'https://i.postimg.cc/HnbpfGbh/Equipeee.jpg', text: 'Clientes satisfeitos' },
@@ -624,7 +617,7 @@ function renderSocialProof() {
         `).join('');
         return;
     }
-    
+
     grid.innerHTML = socialProofImages.slice(0, 3).map(item => `
         <div class="social-proof-card">
             <div class="social-proof-image">
@@ -640,7 +633,7 @@ function renderSocialProof() {
 function renderCarousel() {
     const carousel = document.getElementById('infiniteCarousel');
     if (!carousel || !allProductsLoaded.length) return;
-    
+
     const carouselProducts = [...allProductsLoaded, ...allProductsLoaded];
     carousel.innerHTML = carouselProducts.map(p => {
         const images = Array.isArray(p.images) ? p.images : [];
@@ -663,21 +656,21 @@ function renderStars(rating) {
 }
 
 // ========================================
-// 16. RENDERIZAÇÃO DE PRODUTOS
+// 16. RENDERIZAÇÃO DE PRODUTOS (CORRIGIDO)
 // ========================================
 function renderProductCard(p) {
     const images = Array.isArray(p.images) ? p.images : [];
     const mainImage = images[0] || 'https://via.placeholder.com/200';
     const secondImage = images[1] || mainImage;
     const priceFormatted = p.price.toFixed(2).replace('.', ',');
-    
+
     const solitarioHtml = p.tem_solitario && p.solitario_price && p.solitario_price > 0
         ? `<div class="product-solitario"><i class="fas fa-gem"></i> Solitário: R$ ${p.solitario_price.toFixed(2).replace('.', ',')}</div>`
         : '';
-    
+
     // SELO VENDIDO HOJE
     const soldTodayHtml = p.sold_today ? `<div class="product-sold-today">Vendido Hoje</div>` : '';
-    
+
     return `
         <div class="product-card"
             onclick="openProductModal(${p.id})"
@@ -726,25 +719,25 @@ window.unhoverImage = function(card, mainImage) {
 function renderProducts() {
     const container = document.getElementById('productsContainer');
     if (!container) return;
-    
+
     let filtered = allProductsLoaded.filter(p => {
         const matchCat = currentCategory === 'all' || p.category_id == currentCategory;
         const matchSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase());
         return matchCat && matchSearch;
     });
-    
+
     const productCount = document.getElementById('productCount');
     if (productCount) productCount.textContent = `${filtered.length} itens`;
-    
+
     if (filtered.length === 0) {
         container.innerHTML = '<p style="text-align:center; padding:40px;">Nenhum produto encontrado</p>';
         return;
     }
-    
+
     if (currentCategory === 'all' && !searchQuery) {
         filtered = filtered.sort(() => Math.random() - 0.5);
     }
-    
+
     container.innerHTML = filtered.map(p => renderProductCard(p)).join('');
 }
 
@@ -757,61 +750,63 @@ function getRandomViewers() {
     return Math.floor(Math.random() * 9) + 4; // 4 a 12
 }
 
-// Cronômetro de entrega (COM CONTADOR REGRESSIVO DE 2 HORAS)
+// Cronômetro de entrega (COM TEXTO ATUALIZADO)
 function startDeliveryTimer() {
     const timerElement = document.getElementById('deliveryTimer');
     if (!timerElement) return;
-    
+
     // Limpar intervalo anterior se existir
     if (deliveryTimerInterval) {
         clearInterval(deliveryTimerInterval);
     }
-    
-    // Obter tempo salvo no sessionStorage ou iniciar com 2 horas
-    let savedTime = sessionStorage.getItem('deliveryTimerTime');
-    let startTime = savedTime ? parseInt(savedTime) : Date.now();
-    const totalTime = 2 * 60 * 60 * 1000; // 2 horas em milissegundos
-    
+
     function updateTimer() {
-        const elapsed = Date.now() - startTime;
-        const remaining = Math.max(0, totalTime - elapsed);
-        
-        if (remaining === 0) {
-            // Tempo esgotado - mostrar mensagem padrão
+        const now = new Date();
+        const limit = new Date(now);
+        limit.setHours(17, 0, 0, 0); // 17:00
+
+        if (now > limit) {
+            // Já passou das 17h - TEXTO ATUALIZADO
             timerElement.innerHTML = `
                 <i class="fas fa-clock"></i>
                 <span class="delivery-today">Receba hoje e só pague na entrega</span>
             `;
-            sessionStorage.removeItem('deliveryTimerTime');
             return;
         }
-        
-        const hours = Math.floor(remaining / (1000 * 60 * 60));
-        const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-        
+
+        const diff = limit - now;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
         timerElement.innerHTML = `
             <i class="fas fa-clock"></i>
             <span class="timer-countdown">${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s</span>
             <span class="timer-text">para receber hoje!</span>
         `;
-        
-        // Salvar tempo atual no sessionStorage
-        sessionStorage.setItem('deliveryTimerTime', startTime.toString());
     }
-    
+
     updateTimer();
     deliveryTimerInterval = setInterval(updateTimer, 1000);
 }
 
-// Compartilhar via Web Share API
-async function shareProduct(product) {
+// ========================================
+// 18. COMPARTILHAR (CORRIGIDO)
+// ========================================
+async function shareProduct(id) {
+    // CORREÇÃO: Busca o produto pelo ID recebido
+    const product = allProductsLoaded.find(p => p.id === id);
+    if (!product) {
+        showToast('Produto não encontrado para compartilhar.');
+        return;
+    }
+
     const shareData = {
         title: product.name,
         text: `Olha só essa joia incrível da Etevalda MT: ${product.name} por apenas R$ ${product.price.toFixed(2).replace('.', ',')}!`,
         url: window.location.href.split('#')[0] + `#product-${product.id}`
     };
-    
+
     try {
         if (navigator.share) {
             await navigator.share(shareData);
@@ -827,15 +822,15 @@ async function shareProduct(product) {
 }
 
 // ========================================
-// 18. MODAL DE PRODUTO (COM GATILHOS DE VENDA OTIMIZADOS)
+// 19. MODAL DE PRODUTO (COM GATILHOS DE VENDA OTIMIZADOS)
 // ========================================
 function openProductModal(id) {
     const product = allProductsLoaded.find(p => p.id === id);
     if (!product) return;
-    
+
     currentModalProduct = product;
     currentMediaList = [];
-    
+
     if (product.video_url && product.video_url.trim()) {
         currentMediaList.push({
             type: 'video',
@@ -843,14 +838,14 @@ function openProductModal(id) {
             thumbnail: product.images?.[0] || ''
         });
     }
-    
+
     let images = [];
     if (Array.isArray(product.images)) {
         images = product.images;
     } else if (typeof product.images === 'string') {
         images = product.images.split(',').map(img => img.trim());
     }
-    
+
     images.forEach(img => {
         if (img) {
             currentMediaList.push({
@@ -860,9 +855,9 @@ function openProductModal(id) {
             });
         }
     });
-    
+
     const productReviews = allReviews.filter(r => r.is_general || r.product_id === id);
-    
+
     let upsellProducts = [];
     if (product.upsell_category) {
         upsellProducts = allProductsLoaded.filter(p =>
@@ -875,7 +870,7 @@ function openProductModal(id) {
             p.category_id === product.category_id
         ).slice(0, 12);
     }
-    
+
     let crossSellProducts = [];
     if (product.related_keywords) {
         const keywords = product.related_keywords.toLowerCase().split(',').map(k => k.trim());
@@ -886,27 +881,27 @@ function openProductModal(id) {
             return keywords.some(k => productKeywords.includes(k));
         }).slice(0, 12);
     }
-    
+
     if (crossSellProducts.length === 0 && product.category_id) {
         crossSellProducts = allProductsLoaded.filter(p =>
             p.id !== product.id &&
             p.category_id === product.category_id
         ).slice(0, 12);
     }
-    
+
     const priceFormatted = product.price.toFixed(2).replace('.', ',');
     const solitarioFormatted = product.solitario_price?.toFixed(2).replace('.', ',');
     const rating = product.default_rating || 5;
-    
+
     // Número aleatório de pessoas vendo
     const viewersCount = getRandomViewers();
-    
+
     const thumbnailsHtml = currentMediaList.map((media, index) => `
         <div class="modal-thumb ${media.type === 'video' ? 'video-thumb' : ''} ${index === 0 ? 'active' : ''}" onclick="changeModalMedia(${index})">
             <img src="${media.thumbnail}" alt="">
         </div>
     `).join('');
-    
+
     // REMOVIDO: Bloco pesado de "Você só paga na entrega"
     // ALTERADO: Selo solitário com estilo mais discreto
     const solitarioHtml = product.tem_solitario && product.solitario_price > 0 ? `
@@ -914,7 +909,7 @@ function openProductModal(id) {
             <i class="fas fa-gem"></i> Solitário vendido separadamente: R$ ${solitarioFormatted}
         </div>
     ` : '';
-    
+
     const modalHtml = `
         <div class="modal-gallery">
             <div class="modal-main-media" id="modalMainMedia">
@@ -930,15 +925,15 @@ function openProductModal(id) {
             <span class="modal-category">${product.categories?.name || ''}</span>
             <h2 class="modal-title">${product.name}</h2>
             <div class="modal-price-main">R$ ${priceFormatted}</div>
-            
+
             <!-- Selo solitário discreto -->
             ${solitarioHtml}
-            
+
             <!-- Prova Social em tempo real -->
             <div class="looking-now">
                 <i class="fas fa-eye"></i> ${viewersCount} pessoas estão vendo este produto agora
             </div>
-            
+
             <!-- Caixa de urgência com cronômetro -->
             <div class="urgency-box">
                 <div class="delivery-timer" id="deliveryTimer">
@@ -947,29 +942,26 @@ function openProductModal(id) {
                     <span class="timer-text">para receber hoje!</span>
                 </div>
             </div>
-            
+
             <div class="product-rating-large">${renderStars(rating)}</div>
-            
-            <!-- Botões com compartilhamento melhorado -->
+
+            <!-- Botões com compartilhamento melhorado (CORRIGIDO) -->
             <div class="modal-buttons">
                 <button class="btn-add-cart-modal" onclick="addToCart(${product.id})">
-                    <i class="fas fa-cart-plus"></i>
+                    <i class="fas fa-cart-plus"></i> Carrinho
                 </button>
                 <button class="btn-whatsapp-modal" onclick="buyViaWhatsApp(${product.id})">
-                    <i class="fab fa-whatsapp"></i>
+                    <i class="fab fa-whatsapp"></i> WhatsApp
                 </button>
-                <button class="btn-share" onclick="shareProduct(${JSON.stringify(product).replace(/"/g, '&quot;')})" aria-label="Compartilhar">
+                <button class="btn-share" onclick="shareProduct(${product.id})" aria-label="Compartilhar">
                     <i class="fas fa-share-alt"></i> <span>COMPARTILHE<br>COM SEU AMOR</span>
                 </button>
             </div>
-            
-            <!-- Descrição condicional - só aparece se existir -->
-            ${product.description ? `
-                <div class="modal-description">
-                    ${product.description}
-                </div>
-            ` : ''}
-            
+
+            <div class="modal-description">
+                ${product.description || ''}
+            </div>
+
             ${upsellProducts.length > 0 ? `
                 <div class="recommendations-section">
                     <h4 class="recommendations-title"><i class="fas fa-handshake"></i> Quem viu, também gostou</h4>
@@ -984,7 +976,7 @@ function openProductModal(id) {
                     </div>
                 </div>
             ` : ''}
-            
+
             ${crossSellProducts.length > 0 ? `
                 <div class="cross-sell-section">
                     <h4 class="cross-sell-title"><i class="fas fa-link"></i> Complemente seu Estilo</h4>
@@ -1001,7 +993,7 @@ function openProductModal(id) {
                     </div>
                 </div>
             ` : ''}
-            
+
             ${productReviews.length > 0 ? `
                 <div class="reviews-section">
                     <h4 class="reviews-title"><i class="fas fa-star"></i> Avaliações</h4>
@@ -1022,25 +1014,25 @@ function openProductModal(id) {
                     `).join('')}
                 </div>
             ` : ''}
-            
+
             <div class="scroll-indicator">
                 <i class="fas fa-chevron-up"></i> Arraste para ver mais
             </div>
         </div>
     `;
-    
+
     document.getElementById('modalContainer').innerHTML = modalHtml;
     document.getElementById('productModal').classList.add('active');
     document.body.style.overflow = 'hidden';
-    
+
     // Iniciar cronômetro de entrega
     startDeliveryTimer();
-    
+
     // Adiciona estado no history para controle do botão voltar
-    history.pushState({ modalOpen: true }, '');
-    
+    history.pushState({ modalOpen: true, productId: id }, '', `#product-${id}`);
+
     setupModalMediaClick();
-    setupModalVideoAudio();
+    setupModalVideoAudio(product.video_has_audio); // CORREÇÃO: Passar flag de áudio
     setupNextPhotoButton();
     scrollToTop();
 }
@@ -1048,7 +1040,7 @@ function openProductModal(id) {
 function setupNextPhotoButton() {
     const nextBtn = document.getElementById('nextPhotoBtn');
     if (!nextBtn) return;
-    
+
     if (currentMediaList.length > 1) {
         nextBtn.style.display = 'flex';
         nextBtn.onclick = (e) => {
@@ -1063,10 +1055,10 @@ function setupNextPhotoButton() {
 function setupModalMediaClick() {
     const mainMedia = document.getElementById('modalMainMedia');
     if (!mainMedia) return;
-    
+
     const img = mainMedia.querySelector('img');
     const video = mainMedia.querySelector('video');
-    
+
     if (img) {
         img.style.cursor = 'zoom-in';
         img.onclick = (e) => {
@@ -1074,7 +1066,7 @@ function setupModalMediaClick() {
             openSuperZoom(img.src, 'image');
         };
     }
-    
+
     if (video) {
         video.style.cursor = 'zoom-in';
         video.onclick = (e) => {
@@ -1084,13 +1076,14 @@ function setupModalMediaClick() {
     }
 }
 
-function setupModalVideoAudio() {
+// CORREÇÃO: Função agora aceita um parâmetro 'hasAudio'
+function setupModalVideoAudio(hasAudio = true) {
     const mainMedia = document.getElementById('modalMainMedia');
     if (!mainMedia) return;
-    
+
     const video = mainMedia.querySelector('video');
     if (video) {
-        setupVideoAudioControl(video);
+        setupVideoAudioControl(video, hasAudio);
     }
 }
 
@@ -1103,52 +1096,50 @@ function scrollToTop() {
 
 function changeModalMedia(index) {
     if (!currentMediaList[index]) return;
-    
+
     const media = currentMediaList[index];
     const mainContainer = document.getElementById('modalMainMedia');
-    
+    const hasAudio = currentModalProduct?.video_has_audio ?? true; // Pega a flag do produto atual
+
     if (media.type === 'video') {
         mainContainer.innerHTML = `<video src="${media.url}" autoplay muted loop playsinline></video>`;
-        setupModalVideoAudio();
+        setupModalVideoAudio(hasAudio);
         setupModalMediaClick();
     } else {
         mainContainer.innerHTML = `<img src="${media.url}" alt="">`;
         setupModalMediaClick();
     }
-    
+
     document.querySelectorAll('.modal-thumb').forEach((thumb, i) => {
         thumb.classList.toggle('active', i === index);
     });
 }
 
 function closeProductModal() {
-    const modal = document.getElementById('productModal');
-    if (modal) {
-        modal.classList.remove('active');
-    }
+    document.getElementById('productModal').classList.remove('active');
     document.body.style.overflow = '';
     currentModalProduct = null;
     currentMediaList = [];
-    
+
     // Limpar intervalo do cronômetro
     if (deliveryTimerInterval) {
         clearInterval(deliveryTimerInterval);
         deliveryTimerInterval = null;
     }
-    
-    // Limpa o estado do history para evitar cliques fantasmas
+
+    // Remove o estado do history
     if (history.state?.modalOpen) {
         history.replaceState(null, '', location.pathname + location.search);
     }
 }
 
 // ========================================
-// 19. BUSCA E FILTROS
+// 20. BUSCA E FILTROS
 // ========================================
 function handleSearch(query) {
     searchQuery = query;
     renderProducts();
-    
+
     const dropdown = document.getElementById('searchDropdown');
     if (dropdown) {
         setTimeout(() => { dropdown.style.display = 'none'; }, 200);
@@ -1160,24 +1151,24 @@ function resetFilters() {
     currentCategory = 'all';
     const searchInput = document.getElementById('searchInput');
     if (searchInput) searchInput.value = '';
-    
+
     document.querySelectorAll('.category-list li').forEach(li => {
         li.classList.toggle('active', li.dataset.category === 'all');
     });
-    
+
     renderProducts();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ========================================
-// 20. CARRINHO
+// 21. CARRINHO
 // ========================================
 function addToCart(productId) {
     const product = allProductsLoaded.find(p => p.id === productId);
     if (!product) return;
-    
+
     const existingItem = cart.find(item => item.id === productId);
-    
+
     if (existingItem) {
         existingItem.quantity += 1;
     } else {
@@ -1189,7 +1180,7 @@ function addToCart(productId) {
             quantity: 1
         });
     }
-    
+
     saveCart();
     updateCartUI();
     animateCart(); // ANIMAÇÃO DO CARRINHO
@@ -1205,9 +1196,9 @@ function removeFromCart(productId) {
 function updateQuantity(productId, change) {
     const item = cart.find(item => item.id === productId);
     if (!item) return;
-    
+
     item.quantity += change;
-    
+
     if (item.quantity <= 0) {
         removeFromCart(productId);
     } else {
@@ -1241,12 +1232,12 @@ function updateCartUI() {
     const container = document.getElementById('cartItems');
     const totalEl = document.getElementById('cartTotal');
     const countEl = document.getElementById('cartCount');
-    
+
     if (!container) return;
-    
+
     let total = 0;
     let qtdTotal = 0;
-    
+
     if (cart.length === 0) {
         container.innerHTML = '<p style="text-align:center; padding:40px;">Carrinho vazio</p>';
         totalEl.textContent = 'R$ 0,00';
@@ -1254,7 +1245,7 @@ function updateCartUI() {
         countEl.style.display = 'none';
         return;
     }
-    
+
     container.innerHTML = cart.map(item => {
         total += item.price * item.quantity;
         qtdTotal += item.quantity;
@@ -1274,7 +1265,7 @@ function updateCartUI() {
             </div>
         `;
     }).join('');
-    
+
     totalEl.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
     countEl.textContent = qtdTotal;
     countEl.style.display = qtdTotal > 0 ? 'flex' : 'none';
@@ -1295,7 +1286,7 @@ function closeCart() {
 }
 
 // ========================================
-// 21. WHATSAPP
+// 22. WHATSAPP
 // ========================================
 function buyViaWhatsApp(id) {
     const p = allProductsLoaded.find(p => p.id === id);
@@ -1303,7 +1294,7 @@ function buyViaWhatsApp(id) {
         window.open(WHATSAPP_BASE_URL, '_blank');
         return;
     }
-    
+
     const msg = `Olá! Quero este produto: *${p.name}* - R$ ${p.price.toFixed(2).replace('.', ',')}`;
     const url = `https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}&type=phone_number&app_absent=0`;
     window.open(url, '_blank');
@@ -1314,23 +1305,23 @@ function checkoutWhatsApp() {
         showToast('Carrinho vazio!');
         return;
     }
-    
+
     let itemsList = '';
     let total = 0;
-    
+
     cart.forEach((item, index) => {
         const subtotal = item.price * item.quantity;
         total += subtotal;
         itemsList += `${index + 1}. ${item.name} (x${item.quantity}) - R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
     });
-    
+
     const message = `🛍️ *NOVO PEDIDO*\n${itemsList}\n💰 *Total: R$ ${total.toFixed(2).replace('.', ',')}*\nPago na entrega.`;
     const url = `https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
     window.open(url, '_blank');
 }
 
 // ========================================
-// 22. GEOLOCALIZAÇÃO
+// 23. GEOLOCALIZAÇÃO
 // ========================================
 async function initGeoLocationBackground() {
     try {
@@ -1352,14 +1343,14 @@ function startGeoNotifications() {
 
 function showGeoNotification() {
     if (!allProductsLoaded.length) return;
-    
+
     const neighborhood = detectedLocation.neighborhoods[Math.floor(Math.random() * detectedLocation.neighborhoods.length)];
     const customerName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
     const randomProduct = allProductsLoaded[Math.floor(Math.random() * allProductsLoaded.length)];
-    
+
     const notification = document.getElementById('geoNotification');
     const notificationText = document.getElementById('geoNotificationText');
-    
+
     if (notification && notificationText) {
         notificationText.innerHTML = `<strong>${customerName}</strong> do <strong>${neighborhood}</strong> comprou <strong>${randomProduct.name}</strong>`;
         notification.style.display = 'block';
@@ -1368,34 +1359,34 @@ function showGeoNotification() {
 }
 
 // ========================================
-// 23. BUSCA PREDITIVA
+// 24. BUSCA PREDITIVA
 // ========================================
 function initPredictiveSearch() {
     const searchInput = document.getElementById('searchInput');
     const searchDropdown = document.getElementById('searchDropdown');
     const searchResults = document.getElementById('searchResults');
-    
+
     if (!searchInput) return;
-    
+
     document.addEventListener('click', (e) => {
         if (!searchInput.contains(e.target) && !searchDropdown?.contains(e.target)) {
             if (searchDropdown) searchDropdown.style.display = 'none';
         }
     });
-    
+
     searchInput.addEventListener('input', debounce((e) => {
         const query = e.target.value.trim().toLowerCase();
         handleSearch(query);
-        
+
         if (query.length < 2 || !searchDropdown || !searchResults) {
             if (searchDropdown) searchDropdown.style.display = 'none';
             return;
         }
-        
+
         const results = allProductsLoaded.filter(p =>
             p.name.toLowerCase().includes(query)
         ).slice(0, 5);
-        
+
         if (results.length > 0) {
             searchResults.innerHTML = results.map(p => `
                 <div class="search-result-item" onclick="openProductModal(${p.id}); searchDropdown.style.display='none';">
@@ -1415,7 +1406,7 @@ function initPredictiveSearch() {
 }
 
 // ========================================
-// 24. TIMER DA EQUIPE
+// 25. TIMER DA EQUIPE
 // ========================================
 function startTeamTimer() {
     setTimeout(() => {
@@ -1428,7 +1419,7 @@ function startTeamTimer() {
 }
 
 // ========================================
-// 25. EVENT LISTENERS
+// 26. EVENT LISTENERS
 // ========================================
 function setupEventListeners() {
     document.getElementById('modalCloseBtn')?.addEventListener('click', closeProductModal);
@@ -1455,12 +1446,12 @@ function setupEventListeners() {
 }
 
 // ========================================
-// 26. UTILITÁRIOS
+// 27. UTILITÁRIOS
 // ========================================
 function showToast(msg) {
     const toast = document.getElementById('toast');
     if (!toast) return;
-    
+
     toast.textContent = msg;
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 3000);
@@ -1475,7 +1466,7 @@ function debounce(fn, wait) {
 }
 
 // ========================================
-// 27. EXPOR FUNÇÕES GLOBAIS
+// 28. EXPOR FUNÇÕES GLOBAIS
 // ========================================
 window.openProductModal = openProductModal;
 window.changeModalMedia = changeModalMedia;

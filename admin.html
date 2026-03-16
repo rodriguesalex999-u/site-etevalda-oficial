@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* ======================================== */
+        /* SEUS ESTILOS EXISTENTES (NÃO ALTERADOS) */
+        /* ======================================== */
         :root {
             --gold-primary: #D4AF37;
             --gold-dark: #B8941F;
@@ -23,7 +26,7 @@
             --warning: #f59e0b;
             --shadow: 0 4px 20px rgba(0,0,0,0.1);
             --radius: 12px;
-            
+
             /* Cores para tags */
             --tag-yellow: #FBBF24;
             --tag-red: #EF4444;
@@ -232,7 +235,7 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .search-bar input {
             flex: 1;
             padding: 12px 16px;
@@ -241,13 +244,13 @@
             font-size: 14px;
             transition: all 0.3s;
         }
-        
+
         .search-bar input:focus {
             outline: none;
             border-color: var(--gold-primary);
             box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
         }
-        
+
         .search-bar i {
             color: var(--gold-primary);
             font-size: 1.2rem;
@@ -297,7 +300,7 @@
             gap: 12px;
             padding: 10px 0;
         }
-        
+
         .checkbox-group input[type="checkbox"] {
             width: 20px;
             height: 20px;
@@ -311,15 +314,15 @@
             gap: 10px;
             align-items: flex-start;
         }
-        
+
         .tag-input {
             flex: 2;
         }
-        
+
         .tag-color-select {
             flex: 1;
         }
-        
+
         .tag-preview {
             margin-top: 10px;
             padding: 8px 12px;
@@ -617,7 +620,7 @@
                     </select>
                     <small style="color: var(--medium-gray);">Avaliação que aparece no card do produto</small>
                 </div>
-                
+
                 <div class="form-grid">
                     <div class="form-group full-width">
                         <label><i class="fas fa-gem"></i> Nome do Produto *</label>
@@ -644,7 +647,7 @@
                             <label for="temSolitario">Sim</label>
                         </div>
                     </div>
-                    
+
                     <!-- GRUPO DE TAG COM COR -->
                     <div class="form-group full-width">
                         <label><i class="fas fa-star"></i> Tag de Destaque</label>
@@ -690,7 +693,7 @@
                         <label><i class="fas fa-key"></i> Palavras-chave</label>
                         <input type="text" id="relatedKeywords" placeholder="aliança, ouro, prata, casamento">
                     </div>
-                    
+
                     <!-- CAMPO DE VÍDEO COM OPÇÃO DE ÁUDIO -->
                     <div class="form-group full-width">
                         <label><i class="fas fa-video"></i> URL do Vídeo</label>
@@ -701,7 +704,7 @@
                         </div>
                         <small style="color: var(--medium-gray);">Vídeo iniciará sem áudio por padrão</small>
                     </div>
-                    
+
                     <div class="form-group full-width">
                         <label><i class="fas fa-align-left"></i> Descrição</label>
                         <textarea id="productDescription" rows="3" placeholder="Descrição detalhada do produto..."></textarea>
@@ -719,13 +722,13 @@
 
         <div class="table-section">
             <h2 class="section-title"><i class="fas fa-list"></i> Produtos Cadastrados</h2>
-            
+
             <!-- Barra de busca em tempo real -->
             <div class="search-bar">
                 <i class="fas fa-search"></i>
                 <input type="text" id="productSearch" placeholder="Buscar produtos por nome..." autocomplete="off">
             </div>
-            
+
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -964,12 +967,12 @@
         </div>
         <form id="editProductForm">
             <input type="hidden" id="editProductId">
-            
+
             <div class="form-group full-width">
                 <label>Nome do Produto *</label>
                 <input type="text" id="editProductName" required>
             </div>
-            
+
             <div class="form-grid">
                 <div class="form-group">
                     <label>Preço (R$) *</label>
@@ -980,7 +983,7 @@
                     <input type="text" id="editSolitarioPrice">
                 </div>
             </div>
-            
+
             <div class="form-grid">
                 <div class="form-group">
                     <label>Categoria *</label>
@@ -994,7 +997,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="form-group full-width">
                 <label>Tag de Destaque</label>
                 <div class="tag-group">
@@ -1013,7 +1016,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- NOVO CAMPO: VENDIDO HOJE NA EDIÇÃO -->
             <div class="form-group full-width">
                 <label><i class="fas fa-fire"></i> Selo de Escassez</label>
@@ -1022,12 +1025,25 @@
                     <label for="editSoldToday"><strong>Exibir selo "Vendido Hoje"</strong> (cria senso de urgência)</label>
                 </div>
             </div>
-            
+
             <div class="form-group full-width">
                 <label>Categoria de Sugestão (Upsell)</label>
                 <select id="editUpsellCategory"></select>
             </div>
-            
+
+            <!-- CORREÇÃO: ADICIONADO CAMPO DE AVALIAÇÃO PADRÃO NO MODAL DE EDIÇÃO -->
+            <div class="form-group full-width">
+                <label><i class="fas fa-star"></i> Avaliação Padrão</label>
+                <select id="editDefaultRating">
+                    <option value="5">5 Estrelas ⭐⭐⭐⭐⭐</option>
+                    <option value="4">4 Estrelas ⭐⭐⭐⭐</option>
+                    <option value="3">3 Estrelas ⭐⭐⭐</option>
+                    <option value="2">2 Estrelas ⭐⭐</option>
+                    <option value="1">1 Estrela ⭐</option>
+                </select>
+                <small style="color: var(--medium-gray);">Avaliação que aparece no card do produto</small>
+            </div>
+
             <div class="form-group full-width">
                 <label>URL do Vídeo</label>
                 <input type="url" id="editVideoUrl" placeholder="https://...">
@@ -1036,17 +1052,17 @@
                     <label>Vídeo possui áudio (cliente ativa ao clicar)</label>
                 </div>
             </div>
-            
+
             <div class="form-group full-width">
                 <label>Descrição</label>
                 <textarea id="editDescription" rows="3"></textarea>
             </div>
-            
+
             <div class="form-group full-width">
                 <label>URLs das Imagens (uma por linha) *</label>
                 <textarea id="editImages" required rows="4"></textarea>
             </div>
-            
+
             <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Atualizar Produto</button>
         </form>
     </div>
@@ -1075,16 +1091,9 @@
     const SUPABASE_URL = 'https://vnrfmsyanrvqqhmqyixk.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_xGLDFQarl-DhshRW0932FQ_asug0TUK';
     const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-    // Senha hasheada (SHA-256 de '14659832')
-    const ADMIN_PASSWORD_HASH = '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92';
 
-    async function hashPassword(password) {
-        const msgBuffer = new TextEncoder().encode(password);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    }
+    // SENHA SIMPLES (sem hash)
+    const SENHA_ADMIN = '14659832';
 
     let currentTab = 'products';
     let deleteId = null;
@@ -1094,13 +1103,12 @@
     let allProducts = [];
 
     // ========================================
-    // LOGIN
+    // LOGIN SIMPLIFICADO
     // ========================================
-    async function checkPassword() {
+    function checkPassword() {
         const input = document.getElementById('passwordInput').value;
-        const hashedInput = await hashPassword(input);
-        
-        if (hashedInput === ADMIN_PASSWORD_HASH) {
+
+        if (input === SENHA_ADMIN) {
             document.getElementById('loginArea').style.display = 'none';
             document.getElementById('adminArea').style.display = 'block';
             loadAllData();
@@ -1160,20 +1168,20 @@
     // ========================================
     document.getElementById('badgeSelect')?.addEventListener('input', updateTagPreview);
     document.getElementById('badgeColor')?.addEventListener('change', updateTagPreview);
-    
+
     function updateTagPreview() {
         const text = document.getElementById('badgeSelect').value.trim();
         const color = document.getElementById('badgeColor').value;
         const preview = document.getElementById('tagPreview');
-        
+
         if (text) {
             preview.textContent = text;
         } else {
             preview.textContent = 'Prévia da Tag';
         }
-        
+
         preview.style.background = color;
-        
+
         if (color === '#FBBF24' || color === '#10B981') {
             preview.style.color = '#000000';
         } else {
@@ -1225,14 +1233,14 @@
                 upsellSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
             });
         }
-        
+
         if (editProductSelect && data) {
             editProductSelect.innerHTML = '<option value="">Selecione...</option>';
             data.forEach(c => {
                 editProductSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
             });
         }
-        
+
         if (editUpsellSelect && data) {
             editUpsellSelect.innerHTML = '<option value="">Selecione...</option>';
             data.forEach(c => {
@@ -1300,7 +1308,7 @@
             const categoryName = p.categories?.name || 'Sem categoria';
             const upsellCategory = p.upsell_category || '—';
             const soldToday = p.sold_today ? '✅ Sim' : '❌ Não';
-            
+
             let tagStyle = '';
             if (p.badge_color) {
                 tagStyle = `style="background: ${p.badge_color}; color: ${p.badge_color === '#FBBF24' || p.badge_color === '#10B981' ? '#000000' : '#FFFFFF'}; padding: 4px 8px; border-radius: 20px;"`;
@@ -1329,19 +1337,19 @@
     function setupProductSearch() {
         const searchInput = document.getElementById('productSearch');
         if (!searchInput) return;
-        
+
         searchInput.addEventListener('input', debounce((e) => {
             const query = e.target.value.trim().toLowerCase();
-            
+
             if (!query) {
                 renderProductTable(allProducts);
                 return;
             }
-            
-            const filtered = allProducts.filter(p => 
+
+            const filtered = allProducts.filter(p =>
                 p.name.toLowerCase().includes(query)
             );
-            
+
             renderProductTable(filtered);
         }, 300));
     }
@@ -1355,12 +1363,12 @@
             .select('*')
             .eq('id', id)
             .single();
-            
+
         if (!product) {
             showToast('Produto não encontrado!', 'error');
             return;
         }
-        
+
         document.getElementById('editProductId').value = product.id;
         document.getElementById('editProductName').value = product.name || '';
         document.getElementById('editProductPrice').value = product.price ? product.price.toFixed(2).replace('.', ',') : '';
@@ -1371,10 +1379,12 @@
         document.getElementById('editBadgeColor').value = product.badge_color || '#FBBF24';
         document.getElementById('editSoldToday').checked = product.sold_today || false;
         document.getElementById('editUpsellCategory').value = product.upsell_category || '';
+        // CORREÇÃO: Carregar o valor da avaliação padrão
+        document.getElementById('editDefaultRating').value = product.default_rating || 5;
         document.getElementById('editVideoUrl').value = product.video_url || '';
-        document.getElementById('editVideoHasAudio').checked = true;
+        document.getElementById('editVideoHasAudio').checked = product.video_has_audio !== false;
         document.getElementById('editDescription').value = product.description || '';
-        
+
         if (product.images) {
             if (Array.isArray(product.images)) {
                 document.getElementById('editImages').value = product.images.join('\n');
@@ -1382,7 +1392,7 @@
                 document.getElementById('editImages').value = product.images;
             }
         }
-        
+
         document.getElementById('editProductModal').classList.add('active');
     }
 
@@ -1392,7 +1402,7 @@
 
     document.getElementById('editProductForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
+
         const id = document.getElementById('editProductId').value;
         const name = document.getElementById('editProductName').value.trim();
         const priceRaw = document.getElementById('editProductPrice').value.trim();
@@ -1403,7 +1413,10 @@
         const badgeColor = document.getElementById('editBadgeColor').value;
         const soldToday = document.getElementById('editSoldToday').checked;
         const upsellCategory = document.getElementById('editUpsellCategory').value || null;
+        // CORREÇÃO: Capturar avaliação padrão na edição
+        const defaultRating = parseInt(document.getElementById('editDefaultRating').value);
         const videoUrl = document.getElementById('editVideoUrl').value.trim() || null;
+        const videoHasAudio = document.getElementById('editVideoHasAudio').checked;
         const description = document.getElementById('editDescription').value.trim() || null;
         const imagesRaw = document.getElementById('editImages').value.trim();
 
@@ -1441,7 +1454,9 @@
             badge_color: badgeColor,
             sold_today: soldToday,
             upsell_category: upsellCategory,
+            default_rating: defaultRating, // CORREÇÃO: Campo adicionado
             video_url: videoUrl,
+            video_has_audio: videoHasAudio,
             description,
             images
         };
@@ -1478,7 +1493,10 @@
         const soldToday = document.getElementById('soldToday').checked;
         const upsellCategory = document.getElementById('upsellCategory').value || null;
         const relatedKeywords = document.getElementById('relatedKeywords').value.trim() || null;
+        // CORREÇÃO: Capturar avaliação padrão no cadastro
+        const defaultRating = parseInt(document.getElementById('defaultRating').value);
         const videoUrl = document.getElementById('videoUrl').value.trim() || null;
+        const videoHasAudio = document.getElementById('videoHasAudio').checked;
         const description = document.getElementById('productDescription').value.trim() || null;
         const imagesRaw = document.getElementById('productImages').value.trim();
 
@@ -1517,7 +1535,9 @@
             sold_today: soldToday,
             upsell_category: upsellCategory,
             related_keywords: relatedKeywords,
+            default_rating: defaultRating, // CORREÇÃO: Campo adicionado
             video_url: videoUrl,
+            video_has_audio: videoHasAudio,
             description,
             images
         };
@@ -1818,7 +1838,7 @@
     // INICIALIZAÇÃO
     // ========================================
     updateTagPreview();
-    
+
     setTimeout(() => {
         setupProductSearch();
     }, 1000);
