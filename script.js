@@ -224,13 +224,23 @@ function showLoading(status) {
 // ========================================
 function setupHistoryAPI() {
     window.addEventListener('popstate', (event) => {
-        // Se o estado tiver modalOpen, fecha o modal
-        if (event.state?.modalOpen) {
+        const modal = document.getElementById('productModal');
+        const isModalOpen = modal && modal.classList.contains('active');
+        
+        // Se o modal está ativo, fecha o modal imediatamente
+        if (isModalOpen) {
+            event.preventDefault();
             closeProductModal();
+            
+            // Limpa o hash da URL sem recarregar a página
+            if (location.hash.startsWith('#product-')) {
+                history.replaceState(null, '', location.pathname + location.search);
+            }
+            return;
         }
-        // Se houver hash de produto na URL, fecha também
+        
+        // Se houver hash de produto na URL mas o modal não está ativo, limpa o hash
         if (location.hash.startsWith('#product-')) {
-            closeProductModal();
             history.replaceState(null, '', location.pathname + location.search);
         }
     });
@@ -958,9 +968,12 @@ function openProductModal(id) {
                 </button>
             </div>
 
-            <div class="modal-description">
-                ${product.description || ''}
-            </div>
+            <!-- Descrição condicional - só aparece se existir -->
+            ${product.description ? `
+                <div class="modal-description">
+                    ${product.description}
+                </div>
+            ` : ''}
 
             ${upsellProducts.length > 0 ? `
                 <div class="recommendations-section">
