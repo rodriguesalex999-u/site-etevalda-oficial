@@ -24,7 +24,7 @@ let searchQuery = '';
 
 // Variáveis para Lazy Loading
 let currentPage = 1;
-let productsPerPage = 20;
+let productsPerPage = 6;
 let hasMoreProducts = true;
 let isLoadingMore = false;
 let allProductsLoaded = [];
@@ -354,7 +354,7 @@ async function loadProducts(reset = false) {
 
         const { data, error } = await _supabase
             .from('products')
-            .select('*, categories!category_id(name)')
+            .select('*')
             .order('id', { ascending: false }) // CORRIGIDO: Agora pega os mais novos primeiro
             .range(from, to);
 
@@ -363,6 +363,14 @@ async function loadProducts(reset = false) {
         if (data.length > 0) {
             allProductsLoaded = reset ? data : [...allProductsLoaded, ...data];
             products = allProductsLoaded;
+            
+            // DEBUG: Log para verificar categorias
+            console.log('📦 Produtos carregados:', data.map(p => ({
+                id: p.id,
+                name: p.name,
+                category_id: p.category_id,
+                category_name: p.categories?.name
+            })));
 
             if (data.length < productsPerPage) {
                 hasMoreProducts = false;
@@ -880,10 +888,27 @@ function renderProducts() {
     const container = document.getElementById('productsContainer');
     if (!container) return;
 
+    // DEBUG: Log para verificar filtro
+    console.log('🔍 Filtrando produtos:', {
+        currentCategory,
+        totalProducts: allProductsLoaded.length,
+        searching: searchQuery
+    });
+
     let filtered = allProductsLoaded.filter(p => {
-        const matchCat = currentCategory === 'all' || p.category_id == currentCategory;
+        const matchCat = currentCategory === 'all' || String(p.category_id) === String(currentCategory);
         const matchSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase());
         return matchCat && matchSearch;
+    });
+
+    // DEBUG: Log para verificar resultado do filtro
+    console.log('📋 Produtos filtrados:', {
+        filteredCount: filtered.length,
+        sampleProducts: filtered.slice(0, 3).map(p => ({
+            name: p.name,
+            category_id: p.category_id,
+            category_name: p.categories?.name
+        }))
     });
 
     const productCount = document.getElementById('productCount');
@@ -992,13 +1017,24 @@ async function shareProduct(id) {
 // ========================================
 // 19. MODAL DE PRODUTO (COM GATILHOS DE VENDA OTIMIZADOS)
 // ========================================
-function openProductModal(id) {
-    const product = allProductsLoaded.find(p => p.id === id);
-    if (!product) return;
+// NOVA FUNÇÃO MODAL INTELIGENTE (BUSCA DETALHES COMPLETOS AO CLICAR)
+async function openProductModal(id) {
+    // 1. Busca os detalhes que não carregamos na vitrine (descrição, vídeo, etc)
+    const { data: product, error } = await _supabase
+        .from('products')
+        .select('*, categories!category_id(name)')
+        .eq('id', id)
+        .single();
+
+    if (error || !product) {
+        console.error("Erro ao carregar detalhes:", error);
+        return;
+    }
 
     currentModalProduct = product;
     currentMediaList = [];
 
+    // Adiciona Vídeo se existir
     if (product.video_url && product.video_url.trim()) {
         currentMediaList.push({
             type: 'video',
@@ -1007,13 +1043,8 @@ function openProductModal(id) {
         });
     }
 
-    let images = [];
-    if (Array.isArray(product.images)) {
-        images = product.images;
-    } else if (typeof product.images === 'string') {
-        images = product.images.split(',').map(img => img.trim());
-    }
-
+    // Adiciona Imagens
+    let images = Array.isArray(product.images) ? product.images : [];
     images.forEach(img => {
         if (img) {
             currentMediaList.push({
@@ -1026,19 +1057,12 @@ function openProductModal(id) {
 
     const productReviews = allReviews.filter(r => r.is_general || r.product_id === id);
 
-    let upsellProducts = [];
-    if (product.upsell_category) {
-        upsellProducts = allProductsLoaded.filter(p =>
-            p.id !== product.id &&
-            p.categories?.name?.toLowerCase().includes(product.upsell_category.toLowerCase())
-        ).slice(0, 12);
-    } else if (product.category_id) {
-        upsellProducts = allProductsLoaded.filter(p =>
-            p.id !== product.id &&
-            p.category_id === product.category_id
-        ).slice(0, 12);
-    }
+    // Sugestões (Upsell)
+    let upsellProducts = allProductsLoaded.filter(p =>
+        p.id !== product.id && p.category_id === product.category_id
+    ).slice(0, 12);
 
+    // Sugestões (Cross-sell) - COMPLETO como estava antes
     let crossSellProducts = [];
     if (product.related_keywords) {
         const keywords = product.related_keywords.toLowerCase().split(',').map(k => k.trim());
@@ -1050,6 +1074,14 @@ function openProductModal(id) {
         }).slice(0, 12);
     }
 
+    if (crossSellProducts.length === 0) {
+        crossSellProducts = allProductsLoaded.filter(p =>
+            p.id !== product.id &&
+            p.category_id === product.category_id
+        ).slice(0, 12);
+    }
+
+    // Se ainda não tiver produtos suficientes, busca por categoria também
     if (crossSellProducts.length === 0 && product.category_id) {
         crossSellProducts = allProductsLoaded.filter(p =>
             p.id !== product.id &&
@@ -1060,8 +1092,6 @@ function openProductModal(id) {
     const priceFormatted = product.price.toFixed(2).replace('.', ',');
     const solitarioFormatted = product.solitario_price?.toFixed(2).replace('.', ',');
     const rating = product.default_rating || 5;
-
-    // Número aleatório de pessoas vendo
     const viewersCount = getRandomViewers();
 
     const thumbnailsHtml = currentMediaList.map((media, index) => `
@@ -1070,8 +1100,6 @@ function openProductModal(id) {
         </div>
     `).join('');
 
-    // REMOVIDO: Bloco pesado de "Você só paga na entrega"
-    // ALTERADO: Selo solitário com estilo mais discreto
     const solitarioHtml = product.tem_solitario && product.solitario_price > 0 ? `
         <div class="solitario-discreto">
             <i class="fas fa-gem"></i> Solitário vendido separadamente: R$ ${solitarioFormatted}
@@ -1086,23 +1114,13 @@ function openProductModal(id) {
                     : `<img src="${currentMediaList[0]?.url || ''}" alt="${product.name}">`}
             </div>
         </div>
-        <div class="modal-thumbnails">
-            ${thumbnailsHtml}
-        </div>
+        <div class="modal-thumbnails">${thumbnailsHtml}</div>
         <div class="modal-info">
             <span class="modal-category">${product.categories?.name || ''}</span>
             <h2 class="modal-title">${product.name}</h2>
             <div class="modal-price-main">R$ ${priceFormatted}</div>
-
-            <!-- Selo solitário discreto -->
             ${solitarioHtml}
-
-            <!-- Prova Social em tempo real -->
-            <div class="looking-now">
-                <i class="fas fa-eye"></i> ${viewersCount} pessoas estão vendo este produto agora
-            </div>
-
-            <!-- Caixa de urgência com cronômetro -->
+            <div class="looking-now"><i class="fas fa-eye"></i> ${viewersCount} pessoas vendo agora</div>
             <div class="urgency-box">
                 <div class="delivery-timer" id="deliveryTimer">
                     <i class="fas fa-clock"></i>
@@ -1110,29 +1128,14 @@ function openProductModal(id) {
                     <span class="timer-text">para receber hoje!</span>
                 </div>
             </div>
-
             <div class="product-rating-large">${renderStars(rating)}</div>
-
-            <!-- Botões com compartilhamento melhorado (CORRIGIDO) -->
             <div class="modal-buttons">
-                <button class="btn-add-cart-modal" onclick="addToCart(${product.id})">
-                    <i class="fas fa-cart-plus"></i> Carrinho
-                </button>
-                <button class="btn-whatsapp-modal" onclick="buyViaWhatsApp(${product.id})">
-                    <i class="fab fa-whatsapp"></i> WhatsApp
-                </button>
-                <button class="btn-share" onclick="shareProduct(${product.id})" aria-label="Compartilhar">
-                    <i class="fas fa-share-alt"></i> <span>COMPARTILHE<br>COM SEU AMOR</span>
-                </button>
+                <button class="btn-add-cart-modal" onclick="addToCart(${product.id})"><i class="fas fa-cart-plus"></i> Carrinho</button>
+                <button class="btn-whatsapp-modal" onclick="buyViaWhatsApp(${product.id})"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                <button class="btn-share" onclick="shareProduct(${product.id})"><i class="fas fa-share-alt"></i> <span>COMPARTILHE<br>COM SEU AMOR</span></button>
             </div>
-
-            <!-- Descrição condicional - só aparece se existir -->
-            ${product.description ? `
-                <div class="modal-description">
-                    ${product.description}
-                </div>
-            ` : ''}
-
+            ${product.description ? `<div class="modal-description">${product.description}</div>` : ''}
+            
             ${upsellProducts.length > 0 ? `
                 <div class="recommendations-section">
                     <h4 class="recommendations-title"><i class="fas fa-handshake"></i> Quem viu, também gostou</h4>
@@ -1147,7 +1150,7 @@ function openProductModal(id) {
                     </div>
                 </div>
             ` : ''}
-
+            
             ${crossSellProducts.length > 0 ? `
                 <div class="cross-sell-section">
                     <h4 class="cross-sell-title"><i class="fas fa-link"></i> Complemente seu Estilo</h4>
@@ -1164,46 +1167,18 @@ function openProductModal(id) {
                     </div>
                 </div>
             ` : ''}
-
-            ${productReviews.length > 0 ? `
-                <div class="reviews-section">
-                    <h4 class="reviews-title"><i class="fas fa-star"></i> Avaliações</h4>
-                    ${productReviews.slice(0, 2).map(r => `
-                        <div class="review-card">
-                            <div class="review-header">
-                                ${r.image_url ? `<img src="${r.image_url}" class="review-avatar" alt="${r.customer_name}">` :
-                                    `<div class="review-avatar" style="background:var(--gold-light); display:flex; align-items:center; justify-content:center;">
-                                        <i class="fas fa-user"></i>
-                                    </div>`}
-                                <div>
-                                    <div class="review-name">${r.customer_name}</div>
-                                    <div class="review-stars">${'★'.repeat(r.rating)}</div>
-                                </div>
-                            </div>
-                            <p class="review-comment">${r.comment}</p>
-                        </div>
-                    `).join('')}
-                </div>
-            ` : ''}
-
-            <div class="scroll-indicator">
-                <i class="fas fa-chevron-up"></i> Arraste para ver mais
-            </div>
+            
+            ${product.description ? `<div class="modal-description">${product.description}</div>` : ''}
         </div>
     `;
 
     document.getElementById('modalContainer').innerHTML = modalHtml;
     document.getElementById('productModal').classList.add('active');
     document.body.style.overflow = 'hidden';
-
-    // Iniciar cronômetro de entrega
     startDeliveryTimer();
-
-    // Adiciona estado no history para controle do botão voltar
     history.pushState({ modalOpen: true, productId: id }, '', `#product-${id}`);
-
     setupModalMediaClick();
-    setupModalVideoAudio(product.video_has_audio); // CORREÇÃO: Passar flag de áudio
+    setupModalVideoAudio(product.video_has_audio);
     setupNextPhotoButton();
     scrollToTop();
 }
