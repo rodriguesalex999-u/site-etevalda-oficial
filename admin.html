@@ -446,6 +446,174 @@
             letter-spacing: 2px;
         }
 
+        /* ESTILOS PARA UPLOAD DE IMAGENS */
+        .upload-container {
+            border: 2px dashed var(--gold-primary);
+            border-radius: var(--radius);
+            padding: 20px;
+            background: var(--white);
+            margin-bottom: 15px;
+        }
+
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            background: var(--light-gray);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            background: var(--gold-light);
+        }
+
+        .upload-area i {
+            font-size: 48px;
+            color: var(--gold-primary);
+            margin-bottom: 10px;
+        }
+
+        .upload-area h3 {
+            color: var(--gold-dark);
+            margin-bottom: 5px;
+        }
+
+        .upload-area p {
+            color: var(--medium-gray);
+            font-size: 14px;
+        }
+
+        .upload-progress-container {
+            margin-top: 15px;
+            display: none;
+        }
+
+        .upload-progress {
+            width: 100%;
+            height: 20px;
+            background: var(--light-gray);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .upload-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold-primary), var(--gold-dark));
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .upload-status {
+            font-size: 14px;
+            color: var(--medium-gray);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-status i {
+            color: var(--gold-primary);
+        }
+
+        .upload-url-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .upload-url-input input {
+            flex: 1;
+        }
+
+        .upload-url-input button {
+            background: var(--gold-primary);
+            color: white;
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .upload-url-input button:hover {
+            background: var(--gold-dark);
+            transform: scale(1.05);
+        }
+
+        .image-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .preview-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 1 / 1;
+            border: 2px solid var(--gold-light);
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-item-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .preview-item:hover .preview-item-overlay {
+            opacity: 1;
+        }
+
+        .preview-item-overlay button {
+            background: var(--danger);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-item-overlay button:hover {
+            transform: scale(1.1);
+        }
+
+        .images-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border: 2px solid var(--gold-light);
+            border-radius: var(--radius);
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 15px;
+            resize: vertical;
+        }
+
         /* Modal de Edição */
         .edit-modal {
             position: fixed;
@@ -708,10 +876,51 @@
                         <textarea id="productDescription" rows="3" placeholder="Descrição detalhada do produto..."></textarea>
                         <small style="color: var(--medium-gray);">Para alianças, a descrição automática será adicionada.</small>
                     </div>
+
+                    <!-- NOVO SISTEMA DE UPLOAD DE IMAGENS -->
                     <div class="form-group full-width">
-                        <label><i class="fas fa-images"></i> URLs das Imagens (uma por linha) *</label>
-                        <textarea id="productImages" required placeholder="https://i.postimg.cc/imagem1.jpg" rows="4"></textarea>
-                        <small style="color: var(--medium-gray);">A primeira imagem será a principal</small>
+                        <label><i class="fas fa-images"></i> Imagens do Produto *</label>
+                        
+                        <div class="upload-container">
+                            <!-- Área de upload -->
+                            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <h3>Clique para selecionar imagens</h3>
+                                <p>ou arraste e solte aqui</p>
+                                <p style="font-size: 12px; margin-top: 10px;">JPG, PNG, WebP (até 10MB)</p>
+                            </div>
+                            
+                            <!-- Input file oculto -->
+                            <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png,image/webp" multiple style="display: none;" onchange="handleFileSelect(this.files)">
+                            
+                            <!-- Barra de progresso -->
+                            <div class="upload-progress-container" id="uploadProgressContainer">
+                                <div class="upload-progress">
+                                    <div class="upload-progress-bar" id="uploadProgressBar"></div>
+                                </div>
+                                <div class="upload-status" id="uploadStatus">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <span id="uploadStatusText">Processando imagens...</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Input para adicionar URL manualmente -->
+                            <div class="upload-url-input">
+                                <input type="url" id="imageUrlInput" placeholder="https://... (cole uma URL externa)">
+                                <button type="button" onclick="addImageFromUrl()">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Grid de preview das imagens -->
+                            <div class="image-preview-grid" id="imagePreviewGrid">
+                                <!-- As imagens serão inseridas aqui -->
+                            </div>
+                            
+                            <!-- Textarea oculta para armazenar as URLs -->
+                            <textarea id="productImages" class="images-textarea" placeholder="As URLs serão inseridas automaticamente aqui..." readonly></textarea>
+                            <small style="color: var(--medium-gray);">A primeira imagem será a principal no site</small>
+                        </div>
                     </div>
                 </div>
                 <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Salvar Produto</button>
@@ -1096,6 +1305,276 @@
     let currentRating = 5;
     let categoriesList = [];
     let allProducts = [];
+    
+    // Array para armazenar as URLs das imagens
+    let imageUrls = [];
+
+    // ========================================
+    // FUNÇÕES DE UPLOAD E CONVERSÃO WEBP
+    // ========================================
+
+    /**
+     * Converte uma imagem para WebP usando Canvas
+     * @param {File} file - Arquivo de imagem original
+     * @returns {Promise<Blob>} - Blob da imagem convertida
+     */
+    async function convertToWebP(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    // Criar canvas com as dimensões da imagem
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    
+                    // Desenhar imagem no canvas
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    
+                    // Converter para WebP com 80% de qualidade
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            resolve(blob);
+                        } else {
+                            reject(new Error('Falha ao converter para WebP'));
+                        }
+                    }, 'image/webp', 0.8);
+                };
+                img.onerror = reject;
+            };
+            reader.onerror = reject;
+        });
+    }
+
+    /**
+     * Faz upload de uma imagem para o Supabase Storage
+     * @param {File} file - Arquivo de imagem
+     * @param {number} index - Índice da imagem na fila
+     * @param {number} total - Total de imagens na fila
+     * @returns {Promise<string>} - URL pública da imagem
+     */
+    async function uploadImage(file, index, total) {
+        try {
+            // Verificar autenticação
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (!session) {
+                throw new Error('Você precisa estar logado para fazer upload');
+            }
+
+            // Validar tamanho (10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                throw new Error(`Arquivo muito grande: ${file.name} (máx 10MB)`);
+            }
+
+            // Validar tipo
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                throw new Error(`Formato não permitido: ${file.name}. Use JPG, PNG ou WebP.`);
+            }
+
+            // Atualizar status
+            updateUploadStatus(`Convertendo ${index + 1} de ${total}: ${file.name} para WebP...`);
+
+            // Converter para WebP
+            const webpBlob = await convertToWebP(file);
+            
+            // Criar nome único para o arquivo
+            const timestamp = Date.now();
+            const randomString = Math.random().toString(36).substring(2, 10);
+            const fileName = `${timestamp}-${randomString}.webp`;
+            const filePath = `produtos/${fileName}`;
+
+            updateUploadStatus(`Enviando ${index + 1} de ${total}: ${file.name}...`);
+
+            // Fazer upload
+            const { data, error } = await _supabase.storage
+                .from('produtos')
+                .upload(filePath, webpBlob, {
+                    cacheControl: '3600',
+                    upsert: false,
+                    contentType: 'image/webp'
+                });
+
+            if (error) throw error;
+
+            // Obter URL pública
+            const { data: { publicUrl } } = _supabase.storage
+                .from('produtos')
+                .getPublicUrl(filePath);
+
+            return publicUrl;
+
+        } catch (error) {
+            console.error('Erro no upload:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * Processa múltiplas imagens selecionadas
+     * @param {FileList} files - Lista de arquivos selecionados
+     */
+    async function handleFileSelect(files) {
+        if (!files || files.length === 0) return;
+
+        // Mostrar container de progresso
+        const progressContainer = document.getElementById('uploadProgressContainer');
+        const progressBar = document.getElementById('uploadProgressBar');
+        const statusText = document.getElementById('uploadStatusText');
+        
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+        
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            
+            try {
+                // Atualizar barra de progresso
+                const progress = ((i) / files.length) * 100;
+                progressBar.style.width = `${progress}%`;
+                
+                // Fazer upload
+                const url = await uploadImage(file, i, files.length);
+                
+                // Adicionar URL à lista
+                imageUrls.push(url);
+                addImageToPreview(url);
+                
+                successCount++;
+                
+            } catch (error) {
+                console.error('Erro ao processar imagem:', error);
+                showToast(`Erro em ${file.name}: ${error.message}`, 'error');
+                errorCount++;
+            }
+        }
+
+        // Atualizar barra para 100%
+        progressBar.style.width = '100%';
+        
+        // Mostrar resumo
+        statusText.innerHTML = `${successCount} imagens enviadas com sucesso! ${errorCount > 0 ? `(${errorCount} falhas)` : ''}`;
+        
+        // Esconder progresso após 3 segundos
+        setTimeout(() => {
+            progressContainer.style.display = 'none';
+        }, 3000);
+
+        // Atualizar textarea
+        updateImagesTextarea();
+    }
+
+    /**
+     * Atualiza o texto de status do upload
+     * @param {string} message - Mensagem de status
+     */
+    function updateUploadStatus(message) {
+        const statusText = document.getElementById('uploadStatusText');
+        if (statusText) {
+            statusText.textContent = message;
+        }
+    }
+
+    /**
+     * Adiciona uma imagem ao preview
+     * @param {string} url - URL da imagem
+     */
+    function addImageToPreview(url) {
+        const grid = document.getElementById('imagePreviewGrid');
+        
+        const item = document.createElement('div');
+        item.className = 'preview-item';
+        item.innerHTML = `
+            <img src="${url}" alt="Preview" loading="lazy">
+            <div class="preview-item-overlay">
+                <button type="button" onclick="removeImage('${url}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        
+        grid.appendChild(item);
+    }
+
+    /**
+     * Remove uma imagem do preview e da lista
+     * @param {string} url - URL da imagem a remover
+     */
+    function removeImage(url) {
+        // Remover do array
+        imageUrls = imageUrls.filter(u => u !== url);
+        
+        // Remover do preview
+        const grid = document.getElementById('imagePreviewGrid');
+        const items = grid.querySelectorAll('.preview-item');
+        items.forEach(item => {
+            const img = item.querySelector('img');
+            if (img && img.src === url) {
+                item.remove();
+            }
+        });
+        
+        // Atualizar textarea
+        updateImagesTextarea();
+    }
+
+    /**
+     * Adiciona uma imagem a partir de URL externa
+     */
+    function addImageFromUrl() {
+        const urlInput = document.getElementById('imageUrlInput');
+        const url = urlInput.value.trim();
+        
+        if (!url) {
+            showToast('Digite uma URL válida!', 'error');
+            return;
+        }
+        
+        // Validação básica de URL
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            showToast('URL deve começar com http:// ou https://', 'error');
+            return;
+        }
+        
+        // Adicionar à lista
+        imageUrls.push(url);
+        addImageToPreview(url);
+        updateImagesTextarea();
+        
+        // Limpar input
+        urlInput.value = '';
+    }
+
+    /**
+     * Atualiza o textarea com todas as URLs das imagens
+     */
+    function updateImagesTextarea() {
+        const textarea = document.getElementById('productImages');
+        textarea.value = imageUrls.join('\n');
+    }
+
+    /**
+     * Inicializa o preview com URLs existentes
+     * @param {string[]} urls - Array de URLs
+     */
+    function initializeImagePreview(urls) {
+        const grid = document.getElementById('imagePreviewGrid');
+        grid.innerHTML = '';
+        imageUrls = urls || [];
+        
+        imageUrls.forEach(url => {
+            addImageToPreview(url);
+        });
+        
+        updateImagesTextarea();
+    }
 
     // ========================================
     // LOGIN SEGURO COM SUPABASE AUTH
@@ -1508,16 +1987,15 @@
         const videoUrl = document.getElementById('videoUrl').value.trim() || null;
         const videoHasAudio = document.getElementById('videoHasAudio').checked;
         const description = document.getElementById('productDescription').value.trim() || null;
-        const imagesRaw = document.getElementById('productImages').value.trim();
-
-        if (!name || !priceRaw || !categoryId) {
-            showToast('Preencha os campos obrigatórios!', 'error');
+        
+        // Obter imagens do array imageUrls
+        if (imageUrls.length === 0) {
+            showToast('Adicione pelo menos uma imagem!', 'error');
             return;
         }
 
-        const images = imagesRaw.split('\n').map(l => l.trim()).filter(l => l);
-        if (images.length === 0) {
-            showToast('Adicione pelo menos uma imagem!', 'error');
+        if (!name || !priceRaw || !categoryId) {
+            showToast('Preencha os campos obrigatórios!', 'error');
             return;
         }
 
@@ -1549,7 +2027,7 @@
             video_url: videoUrl,
             video_has_audio: videoHasAudio,
             description,
-            images
+            images: imageUrls // Usar o array de imagens
         };
 
         const { error } = await _supabase.from('products').insert([productData]);
@@ -1560,6 +2038,12 @@
             document.getElementById('upsellCategory').value = '';
             document.getElementById('badgeColor').value = '#FBBF24';
             document.getElementById('soldToday').checked = false;
+            
+            // Limpar preview de imagens
+            document.getElementById('imagePreviewGrid').innerHTML = '';
+            imageUrls = [];
+            updateImagesTextarea();
+            
             updateTagPreview();
             await loadProducts();
             updateStats();

@@ -24,7 +24,7 @@ let searchQuery = '';
 
 // Variáveis para Lazy Loading
 let currentPage = 1;
-let productsPerPage = 6;
+let productsPerPage = 20;
 let hasMoreProducts = true;
 let isLoadingMore = false;
 let allProductsLoaded = [];
