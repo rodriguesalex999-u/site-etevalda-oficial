@@ -296,22 +296,26 @@ function setupHistoryAPI() {
             history.replaceState(null, '', location.pathname + location.search);
         }
     });
-}
-
-// ========================================
+} // adicionado chave de fechamento faltante
 // 8. SCROLL LISTENER PARA HEADER COLLAPSIBLE
 // ========================================
 function setupScrollListener() {
     const header = document.querySelector('.header');
-    const scrollThreshold = 50;
+    const scrollThreshold = 100;
+    let isCollapsed = false;
 
     window.addEventListener('scroll', debounce(() => {
         const scrollPosition = window.scrollY;
+        const shouldBeCollapsed = scrollPosition > scrollThreshold;
 
-        if (scrollPosition > scrollThreshold) {
-            header.classList.add('header-collapsed');
-        } else {
-            header.classList.remove('header-collapsed');
+        // Só adiciona/remove a classe se houver mudança real
+        if (shouldBeCollapsed !== isCollapsed) {
+            isCollapsed = shouldBeCollapsed;
+            if (shouldBeCollapsed) {
+                header.classList.add('header-collapsed');
+            } else {
+                header.classList.remove('header-collapsed');
+            }
         }
     }, 10));
 }
@@ -563,6 +567,9 @@ function renderSuperZoomMedia() {
             </button>
             <button class="super-zoom-nav super-zoom-next" onclick="nextSuperZoomMedia()">
                 <i class="fas fa-chevron-right"></i>
+            </button>
+            <button class="next-photo-btn" onclick="nextSuperZoomMedia()">
+                <i class="fas fa-arrow-right"></i>
             </button>
             <div class="super-zoom-counter">${currentZoomIndex + 1} / ${superZoomMediaList.length}</div>
         `;

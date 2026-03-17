@@ -121,8 +121,8 @@ button {
     box-shadow: var(--shadow-md);
     position: sticky;
     top: 0;
-    z-index: 100;
-    border-bottom: 2px solid var(--gold-primary);
+    z-index: 1000;
+    will-change: transform;
     transition: all var(--transition-normal);
 }
 
@@ -1743,7 +1743,7 @@ NOVAS SEÇÕES: GATILHOS DE VENDA NO MODAL (OTIMIZADOS)
     margin-bottom: 5px;
 }
 .modal-title {
-    font-family: var(--font-display);
+    font-family: var(--font-body), 'Arial', sans-serif;
     font-size: 1.8rem;
     font-weight: 700;
     color: var(--black-soft);
@@ -2024,18 +2024,21 @@ SUPER ZOOM OVERLAY
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
     background: var(--whatsapp);
     color: var(--white);
-    padding: 14px 24px;
-    border-radius: 50px;
+    border: none;
+    padding: 15px 20px;
+    border-radius: 30px;
+    font-family: var(--font-body);
+    font-size: 1rem;
     font-weight: 600;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 8px 30px rgba(37, 211, 102, 0.5);
+    cursor: pointer;
+    box-shadow: var(--shadow-xl);
     z-index: 10000;
     transition: all 0.3s;
+    animation: pulse-green 2s infinite ease-in-out;
 }
 .zoom-whatsapp-btn:hover {
     transform: translateX(-50%) scale(1.05);
@@ -2046,6 +2049,11 @@ SUPER ZOOM OVERLAY
 @keyframes highlightPulse {
     0%, 100% { box-shadow: 0 8px 30px rgba(37, 211, 102, 0.5); transform: translateX(-50%) scale(1); }
     50% { box-shadow: 0 15px 45px rgba(37, 211, 102, 0.9); transform: translateX(-50%) scale(1.08); }
+}
+@keyframes pulse-green {
+  0% { transform: translateX(-50%) scale(1); }
+  50% { transform: translateX(-50%) scale(1.05); }
+  100% { transform: translateX(-50%) scale(1); }
 }
 /* Botão de áudio do vídeo */
 .video-audio-toggle {
@@ -2069,6 +2077,39 @@ SUPER ZOOM OVERLAY
 .video-audio-toggle:hover {
     background: var(--gold-primary);
     transform: scale(1.1);
+}
+
+/* Botão de navegação do Super Zoom */
+.super-zoom-nav {
+    position: absolute;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.8);
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.super-zoom-nav:hover {
+    background: rgba(255, 255, 255, 0.95);
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.super-zoom-nav.prev {
+    right: auto;
+    left: 20px;
 }
 
 /* ========================================
@@ -2891,45 +2932,6 @@ SUPER ZOOM OVERLAY
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
-}
-button:focus-visible,
-a:focus-visible,
-input:focus-visible {
-    outline: 3px solid var(--gold-primary);
-    outline-offset: 2px;
-}
-
-/* ========================================
-25. IMPRESSÃO
-======================================== */
-@media print {
-    .header,
-    .footer,
-    .cart-btn,
-    .modal,
-    .geo-notification,
-    .toast,
-    .whatsapp-float,
-    .mobile-filters,
-    .delivery-callout,
-    .seo-footer-area,
-    .super-zoom-overlay,
-    .urgency-box,
-    .looking-now,
-    .btn-share {
-        display: none !important;
-    }
-    .products-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-/* ========================================
-26. KEYFRAMES
-======================================== */
-@keyframes cartBounce {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
 }
 @keyframes cartGlow {
     0%, 100% { box-shadow: 0 0 0 0 var(--gold-primary); }
