@@ -72,6 +72,8 @@ VERSÃO OTIMIZADA PARA COREWEBVITALS
 html {
     scroll-behavior: smooth;
     font-size: 16px;
+    overflow-x: hidden; /* Trava definitiva para não arrastar para o lado */
+    width: 100%;
 }
 body {
     font-family: var(--font-body);
@@ -79,6 +81,8 @@ body {
     background-color: var(--gray-light);
     line-height: 1.6;
     overflow-x: hidden;
+    position: relative;
+    width: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
@@ -1341,7 +1345,8 @@ button {
 }
 .modal.active {
     display: flex;
-    align-items: flex-end;
+    align-items: center; /* Mudado de flex-end para center */
+    justify-content: center;
 }
 .modal-overlay {
     position: absolute;

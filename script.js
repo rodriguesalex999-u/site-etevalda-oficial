@@ -663,12 +663,14 @@ function hideLoadingMore() {
 function setupInfiniteScroll() {
     window.addEventListener('scroll', debounce(() => {
         const scrollPosition = window.innerHeight + window.scrollY;
-        const threshold = document.documentElement.scrollHeight - 1000;
+        // Diminuímos de 1000 para 300 para o celular "sentir" o scroll mais cedo
+        const threshold = document.documentElement.scrollHeight - 300; 
 
         if (scrollPosition >= threshold && !isLoadingMore && hasMoreProducts) {
+            console.log('🔄 Buscando mais produtos...');
             loadProducts(false);
         }
-    }, 200));
+    }, 150)); // Reduzido de 200ms para 150ms para ser mais rápido
 }
 
 function setupScrollListener() {
@@ -942,6 +944,7 @@ async function openProductModal(id) {
     document.getElementById('modalContainer').innerHTML = modalHtml;
     document.getElementById('productModal').classList.add('active');
     document.body.style.overflow = 'hidden';
+    document.querySelector('.modal-content').scrollTop = 0; // Reseta o scroll do modal para o topo
     startDeliveryTimer();
     history.pushState({ modalOpen: true, productId: id }, '', `#product-${id}`);
     setupModalMediaClick();
