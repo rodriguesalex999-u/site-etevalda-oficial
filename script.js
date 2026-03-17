@@ -269,6 +269,17 @@ function setupHistoryAPI() {
         const modal = document.getElementById('productModal');
         const isModalOpen = modal && modal.classList.contains('active');
         
+        const superZoomOverlay = document.getElementById('superZoomOverlay');
+        const isSuperZoomOpen = superZoomOverlay && superZoomOverlay.classList.contains('active');
+        
+        // Se o super zoom está ativo, fecha o super zoom
+        if (isSuperZoomOpen) {
+            event.preventDefault();
+            closeSuperZoom();
+            return;
+        }
+        
+        // Se o modal está ativo, fecha o modal
         if (isModalOpen) {
             event.preventDefault();
             closeProductModal();
@@ -503,6 +514,9 @@ function openSuperZoom(mediaUrl, type = 'image', mediaList = [], currentIndex = 
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
     
+    // Adiciona estado no history para controle do botão voltar físico
+    history.pushState({ superZoomOpen: true }, '', '#super-zoom');
+    
     // Configurar navegação por swipe
     setupSuperZoomSwipe();
 }
@@ -515,6 +529,11 @@ function closeSuperZoom() {
     overlay.classList.remove('active');
     content.innerHTML = '';
     document.body.style.overflow = '';
+    
+    // Limpa o hash do Super Zoom se estiver ativo
+    if (location.hash === '#super-zoom') {
+        history.replaceState(null, '', location.pathname + location.search);
+    }
 }
 
 function setupSuperZoomListeners() {
