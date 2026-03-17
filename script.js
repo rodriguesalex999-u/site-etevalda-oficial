@@ -269,17 +269,6 @@ function setupHistoryAPI() {
         const modal = document.getElementById('productModal');
         const isModalOpen = modal && modal.classList.contains('active');
         
-        const superZoomOverlay = document.getElementById('superZoomOverlay');
-        const isSuperZoomOpen = superZoomOverlay && superZoomOverlay.classList.contains('active');
-        
-        // Se o super zoom está ativo, fecha o super zoom
-        if (isSuperZoomOpen) {
-            event.preventDefault();
-            closeSuperZoom();
-            return;
-        }
-        
-        // Se o modal está ativo, fecha o modal
         if (isModalOpen) {
             event.preventDefault();
             closeProductModal();
@@ -296,7 +285,8 @@ function setupHistoryAPI() {
             history.replaceState(null, '', location.pathname + location.search);
         }
     });
-} // adicionado chave de fechamento faltante
+}
+
 // 8. SCROLL LISTENER PARA HEADER COLLAPSIBLE
 // ========================================
 function setupScrollListener() {
