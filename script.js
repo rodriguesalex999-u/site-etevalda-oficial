@@ -185,8 +185,17 @@ function filterValidImages(images) {
 // 7. INICIALIZAÇÃO PRINCIPAL - OTIMIZADA
 // ========================================
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Grupo Etevalda MT - Versão Otimizada para PageSpeed 100');
-    showLoading(true);
+    console.log('🚀 Grupo Etevalda MT - Versão com Cache Ativado');
+
+    // Tenta mostrar produtos salvos antes de ir no banco de dados (Aceleração Instantânea)
+    const cache = localStorage.getItem('etevalda_cache');
+    if (cache) {
+        allProductsLoaded = JSON.parse(cache);
+        renderProducts();
+        showLoading(false); // Já mostra os produtos sem tela de "carregando"
+    } else {
+        showLoading(true); // Se for a primeira vez da vida do cliente, mostra o carregando
+    }
 
     // Criar manifest PWA
     createManifest();
@@ -372,6 +381,8 @@ async function loadProducts(reset = false) {
 
             allProductsLoaded = reset ? filteredData : [...allProductsLoaded, ...filteredData];
             products = allProductsLoaded;
+            // Salva os primeiros 12 produtos no celular do cliente para a próxima visita
+localStorage.setItem('etevalda_cache', JSON.stringify(allProductsLoaded.slice(0, 12)));
 
             if (data.length < productsPerPage) {
                 hasMoreProducts = false;
@@ -425,9 +436,13 @@ async function loadSocialProof() {
 // ========================================
 // 9. RENDERIZAÇÃO DE PRODUTOS (COM FILTRO)
 // ========================================
-function renderProductCard(p) {
+function renderProductCard(p, index) { // Adicionado o "index" aqui
     const images = Array.isArray(p.images) ? p.images : [];
     const mainImage = images[0] || 'https://via.placeholder.com/200';
+    
+    // MELHORIA DE PERFORMANCE: As 2 primeiras imagens carregam na hora (eager), o resto só no scroll (lazy)
+    const loadingStrategy = index < 2 ? 'eager' : 'lazy';
+    const priority = index < 2 ? 'fetchpriority="high"' : '';
     const secondImage = images[1] || mainImage;
     const priceFormatted = p.price.toFixed(2).replace('.', ',');
 
@@ -449,8 +464,7 @@ function renderProductCard(p) {
             <div class="product-image">
                 ${soldTodayHtml}
                 ${p.badge_text ? `<div class="product-badge">${p.badge_text}</div>` : ''}
-                <img src="${mainImage}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/200'">
-            </div>
+<img src="${mainImage}" alt="${p.name}" loading="${loadingStrategy}" ${priority} onerror="this.src='https://via.placeholder.com/200'">            </div>
             <div class="product-info">
                 <span class="product-category">${p.categories?.name || ''}</span>
                 <h3 class="product-name">${p.name}</h3>
@@ -501,7 +515,8 @@ function renderProducts() {
         filtered = filtered.sort(() => Math.random() - 0.5);
     }
 
-    container.innerHTML = filtered.map(p => renderProductCard(p)).join('');
+    // ADICIONADO: Agora passamos a posição (index) para o card saber se deve carregar rápido ou devagar
+    container.innerHTML = filtered.map((p, index) => renderProductCard(p, index)).join('');
 }
 
 function renderCategories() {
