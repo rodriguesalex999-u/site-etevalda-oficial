@@ -24,7 +24,7 @@ let searchQuery = '';
 
 // Variáveis para Lazy Loading - Mobile first: 6 produtos
 let currentPage = 1;
-let productsPerPage = 10; // Padrão de 10 para garantir o gatilho na 6ª foto
+let productsPerPage = 12; // Número par perfeito para vitrine de 2 colunas no celular
 let hasMoreProducts = true;
 let isLoadingMore = false;
 let allProductsLoaded = [];
@@ -330,7 +330,7 @@ async function loadProducts(reset = false) {
     if (reset) {
         currentPage = 1;
         allProductsLoaded = [];
-        hasMoreProducts = true; // Garante que a busca recomeça do zero
+        hasMoreProducts = true; 
     }
 
     if (!hasMoreProducts || isLoadingMore) return;
@@ -339,17 +339,19 @@ async function loadProducts(reset = false) {
     if (!reset) showLoadingMore();
 
     try {
-        let query = _supabase.from('products').select('*').order('id', { ascending: false });
+        // Iniciamos a busca
+        let query = _supabase.from('products').select('*');
 
-        // Se for categoria específica, filtra no banco. Se for "Todos", usa paginação.
         if (currentCategory !== 'all') {
-            query = query.eq('category_id', currentCategory).limit(1000); 
-            hasMoreProducts = false; // Categorias específicas carregam tudo de uma vez
+            // Se for uma categoria (ex: Moeda Antiga), filtra por ela
+            query = query.eq('category_id', currentCategory).order('id', { ascending: false }).limit(1000); 
+            hasMoreProducts = false;    
         } else {
+            // Se for "Todos", NÃO filtra por categoria, pega tudo!
             const from = (currentPage - 1) * productsPerPage;
             const to = from + productsPerPage - 1;
-            query = query.range(from, to);
-            hasMoreProducts = true; // No "Todos", o Scroll Infinito continua ativo
+            query = query.order('id', { ascending: false }).range(from, to);
+            hasMoreProducts = true; 
         }
 
         const { data, error } = await query;
@@ -494,9 +496,10 @@ function renderProducts() {
         return;
     }
 
-    // Agora mistura em qualquer categoria, não só no "Todos"
-    if (!searchQuery) {
-    filtered = filtered.sort(() => Math.random() - 0.5);
+    // Só mistura se estivermos na primeira página. 
+    // Isso evita que os produtos fiquem pulando de lugar ao carregar mais.
+    if (!searchQuery && currentPage <= 2) {
+        filtered = filtered.sort(() => Math.random() - 0.5);
     }
 
     // ADICIONADO: Agora passamos a posição (index) para o card saber se deve carregar rápido ou devagar
@@ -523,13 +526,13 @@ function renderCategories() {
             currentPage = 1; 
             allProductsLoaded = []; 
             hasMoreProducts = true; 
-            
-            // Limpa a tela na hora para o cliente não ver produtos da aba anterior
+
+            // Limpa a vitrine visualmente na hora
             const container = document.getElementById('productsContainer');
             if (container) container.innerHTML = ''; 
             
             showLoading(true); 
-            loadProducts(true); 
+            loadProducts(true); // Dispara a busca do zero no banco 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });
@@ -656,20 +659,22 @@ function hideLoadingMore() {
 }
 
 function setupInfiniteScroll() {
+    // Usamos 'scroll' e 'touchmove' para garantir que o celular perceba o movimento
     window.addEventListener('scroll', debounce(() => {
-        // Se não estiver na home (Todos), não precisa de scroll infinito
         if (currentCategory !== 'all') return;
 
         const scrollPosition = window.innerHeight + window.scrollY;
+        const totalHeight = document.documentElement.scrollHeight;
         
-        // GATILHO: Dispara quando o cliente chega em 60% da página (aprox. 6ª foto)
-        const threshold = document.documentElement.scrollHeight * 0.6; 
+        // GATILHO PARA CELULAR: Se faltar menos de 800px para o fim, carrega.
+        // Isso é mais seguro que usar porcentagem em telas pequenas.
+        const distanceToBottom = totalHeight - scrollPosition;
 
-        if (scrollPosition >= threshold && !isLoadingMore && hasMoreProducts) {
-            console.log('🚀 Sistema antecipou a rolagem: Buscando mais 10...');
+        if (distanceToBottom < 800 && !isLoadingMore && hasMoreProducts) {
+            console.log('🚀 Carregando mais produtos para mobile...');
             loadProducts(false);
         }
-    }, 100)); // Resposta ultra rápida (100ms)
+    }, 150)); // Um pouco mais de tempo para o processador do celular respirar
 }
 
 function setupScrollListener() {
