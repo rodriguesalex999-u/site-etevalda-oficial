@@ -503,9 +503,6 @@ function openSuperZoom(mediaUrl, type = 'image', mediaList = [], currentIndex = 
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
     
-    // Adiciona estado no history para controle do botão voltar
-    history.pushState({ superZoomOpen: true }, '');
-    
     // Configurar navegação por swipe
     setupSuperZoomSwipe();
 }
@@ -518,11 +515,6 @@ function closeSuperZoom() {
     overlay.classList.remove('active');
     content.innerHTML = '';
     document.body.style.overflow = '';
-    
-    // Limpa o estado do history para evitar cliques fantasmas
-    if (history.state?.superZoomOpen) {
-        history.replaceState(null, '', location.pathname + location.search);
-    }
 }
 
 function setupSuperZoomListeners() {
