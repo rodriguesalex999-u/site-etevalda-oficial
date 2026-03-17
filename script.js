@@ -474,7 +474,7 @@ function renderProductCard(p, index) { // Adicionado o "index" aqui
                     <button class="btn-primary" onclick="addToCart(${p.id})">
                         <i class="fas fa-cart-plus"></i>
                     </button>
-                    <button class="btn-secondary" onclick="buyViaWhatsApp(${p.id})">
+                    <button class="btn-secondary" aria-label="Comprar ${p.name} pelo WhatsApp" onclick="buyViaWhatsApp(${p.id})">
                         <i class="fab fa-whatsapp"></i>
                     </button>
                 </div>
@@ -899,7 +899,8 @@ async function openProductModal(id) {
             <div class="product-rating-large">${renderStars(rating)}</div>
             <div class="modal-buttons">
                 <button class="btn-add-cart-modal" onclick="addToCart(${product.id})"><i class="fas fa-cart-plus"></i> Carrinho</button>
-                <button class="btn-whatsapp-modal" onclick="buyViaWhatsApp(${product.id})"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                <button class="btn-whatsapp-modal" aria-label="Falar com atendente no WhatsApp sobre este produto" 
+                onclick="buyViaWhatsApp(${product.id})"><i class="fab fa-whatsapp"></i> WhatsApp</button>
                 <button class="btn-share" onclick="shareProduct(${product.id})"><i class="fas fa-share-alt"></i> <span>COMPARTILHE<br>COM SEU AMOR</span></button>
             </div>
             ${product.description ? `<div class="modal-description">${product.description}</div>` : ''}
