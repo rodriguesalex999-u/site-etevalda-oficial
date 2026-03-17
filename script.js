@@ -24,7 +24,7 @@ let searchQuery = '';
 
 // Variáveis para Lazy Loading - Mobile first: 6 produtos
 let currentPage = 1;
-let productsPerPage = window.innerWidth < 768 ? 6 : 20;
+let productsPerPage = 10; // Padrão de 10 para garantir o gatilho na 6ª foto
 let hasMoreProducts = true;
 let isLoadingMore = false;
 let allProductsLoaded = [];
@@ -166,14 +166,8 @@ function createManifest() {
 // 6. FUNÇÃO PARA FILTRAR IMAGENS POSTIMG.CC
 // ========================================
 function isValidImageUrl(url) {
-    if (!url) return false;
-    // Filtra URLs do postimg.cc (bloquear)
-    if (url.includes('postimg.cc') || url.includes('postimg.org')) {
-        return false;
-    }
-    // Aceita apenas URLs que terminam com .webp (prioridade) ou outras extensões válidas
-    // Mas vamos priorizar .webp
-    return url.trim() !== '';
+    // Se existir um link, ele é válido. Simples assim.
+    return url && url.trim() !== '';
 }
 
 function filterValidImages(images) {
@@ -185,17 +179,7 @@ function filterValidImages(images) {
 // 7. INICIALIZAÇÃO PRINCIPAL - OTIMIZADA
 // ========================================
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Grupo Etevalda MT - Versão com Cache Ativado');
-
-    // Tenta mostrar produtos salvos antes de ir no banco de dados (Aceleração Instantânea)
-    const cache = localStorage.getItem('etevalda_cache');
-    if (cache) {
-        allProductsLoaded = JSON.parse(cache);
-        renderProducts();
-        showLoading(false); // Já mostra os produtos sem tela de "carregando"
-    } else {
-        showLoading(true); // Se for a primeira vez da vida do cliente, mostra o carregando
-    }
+    console.log('🚀 Grupo Etevalda MT - Versão Tempo Real');
 
     // Criar manifest PWA
     createManifest();
@@ -346,31 +330,32 @@ async function loadProducts(reset = false) {
     if (reset) {
         currentPage = 1;
         allProductsLoaded = [];
-        hasMoreProducts = true;
+        hasMoreProducts = true; // Garante que a busca recomeça do zero
     }
 
     if (!hasMoreProducts || isLoadingMore) return;
 
     isLoadingMore = true;
-
-    if (!reset) {
-        showLoadingMore();
-    }
+    if (!reset) showLoadingMore();
 
     try {
-        const from = (currentPage - 1) * productsPerPage;
-        const to = from + productsPerPage - 1;
+        let query = _supabase.from('products').select('*').order('id', { ascending: false });
 
-        const { data, error } = await _supabase
-            .from('products')
-            .select('*')
-            .order('id', { ascending: false })
-            .range(from, to);
+        // Se for categoria específica, filtra no banco. Se for "Todos", usa paginação.
+        if (currentCategory !== 'all') {
+            query = query.eq('category_id', currentCategory).limit(1000); 
+            hasMoreProducts = false; // Categorias específicas carregam tudo de uma vez
+        } else {
+            const from = (currentPage - 1) * productsPerPage;
+            const to = from + productsPerPage - 1;
+            query = query.range(from, to);
+            hasMoreProducts = true; // No "Todos", o Scroll Infinito continua ativo
+        }
 
+        const { data, error } = await query;
         if (error) throw error;
 
-        if (data.length > 0) {
-            // Filtrar produtos com imagens válidas (remover postimg.cc)
+        if (data && data.length > 0) {
             const filteredData = data.filter(p => {
                 const validImages = filterValidImages(p.images);
                 return validImages.length > 0;
@@ -381,26 +366,24 @@ async function loadProducts(reset = false) {
 
             allProductsLoaded = reset ? filteredData : [...allProductsLoaded, ...filteredData];
             products = allProductsLoaded;
-            // Salva os primeiros 12 produtos no celular do cliente para a próxima visita
-localStorage.setItem('etevalda_cache', JSON.stringify(allProductsLoaded.slice(0, 12)));
 
-            if (data.length < productsPerPage) {
+            // Se o banco mandou menos que 10, é porque acabaram os produtos
+            if (currentCategory === 'all' && data.length < productsPerPage) {
                 hasMoreProducts = false;
             }
-
             currentPage++;
         } else {
             hasMoreProducts = false;
         }
 
-        console.log(`📦 Carregados ${allProductsLoaded.length} produtos (filtrados)`);
+        renderProducts(); // Monta a vitrine na tela
 
     } catch (error) {
         console.error('Erro ao carregar produtos:', error);
-        showToast('Erro ao carregar mais produtos');
     } finally {
         isLoadingMore = false;
         hideLoadingMore();
+        showLoading(false);
     }
 }
 
@@ -511,8 +494,9 @@ function renderProducts() {
         return;
     }
 
-    if (currentCategory === 'all' && !searchQuery) {
-        filtered = filtered.sort(() => Math.random() - 0.5);
+    // Agora mistura em qualquer categoria, não só no "Todos"
+    if (!searchQuery) {
+    filtered = filtered.sort(() => Math.random() - 0.5);
     }
 
     // ADICIONADO: Agora passamos a posição (index) para o card saber se deve carregar rápido ou devagar
@@ -529,12 +513,23 @@ function renderCategories() {
         list.innerHTML += `<li data-category="${cat.id}">${cat.name}</li>`;
     });
 
-    list.querySelectorAll('li').forEach(li => {
-        li.addEventListener('click', () => {
+    list.querySelectorAll('li').forEach(button => {
+        button.addEventListener('click', () => {
             list.querySelectorAll('li').forEach(el => el.classList.remove('active'));
-            li.classList.add('active');
-            currentCategory = li.dataset.category;
-            renderProducts();
+            button.classList.add('active');
+            
+            // RESET TOTAL PARA NOVA CATEGORIA
+            currentCategory = button.dataset.category;
+            currentPage = 1; 
+            allProductsLoaded = []; 
+            hasMoreProducts = true; 
+            
+            // Limpa a tela na hora para o cliente não ver produtos da aba anterior
+            const container = document.getElementById('productsContainer');
+            if (container) container.innerHTML = ''; 
+            
+            showLoading(true); 
+            loadProducts(true); 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });
@@ -662,15 +657,19 @@ function hideLoadingMore() {
 
 function setupInfiniteScroll() {
     window.addEventListener('scroll', debounce(() => {
+        // Se não estiver na home (Todos), não precisa de scroll infinito
+        if (currentCategory !== 'all') return;
+
         const scrollPosition = window.innerHeight + window.scrollY;
-        // Diminuímos de 1000 para 300 para o celular "sentir" o scroll mais cedo
-        const threshold = document.documentElement.scrollHeight - 300; 
+        
+        // GATILHO: Dispara quando o cliente chega em 60% da página (aprox. 6ª foto)
+        const threshold = document.documentElement.scrollHeight * 0.6; 
 
         if (scrollPosition >= threshold && !isLoadingMore && hasMoreProducts) {
-            console.log('🔄 Buscando mais produtos...');
+            console.log('🚀 Sistema antecipou a rolagem: Buscando mais 10...');
             loadProducts(false);
         }
-    }, 150)); // Reduzido de 200ms para 150ms para ser mais rápido
+    }, 100)); // Resposta ultra rápida (100ms)
 }
 
 function setupScrollListener() {
@@ -944,7 +943,7 @@ async function openProductModal(id) {
     document.getElementById('modalContainer').innerHTML = modalHtml;
     document.getElementById('productModal').classList.add('active');
     document.body.style.overflow = 'hidden';
-    document.querySelector('.modal-content').scrollTop = 0; // Reseta o scroll do modal para o topo
+    document.getElementById('modalContainer').scrollTop = 0; // Garante o reset em todos os navegadores
     startDeliveryTimer();
     history.pushState({ modalOpen: true, productId: id }, '', `#product-${id}`);
     setupModalMediaClick();
