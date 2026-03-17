@@ -347,24 +347,29 @@ async function loadProducts(reset = false) {
             query = query.eq('category_id', currentCategory).order('id', { ascending: false }).limit(1000); 
             hasMoreProducts = false;    
         } else {
-            // Se for "Todos", NÃO filtra por categoria, pega tudo!
+            // Se for "Todos", busca de forma aleatória estratégica usando o random_index
             const from = (currentPage - 1) * productsPerPage;
             const to = from + productsPerPage - 1;
-            query = query.order('id', { ascending: false }).range(from, to);
-            hasMoreProducts = true; 
+            query = query.order('random_index').range(from, to);
+            hasMoreProducts = true;
         }
 
         const { data, error } = await query;
         if (error) throw error;
 
         if (data && data.length > 0) {
-            const filteredData = data.filter(p => {
+            let filteredData = data.filter(p => {
                 const validImages = filterValidImages(p.images);
                 return validImages.length > 0;
             }).map(p => ({
                 ...p,
                 images: filterValidImages(p.images)
             }));
+
+            // AQUI ESTÁ O SEGREDO: Se for a aba "Todos", embaralha o novo pacote que chegou
+            if (currentCategory === 'all') {
+                filteredData = filteredData.sort(() => Math.random() - 0.5);
+            }
 
             allProductsLoaded = reset ? filteredData : [...allProductsLoaded, ...filteredData];
             products = allProductsLoaded;
@@ -494,12 +499,6 @@ function renderProducts() {
     if (filtered.length === 0) {
         container.innerHTML = '<p style="text-align:center; padding:40px;">Nenhum produto encontrado</p>';
         return;
-    }
-
-    // Só mistura se estivermos na primeira página. 
-    // Isso evita que os produtos fiquem pulando de lugar ao carregar mais.
-    if (!searchQuery && currentPage <= 2) {
-        filtered = filtered.sort(() => Math.random() - 0.5);
     }
 
     // ADICIONADO: Agora passamos a posição (index) para o card saber se deve carregar rápido ou devagar
@@ -659,22 +658,21 @@ function hideLoadingMore() {
 }
 
 function setupInfiniteScroll() {
-    // Usamos 'scroll' e 'touchmove' para garantir que o celular perceba o movimento
-    window.addEventListener('scroll', debounce(() => {
-        if (currentCategory !== 'all') return;
+    const trigger = document.getElementById('infinite-scroll-trigger');
+    if (!trigger) return;
 
-        const scrollPosition = window.innerHeight + window.scrollY;
-        const totalHeight = document.documentElement.scrollHeight;
-        
-        // GATILHO PARA CELULAR: Se faltar menos de 800px para o fim, carrega.
-        // Isso é mais seguro que usar porcentagem em telas pequenas.
-        const distanceToBottom = totalHeight - scrollPosition;
-
-        if (distanceToBottom < 800 && !isLoadingMore && hasMoreProducts) {
-            console.log('🚀 Carregando mais produtos para mobile...');
+    // Criamos um "observador" que fica vigiando o sensor no final da página
+    const observer = new IntersectionObserver((entries) => {
+        // Se o sensor aparecer na tela, o cliente estiver no "Todos" e houver mais produtos...
+        if (entries[0].isIntersecting && currentCategory === 'all' && !isLoadingMore && hasMoreProducts) {
+            console.log('📱 Sensor ativado no celular: Carregando mais...');
             loadProducts(false);
         }
-    }, 150)); // Um pouco mais de tempo para o processador do celular respirar
+    }, {
+        rootMargin: '400px' // Começa a carregar quando o sensor estiver a 400px de aparecer (antecipa o carregamento)
+    });
+
+    observer.observe(trigger);
 }
 
 function setupScrollListener() {
