@@ -17,27 +17,28 @@
 <meta property="og:title" content="Grupo Etevalda MT">
 <meta property="og:description" content="Variedade imbatível com entrega hoje! Pague só na entrega.">
 <title>Grupo Etevalda MT | Variedades</title>
+<link rel="preload" as="image" id="lcpPreload" fetchpriority="high" href="..." imagesrcset="" imagesizes="">
 
-<!-- Pré-conexões para melhorar tempo de carregamento -->
+<!-- Pré-conexões essenciais -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://vnrfmsyanrvqqhmqyixk.supabase.co">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
-<!-- Google Fonts com display=swap (essencial para CLS) -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700&display=swap"></noscript>
+<!-- Google Fonts otimizado - apenas pesos necessários -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&display=swap"></noscript>
 
-<!-- Font Awesome com defer (não bloqueia renderização) -->
+<!-- Font Awesome com defer e preload crítico -->
 <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
 
-<!-- Supabase com defer (não bloqueia renderização) -->
+<!-- Supabase com defer -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
 
-<!-- CSS Principal - carregado normalmente (é crítico) -->
+<!-- CSS Principal -->
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -70,7 +71,7 @@
 </a>
 </div>
 
-<!-- Busca Premium com Dropdown Preditivo -->
+<!-- Busca Premium -->
 <div class="header-search">
 <div class="search-wrapper">
 <input
@@ -114,14 +115,15 @@ autocomplete="off"
 <main class="main-content">
 <div class="container-fluid">
 
+<!-- Preload dinâmico para LCP - será preenchido via JS -->
 <!-- Seção de Produtos -->
 <section class="products-section">
 
 <!-- Grid de Produtos -->
 <div id="productsContainer" class="products-grid">
-<!-- Skeleton Screens - 8 itens para preencher a tela inicial -->
+<!-- Skeleton Screens - 6 itens para mobile (conforme regra) -->
 <div class="product-card skeleton">
-<div class="skeleton-image"></div>
+<div class="skeleton-image" style="aspect-ratio: 1/1;"></div>
 <div class="product-info">
 <div class="skeleton-text skeleton-title"></div>
 <div class="skeleton-text skeleton-price"></div>
@@ -131,113 +133,38 @@ autocomplete="off"
 </div>
 </div>
 </div>
-<div class="product-card skeleton">
-<div class="skeleton-image"></div>
-<div class="product-info">
-<div class="skeleton-text skeleton-title"></div>
-<div class="skeleton-text skeleton-price"></div>
-<div class="product-buttons">
-<div class="skeleton-text skeleton-button"></div>
-<div class="skeleton-text skeleton-button"></div>
-</div>
-</div>
-</div>
-<div class="product-card skeleton">
-<div class="skeleton-image"></div>
-<div class="product-info">
-<div class="skeleton-text skeleton-title"></div>
-<div class="skeleton-text skeleton-price"></div>
-<div class="product-buttons">
-<div class="skeleton-text skeleton-button"></div>
-<div class="skeleton-text skeleton-button"></div>
-</div>
-</div>
-</div>
-<div class="product-card skeleton">
-<div class="skeleton-image"></div>
-<div class="product-info">
-<div class="skeleton-text skeleton-title"></div>
-<div class="skeleton-text skeleton-price"></div>
-<div class="product-buttons">
-<div class="skeleton-text skeleton-button"></div>
-<div class="skeleton-text skeleton-button"></div>
-</div>
-</div>
-</div>
-<div class="product-card skeleton">
-<div class="skeleton-image"></div>
-<div class="product-info">
-<div class="skeleton-text skeleton-title"></div>
-<div class="skeleton-text skeleton-price"></div>
-<div class="product-buttons">
-<div class="skeleton-text skeleton-button"></div>
-<div class="skeleton-text skeleton-button"></div>
-</div>
-</div>
-</div>
-<div class="product-card skeleton">
-<div class="skeleton-image"></div>
-<div class="product-info">
-<div class="skeleton-text skeleton-title"></div>
-<div class="skeleton-text skeleton-price"></div>
-<div class="product-buttons">
-<div class="skeleton-text skeleton-button"></div>
-<div class="skeleton-text skeleton-button"></div>
-</div>
-</div>
-</div>
-<div class="product-card skeleton">
-<div class="skeleton-image"></div>
-<div class="product-info">
-<div class="skeleton-text skeleton-title"></div>
-<div class="skeleton-text skeleton-price"></div>
-<div class="product-buttons">
-<div class="skeleton-text skeleton-button"></div>
-<div class="skeleton-text skeleton-button"></div>
-</div>
-</div>
-</div>
-<div class="product-card skeleton">
-<div class="skeleton-image"></div>
-<div class="product-info">
-<div class="skeleton-text skeleton-title"></div>
-<div class="skeleton-text skeleton-price"></div>
-<div class="product-buttons">
-<div class="skeleton-text skeleton-button"></div>
-<div class="skeleton-text skeleton-button"></div>
-</div>
-</div>
-</div>
+<!-- +5 skeletons (total 6) -->
+<div class="product-card skeleton"><div class="skeleton-image" style="aspect-ratio: 1/1;"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div><div class="product-buttons"><div class="skeleton-text skeleton-button"></div><div class="skeleton-text skeleton-button"></div></div></div></div>
+<div class="product-card skeleton"><div class="skeleton-image" style="aspect-ratio: 1/1;"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div><div class="product-buttons"><div class="skeleton-text skeleton-button"></div><div class="skeleton-text skeleton-button"></div></div></div></div>
+<div class="product-card skeleton"><div class="skeleton-image" style="aspect-ratio: 1/1;"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div><div class="product-buttons"><div class="skeleton-text skeleton-button"></div><div class="skeleton-text skeleton-button"></div></div></div></div>
+<div class="product-card skeleton"><div class="skeleton-image" style="aspect-ratio: 1/1;"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div><div class="product-buttons"><div class="skeleton-text skeleton-button"></div><div class="skeleton-text skeleton-button"></div></div></div></div>
+<div class="product-card skeleton"><div class="skeleton-image" style="aspect-ratio: 1/1;"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div><div class="product-buttons"><div class="skeleton-text skeleton-button"></div><div class="skeleton-text skeleton-button"></div></div></div></div>
 </div>
 </section>
 
-<!-- Seção de Prova Social (será carregada após 3s) -->
+<!-- Seção de Prova Social -->
 <section class="social-proof-section" id="socialProofSection" style="opacity:0; height:0; overflow:hidden; transition:opacity 0.5s;">
 <div class="section-header">
 <h2 class="section-title">Quem Confia, Recomenda</h2>
 <p class="section-subtitle">Clientes em todo Mato Grosso</p>
 </div>
-<div id="socialProofGrid" class="social-proof-grid">
-<!-- Será preenchido pelo JavaScript -->
-</div>
+<div id="socialProofGrid" class="social-proof-grid"></div>
 </section>
 
-<!-- Seção de FAQs Moderna (será carregada após 3s) -->
+<!-- Seção de FAQs Moderna -->
 <section class="faq-section" id="faqSection" style="opacity:0; height:0; overflow:hidden; transition:opacity 0.5s;">
 <div class="section-header">
 <h2 class="section-title">Perguntas Frequentes</h2>
 <p class="section-subtitle">Clique e ouça a resposta</p>
 </div>
-<div id="faqGrid" class="faq-grid">
-<!-- Será preenchido pelo JavaScript -->
-</div>
+<div id="faqGrid" class="faq-grid"></div>
 </section>
 
-<!-- Seção Nossa Equipe (será carregada após 3s) -->
+<!-- Seção Nossa Equipe - AGORA DINÂMICA -->
 <section id="teamSection" class="team-section" style="display:none;">
 <div class="team-content">
 <div class="team-image-wrapper">
-<img src="https://i.postimg.cc/HnbpfGbh/Equipeee.jpg" alt="Equipe Etevalda" loading="lazy">
+<img id="teamImage" src="" alt="Equipe Etevalda" loading="lazy" style="aspect-ratio: 16/9; object-fit: cover;">
 <div class="team-overlay">
 <span>Excelência desde 2005</span>
 </div>
@@ -258,7 +185,7 @@ autocomplete="off"
 </div>
 </section>
 
-<!-- Carrossel Infinito Premium (será carregado após 3s) -->
+<!-- Carrossel Infinito Premium -->
 <section class="carousel-section" id="carouselSection" style="opacity:0; height:0; overflow:hidden; transition:opacity 0.5s;">
 <div class="section-header">
 <h2 class="carousel-title"><i class="fas fa-compass"></i> Descubra mais</h2>
@@ -266,9 +193,7 @@ autocomplete="off"
 <div class="carousel-container">
 <div class="carousel-gradient-left"></div>
 <div class="carousel-gradient-right"></div>
-<div id="infiniteCarousel" class="infinite-carousel">
-<!-- Será preenchido pelo JavaScript -->
-</div>
+<div id="infiniteCarousel" class="infinite-carousel"></div>
 </div>
 </section>
 
@@ -282,13 +207,10 @@ autocomplete="off"
 <button id="modalCloseBtn" class="modal-close-btn" aria-label="Fechar">
 <i class="fas fa-times"></i>
 </button>
-<!-- Botão de próxima foto -->
 <button id="nextPhotoBtn" class="next-photo-btn" style="display: none;" aria-label="Próxima foto">
 <i class="fas fa-chevron-right"></i>
 </button>
-<div id="modalContainer" class="modal-container">
-<!-- Será preenchido pelo JavaScript -->
-</div>
+<div id="modalContainer" class="modal-container"></div>
 </div>
 </div>
 
@@ -297,9 +219,7 @@ autocomplete="off"
 <button id="superZoomClose" class="super-zoom-close" aria-label="Fechar zoom">
 <i class="fas fa-times"></i>
 </button>
-<div class="super-zoom-content" id="superZoomContent">
-<!-- Imagem ou vídeo será inserido aqui dinamicamente -->
-</div>
+<div class="super-zoom-content" id="superZoomContent"></div>
 <a href="#" id="zoomWhatsAppBtn" class="zoom-whatsapp-btn" target="_blank">
 <i class="fab fa-whatsapp"></i> Falar no WhatsApp, quero esse!
 </a>
@@ -313,9 +233,7 @@ autocomplete="off"
 <i class="fas fa-times"></i>
 </button>
 </div>
-<div id="cartItems" class="cart-items">
-<!-- Será preenchido pelo JavaScript -->
-</div>
+<div id="cartItems" class="cart-items"></div>
 <div class="cart-footer">
 <div class="cart-total">
 <span>Total:</span>
@@ -381,22 +299,7 @@ Limpar Carrinho
 </div>
 </section>
 
-<!-- TAWK.TO - Carregado após 60 segundos -->
-<script>
-setTimeout(function() {
-var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
-(function() {
-var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
-s1.async = true;
-s1.src = 'https://embed.tawk.to/65e8a3d28d261e1b5f5f8b2a/1hoh7vq1q';
-s1.charset = 'UTF-8';
-s1.setAttribute('crossorigin', '*');
-s0.parentNode.insertBefore(s1, s0);
-})();
-}, 60000); // 60 segundos
-</script>
-
-<!-- SCRIPT PRINCIPAL - com defer para não bloquear renderização -->
+<!-- SCRIPT PRINCIPAL -->
 <script src="script.js" defer></script>
 </body>
 </html>

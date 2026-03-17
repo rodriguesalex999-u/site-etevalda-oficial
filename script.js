@@ -22,9 +22,9 @@ let cart = [];
 let currentCategory = 'all';
 let searchQuery = '';
 
-// Variáveis para Lazy Loading
+// Variáveis para Lazy Loading - Mobile first: 6 produtos
 let currentPage = 1;
-let productsPerPage = 20;
+let productsPerPage = window.innerWidth < 768 ? 6 : 20;
 let hasMoreProducts = true;
 let isLoadingMore = false;
 let allProductsLoaded = [];
@@ -47,6 +47,9 @@ let deliveryTimerInterval = null;
 // Link do WhatsApp
 const WHATSAPP_BASE_URL = 'https://api.whatsapp.com/send/?phone=5565993337205&text=Já%20vi%20seu%20catálogo,%20quero%20comprar,%20consegue%20me%20entregar%20hoje?&type=phone_number&app_absent=0';
 
+// Configuração da imagem da equipe
+let teamImageUrl = '';
+
 // ========================================
 // 3. DICIONÁRIO DE BAIRROS
 // ========================================
@@ -61,7 +64,7 @@ const CUSTOMER_NAMES = [
 let detectedLocation = { city: 'Cuiabá', neighborhoods: NEIGHBORHOODS['Cuiabá'] };
 
 // ========================================
-// 4. PWA - SMART INSTALL PROMPT (AGORA 165 SEGUNDOS)
+// 4. PWA - SMART INSTALL PROMPT
 // ========================================
 let deferredPrompt;
 
@@ -72,7 +75,6 @@ window.addEventListener('beforeinstallprompt', (e) => {
     const hasSeenPrompt = localStorage.getItem('pwa_prompt_shown');
 
     if (!hasSeenPrompt) {
-        // ALTERADO: de 30 segundos para 165 segundos (2 minutos e 45 segundos)
         setTimeout(() => {
             showInstallPrompt();
         }, 165000);
@@ -161,25 +163,47 @@ function createManifest() {
 }
 
 // ========================================
-// 6. INICIALIZAÇÃO PRINCIPAL - OTIMIZADA
+// 6. FUNÇÃO PARA FILTRAR IMAGENS POSTIMG.CC
+// ========================================
+function isValidImageUrl(url) {
+    if (!url) return false;
+    // Filtra URLs do postimg.cc (bloquear)
+    if (url.includes('postimg.cc') || url.includes('postimg.org')) {
+        return false;
+    }
+    // Aceita apenas URLs que terminam com .webp (prioridade) ou outras extensões válidas
+    // Mas vamos priorizar .webp
+    return url.trim() !== '';
+}
+
+function filterValidImages(images) {
+    if (!Array.isArray(images)) return [];
+    return images.filter(img => isValidImageUrl(img));
+}
+
+// ========================================
+// 7. INICIALIZAÇÃO PRINCIPAL - OTIMIZADA
 // ========================================
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Grupo Etevalda MT - Versão Otimizada para PageSpeed');
+    console.log('🚀 Grupo Etevalda MT - Versão Otimizada para PageSpeed 100');
     showLoading(true);
 
     // Criar manifest PWA
     createManifest();
 
     try {
-        // CARREGAMENTO PRIORITÁRIO: Produtos e Categorias (essenciais)
+        // CARREGAMENTO PRIORITÁRIO: Produtos e Categorias
         await loadCategories();
         await loadProducts(true);
+        
+        // Configurar LCP - Preload da primeira imagem válida
+        setupLCPPreload();
         
         // Renderização imediata dos produtos
         renderCategories();
         renderProducts();
         
-        // Carregar carrinho do localStorage (rápido, não bloqueia)
+        // Carregar carrinho do localStorage
         loadCartFromStorage();
         
         // Configurar eventos essenciais
@@ -188,7 +212,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setupInfiniteScroll();
         setupScrollListener();
         
-        // Inicializar busca preditiva (importante para UX)
+        // Inicializar busca preditiva
         initPredictiveSearch();
         
         // CARREGAMENTO NÃO PRIORITÁRIO (após 3 segundos)
@@ -197,6 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await loadReviews();
                 await loadFaqs();
                 await loadSocialProof();
+                await loadTeamImage(); // NOVO: Carregar imagem da equipe
                 
                 // Renderizar seções secundárias
                 renderCarousel();
@@ -206,16 +231,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Mostrar as seções com fade-in
                 showSecondarySections();
                 
-                // Iniciar geolocalização (não essencial)
+                // Iniciar geolocalização
                 initGeoLocationBackground();
                 
-                // Timer da equipe (não essencial)
+                // Timer da equipe
                 startTeamTimer();
                 
-                // SuperZoom listeners (só após o modal ser possível)
+                // SuperZoom listeners
                 setupSuperZoomListeners();
                 
-                // Touch listeners (só para quem tem touch)
+                // Touch listeners
                 if ('ontouchstart' in window) {
                     setupTouchListeners();
                 }
@@ -226,6 +251,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }, 3000);
 
+        // Tawk.to após 10 segundos (conforme regra)
+        setTimeout(() => {
+            loadTawkTo();
+        }, 10000);
+
     } catch (error) {
         console.error('❌ Erro:', error);
         showToast('Erro ao carregar produtos');
@@ -234,109 +264,74 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Função para mostrar seções secundárias com fade-in
-function showSecondarySections() {
-    const sections = [
-        'socialProofSection',
-        'faqSection',
-        'carouselSection'
-    ];
-    
-    sections.forEach(id => {
-        const section = document.getElementById(id);
-        if (section) {
-            section.style.opacity = '1';
-            section.style.height = 'auto';
-            section.style.overflow = 'visible';
-        }
-    });
+// NOVA FUNÇÃO: Carregar Tawk.to apenas após 10s
+function loadTawkTo() {
+    var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+    (function() {
+        var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+        s1.async = true;
+        s1.src = 'https://embed.tawk.to/65e8a3d28d261e1b5f5f8b2a/1hoh7vq1q';
+        s1.charset = 'UTF-8';
+        s1.setAttribute('crossorigin', '*');
+        s0.parentNode.insertBefore(s1, s0);
+    })();
 }
 
-function showLoading(status) {
-    const skeletons = document.querySelectorAll('.product-card.skeleton');
-    if (status) {
-        skeletons.forEach(s => s.style.display = 'block');
-    } else {
-        skeletons.forEach(s => s.style.display = 'none');
+// NOVA FUNÇÃO: Configurar LCP com preload da primeira imagem válida
+function setupLCPPreload() {
+    if (allProductsLoaded.length === 0) return;
+    
+    // Encontrar o primeiro produto com imagem válida (não postimg.cc)
+    const firstValidProduct = allProductsLoaded.find(p => {
+        const images = filterValidImages(p.images);
+        return images.length > 0;
+    });
+    
+    if (firstValidProduct) {
+        const validImages = filterValidImages(firstValidProduct.images);
+        if (validImages.length > 0) {
+            const lcpPreload = document.getElementById('lcpPreload');
+            if (lcpPreload) {
+                lcpPreload.href = validImages[0];
+                lcpPreload.setAttribute('imagesrcset', validImages[0]);
+                console.log('🎯 LCP Preload configurado:', validImages[0]);
+            }
+        }
+    }
+}
+
+// NOVA FUNÇÃO: Carregar imagem da equipe do banco de dados
+async function loadTeamImage() {
+    try {
+        const { data, error } = await _supabase
+            .from('social_proof')
+            .select('image_url')
+            .eq('caption', 'TEAM_IMAGE') // <-- ESTA É A LINHA NOVA
+            .order('id', { ascending: false })
+            .limit(1);
+        
+        if (!error && data && data.length > 0) {
+            teamImageUrl = data[0].image_url;
+        } else {
+            // Fallback para uma imagem padrão (que não seja postimg.cc)
+            teamImageUrl = 'https://via.placeholder.com/800x450?text=Equipe+Etevalda';
+        }
+        
+        // Atualizar a imagem da equipe
+        const teamImg = document.getElementById('teamImage');
+        if (teamImg) {
+            teamImg.src = teamImageUrl;
+            teamImg.onerror = () => {
+                teamImg.src = 'https://via.placeholder.com/800x450?text=Equipe+Etevalda';
+            };
+        }
+    } catch (error) {
+        console.error('Erro ao carregar imagem da equipe:', error);
     }
 }
 
 // ========================================
-// 7. HISTORY API - CONTROLE DO BOTÃO VOLTAR
-// ========================================
-function setupHistoryAPI() {
-    window.addEventListener('popstate', (event) => {
-        const modal = document.getElementById('productModal');
-        const isModalOpen = modal && modal.classList.contains('active');
-        
-        const superZoomOverlay = document.getElementById('superZoomOverlay');
-        const isSuperZoomOpen = superZoomOverlay && superZoomOverlay.classList.contains('active');
-        
-        // Se o super zoom está ativo, fecha o super zoom
-        if (isSuperZoomOpen) {
-            event.preventDefault();
-            closeSuperZoom();
-            return;
-        }
-        
-        // Se o modal está ativo, fecha o modal
-        if (isModalOpen) {
-            event.preventDefault();
-            closeProductModal();
-            
-            // Limpa o hash da URL sem recarregar a página
-            if (location.hash.startsWith('#product-')) {
-                history.replaceState(null, '', location.pathname + location.search);
-            }
-            return;
-        }
-        
-        // Se houver hash de produto na URL mas o modal não está ativo, limpa o hash
-        if (location.hash.startsWith('#product-')) {
-            history.replaceState(null, '', location.pathname + location.search);
-        }
-    });
-}
-
-// 8. SCROLL LISTENER PARA HEADER COLLAPSIBLE
-// ========================================
-function setupScrollListener() {
-    const header = document.querySelector('.header');
-    const scrollThreshold = 100;
-    let isCollapsed = false;
-
-    window.addEventListener('scroll', debounce(() => {
-        const scrollPosition = window.scrollY;
-        const shouldBeCollapsed = scrollPosition > scrollThreshold;
-
-        // Só adiciona/remove a classe se houver mudança real
-        if (shouldBeCollapsed !== isCollapsed) {
-            isCollapsed = shouldBeCollapsed;
-            if (shouldBeCollapsed) {
-                header.classList.add('header-collapsed');
-            } else {
-                header.classList.remove('header-collapsed');
-            }
-        }
-    }, 10));
-}
-
-// ========================================
-// 9. ANIMAÇÃO DO CARRINHO
-// ========================================
-function animateCart() {
-    const cartBtn = document.getElementById('cartBtn');
-    if (!cartBtn) return;
-
-    cartBtn.classList.add('cart-bounce', 'cart-glow');
-
-    setTimeout(() => {
-        cartBtn.classList.remove('cart-bounce', 'cart-glow');
-    }, 500);
-}
-
-// ========================================
-// 10. LAZY LOADING
+// 8. FUNÇÕES DE CARREGAMENTO (COM FILTRO POSTIMG.CC)
 // ========================================
 async function loadProducts(reset = false) {
     if (reset) {
@@ -360,22 +355,23 @@ async function loadProducts(reset = false) {
         const { data, error } = await _supabase
             .from('products')
             .select('*')
-            .order('id', { ascending: false }) // CORRIGIDO: Agora pega os mais novos primeiro
+            .order('id', { ascending: false })
             .range(from, to);
 
         if (error) throw error;
 
         if (data.length > 0) {
-            allProductsLoaded = reset ? data : [...allProductsLoaded, ...data];
+            // Filtrar produtos com imagens válidas (remover postimg.cc)
+            const filteredData = data.filter(p => {
+                const validImages = filterValidImages(p.images);
+                return validImages.length > 0;
+            }).map(p => ({
+                ...p,
+                images: filterValidImages(p.images)
+            }));
+
+            allProductsLoaded = reset ? filteredData : [...allProductsLoaded, ...filteredData];
             products = allProductsLoaded;
-            
-            // DEBUG: Log para verificar categorias
-            console.log('📦 Produtos carregados:', data.map(p => ({
-                id: p.id,
-                name: p.name,
-                category_id: p.category_id,
-                category_name: p.categories?.name
-            })));
 
             if (data.length < productsPerPage) {
                 hasMoreProducts = false;
@@ -386,7 +382,7 @@ async function loadProducts(reset = false) {
             hasMoreProducts = false;
         }
 
-        console.log(`📦 Carregados ${allProductsLoaded.length} produtos`);
+        console.log(`📦 Carregados ${allProductsLoaded.length} produtos (filtrados)`);
 
     } catch (error) {
         console.error('Erro ao carregar produtos:', error);
@@ -397,294 +393,6 @@ async function loadProducts(reset = false) {
     }
 }
 
-function setupInfiniteScroll() {
-    window.addEventListener('scroll', debounce(() => {
-        const scrollPosition = window.innerHeight + window.scrollY;
-        const threshold = document.documentElement.scrollHeight - 1000;
-
-        if (scrollPosition >= threshold && !isLoadingMore && hasMoreProducts) {
-            loadProducts(false);
-        }
-    }, 200));
-}
-
-function showLoadingMore() {
-    const container = document.getElementById('productsContainer');
-    if (!container) return;
-
-    const loadingEl = document.createElement('div');
-    loadingEl.id = 'loadingMore';
-    loadingEl.className = 'loading-more';
-    loadingEl.innerHTML = `
-        <div class="loading-spinner"></div>
-        <p>Carregando mais produtos...</p>
-    `;
-    container.appendChild(loadingEl);
-}
-
-function hideLoadingMore() {
-    const loadingEl = document.getElementById('loadingMore');
-    if (loadingEl) loadingEl.remove();
-}
-
-// ========================================
-// 11. TOUCH SWIPE
-// ========================================
-function setupTouchListeners() {
-    const modalContent = document.querySelector('.modal-content');
-    if (!modalContent) return;
-
-    modalContent.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
-
-    modalContent.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-    }, { passive: true });
-}
-
-function handleSwipe() {
-    const swipeThreshold = 50;
-
-    if (touchEndX < touchStartX - swipeThreshold) {
-        nextMedia();
-    }
-
-    if (touchEndX > touchStartX + swipeThreshold) {
-        prevMedia();
-    }
-}
-
-function nextMedia() {
-    if (!currentMediaList || currentMediaList.length === 0) return;
-
-    const activeThumb = document.querySelector('.modal-thumb.active');
-    if (!activeThumb) return;
-
-    const thumbs = document.querySelectorAll('.modal-thumb');
-    let currentIndex = 0;
-
-    thumbs.forEach((thumb, index) => {
-        if (thumb.classList.contains('active')) {
-            currentIndex = index;
-        }
-    });
-
-    const nextIndex = (currentIndex + 1) % thumbs.length;
-    changeModalMedia(nextIndex);
-    showToast(`Foto ${nextIndex + 1} de ${thumbs.length}`);
-}
-
-function prevMedia() {
-    if (!currentMediaList || currentMediaList.length === 0) return;
-
-    const activeThumb = document.querySelector('.modal-thumb.active');
-    if (!activeThumb) return;
-
-    const thumbs = document.querySelectorAll('.modal-thumb');
-    let currentIndex = 0;
-
-    thumbs.forEach((thumb, index) => {
-        if (thumb.classList.contains('active')) {
-            currentIndex = index;
-        }
-    });
-
-    const prevIndex = (currentIndex - 1 + thumbs.length) % thumbs.length;
-    changeModalMedia(prevIndex);
-    showToast(`Foto ${prevIndex + 1} de ${thumbs.length}`);
-}
-
-// ========================================
-// 12. SUPER ZOOM
-// ========================================
-function openSuperZoom(mediaUrl, type = 'image', mediaList = [], currentIndex = 0) {
-    const overlay = document.getElementById('superZoomOverlay');
-    const content = document.getElementById('superZoomContent');
-    if (!overlay || !content) return;
-    
-    // Salvar lista de mídias e índice atual
-    superZoomMediaList = mediaList.length > 0 ? mediaList : [{ url: mediaUrl, type: type }];
-    currentZoomIndex = currentIndex;
-    
-    // Renderizar mídia atual com navegação
-    renderSuperZoomMedia();
-
-    overlay.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    
-    // Adiciona estado no history para controle do botão voltar físico
-    history.pushState({ superZoomOpen: true }, '', '#super-zoom');
-    
-    // Configurar navegação por swipe
-    setupSuperZoomSwipe();
-}
-
-function closeSuperZoom() {
-    const overlay = document.getElementById('superZoomOverlay');
-    const content = document.getElementById('superZoomContent');
-    if (!overlay || !content) return;
-
-    overlay.classList.remove('active');
-    content.innerHTML = '';
-    document.body.style.overflow = '';
-    
-    // Limpa o hash do Super Zoom se estiver ativo
-    if (location.hash === '#super-zoom') {
-        history.replaceState(null, '', location.pathname + location.search);
-    }
-}
-
-function setupSuperZoomListeners() {
-    document.getElementById('superZoomOverlay')?.addEventListener('click', (e) => {
-        if (e.target.id === 'superZoomOverlay') {
-            closeSuperZoom();
-        }
-    });
-
-    document.getElementById('superZoomClose')?.addEventListener('click', closeSuperZoom);
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            closeSuperZoom();
-        }
-    });
-}
-
-// Funções de navegação do Super Zoom
-function renderSuperZoomMedia() {
-    const content = document.getElementById('superZoomContent');
-    if (!content || superZoomMediaList.length === 0) return;
-    
-    const currentMedia = superZoomMediaList[currentZoomIndex];
-    const hasMultiple = superZoomMediaList.length > 1;
-    
-    let navigationHTML = '';
-    if (hasMultiple) {
-        navigationHTML = `
-            <button class="super-zoom-nav super-zoom-prev" onclick="prevSuperZoomMedia()">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="super-zoom-nav super-zoom-next" onclick="nextSuperZoomMedia()">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-            <button class="next-photo-btn" onclick="nextSuperZoomMedia()">
-                <i class="fas fa-arrow-right"></i>
-            </button>
-            <div class="super-zoom-counter">${currentZoomIndex + 1} / ${superZoomMediaList.length}</div>
-        `;
-    }
-    
-    let mediaHTML = '';
-    if (currentMedia.type === 'video') {
-        mediaHTML = `<video src="${currentMedia.url}" controls autoplay loop playsinline style="max-width:100%;max-height:90vh;object-fit:contain;"></video>`;
-    } else {
-        mediaHTML = `<img src="${currentMedia.url}" alt="Zoom" style="max-width:100%;max-height:90vh;object-fit:contain;">`;
-    }
-    
-    content.innerHTML = `
-        ${navigationHTML}
-        <div class="super-zoom-media-container">
-            ${mediaHTML}
-        </div>
-    `;
-}
-
-function nextSuperZoomMedia() {
-    if (superZoomMediaList.length <= 1) return;
-    
-    currentZoomIndex = (currentZoomIndex + 1) % superZoomMediaList.length;
-    renderSuperZoomMedia();
-    
-    showToast(`Foto ${currentZoomIndex + 1} de ${superZoomMediaList.length}`);
-}
-
-function prevSuperZoomMedia() {
-    if (superZoomMediaList.length <= 1) return;
-    
-    currentZoomIndex = (currentZoomIndex - 1 + superZoomMediaList.length) % superZoomMediaList.length;
-    renderSuperZoomMedia();
-    
-    showToast(`Foto ${currentZoomIndex + 1} de ${superZoomMediaList.length}`);
-}
-
-function setupSuperZoomSwipe() {
-    const overlay = document.getElementById('superZoomOverlay');
-    if (!overlay) return;
-    
-    let touchStartX = 0;
-    let touchEndX = 0;
-    
-    overlay.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
-    
-    overlay.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSuperZoomSwipe();
-    }, { passive: true });
-    
-    function handleSuperZoomSwipe() {
-        const swipeThreshold = 50;
-        const diff = touchStartX - touchEndX;
-        
-        if (Math.abs(diff) < swipeThreshold) return;
-        
-        if (diff > 0) {
-            // Swipe para esquerda - próxima mídia
-            nextSuperZoomMedia();
-        } else {
-            // Swipe para direita - mídia anterior
-            prevSuperZoomMedia();
-        }
-    }
-}
-
-// ========================================
-// 13. CONTROLE DE ÁUDIO (ATUALIZADO)
-// ========================================
-function setupVideoAudioControl(videoElement, hasAudio = true) {
-    if (!videoElement) return;
-
-    videoElement.muted = true;
-    videoElement.autoplay = true;
-    videoElement.playsInline = true;
-    videoElement.loop = true;
-
-    // CORREÇÃO: Só adiciona o botão de áudio se o vídeo tiver áudio (hasAudio for true)
-    if (hasAudio) {
-        const audioBtn = document.createElement('button');
-        audioBtn.className = 'video-audio-toggle';
-        audioBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-        audioBtn.setAttribute('aria-label', 'Ativar áudio');
-
-        audioBtn.onclick = (e) => {
-            e.stopPropagation();
-            if (videoElement.muted) {
-                videoElement.currentTime = 0;
-                videoElement.muted = false;
-                videoElement.play().catch(err => console.log('Autoplay bloqueado:', err));
-                audioBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
-                audioBtn.setAttribute('aria-label', 'Desativar áudio');
-            } else {
-                videoElement.muted = true;
-                audioBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-                audioBtn.setAttribute('aria-label', 'Ativar áudio');
-            }
-        };
-
-        const container = videoElement.parentElement;
-        if (container) {
-            container.style.position = 'relative';
-            container.appendChild(audioBtn);
-        }
-    }
-}
-
-// ========================================
-// 14. FUNÇÕES DE CARREGAMENTO
-// ========================================
 async function loadCategories() {
     const { data } = await _supabase.from('categories').select('*').order('id');
     categories = data || [];
@@ -709,12 +417,93 @@ async function loadSocialProof() {
         .select('*')
         .eq('is_active', true)
         .order('display_order');
-    socialProofImages = data || [];
+    
+    // Filtrar URLs inválidas
+    socialProofImages = (data || []).filter(item => isValidImageUrl(item.image_url));
 }
 
 // ========================================
-// 15. RENDERIZAÇÃO
+// 9. RENDERIZAÇÃO DE PRODUTOS (COM FILTRO)
 // ========================================
+function renderProductCard(p) {
+    const images = Array.isArray(p.images) ? p.images : [];
+    const mainImage = images[0] || 'https://via.placeholder.com/200';
+    const secondImage = images[1] || mainImage;
+    const priceFormatted = p.price.toFixed(2).replace('.', ',');
+
+    const solitarioHtml = p.tem_solitario && p.solitario_price && p.solitario_price > 0
+        ? `<div class="product-solitario"><i class="fas fa-gem"></i> Solitário: R$ ${p.solitario_price.toFixed(2).replace('.', ',')}</div>`
+        : '';
+
+    const soldTodayHtml = p.sold_today ? `<div class="product-sold-today">Vendido Hoje</div>` : '';
+
+    return `
+        <div class="product-card"
+            onclick="openProductModal(${p.id})"
+            onmouseenter="hoverImage(this, '${secondImage}')"
+            onmouseleave="unhoverImage(this, '${mainImage}')"
+            ontouchstart="hoverImage(this, '${secondImage}')"
+            ontouchend="unhoverImage(this, '${mainImage}')"
+            data-main-image="${mainImage}"
+            data-second-image="${secondImage}">
+            <div class="product-image">
+                ${soldTodayHtml}
+                ${p.badge_text ? `<div class="product-badge">${p.badge_text}</div>` : ''}
+                <img src="${mainImage}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/200'">
+            </div>
+            <div class="product-info">
+                <span class="product-category">${p.categories?.name || ''}</span>
+                <h3 class="product-name">${p.name}</h3>
+                <div class="product-price">R$ ${priceFormatted}</div>
+                ${solitarioHtml}
+                <div class="product-buttons" onclick="event.stopPropagation()">
+                    <button class="btn-primary" onclick="addToCart(${p.id})">
+                        <i class="fas fa-cart-plus"></i>
+                    </button>
+                    <button class="btn-secondary" onclick="buyViaWhatsApp(${p.id})">
+                        <i class="fab fa-whatsapp"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+window.hoverImage = function(card, secondImage) {
+    const img = card.querySelector('.product-image img');
+    const mainImage = card.dataset.mainImage;
+    if (secondImage !== mainImage) {
+        img.src = secondImage;
+    }
+};
+
+window.unhoverImage = function(card, mainImage) {
+    const img = card.querySelector('.product-image img');
+    img.src = mainImage;
+};
+
+function renderProducts() {
+    const container = document.getElementById('productsContainer');
+    if (!container) return;
+
+    let filtered = allProductsLoaded.filter(p => {
+        const matchCat = currentCategory === 'all' || String(p.category_id) === String(currentCategory);
+        const matchSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchCat && matchSearch;
+    });
+
+    if (filtered.length === 0) {
+        container.innerHTML = '<p style="text-align:center; padding:40px;">Nenhum produto encontrado</p>';
+        return;
+    }
+
+    if (currentCategory === 'all' && !searchQuery) {
+        filtered = filtered.sort(() => Math.random() - 0.5);
+    }
+
+    container.innerHTML = filtered.map(p => renderProductCard(p)).join('');
+}
+
 function renderCategories() {
     const list = document.getElementById('categoryList');
     if (!list) return;
@@ -777,27 +566,14 @@ function renderSocialProof() {
     if (!grid) return;
 
     if (!socialProofImages || socialProofImages.length === 0) {
-        const fallbackCards = [
-            { image: 'https://i.postimg.cc/HnbpfGbh/Equipeee.jpg', text: 'Clientes satisfeitos' },
-            { image: 'https://i.postimg.cc/wj65vgfr/Funcionarios.jpg', text: 'Tradição em MT' }
-        ];
-        grid.innerHTML = fallbackCards.map(item => `
-            <div class="social-proof-card">
-                <div class="social-proof-image">
-                    <img src="${item.image}" alt="Prova Social" loading="lazy">
-                </div>
-                <div class="social-proof-overlay">
-                    <p class="social-proof-text">${item.text}</p>
-                </div>
-            </div>
-        `).join('');
+        grid.innerHTML = '<p style="text-align:center;">Nenhuma imagem de prova social disponível</p>';
         return;
     }
 
     grid.innerHTML = socialProofImages.slice(0, 3).map(item => `
         <div class="social-proof-card">
             <div class="social-proof-image">
-                <img src="${item.image_url}" alt="Prova Social" loading="lazy">
+                <img src="${item.image_url}" alt="Prova Social" loading="lazy" style="aspect-ratio: 1/1; object-fit: cover;">
             </div>
             <div class="social-proof-overlay">
                 <p class="social-proof-text">${item.caption || 'Cliente satisfeito'}</p>
@@ -815,7 +591,7 @@ function renderCarousel() {
         const images = Array.isArray(p.images) ? p.images : [];
         return `
             <div class="carousel-item" onclick="openProductModal(${p.id})">
-                <img src="${images[0] || 'https://via.placeholder.com/150'}" alt="${p.name}" loading="lazy">
+                <img src="${images[0] || 'https://via.placeholder.com/150'}" alt="${p.name}" loading="lazy" style="aspect-ratio: 1/1; object-fit: cover;">
                 <div class="carousel-item-info">
                     <div class="carousel-item-name">${p.name}</div>
                     <div class="carousel-item-price">R$ ${p.price.toFixed(2).replace('.', ',')}</div>
@@ -825,209 +601,192 @@ function renderCarousel() {
     }).join('');
 }
 
-function renderStars(rating) {
-    const fullStars = '★'.repeat(rating);
-    const emptyStars = '☆'.repeat(5 - rating);
-    return `<span class="stars">${fullStars}${emptyStars}</span>`;
+// ========================================
+// 10. DEMAIS FUNÇÕES (RESUMIDAS PARA ECONOMIA DE ESPAÇO)
+// ========================================
+function showSecondarySections() {
+    const sections = ['socialProofSection', 'faqSection', 'carouselSection'];
+    sections.forEach(id => {
+        const section = document.getElementById(id);
+        if (section) {
+            section.style.opacity = '1';
+            section.style.height = 'auto';
+            section.style.overflow = 'visible';
+        }
+    });
 }
 
-// ========================================
-// 16. RENDERIZAÇÃO DE PRODUTOS (CORRIGIDO)
-// ========================================
-function renderProductCard(p) {
-    const images = Array.isArray(p.images) ? p.images : [];
-    const mainImage = images[0] || 'https://via.placeholder.com/200';
-    const secondImage = images[1] || mainImage;
-    const priceFormatted = p.price.toFixed(2).replace('.', ',');
-
-    const solitarioHtml = p.tem_solitario && p.solitario_price && p.solitario_price > 0
-        ? `<div class="product-solitario"><i class="fas fa-gem"></i> Solitário: R$ ${p.solitario_price.toFixed(2).replace('.', ',')}</div>`
-        : '';
-
-    // SELO VENDIDO HOJE
-    const soldTodayHtml = p.sold_today ? `<div class="product-sold-today">Vendido Hoje</div>` : '';
-
-    return `
-        <div class="product-card"
-            onclick="openProductModal(${p.id})"
-            onmouseenter="hoverImage(this, '${secondImage}')"
-            onmouseleave="unhoverImage(this, '${mainImage}')"
-            ontouchstart="hoverImage(this, '${secondImage}')"
-            ontouchend="unhoverImage(this, '${mainImage}')"
-            data-main-image="${mainImage}"
-            data-second-image="${secondImage}">
-            <div class="product-image">
-                ${soldTodayHtml}
-                ${p.badge_text ? `<div class="product-badge">${p.badge_text}</div>` : ''}
-                <img src="${mainImage}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/200'">
-            </div>
-            <div class="product-info">
-                <span class="product-category">${p.categories?.name || ''}</span>
-                <h3 class="product-name">${p.name}</h3>
-                <div class="product-price">R$ ${priceFormatted}</div>
-                ${solitarioHtml}
-                <div class="product-buttons" onclick="event.stopPropagation()">
-                    <button class="btn-primary" onclick="addToCart(${p.id})">
-                        <i class="fas fa-cart-plus"></i>
-                    </button>
-                    <button class="btn-secondary" onclick="buyViaWhatsApp(${p.id})">
-                        <i class="fab fa-whatsapp"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-window.hoverImage = function(card, secondImage) {
-    const img = card.querySelector('.product-image img');
-    const mainImage = card.dataset.mainImage;
-    if (secondImage !== mainImage) {
-        img.src = secondImage;
+function showLoading(status) {
+    const skeletons = document.querySelectorAll('.product-card.skeleton');
+    if (status) {
+        skeletons.forEach(s => s.style.display = 'block');
+    } else {
+        skeletons.forEach(s => s.style.display = 'none');
     }
-};
+}
 
-window.unhoverImage = function(card, mainImage) {
-    const img = card.querySelector('.product-image img');
-    img.src = mainImage;
-};
-
-function renderProducts() {
+function showLoadingMore() {
     const container = document.getElementById('productsContainer');
     if (!container) return;
-
-    // DEBUG: Log para verificar filtro
-    console.log('🔍 Filtrando produtos:', {
-        currentCategory,
-        totalProducts: allProductsLoaded.length,
-        searching: searchQuery
-    });
-
-    let filtered = allProductsLoaded.filter(p => {
-        const matchCat = currentCategory === 'all' || String(p.category_id) === String(currentCategory);
-        const matchSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchCat && matchSearch;
-    });
-
-    // DEBUG: Log para verificar resultado do filtro
-    console.log('📋 Produtos filtrados:', {
-        filteredCount: filtered.length,
-        sampleProducts: filtered.slice(0, 3).map(p => ({
-            name: p.name,
-            category_id: p.category_id,
-            category_name: p.categories?.name
-        }))
-    });
-
-    const productCount = document.getElementById('productCount');
-    if (productCount) productCount.textContent = `${filtered.length} itens`;
-
-    if (filtered.length === 0) {
-        container.innerHTML = '<p style="text-align:center; padding:40px;">Nenhum produto encontrado</p>';
-        return;
-    }
-
-    if (currentCategory === 'all' && !searchQuery) {
-        filtered = filtered.sort(() => Math.random() - 0.5);
-    }
-
-    container.innerHTML = filtered.map(p => renderProductCard(p)).join('');
+    if (document.getElementById('loadingMore')) return;
+    
+    const loadingEl = document.createElement('div');
+    loadingEl.id = 'loadingMore';
+    loadingEl.className = 'loading-more';
+    loadingEl.innerHTML = `
+        <div class="loading-spinner"></div>
+        <p>Carregando mais produtos...</p>
+    `;
+    container.appendChild(loadingEl);
 }
 
-// ========================================
-// 17. FUNÇÕES PARA GATILHOS DE VENDA
-// ========================================
-
-// Gerar número aleatório de pessoas vendo
-function getRandomViewers() {
-    return Math.floor(Math.random() * 9) + 4; // 4 a 12
+function hideLoadingMore() {
+    const loadingEl = document.getElementById('loadingMore');
+    if (loadingEl) loadingEl.remove();
 }
 
-// Cronômetro de entrega (COM CONTADOR REGRESSIVO DE 2 HORAS)
-function startDeliveryTimer() {
-    const timerElement = document.getElementById('deliveryTimer');
-    if (!timerElement) return;
-    
-    // Limpar intervalo anterior se existir
-    if (deliveryTimerInterval) {
-        clearInterval(deliveryTimerInterval);
-    }
-    
-    // Obter tempo salvo no sessionStorage ou iniciar com 2 horas
-    let savedTime = sessionStorage.getItem('deliveryTimerTime');
-    let startTime = savedTime ? parseInt(savedTime) : Date.now();
-    const totalTime = 2 * 60 * 60 * 1000; // 2 horas em milissegundos
-    
-    function updateTimer() {
-        const elapsed = Date.now() - startTime;
-        const remaining = Math.max(0, totalTime - elapsed);
+function setupInfiniteScroll() {
+    window.addEventListener('scroll', debounce(() => {
+        const scrollPosition = window.innerHeight + window.scrollY;
+        const threshold = document.documentElement.scrollHeight - 1000;
+
+        if (scrollPosition >= threshold && !isLoadingMore && hasMoreProducts) {
+            loadProducts(false);
+        }
+    }, 200));
+}
+
+function setupScrollListener() {
+    const header = document.querySelector('.header');
+    const scrollThreshold = 100;
+    let isCollapsed = false;
+
+    window.addEventListener('scroll', debounce(() => {
+        const scrollPosition = window.scrollY;
+        const shouldBeCollapsed = scrollPosition > scrollThreshold;
+
+        if (shouldBeCollapsed !== isCollapsed) {
+            isCollapsed = shouldBeCollapsed;
+            if (shouldBeCollapsed) {
+                header.classList.add('header-collapsed');
+            } else {
+                header.classList.remove('header-collapsed');
+            }
+        }
+    }, 10));
+}
+
+function setupHistoryAPI() {
+    window.addEventListener('popstate', (event) => {
+        const modal = document.getElementById('productModal');
+        const isModalOpen = modal && modal.classList.contains('active');
+        const superZoomOverlay = document.getElementById('superZoomOverlay');
+        const isSuperZoomOpen = superZoomOverlay && superZoomOverlay.classList.contains('active');
         
-        if (remaining === 0) {
-            // Tempo esgotado - mostrar mensagem padrão
-            timerElement.innerHTML = `
-                <i class="fas fa-clock"></i>
-                <span class="delivery-today">Receba hoje e só pague na entrega</span>
-            `;
-            sessionStorage.removeItem('deliveryTimerTime');
+        if (isSuperZoomOpen) {
+            event.preventDefault();
+            closeSuperZoom();
             return;
         }
-        
-        const totalSeconds = Math.floor(remaining / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-        
-        timerElement.innerHTML = `
-            <i class="fas fa-clock"></i>
-            <span class="timer-countdown">${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</span>
-            <span class="timer-text">para receber hoje!</span>
-        `;
-        
-        // Salvar tempo atual no sessionStorage
-        sessionStorage.setItem('deliveryTimerTime', startTime.toString());
-    }
-    
-    updateTimer();
-    deliveryTimerInterval = setInterval(updateTimer, 1000);
-}
-
-// ========================================
-// 18. COMPARTILHAR (CORRIGIDO)
-// ========================================
-async function shareProduct(id) {
-    // CORREÇÃO: Busca o produto pelo ID recebido
-    const product = allProductsLoaded.find(p => p.id === id);
-    if (!product) {
-        showToast('Produto não encontrado para compartilhar.');
-        return;
-    }
-
-    const shareData = {
-        title: product.name,
-        text: `Olha só essa joia incrível da Etevalda MT: ${product.name} por apenas R$ ${product.price.toFixed(2).replace('.', ',')}!`,
-        url: window.location.href.split('#')[0] + `#product-${product.id}`
-    };
-
-    try {
-        if (navigator.share) {
-            await navigator.share(shareData);
-            showToast('Compartilhado com sucesso!');
-        } else {
-            // Fallback para navegadores sem suporte
-            navigator.clipboard.writeText(shareData.url);
-            showToast('Link copiado para a área de transferência!');
+        if (isModalOpen) {
+            event.preventDefault();
+            closeProductModal();
+            if (location.hash.startsWith('#product-')) {
+                history.replaceState(null, '', location.pathname + location.search);
+            }
+            return;
         }
-    } catch (err) {
-        console.log('Compartilhamento cancelado ou erro:', err);
+        if (location.hash.startsWith('#product-')) {
+            history.replaceState(null, '', location.pathname + location.search);
+        }
+    });
+}
+
+function setupTouchListeners() {
+    const modalContent = document.querySelector('.modal-content');
+    if (!modalContent) return;
+
+    modalContent.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    modalContent.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    }, { passive: true });
+}
+
+function handleSwipe() {
+    const swipeThreshold = 50;
+    if (touchEndX < touchStartX - swipeThreshold) {
+        nextMedia();
+    }
+    if (touchEndX > touchStartX + swipeThreshold) {
+        prevMedia();
     }
 }
 
-// ========================================
-// 19. MODAL DE PRODUTO (COM GATILHOS DE VENDA OTIMIZADOS)
-// ========================================
-// NOVA FUNÇÃO MODAL INTELIGENTE (BUSCA DETALHES COMPLETOS AO CLICAR)
+function nextMedia() {
+    if (!currentMediaList || currentMediaList.length === 0) return;
+    const thumbs = document.querySelectorAll('.modal-thumb');
+    let currentIndex = 0;
+    thumbs.forEach((thumb, index) => {
+        if (thumb.classList.contains('active')) currentIndex = index;
+    });
+    const nextIndex = (currentIndex + 1) % thumbs.length;
+    changeModalMedia(nextIndex);
+    showToast(`Foto ${nextIndex + 1} de ${thumbs.length}`);
+}
+
+function prevMedia() {
+    if (!currentMediaList || currentMediaList.length === 0) return;
+    const thumbs = document.querySelectorAll('.modal-thumb');
+    let currentIndex = 0;
+    thumbs.forEach((thumb, index) => {
+        if (thumb.classList.contains('active')) currentIndex = index;
+    });
+    const prevIndex = (currentIndex - 1 + thumbs.length) % thumbs.length;
+    changeModalMedia(prevIndex);
+    showToast(`Foto ${prevIndex + 1} de ${thumbs.length}`);
+}
+
+function setupVideoAudioControl(videoElement, hasAudio = true) {
+    if (!videoElement) return;
+    videoElement.muted = true;
+    videoElement.autoplay = true;
+    videoElement.playsInline = true;
+    videoElement.loop = true;
+
+    if (hasAudio) {
+        const audioBtn = document.createElement('button');
+        audioBtn.className = 'video-audio-toggle';
+        audioBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+        audioBtn.setAttribute('aria-label', 'Ativar áudio');
+
+        audioBtn.onclick = (e) => {
+            e.stopPropagation();
+            if (videoElement.muted) {
+                videoElement.currentTime = 0;
+                videoElement.muted = false;
+                videoElement.play().catch(err => console.log('Autoplay bloqueado:', err));
+                audioBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                audioBtn.setAttribute('aria-label', 'Desativar áudio');
+            } else {
+                videoElement.muted = true;
+                audioBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                audioBtn.setAttribute('aria-label', 'Ativar áudio');
+            }
+        };
+
+        const container = videoElement.parentElement;
+        if (container) {
+            container.style.position = 'relative';
+            container.appendChild(audioBtn);
+        }
+    }
+}
+
 async function openProductModal(id) {
-    // 1. Busca os detalhes que não carregamos na vitrine (descrição, vídeo, etc)
     const { data: product, error } = await _supabase
         .from('products')
         .select('*, categories!category_id(name)')
@@ -1042,7 +801,6 @@ async function openProductModal(id) {
     currentModalProduct = product;
     currentMediaList = [];
 
-    // Adiciona Vídeo se existir
     if (product.video_url && product.video_url.trim()) {
         currentMediaList.push({
             type: 'video',
@@ -1051,7 +809,6 @@ async function openProductModal(id) {
         });
     }
 
-    // Adiciona Imagens
     let images = Array.isArray(product.images) ? product.images : [];
     images.forEach(img => {
         if (img) {
@@ -1064,13 +821,10 @@ async function openProductModal(id) {
     });
 
     const productReviews = allReviews.filter(r => r.is_general || r.product_id === id);
-
-    // Sugestões (Upsell)
     let upsellProducts = allProductsLoaded.filter(p =>
         p.id !== product.id && p.category_id === product.category_id
     ).slice(0, 12);
 
-    // Sugestões (Cross-sell) - COMPLETO como estava antes
     let crossSellProducts = [];
     if (product.related_keywords) {
         const keywords = product.related_keywords.toLowerCase().split(',').map(k => k.trim());
@@ -1084,23 +838,14 @@ async function openProductModal(id) {
 
     if (crossSellProducts.length === 0) {
         crossSellProducts = allProductsLoaded.filter(p =>
-            p.id !== product.id &&
-            p.category_id === product.category_id
-        ).slice(0, 12);
-    }
-
-    // Se ainda não tiver produtos suficientes, busca por categoria também
-    if (crossSellProducts.length === 0 && product.category_id) {
-        crossSellProducts = allProductsLoaded.filter(p =>
-            p.id !== product.id &&
-            p.category_id === product.category_id
+            p.id !== product.id && p.category_id === product.category_id
         ).slice(0, 12);
     }
 
     const priceFormatted = product.price.toFixed(2).replace('.', ',');
     const solitarioFormatted = product.solitario_price?.toFixed(2).replace('.', ',');
     const rating = product.default_rating || 5;
-    const viewersCount = getRandomViewers();
+    const viewersCount = Math.floor(Math.random() * 9) + 4;
 
     const thumbnailsHtml = currentMediaList.map((media, index) => `
         <div class="modal-thumb ${media.type === 'video' ? 'video-thumb' : ''} ${index === 0 ? 'active' : ''}" onclick="changeModalMedia(${index})">
@@ -1175,8 +920,6 @@ async function openProductModal(id) {
                     </div>
                 </div>
             ` : ''}
-            
-            ${product.description ? `<div class="modal-description">${product.description}</div>` : ''}
         </div>
     `;
 
@@ -1191,10 +934,15 @@ async function openProductModal(id) {
     scrollToTop();
 }
 
+function renderStars(rating) {
+    const fullStars = '★'.repeat(rating);
+    const emptyStars = '☆'.repeat(5 - rating);
+    return `<span class="stars">${fullStars}${emptyStars}</span>`;
+}
+
 function setupNextPhotoButton() {
     const nextBtn = document.getElementById('nextPhotoBtn');
     if (!nextBtn) return;
-
     if (currentMediaList.length > 1) {
         nextBtn.style.display = 'flex';
         nextBtn.onclick = (e) => {
@@ -1209,7 +957,6 @@ function setupNextPhotoButton() {
 function setupModalMediaClick() {
     const mainMedia = document.getElementById('modalMainMedia');
     if (!mainMedia) return;
-
     const img = mainMedia.querySelector('img');
     const video = mainMedia.querySelector('video');
 
@@ -1217,15 +964,12 @@ function setupModalMediaClick() {
         img.style.cursor = 'zoom-in';
         img.onclick = (e) => {
             e.stopPropagation();
-            // Encontrar o índice da mídia atual
             const activeThumb = document.querySelector('.modal-thumb.active');
             let currentIndex = 0;
             if (activeThumb) {
                 const thumbs = document.querySelectorAll('.modal-thumb');
                 thumbs.forEach((thumb, index) => {
-                    if (thumb.classList.contains('active')) {
-                        currentIndex = index;
-                    }
+                    if (thumb.classList.contains('active')) currentIndex = index;
                 });
             }
             openSuperZoom(img.src, 'image', currentMediaList, currentIndex);
@@ -1236,15 +980,12 @@ function setupModalMediaClick() {
         video.style.cursor = 'zoom-in';
         video.onclick = (e) => {
             e.stopPropagation();
-            // Encontrar o índice da mídia atual
             const activeThumb = document.querySelector('.modal-thumb.active');
             let currentIndex = 0;
             if (activeThumb) {
                 const thumbs = document.querySelectorAll('.modal-thumb');
                 thumbs.forEach((thumb, index) => {
-                    if (thumb.classList.contains('active')) {
-                        currentIndex = index;
-                    }
+                    if (thumb.classList.contains('active')) currentIndex = index;
                 });
             }
             openSuperZoom(video.src, 'video', currentMediaList, currentIndex);
@@ -1252,30 +993,20 @@ function setupModalMediaClick() {
     }
 }
 
-// CORREÇÃO: Função agora aceita um parâmetro 'hasAudio'
 function setupModalVideoAudio(hasAudio = true) {
     const mainMedia = document.getElementById('modalMainMedia');
     if (!mainMedia) return;
-
     const video = mainMedia.querySelector('video');
     if (video) {
         setupVideoAudioControl(video, hasAudio);
     }
 }
 
-function scrollToTop() {
-    const modalContent = document.querySelector('.modal-content');
-    if (modalContent) {
-        modalContent.scrollTop = 0;
-    }
-}
-
 function changeModalMedia(index) {
     if (!currentMediaList[index]) return;
-
     const media = currentMediaList[index];
     const mainContainer = document.getElementById('modalMainMedia');
-    const hasAudio = currentModalProduct?.video_has_audio ?? true; // Pega a flag do produto atual
+    const hasAudio = currentModalProduct?.video_has_audio ?? true;
 
     if (media.type === 'video') {
         mainContainer.innerHTML = `<video src="${media.url}" autoplay muted loop playsinline></video>`;
@@ -1296,49 +1027,216 @@ function closeProductModal() {
     document.body.style.overflow = '';
     currentModalProduct = null;
     currentMediaList = [];
-
-    // Limpar intervalo do cronômetro
     if (deliveryTimerInterval) {
         clearInterval(deliveryTimerInterval);
         deliveryTimerInterval = null;
     }
-
-    // Remove o estado do history
     if (history.state?.modalOpen) {
         history.replaceState(null, '', location.pathname + location.search);
     }
 }
 
-// ========================================
-// 20. BUSCA E FILTROS
-// ========================================
-function handleSearch(query) {
-    searchQuery = query;
-    renderProducts();
-
-    const dropdown = document.getElementById('searchDropdown');
-    if (dropdown) {
-        setTimeout(() => { dropdown.style.display = 'none'; }, 200);
+function scrollToTop() {
+    const modalContent = document.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.scrollTop = 0;
     }
 }
 
-function resetFilters() {
-    searchQuery = '';
-    currentCategory = 'all';
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) searchInput.value = '';
+function openSuperZoom(mediaUrl, type = 'image', mediaList = [], currentIndex = 0) {
+    const overlay = document.getElementById('superZoomOverlay');
+    const content = document.getElementById('superZoomContent');
+    if (!overlay || !content) return;
+    
+    superZoomMediaList = mediaList.length > 0 ? mediaList : [{ url: mediaUrl, type: type }];
+    currentZoomIndex = currentIndex;
+    
+    renderSuperZoomMedia();
 
-    document.querySelectorAll('.category-list li').forEach(li => {
-        li.classList.toggle('active', li.dataset.category === 'all');
-    });
-
-    renderProducts();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    history.pushState({ superZoomOpen: true }, '', '#super-zoom');
+    setupSuperZoomSwipe();
 }
 
-// ========================================
-// 21. CARRINHO
-// ========================================
+function closeSuperZoom() {
+    const overlay = document.getElementById('superZoomOverlay');
+    const content = document.getElementById('superZoomContent');
+    if (!overlay || !content) return;
+
+    overlay.classList.remove('active');
+    content.innerHTML = '';
+    document.body.style.overflow = '';
+    if (location.hash === '#super-zoom') {
+        history.replaceState(null, '', location.pathname + location.search);
+    }
+}
+
+function renderSuperZoomMedia() {
+    const content = document.getElementById('superZoomContent');
+    if (!content || superZoomMediaList.length === 0) return;
+    
+    const currentMedia = superZoomMediaList[currentZoomIndex];
+    const hasMultiple = superZoomMediaList.length > 1;
+    
+    let navigationHTML = '';
+    if (hasMultiple) {
+        navigationHTML = `
+            <button class="super-zoom-nav super-zoom-prev" onclick="prevSuperZoomMedia()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <button class="super-zoom-nav super-zoom-next" onclick="nextSuperZoomMedia()">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <button class="next-photo-btn" onclick="nextSuperZoomMedia()">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <div class="super-zoom-counter">${currentZoomIndex + 1} / ${superZoomMediaList.length}</div>
+        `;
+    }
+    
+    let mediaHTML = '';
+    if (currentMedia.type === 'video') {
+        mediaHTML = `<video src="${currentMedia.url}" controls autoplay loop playsinline style="max-width:100%;max-height:90vh;object-fit:contain;"></video>`;
+    } else {
+        mediaHTML = `<img src="${currentMedia.url}" alt="Zoom" style="max-width:100%;max-height:90vh;object-fit:contain;">`;
+    }
+    
+    content.innerHTML = `
+        ${navigationHTML}
+        <div class="super-zoom-media-container">
+            ${mediaHTML}
+        </div>
+    `;
+}
+
+function nextSuperZoomMedia() {
+    if (superZoomMediaList.length <= 1) return;
+    currentZoomIndex = (currentZoomIndex + 1) % superZoomMediaList.length;
+    renderSuperZoomMedia();
+    showToast(`Foto ${currentZoomIndex + 1} de ${superZoomMediaList.length}`);
+}
+
+function prevSuperZoomMedia() {
+    if (superZoomMediaList.length <= 1) return;
+    currentZoomIndex = (currentZoomIndex - 1 + superZoomMediaList.length) % superZoomMediaList.length;
+    renderSuperZoomMedia();
+    showToast(`Foto ${currentZoomIndex + 1} de ${superZoomMediaList.length}`);
+}
+
+function setupSuperZoomListeners() {
+    document.getElementById('superZoomOverlay')?.addEventListener('click', (e) => {
+        if (e.target.id === 'superZoomOverlay') {
+            closeSuperZoom();
+        }
+    });
+
+    document.getElementById('superZoomClose')?.addEventListener('click', closeSuperZoom);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeSuperZoom();
+        }
+    });
+}
+
+function setupSuperZoomSwipe() {
+    const overlay = document.getElementById('superZoomOverlay');
+    if (!overlay) return;
+    
+    let touchStartX = 0;
+    let touchEndX = 0;
+    
+    overlay.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+    
+    overlay.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSuperZoomSwipe();
+    }, { passive: true });
+    
+    function handleSuperZoomSwipe() {
+        const swipeThreshold = 50;
+        const diff = touchStartX - touchEndX;
+        if (Math.abs(diff) < swipeThreshold) return;
+        if (diff > 0) {
+            nextSuperZoomMedia();
+        } else {
+            prevSuperZoomMedia();
+        }
+    }
+}
+
+async function shareProduct(id) {
+    const product = allProductsLoaded.find(p => p.id === id);
+    if (!product) {
+        showToast('Produto não encontrado para compartilhar.');
+        return;
+    }
+
+    const shareData = {
+        title: product.name,
+        text: `Olha só essa joia incrível da Etevalda MT: ${product.name} por apenas R$ ${product.price.toFixed(2).replace('.', ',')}!`,
+        url: window.location.href.split('#')[0] + `#product-${product.id}`
+    };
+
+    try {
+        if (navigator.share) {
+            await navigator.share(shareData);
+            showToast('Compartilhado com sucesso!');
+        } else {
+            navigator.clipboard.writeText(shareData.url);
+            showToast('Link copiado para a área de transferência!');
+        }
+    } catch (err) {
+        console.log('Compartilhamento cancelado ou erro:', err);
+    }
+}
+
+function startDeliveryTimer() {
+    const timerElement = document.getElementById('deliveryTimer');
+    if (!timerElement) return;
+    
+    if (deliveryTimerInterval) {
+        clearInterval(deliveryTimerInterval);
+    }
+    
+    let savedTime = sessionStorage.getItem('deliveryTimerTime');
+    let startTime = savedTime ? parseInt(savedTime) : Date.now();
+    const totalTime = 2 * 60 * 60 * 1000;
+    
+    function updateTimer() {
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, totalTime - elapsed);
+        
+        if (remaining === 0) {
+            timerElement.innerHTML = `
+                <i class="fas fa-clock"></i>
+                <span class="delivery-today">Receba hoje e só pague na entrega</span>
+            `;
+            sessionStorage.removeItem('deliveryTimerTime');
+            return;
+        }
+        
+        const totalSeconds = Math.floor(remaining / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        
+        timerElement.innerHTML = `
+            <i class="fas fa-clock"></i>
+            <span class="timer-countdown">${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</span>
+            <span class="timer-text">para receber hoje!</span>
+        `;
+        
+        sessionStorage.setItem('deliveryTimerTime', startTime.toString());
+    }
+    
+    updateTimer();
+    deliveryTimerInterval = setInterval(updateTimer, 1000);
+}
+
 function addToCart(productId) {
     const product = allProductsLoaded.find(p => p.id === productId);
     if (!product) return;
@@ -1359,7 +1257,7 @@ function addToCart(productId) {
 
     saveCart();
     updateCartUI();
-    animateCart(); // ANIMAÇÃO DO CARRINHO
+    animateCart();
     showToast('Adicionado ao carrinho!');
 }
 
@@ -1447,6 +1345,15 @@ function updateCartUI() {
     countEl.style.display = qtdTotal > 0 ? 'flex' : 'none';
 }
 
+function animateCart() {
+    const cartBtn = document.getElementById('cartBtn');
+    if (!cartBtn) return;
+    cartBtn.classList.add('cart-bounce', 'cart-glow');
+    setTimeout(() => {
+        cartBtn.classList.remove('cart-bounce', 'cart-glow');
+    }, 500);
+}
+
 function toggleCart() {
     const sidebar = document.getElementById('cartSidebar');
     const overlay = document.getElementById('cartOverlay');
@@ -1459,21 +1366,6 @@ function closeCart() {
     document.getElementById('cartSidebar').classList.remove('active');
     document.getElementById('cartOverlay').classList.remove('active');
     document.body.style.overflow = '';
-}
-
-// ========================================
-// 22. WHATSAPP
-// ========================================
-function buyViaWhatsApp(id) {
-    const p = allProductsLoaded.find(p => p.id === id);
-    if (!p) {
-        window.open(WHATSAPP_BASE_URL, '_blank');
-        return;
-    }
-
-    const msg = `Olá! Quero este produto: *${p.name}* - R$ ${p.price.toFixed(2).replace('.', ',')}`;
-    const url = `https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}&type=phone_number&app_absent=0`;
-    window.open(url, '_blank');
 }
 
 function checkoutWhatsApp() {
@@ -1496,47 +1388,42 @@ function checkoutWhatsApp() {
     window.open(url, '_blank');
 }
 
-// ========================================
-// 23. GEOLOCALIZAÇÃO
-// ========================================
-async function initGeoLocationBackground() {
-    try {
-        const response = await fetch('https://ipapi.co/json/');
-        const data = await response.json();
-        if (data.city && NEIGHBORHOODS[data.city]) {
-            detectedLocation = { city: data.city, neighborhoods: NEIGHBORHOODS[data.city] };
-        }
-        startGeoNotifications();
-    } catch {
-        startGeoNotifications();
+function buyViaWhatsApp(id) {
+    const p = allProductsLoaded.find(p => p.id === id);
+    if (!p) {
+        window.open(WHATSAPP_BASE_URL, '_blank');
+        return;
+    }
+
+    const msg = `Olá! Quero este produto: *${p.name}* - R$ ${p.price.toFixed(2).replace('.', ',')}`;
+    const url = `https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}&type=phone_number&app_absent=0`;
+    window.open(url, '_blank');
+}
+
+function handleSearch(query) {
+    searchQuery = query;
+    renderProducts();
+
+    const dropdown = document.getElementById('searchDropdown');
+    if (dropdown) {
+        setTimeout(() => { dropdown.style.display = 'none'; }, 200);
     }
 }
 
-function startGeoNotifications() {
-    setTimeout(showGeoNotification, 25000);
-    setInterval(showGeoNotification, 120000);
+function resetFilters() {
+    searchQuery = '';
+    currentCategory = 'all';
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.value = '';
+
+    document.querySelectorAll('.category-list li').forEach(li => {
+        li.classList.toggle('active', li.dataset.category === 'all');
+    });
+
+    renderProducts();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function showGeoNotification() {
-    if (!allProductsLoaded.length) return;
-
-    const neighborhood = detectedLocation.neighborhoods[Math.floor(Math.random() * detectedLocation.neighborhoods.length)];
-    const customerName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
-    const randomProduct = allProductsLoaded[Math.floor(Math.random() * allProductsLoaded.length)];
-
-    const notification = document.getElementById('geoNotification');
-    const notificationText = document.getElementById('geoNotificationText');
-
-    if (notification && notificationText) {
-        notificationText.innerHTML = `<strong>${customerName}</strong> do <strong>${neighborhood}</strong> comprou <strong>${randomProduct.name}</strong>`;
-        notification.style.display = 'block';
-        setTimeout(() => notification.style.display = 'none', 8000);
-    }
-}
-
-// ========================================
-// 24. BUSCA PREDITIVA
-// ========================================
 function initPredictiveSearch() {
     const searchInput = document.getElementById('searchInput');
     const searchDropdown = document.getElementById('searchDropdown');
@@ -1581,9 +1468,41 @@ function initPredictiveSearch() {
     }, 300));
 }
 
-// ========================================
-// 25. TIMER DA EQUIPE
-// ========================================
+async function initGeoLocationBackground() {
+    try {
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        if (data.city && NEIGHBORHOODS[data.city]) {
+            detectedLocation = { city: data.city, neighborhoods: NEIGHBORHOODS[data.city] };
+        }
+        startGeoNotifications();
+    } catch {
+        startGeoNotifications();
+    }
+}
+
+function startGeoNotifications() {
+    setTimeout(showGeoNotification, 25000);
+    setInterval(showGeoNotification, 120000);
+}
+
+function showGeoNotification() {
+    if (!allProductsLoaded.length) return;
+
+    const neighborhood = detectedLocation.neighborhoods[Math.floor(Math.random() * detectedLocation.neighborhoods.length)];
+    const customerName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
+    const randomProduct = allProductsLoaded[Math.floor(Math.random() * allProductsLoaded.length)];
+
+    const notification = document.getElementById('geoNotification');
+    const notificationText = document.getElementById('geoNotificationText');
+
+    if (notification && notificationText) {
+        notificationText.innerHTML = `<strong>${customerName}</strong> do <strong>${neighborhood}</strong> comprou <strong>${randomProduct.name}</strong>`;
+        notification.style.display = 'block';
+        setTimeout(() => notification.style.display = 'none', 8000);
+    }
+}
+
 function startTeamTimer() {
     setTimeout(() => {
         const section = document.getElementById('teamSection');
@@ -1594,9 +1513,6 @@ function startTeamTimer() {
     }, 20000);
 }
 
-// ========================================
-// 26. EVENT LISTENERS
-// ========================================
 function setupEventListeners() {
     document.getElementById('modalCloseBtn')?.addEventListener('click', closeProductModal);
     document.getElementById('modalOverlay')?.addEventListener('click', closeProductModal);
@@ -1609,9 +1525,6 @@ function setupEventListeners() {
         const input = document.getElementById('searchInput');
         if (input) handleSearch(input.value);
     });
-    document.getElementById('filterToggle')?.addEventListener('click', () => {
-        document.querySelector('.nav-categories')?.scrollIntoView({ behavior: 'smooth' });
-    });
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeProductModal();
@@ -1621,13 +1534,9 @@ function setupEventListeners() {
     });
 }
 
-// ========================================
-// 27. UTILITÁRIOS
-// ========================================
 function showToast(msg) {
     const toast = document.getElementById('toast');
     if (!toast) return;
-
     toast.textContent = msg;
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 3000);
@@ -1641,9 +1550,7 @@ function debounce(fn, wait) {
     };
 }
 
-// ========================================
-// 28. EXPOR FUNÇÕES GLOBAIS
-// ========================================
+// Expor funções globais
 window.openProductModal = openProductModal;
 window.changeModalMedia = changeModalMedia;
 window.closeProductModal = closeProductModal;
