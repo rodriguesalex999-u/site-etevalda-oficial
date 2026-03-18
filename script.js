@@ -381,6 +381,10 @@ async function loadProducts(reset = false) {
             currentPage++;
         } else {
             hasMoreProducts = false;
+            // Se a categoria acabou e NÃO é a aba "Todos", chama as sugestões
+            if (currentCategory !== 'all') {
+                showEndCategorySuggestions();
+            }
         }
 
         renderProducts(); // Monta a vitrine na tela
@@ -1569,6 +1573,26 @@ function debounce(fn, wait) {
         clearTimeout(timeout);
         timeout = setTimeout(() => fn(...args), wait);
     };
+}
+
+// Função para carregar sugestões quando o estoque da categoria termina
+async function showEndCategorySuggestions() {
+    const container = document.getElementById('end-category-suggestions');
+    const grid = document.getElementById('suggestionsGrid');
+    if (!container || !grid) return;
+
+    // Busca 10 produtos de OUTRAS categorias (que não a que o cliente está)
+    const { data: suggestions } = await _supabase
+        .from('products')
+        .select('*, categories(name)')
+        .neq('category_id', currentCategory) 
+        .order('random_index')
+        .limit(10);
+
+    if (suggestions && suggestions.length > 0) {
+        grid.innerHTML = suggestions.map((p, index) => renderProductCard(p, index + 100)).join('');
+        container.style.display = 'block'; // Mostra o bloco na tela
+    }
 }
 
 // Expor funções globais
