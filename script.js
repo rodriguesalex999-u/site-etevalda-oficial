@@ -15,6 +15,7 @@ const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ========================================
 let products = [];
 let categories = [];
+let teamCarouselItems = [];
 let allReviews = [];
 let faqs = [];
 let socialProofImages = [];
@@ -24,7 +25,7 @@ let searchQuery = '';
 
 // Variáveis para Lazy Loading - Mobile first: 6 produtos
 let currentPage = 1;
-let productsPerPage = 12; // Aumentado para 12 para garantir que o sensor saia da tela inicial
+let productsPerPage = 12;
 let hasMoreProducts = true;
 let isLoadingMore = false;
 let allProductsLoaded = [];
@@ -166,7 +167,6 @@ function createManifest() {
 // 6. FUNÇÃO PARA FILTRAR IMAGENS POSTIMG.CC
 // ========================================
 function isValidImageUrl(url) {
-    // Se existir um link, ele é válido. Simples assim.
     return url && url.trim() !== '';
 }
 
@@ -176,156 +176,7 @@ function filterValidImages(images) {
 }
 
 // ========================================
-// 7. INICIALIZAÇÃO PRINCIPAL - OTIMIZADA
-// ========================================
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Grupo Etevalda MT - Versão Tempo Real');
-
-    // Criar manifest PWA
-    createManifest();
-
-    try {
-        renderSkeleton();
-        // CARREGAMENTO PRIORITÁRIO: Produtos e Categorias
-        await loadCategories();
-        await loadProducts(true);
-        
-        // Configurar LCP - Preload da primeira imagem válida
-        setupLCPPreload();
-        
-        // Renderização imediata dos produtos
-        renderCategories();
-        renderProducts();
-        
-        // Carregar carrinho do localStorage
-        loadCartFromStorage();
-        
-        // Configurar eventos essenciais
-        setupEventListeners();
-        setupHistoryAPI();
-        setupInfiniteScroll();
-        setupScrollListener();
-        
-        // Inicializar busca preditiva
-        initPredictiveSearch();
-        
-        // CARREGAMENTO NÃO PRIORITÁRIO (após 3 segundos)
-        setTimeout(async () => {
-            try {
-                await loadReviews();
-                await loadFaqs();
-                await loadSocialProof();
-                await loadTeamImage(); // NOVO: Carregar imagem da equipe
-                
-                // Renderizar seções secundárias
-                renderCarousel();
-                renderSocialProof();
-                renderFaqs();
-                
-                // Mostrar as seções com fade-in
-                showSecondarySections();
-                
-                // Iniciar geolocalização
-                initGeoLocationBackground();
-                
-                // Timer da equipe
-                startTeamTimer();
-                
-                // SuperZoom listeners
-                setupSuperZoomListeners();
-                
-                // Touch listeners
-                if ('ontouchstart' in window) {
-                    setupTouchListeners();
-                }
-                
-                console.log('✅ Seções secundárias carregadas');
-            } catch (error) {
-                console.error('Erro ao carregar seções secundárias:', error);
-            }
-        }, 3000);
-
-        // Tawk.to após 10 segundos (conforme regra)
-        setTimeout(() => {
-            loadTawkTo();
-        }, 10000);
-
-    } catch (error) {
-        console.error('❌ Erro:', error);
-        showToast('Erro ao carregar produtos');
-    } finally {
-        setTimeout(() => showLoading(false), 500);
-    }
-});
-
-// NOVA FUNÇÃO: Carregar Tawk.to apenas após 10s
-function loadTawkTo() {
-    var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
-    (function() {
-        var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
-        s1.async = true;
-        s1.src = 'https://embed.tawk.to/65e8a3d28d261e1b5f5f8b2a/1hoh7vq1q';
-        s1.charset = 'UTF-8';
-        s1.setAttribute('crossorigin', '*');
-        s0.parentNode.insertBefore(s1, s0);
-    })();
-}
-
-// NOVA FUNÇÃO: Configurar LCP com preload da primeira imagem válida
-function setupLCPPreload() {
-    if (allProductsLoaded.length === 0) return;
-    
-    // Encontrar o primeiro produto com imagem válida (não postimg.cc)
-    const firstValidProduct = allProductsLoaded.find(p => {
-        const images = filterValidImages(p.images);
-        return images.length > 0;
-    });
-    
-    if (firstValidProduct) {
-        const validImages = filterValidImages(firstValidProduct.images);
-        if (validImages.length > 0) {
-            const lcpPreload = document.getElementById('lcpPreload');
-            if (lcpPreload) {
-                lcpPreload.href = validImages[0];
-                lcpPreload.setAttribute('imagesrcset', validImages[0]);
-                console.log('🎯 LCP Preload configurado:', validImages[0]);
-            }
-        }
-    }
-}
-
-// NOVA FUNÇÃO: Carregar imagem da equipe do banco de dados
-async function loadTeamImage() {
-    try {
-        const { data, error } = await _supabase
-            .from('social_proof')
-            .select('image_url')
-            .eq('caption', 'TEAM_IMAGE') // <-- ESTA É A LINHA NOVA
-            .order('id', { ascending: false })
-            .limit(1);
-        
-        if (!error && data && data.length > 0) {
-            teamImageUrl = data[0].image_url;
-        } else {
-            // Fallback para uma imagem padrão (que não seja postimg.cc)
-            teamImageUrl = 'https://via.placeholder.com/800x450?text=Equipe+Etevalda';
-        }
-        
-        // Atualizar a imagem da equipe
-        const teamImg = document.getElementById('teamImage');
-        if (teamImg) {
-            teamImg.src = teamImageUrl;
-            teamImg.onerror = () => {
-                teamImg.src = 'https://via.placeholder.com/800x450?text=Equipe+Etevalda';
-            };
-        }
-    } catch (error) {
-        console.error('Erro ao carregar imagem da equipe:', error);
-    }
-}
-
-// ========================================
-// 8. FUNÇÕES DE CARREGAMENTO (COM FILTRO POSTIMG.CC)
+// 7. FUNÇÕES DE CARREGAMENTO
 // ========================================
 async function loadProducts(reset = false) {
     if (reset) {
@@ -340,15 +191,12 @@ async function loadProducts(reset = false) {
     if (!reset) showLoadingMore();
 
     try {
-        // Iniciamos a busca
         let query = _supabase.from('products').select('*');
 
         if (currentCategory !== 'all') {
-            // Se for uma categoria (ex: Moeda Antiga), filtra por ela
             query = query.eq('category_id', currentCategory).order('id', { ascending: false }).limit(1000); 
             hasMoreProducts = false;    
         } else {
-            // Se for "Todos", busca de forma aleatória estratégica usando o random_index
             const from = (currentPage - 1) * productsPerPage;
             const to = from + productsPerPage - 1;
             query = query.order('random_index').range(from, to);
@@ -367,7 +215,6 @@ async function loadProducts(reset = false) {
                 images: filterValidImages(p.images)
             }));
 
-            // AQUI ESTÁ O SEGREDO: Se for a aba "Todos", embaralha o novo pacote que chegou
             if (currentCategory === 'all') {
                 filteredData = filteredData.sort(() => Math.random() - 0.5);
             }
@@ -375,7 +222,6 @@ async function loadProducts(reset = false) {
             allProductsLoaded = reset ? filteredData : [...allProductsLoaded, ...filteredData];
             products = allProductsLoaded;
 
-            // Se o banco mandou menos que 10, é porque acabaram os produtos
             if (currentCategory === 'all' && data.length < productsPerPage) {
                 hasMoreProducts = false;
             }
@@ -384,7 +230,7 @@ async function loadProducts(reset = false) {
             hasMoreProducts = false;
         }
 
-        renderProducts(); // Monta a vitrine na tela
+        renderProducts();
 
     } catch (error) {
         console.error('Erro ao carregar produtos:', error);
@@ -420,18 +266,171 @@ async function loadSocialProof() {
         .eq('is_active', true)
         .order('display_order');
     
-    // Filtrar URLs inválidas
     socialProofImages = (data || []).filter(item => isValidImageUrl(item.image_url));
 }
 
 // ========================================
-// 9. RENDERIZAÇÃO DE PRODUTOS (COM FILTRO)
+// NOVAS FUNÇÕES: CARROSSEL DA EQUIPE
 // ========================================
-function renderProductCard(p, index) { // Adicionado o "index" aqui
+async function loadTeamCarousel() {
+    const { data } = await _supabase
+        .from('team_carousel')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+
+    teamCarouselItems = data || [];
+    console.log('Fotos da equipe carregadas:', teamCarouselItems.length);
+}
+
+function renderTeamCarousel() {
+    const section = document.getElementById('teamCarouselSection');
+    const track = document.getElementById('teamCarouselTrack');
+    const dotsContainer = document.getElementById('teamCarouselDots');
+
+    if (!section || !track) return;
+
+    if (teamCarouselItems.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+
+    section.style.display = 'block';
+    section.classList.add('visible');
+
+    track.innerHTML = teamCarouselItems.map(item => `
+        <div class="team-carousel-item">
+            <img src="${item.image_url}" alt="Equipe Etevalda" class="team-carousel-image" loading="lazy" onerror="this.src='https://via.placeholder.com/800x450?text=Equipe'">
+            ${item.caption ? `<div class="team-carousel-caption">${item.caption}</div>` : ''}
+        </div>
+    `).join('');
+
+    if (dotsContainer) {
+        dotsContainer.innerHTML = teamCarouselItems.map((_, index) => `
+            <button class="team-carousel-dot ${index === 0 ? 'active' : ''}" data-index="${index}"></button>
+        `).join('');
+    }
+
+    initTeamCarousel();
+}
+
+function initTeamCarousel() {
+    const track = document.getElementById('teamCarouselTrack');
+    const dots = document.querySelectorAll('.team-carousel-dot');
+    if (!track || dots.length === 0) return;
+
+    let currentIndex = 0;
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+
+    const updateCarousel = (index) => {
+        if (index < 0) index = 0;
+        if (index >= teamCarouselItems.length) index = teamCarouselItems.length - 1;
+        
+        currentIndex = index;
+        const translateX = -currentIndex * 100;
+        track.style.transform = `translateX(${translateX}%)`;
+
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentIndex);
+        });
+    };
+
+    dots.forEach(dot => {
+        dot.addEventListener('click', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            updateCarousel(index);
+        });
+    });
+
+    const handleDragStart = (e) => {
+        isDragging = true;
+        startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+        currentX = startX;
+        track.style.transition = 'none';
+        track.style.cursor = 'grabbing';
+    };
+
+    const handleDragMove = (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        
+        const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+        const diff = clientX - currentX;
+        currentX = clientX;
+
+        const currentTranslate = parseFloat(track.style.transform.replace('translateX(', '').replace('%)', '')) || 0;
+        const newTranslate = currentTranslate + (diff / track.clientWidth) * 100;
+        
+        if (newTranslate > 10 || newTranslate < -((teamCarouselItems.length - 1) * 100) - 10) return;
+        
+        track.style.transform = `translateX(${newTranslate}%)`;
+    };
+
+    const handleDragEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        track.style.transition = 'transform 0.3s ease';
+        track.style.cursor = 'grab';
+
+        const currentTranslate = parseFloat(track.style.transform.replace('translateX(', '').replace('%)', '')) || 0;
+        const itemIndex = Math.round(-currentTranslate / 100);
+        const newIndex = Math.max(0, Math.min(itemIndex, teamCarouselItems.length - 1));
+        updateCarousel(newIndex);
+    };
+
+    track.addEventListener('mousedown', handleDragStart);
+    track.addEventListener('touchstart', handleDragStart, { passive: true });
+    
+    window.addEventListener('mousemove', handleDragMove);
+    window.addEventListener('touchmove', handleDragMove, { passive: false });
+    
+    window.addEventListener('mouseup', handleDragEnd);
+    window.addEventListener('touchend', handleDragEnd);
+
+    track.addEventListener('dragstart', (e) => e.preventDefault());
+
+    updateCarousel(0);
+}
+
+// ========================================
+// 8. FUNÇÃO PARA CARREGAR IMAGEM DA EQUIPE (ANTIGA)
+// ========================================
+async function loadTeamImage() {
+    try {
+        const { data, error } = await _supabase
+            .from('social_proof')
+            .select('image_url')
+            .eq('caption', 'TEAM_IMAGE')
+            .order('id', { ascending: false })
+            .limit(1);
+        
+        if (!error && data && data.length > 0) {
+            teamImageUrl = data[0].image_url;
+        } else {
+            teamImageUrl = 'https://via.placeholder.com/800x450?text=Equipe+Etevalda';
+        }
+        
+        const teamImg = document.getElementById('teamImage');
+        if (teamImg) {
+            teamImg.src = teamImageUrl;
+            teamImg.onerror = () => {
+                teamImg.src = 'https://via.placeholder.com/800x450?text=Equipe+Etevalda';
+            };
+        }
+    } catch (error) {
+        console.error('Erro ao carregar imagem da equipe:', error);
+    }
+}
+
+// ========================================
+// 9. FUNÇÕES DE RENDERIZAÇÃO
+// ========================================
+function renderProductCard(p, index) {
     const images = Array.isArray(p.images) ? p.images : [];
     const mainImage = images[0] || 'https://via.placeholder.com/200';
     
-    // MELHORIA DE PERFORMANCE: As 2 primeiras imagens carregam na hora (eager), o resto só no scroll (lazy)
     const loadingStrategy = index < 2 ? 'eager' : 'lazy';
     const priority = index === 0 ? 'fetchpriority="high"' : '';
     const secondImage = images[1] || mainImage;
@@ -502,7 +501,6 @@ function renderProducts() {
         return;
     }
 
-    // ADICIONADO: Agora passamos a posição (index) para o card saber se deve carregar rápido ou devagar
     container.innerHTML = filtered.map((p, index) => renderProductCard(p, index)).join('');
 }
 
@@ -521,18 +519,16 @@ function renderCategories() {
             list.querySelectorAll('li').forEach(el => el.classList.remove('active'));
             button.classList.add('active');
             
-            // RESET TOTAL PARA NOVA CATEGORIA
             currentCategory = button.dataset.category;
             currentPage = 1; 
             allProductsLoaded = []; 
             hasMoreProducts = true; 
 
-            // Limpa a vitrine visualmente na hora
             const container = document.getElementById('productsContainer');
             if (container) container.innerHTML = ''; 
             
             showLoading(true); 
-            loadProducts(true); // Dispara a busca do zero no banco 
+            loadProducts(true);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });
@@ -615,10 +611,10 @@ function renderCarousel() {
 }
 
 // ========================================
-// 10. DEMAIS FUNÇÕES (RESUMIDAS PARA ECONOMIA DE ESPAÇO)
+// 10. FUNÇÕES DE UTILIDADE
 // ========================================
 function showSecondarySections() {
-    const sections = ['socialProofSection', 'faqSection', 'carouselSection'];
+    const sections = ['socialProofSection', 'faqSection', 'carouselSection', 'teamCarouselSection'];
     sections.forEach(id => {
         const section = document.getElementById(id);
         if (section) {
@@ -663,14 +659,13 @@ function setupInfiniteScroll() {
     if (!trigger) return;
 
     const observer = new IntersectionObserver((entries) => {
-        // Se o sensor aparecer na tela e não estivermos carregando nada...
         if (entries[0].isIntersecting && !isLoadingMore && hasMoreProducts) {
             if (currentCategory === 'all') {
                 loadProducts(false);
             }
         }
     }, {
-        rootMargin: '100px' // Sensibilidade ajustada
+        rootMargin: '100px'
     });
 
     observer.observe(trigger);
@@ -806,6 +801,9 @@ function setupVideoAudioControl(videoElement, hasAudio = true) {
     }
 }
 
+// ========================================
+// 11. FUNÇÕES DO MODAL
+// ========================================
 async function openProductModal(id) {
     const { data: product, error } = await _supabase
         .from('products')
@@ -950,7 +948,7 @@ async function openProductModal(id) {
     document.getElementById('modalContainer').innerHTML = modalHtml;
     document.getElementById('productModal').classList.add('active');
     document.body.style.overflow = 'hidden';
-    document.getElementById('modalContainer').scrollTop = 0; // Garante o reset em todos os navegadores
+    document.getElementById('modalContainer').scrollTop = 0;
     startDeliveryTimer();
     history.pushState({ modalOpen: true, productId: id }, '', `#product-${id}`);
     setupModalMediaClick();
@@ -1068,6 +1066,9 @@ function scrollToTop() {
     }
 }
 
+// ========================================
+// 12. FUNÇÕES DO SUPER ZOOM
+// ========================================
 function openSuperZoom(mediaUrl, type = 'image', mediaList = [], currentIndex = 0) {
     const overlay = document.getElementById('superZoomOverlay');
     const content = document.getElementById('superZoomContent');
@@ -1127,7 +1128,6 @@ function renderSuperZoomMedia() {
     mediaHTML = `<img src="${currentMedia.url}" alt="Zoom" style="max-width:100%;max-height:90vh;object-fit:contain;">`;
 }
 
-// Botão WhatsApp no super zoom
 if (currentModalProduct) {
     const product = currentModalProduct;
     let whatsappMessage = `Olá! Gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}`;
@@ -1148,8 +1148,7 @@ if (currentModalProduct) {
     `;
 }
 
-// Adicionar badge no super zoom
-if (currentZoomIndex === 0 && currentModalProduct) { // Só no primeiro item da lista
+if (currentZoomIndex === 0 && currentModalProduct) {
     if (currentModalProduct.badge_text) {
         mediaHTML += `<div class="super-zoom-badge">${currentModalProduct.badge_text}</div>`;
     }
@@ -1224,6 +1223,9 @@ function setupSuperZoomSwipe() {
     }
 }
 
+// ========================================
+// 13. FUNÇÕES DE COMPARTILHAMENTO
+// ========================================
 async function shareProduct(id) {
     const product = allProductsLoaded.find(p => p.id === id);
     if (!product) {
@@ -1250,6 +1252,9 @@ async function shareProduct(id) {
     }
 }
 
+// ========================================
+// 14. FUNÇÕES DO TIMER
+// ========================================
 function startDeliveryTimer() {
     const timerElement = document.getElementById('deliveryTimer');
     if (!timerElement) return;
@@ -1293,6 +1298,9 @@ function startDeliveryTimer() {
     deliveryTimerInterval = setInterval(updateTimer, 1000);
 }
 
+// ========================================
+// 15. FUNÇÕES DO CARRINHO
+// ========================================
 function addToCart(productId) {
     const product = allProductsLoaded.find(p => p.id === productId);
     if (!product) return;
@@ -1464,6 +1472,9 @@ function buyViaWhatsApp(id) {
     window.open(url, '_blank');
 }
 
+// ========================================
+// 16. FUNÇÕES DE BUSCA
+// ========================================
 function handleSearch(query) {
     searchQuery = query;
     renderProducts();
@@ -1532,6 +1543,9 @@ function initPredictiveSearch() {
     }, 300));
 }
 
+// ========================================
+// 17. FUNÇÕES DE GEOLOCALIZAÇÃO
+// ========================================
 async function initGeoLocationBackground() {
     try {
         const response = await fetch('https://ipapi.co/json/');
@@ -1567,16 +1581,16 @@ function showGeoNotification() {
     }
 }
 
+// ========================================
+// 18. FUNÇÕES DE TIMER DA EQUIPE (DESATIVADA)
+// ========================================
 function startTeamTimer() {
-    setTimeout(() => {
-        const section = document.getElementById('teamSection');
-        if (section) {
-            section.style.display = 'block';
-            setTimeout(() => section.classList.add('visible'), 100);
-        }
-    }, 20000);
+    console.log('Timer da equipe antigo desativado - usando novo carrossel');
 }
 
+// ========================================
+// 19. CONFIGURAÇÃO DE EVENTOS
+// ========================================
 function setupEventListeners() {
     document.getElementById('modalCloseBtn')?.addEventListener('click', closeProductModal);
     document.getElementById('modalOverlay')?.addEventListener('click', closeProductModal);
@@ -1613,8 +1627,9 @@ function debounce(fn, wait) {
         timeout = setTimeout(() => fn(...args), wait);
     };
 }
+
 // ========================================
-// FUNÇÃO RENDER SKELETON
+// 20. FUNÇÃO RENDER SKELETON
 // ========================================
 function renderSkeleton() {
     const container = document.getElementById('productsContainer');
@@ -1636,17 +1651,15 @@ function renderSkeleton() {
 }
 
 // ========================================
-// FUNÇÃO PARA CARREGAR SUGESTÕES (QUEM VIU TAMBÉM GOSTOU)
+// 21. FUNÇÃO PARA CARREGAR SUGESTÕES
 // ========================================
 async function showEndCategorySuggestions() {
     const container = document.getElementById('end-category-suggestions');
     const grid = document.getElementById('suggestionsGrid');
     if (!container || !grid) return;
 
-    // Se já estiver visível, não faz nada
     if (container.style.display === 'block') return;
 
-    // Busca 10 produtos de OUTRAS categorias
     const { data: suggestions } = await _supabase
         .from('products')
         .select('*, categories(name)')
@@ -1659,6 +1672,113 @@ async function showEndCategorySuggestions() {
         container.style.display = 'block';
     }
 }
+
+// ========================================
+// 22. NOVA FUNÇÃO: Configurar LCP com preload
+// ========================================
+function setupLCPPreload() {
+    if (allProductsLoaded.length === 0) return;
+    
+    const firstValidProduct = allProductsLoaded.find(p => {
+        const images = filterValidImages(p.images);
+        return images.length > 0;
+    });
+    
+    if (firstValidProduct) {
+        const validImages = filterValidImages(firstValidProduct.images);
+        if (validImages.length > 0) {
+            const lcpPreload = document.getElementById('lcpPreload');
+            if (lcpPreload) {
+                lcpPreload.href = validImages[0];
+                lcpPreload.setAttribute('imagesrcset', validImages[0]);
+                console.log('🎯 LCP Preload configurado:', validImages[0]);
+            }
+        }
+    }
+}
+
+// ========================================
+// 23. FUNÇÃO PARA CARREGAR TAWK.TO
+// ========================================
+function loadTawkTo() {
+    var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+    (function() {
+        var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
+        s1.async = true;
+        s1.src = 'https://embed.tawk.to/65e8a3d28d261e1b5f5f8b2a/1hoh7vq1q';
+        s1.charset = 'UTF-8';
+        s1.setAttribute('crossorigin', '*');
+        s0.parentNode.insertBefore(s1, s0);
+    })();
+}
+
+// ========================================
+// 24. INICIALIZAÇÃO PRINCIPAL
+// ========================================
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Grupo Etevalda MT - Versão Tempo Real');
+
+    createManifest();
+
+    try {
+        renderSkeleton();
+        await loadCategories();
+        await loadProducts(true);
+        
+        setupLCPPreload();
+        
+        renderCategories();
+        renderProducts();
+        
+        loadCartFromStorage();
+        
+        setupEventListeners();
+        setupHistoryAPI();
+        setupInfiniteScroll();
+        setupScrollListener();
+        
+        initPredictiveSearch();
+        
+        setTimeout(async () => {
+            try {
+                await loadReviews();
+                await loadFaqs();
+                await loadSocialProof();
+                await loadTeamImage();
+                await loadTeamCarousel();
+                
+                renderCarousel();
+                renderSocialProof();
+                renderFaqs();
+                renderTeamCarousel();
+                
+                showSecondarySections();
+                
+                initGeoLocationBackground();
+                startTeamTimer();
+                setupSuperZoomListeners();
+                
+                if ('ontouchstart' in window) {
+                    setupTouchListeners();
+                }
+                
+                console.log('✅ Seções secundárias carregadas');
+            } catch (error) {
+                console.error('Erro ao carregar seções secundárias:', error);
+            }
+        }, 3000);
+
+        setTimeout(() => {
+            loadTawkTo();
+        }, 10000);
+
+    } catch (error) {
+        console.error('❌ Erro:', error);
+        showToast('Erro ao carregar produtos');
+    } finally {
+        setTimeout(() => showLoading(false), 500);
+    }
+});
 
 // Expor funções globais
 window.openProductModal = openProductModal;

@@ -767,6 +767,7 @@
         <button class="tab-btn" onclick="switchTab('reviews')"><i class="fas fa-star"></i> Avaliações</button>
         <button class="tab-btn" onclick="switchTab('faqs')"><i class="fas fa-question"></i> FAQs</button>
         <button class="tab-btn" onclick="switchTab('social_proof')"><i class="fas fa-images"></i> Prova Social</button>
+        <button class="tab-btn" onclick="switchTab('team_carousel')"><i class="fas fa-users"></i> Equipe</button>
     </div>
 
     <!-- PRODUTOS -->
@@ -1157,6 +1158,62 @@
                         <tr><td colspan="6" style="text-align:center; padding:40px;">
                             <i class="fas fa-images fa-3x" style="color:var(--medium-gray);"></i>
                             <p style="margin-top:15px;">Nenhuma imagem cadastrada</p>
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- EQUIPE / VARIEDADE IMBATÍVEL (CARROSSEL) -->
+    <div id="team_carousel-tab" class="tab-section">
+        <div class="form-section">
+            <h2 class="section-title"><i class="fas fa-users"></i> Nova Foto da Equipe (Carrossel)</h2>
+            <form id="teamCarouselForm">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-image"></i> URL da Foto *</label>
+                        <input type="url" id="teamCarouselImage" required placeholder="https://i.postimg.cc/foto-da-equipe.jpg">
+                        <small style="color: var(--medium-gray);">Foto da sua equipe ou do seu produto.</small>
+                    </div>
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-quote-right"></i> Legenda</label>
+                        <textarea id="teamCarouselCaption" rows="2" placeholder="Ex: Equipe Etevalda pronta para te atender!"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-check-circle"></i> Ativo?</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="teamCarouselActive" checked>
+                            <label for="teamCarouselActive">Sim, mostrar no site</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-sort"></i> Ordem de exibição</label>
+                        <input type="number" id="teamCarouselOrder" value="0">
+                        <small>Números menores aparecem primeiro.</small>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Salvar Foto</button>
+            </form>
+        </div>
+        <div class="table-section">
+            <h2 class="section-title"><i class="fas fa-images"></i> Fotos da Equipe Cadastradas</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Foto</th>
+                            <th>Legenda</th>
+                            <th>Ordem</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teamCarouselTableBody">
+                        <tr><td colspan="6" style="text-align:center; padding:40px;">
+                            <i class="fas fa-users fa-3x" style="color:var(--medium-gray);"></i>
+                            <p style="margin-top:15px;">Nenhuma foto cadastrada</p>
                         </td></tr>
                     </tbody>
                 </table>
@@ -1629,7 +1686,8 @@
             loadProducts(),
             loadReviews(),
             loadFaqs(),
-            loadSocialProof()
+            loadSocialProof(),
+            loadTeamCarousel()
         ]);
         updateStats();
     }
@@ -2285,7 +2343,8 @@
             category: 'categories',
             review: 'reviews',
             faq: 'faqs',
-            social_proof: 'social_proof'
+            social_proof: 'social_proof',
+            team_carousel: 'team_carousel'
         };
 
         const { error } = await _supabase.from(tables[deleteType]).delete().eq('id', deleteId);
@@ -2336,6 +2395,66 @@
     setTimeout(() => {
         setupProductSearch();
     }, 1000);
+        // ========================================
+    // NOVAS FUNÇÕES: CARROSSEL DA EQUIPE (ADMIN)
+    // ========================================
+    let teamCarouselItems = [];
+
+    async function loadTeamCarousel() {
+        const { data } = await _supabase.from('team_carousel').select('*').order('display_order', { ascending: true });
+        teamCarouselItems = data || [];
+
+        const tbody = document.getElementById('teamCarouselTableBody');
+        if (!tbody) return;
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px;">
+                <i class="fas fa-users fa-3x" style="color:var(--medium-gray);"></i>
+                <p>Nenhuma foto cadastrada</p>
+            </td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = data.map(item => `
+            <tr>
+                <td><strong>#${item.id}</strong></td>
+                <td><img src="${item.image_url}" class="prod-img" onerror="this.src='https://via.placeholder.com/60'"></td>
+                <td>${item.caption || '—'}</td>
+                <td>${item.display_order}</td>
+                <td><span class="badge ${item.is_active ? 'badge-true' : 'badge-false'}">${item.is_active ? 'Ativo' : 'Inativo'}</span></td>
+                <td><button class="btn-danger" onclick="confirmDelete('team_carousel', ${item.id})"><i class="fas fa-trash"></i></button></td>
+            </tr>
+        `).join('');
+    }
+
+    document.getElementById('teamCarouselForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const imageUrl = document.getElementById('teamCarouselImage').value.trim();
+        const caption = document.getElementById('teamCarouselCaption').value.trim() || null;
+        const isActive = document.getElementById('teamCarouselActive').checked;
+        const displayOrder = parseInt(document.getElementById('teamCarouselOrder').value) || 0;
+
+        if (!imageUrl) {
+            showToast('Digite a URL da imagem!', 'error');
+            return;
+        }
+
+        const { error } = await _supabase
+            .from('team_carousel')
+            .insert([{ image_url: imageUrl, caption, is_active: isActive, display_order: displayOrder }]);
+
+        if (!error) {
+            showToast('✅ Foto cadastrada!');
+            e.target.reset();
+            document.getElementById('teamCarouselActive').checked = true;
+            document.getElementById('teamCarouselOrder').value = '0';
+            await loadTeamCarousel();
+        } else {
+            showToast('Erro ao salvar foto', 'error');
+            console.error(error);
+        }
+    });
 </script>
 </body>
 </html>

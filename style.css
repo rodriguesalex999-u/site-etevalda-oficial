@@ -980,73 +980,130 @@ button {
 }
 
 /* ========================================
-11. FAQ SECTION MODERNA
+11. FAQ SECTION MODERNA - VERSÃO COMPACTADA
 ======================================== */
 .faq-section {
     margin-bottom: var(--spacing-xxl);
 }
+
+/* Grid responsivo - igual aos produtos */
 .faq-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: var(--spacing-lg);
+    grid-template-columns: repeat(2, 1fr); /* 2 colunas no celular */
+    gap: 8px;
+    padding: 0 8px;
 }
+
+/* Tablets: 3 colunas */
+@media (min-width: 768px) {
+    .faq-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        padding: 0 12px;
+    }
+}
+
+/* Computadores: 4 colunas */
+@media (min-width: 1024px) {
+    .faq-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        padding: 0 16px;
+    }
+}
+
+/* Card compacto */
 .faq-card {
     background: var(--white);
-    padding: var(--spacing-lg);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
-    border: 1px solid var(--gold-light);
-    transition: all var(--transition-normal);
+    border-radius: 8px;
+    padding: 12px 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border: 1px solid #f0f0f0;
+    transition: all 0.2s ease;
     cursor: pointer;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
+
 .faq-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-xl);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     border-color: var(--gold-primary);
 }
+
+/* Ícone menor */
 .faq-icon {
-    width: 70px;
-    height: 70px;
+    width: 50px;
+    height: 50px;
     background: var(--gold-primary);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto var(--spacing-md);
+    margin: 0 auto 10px;
     color: var(--white);
-    font-size: 2rem;
-    box-shadow: var(--shadow-md);
+    font-size: 1.5rem;
+    box-shadow: var(--shadow-sm);
     transition: transform var(--transition-normal);
 }
+
 .faq-card:hover .faq-icon {
     transform: scale(1.1);
 }
+
+/* Título menor */
 .faq-card h3 {
-    font-family: var(--font-display);
-    font-size: 1.3rem;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
     font-weight: 600;
     color: var(--gold-dark);
-    margin-bottom: var(--spacing-md);
-    line-height: 1.4;
+    margin-bottom: 8px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.4em;
 }
+
+/* Player de áudio compacto */
 .faq-audio {
-    margin-top: var(--spacing-md);
+    margin-top: auto;
     background: var(--gray-light);
-    padding: var(--spacing-sm);
+    padding: 4px;
     border-radius: var(--radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
 }
+
 .faq-audio audio {
     width: 100%;
-    height: 40px;
+    height: 32px;
     outline: none;
     border-radius: var(--radius-full);
 }
+
 .faq-audio audio::-webkit-media-controls-panel {
     background: var(--gold-light);
+}
+
+/* Ajuste para telas muito pequenas */
+@media (max-width: 480px) {
+    .faq-card h3 {
+        font-size: 0.8rem;
+    }
+    .faq-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    .faq-audio audio {
+        height: 28px;
+    }
 }
 
 /* ========================================
@@ -3172,4 +3229,112 @@ BADGES NO MODAL E SUPER ZOOM
         padding: 8px 20px;
         font-size: 1.2rem;
     }
+}
+/* ========================================
+CARROSSEL DA EQUIPE (NOVA SEÇÃO)
+======================================== */
+.team-carousel-section {
+    margin: var(--spacing-lg) 0;
+    padding: 0 var(--spacing-md);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+.team-carousel-section.visible {
+    opacity: 1;
+}
+
+.team-carousel-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    background: var(--white);
+    margin-top: var(--spacing-md);
+}
+
+.team-carousel-track {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    cursor: grab;
+}
+
+.team-carousel-track:active {
+    cursor: grabbing;
+}
+
+.team-carousel-item {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    position: relative;
+    background: var(--gray-light);
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 768px) {
+    .team-carousel-item {
+        flex: 0 0 50%;
+    }
+}
+
+@media (min-width: 1024px) {
+    .team-carousel-item {
+        flex: 0 0 33.333%;
+    }
+}
+
+.team-carousel-image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+}
+
+.team-carousel-caption {
+    padding: var(--spacing-md);
+    background: var(--white);
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--black-soft);
+    font-weight: 500;
+    line-height: 1.5;
+    border-top: 2px solid var(--gold-light);
+    pointer-events: none;
+}
+
+.team-carousel-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-xs);
+    margin-top: var(--spacing-md);
+}
+
+.team-carousel-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--gray-soft);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.team-carousel-dot.active {
+    background: var(--gold-primary);
+    transform: scale(1.2);
+    width: 25px;
+    border-radius: 10px;
+}
+
+.team-carousel-empty {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--gray-medium);
+    font-style: italic;
+    background: var(--white);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
 }
