@@ -968,6 +968,28 @@ async function openProductModal(id) {
                     </div>
                 </div>
             ` : ''}
+            
+            <!-- CARROSSEL DE PRODUTOS SIMILARES NO MODAL -->
+            <div class="modal-carousel-section">
+                <div class="modal-carousel-container">
+                    <div id="modalInfiniteCarousel" class="modal-infinite-carousel"></div>
+                </div>
+            </div>
+            <div class="modal-carousel-section">
+                <div class="modal-carousel-container">
+                    <div id="modalInfiniteCarousel2" class="modal-infinite-carousel"></div>
+                </div>
+            </div>
+            <div class="modal-carousel-section">
+                <div class="modal-carousel-container">
+                    <div id="modalInfiniteCarousel3" class="modal-infinite-carousel"></div>
+                </div>
+            </div>
+            <div class="modal-carousel-section">
+                <div class="modal-carousel-container">
+                    <div id="modalInfiniteCarousel4" class="modal-infinite-carousel"></div>
+                </div>
+            </div>
         </div>
     `;
 
@@ -980,6 +1002,7 @@ async function openProductModal(id) {
     setupModalMediaClick();
     setupModalVideoAudio(product.video_has_audio);
     setupNextPhotoButton();
+    renderModalCarousel(); // Adiciona o carrossel do modal
     scrollToTop();
 }
 
@@ -1092,17 +1115,63 @@ function scrollToTop() {
     }
 }
 
-// ========================================
-// 12. FUNÇÕES DO SUPER ZOOM
-// ========================================
+// Função para renderizar o carrossel do modal
+function renderModalCarousel() {
+    if (!allProductsLoaded.length) return;
+
+    // Renderiza os 4 carrosseis com produtos diferentes
+    renderModalCarouselIndividual('modalInfiniteCarousel', 1);
+    renderModalCarouselIndividual('modalInfiniteCarousel2', 2);
+    renderModalCarouselIndividual('modalInfiniteCarousel3', 3);
+    renderModalCarouselIndividual('modalInfiniteCarousel4', 4);
+}
+
+// Função auxiliar para renderizar cada carrossel individual
+function renderModalCarouselIndividual(carouselId, carouselIndex) {
+    const modalCarousel = document.getElementById(carouselId);
+    if (!modalCarousel) return;
+
+    // Pega produtos aleatórios diferentes do produto atual
+    // Usa o carouselIndex para garantir que cada carrossel tenha produtos diferentes
+    const randomProducts = [...allProductsLoaded]
+        .filter(p => p.id !== currentModalProduct?.id)
+        .sort(() => Math.random() - 0.5)
+        .slice((carouselIndex - 1) * 8, carouselIndex * 8); // Pega 8 produtos diferentes para cada carrossel
+
+    // Se não tiver produtos suficientes, pega mais aleatórios
+    if (randomProducts.length < 8) {
+        const moreProducts = [...allProductsLoaded]
+            .filter(p => p.id !== currentModalProduct?.id && !randomProducts.some(rp => rp.id === p.id))
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 8 - randomProducts.length);
+        randomProducts.push(...moreProducts);
+    }
+
+    // Duplica para criar o efeito infinito
+    const carouselProducts = [...randomProducts, ...randomProducts];
+
+    modalCarousel.innerHTML = carouselProducts.map(p => {
+        const images = Array.isArray(p.images) ? p.images : [];
+        return `
+            <div class="modal-carousel-item" onclick="openProductModal(${p.id})">
+                <img src="${images[0] || 'https://via.placeholder.com/150'}" alt="${p.name}" loading="lazy">
+                <div class="modal-carousel-item-info">
+                    <div class="modal-carousel-item-name">${p.name}</div>
+                    <div class="modal-carousel-item-price">R$ ${p.price.toFixed(2).replace('.', ',')}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
 function openSuperZoom(mediaUrl, type = 'image', mediaList = [], currentIndex = 0) {
     const overlay = document.getElementById('superZoomOverlay');
     const content = document.getElementById('superZoomContent');
     if (!overlay || !content) return;
-    
+
     superZoomMediaList = mediaList.length > 0 ? mediaList : [{ url: mediaUrl, type: type }];
     currentZoomIndex = currentIndex;
-    
+
     renderSuperZoomMedia();
 
     overlay.classList.add('active');

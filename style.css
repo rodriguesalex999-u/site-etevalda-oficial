@@ -1307,6 +1307,96 @@ button {
 }
 
 /* ========================================
+CARROSSEL DO MODAL
+======================================== */
+.modal-carousel-section {
+    margin-top: var(--spacing-xl);
+    padding-top: var(--spacing-lg);
+    border-top: 1px solid var(--gray-light);
+}
+
+.modal-carousel-section:first-of-type {
+    margin-top: var(--spacing-lg);
+    border-top: none;
+    padding-top: 0;
+}
+
+.modal-carousel-container {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: var(--white);
+    padding: var(--spacing-md) 0;
+}
+
+.modal-infinite-carousel {
+    display: flex;
+    animation: modalCarouselScroll 30s linear infinite;
+    gap: var(--spacing-md);
+    padding: 0 var(--spacing-md);
+}
+
+.modal-infinite-carousel:hover {
+    animation-play-state: paused;
+}
+
+.modal-carousel-item {
+    flex: 0 0 200px;
+    background: var(--white);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid var(--gold-light);
+    transition: all var(--transition-fast);
+}
+
+.modal-carousel-item:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--gold-primary);
+}
+
+.modal-carousel-item img {
+    width: 100%;
+    height: 200px;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+}
+
+.modal-carousel-item-info {
+    padding: var(--spacing-sm);
+    text-align: center;
+}
+
+.modal-carousel-item-name {
+    font-weight: 600;
+    color: var(--black-soft);
+    margin-bottom: var(--spacing-xs);
+    font-size: 0.85rem;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.modal-carousel-item-price {
+    color: var(--gold-primary);
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+@keyframes modalCarouselScroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* ========================================
 14. NOTIFICAÇÃO GEOLOCALIZADA
 ======================================== */
 .geo-notification {
@@ -2951,6 +3041,18 @@ RESPONSIVE - DESKTOP FIXES
     .carousel-item img {
         height: 180px;
     }
+    .modal-carousel-item {
+        flex: 0 0 160px;
+    }
+    .modal-carousel-item img {
+        height: 160px;
+    }
+    .modal-carousel-item-name {
+        font-size: 0.75rem;
+    }
+    .modal-carousel-item-price {
+        font-size: 0.85rem;
+    }
     .hero-image-xl {
         max-height: 220px;
     }
@@ -3130,7 +3232,7 @@ RESPONSIVE - DESKTOP FIXES
 }
 @keyframes carouselScroll {
     0% { transform: translateX(0); }
-    100% { transform: translateX(calc(-280px * 6 - 120px)); }
+    100% { transform: translateX(-50%); }
 }
 @keyframes pulseWhatsappButton {
     0% {
@@ -3195,7 +3297,7 @@ RESPONSIVE - DESKTOP FIXES
 @media (max-width: 768px) {
     @keyframes carouselScroll {
         0% { transform: translateX(0); }
-        100% { transform: translateX(calc(-200px * 6 - 60px)); }
+        100% { transform: translateX(-50%); }
     }
 }
 
