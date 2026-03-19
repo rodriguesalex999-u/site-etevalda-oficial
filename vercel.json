@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    { "source": "/pares-de-aliancas", "destination": "/", "permanent": true },
+    { "source": "/alianca-moeda-antiga", "destination": "/", "permanent": true },
+    { "source": "/aliancas-pratas", "destination": "/", "permanent": true },
+    { "source": "/relogios-femininos", "destination": "/", "permanent": true },
+    { "source": "/relogios-masculinos", "destination": "/", "permanent": true }
+  ]
+}
