@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+        <!-- PRELOAD DA IMAGEM PRIORITÁRIA (LCP) -->
+    <link rel="preload" as="image" href="https://vnrfmsyanrvqqhmqyixk.supabase.co/storage/v1/object/public/produtos/produtos/1773710851783-1w34bjz7.webp" fetchpriority="high">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="description" content="Grupo Etevalda MT - A maior loja de variedades de Mato Grosso">
@@ -36,12 +38,12 @@
                     <div class="header-search">
                         <div class="search-wrapper">
                             <input type="text" id="searchInput" class="search-input" placeholder="Buscar joias..." autocomplete="off">
-                            <button id="searchBtn" class="search-btn" aria-label="Pesquisar joias"><i class="fas fa-search"></i></button>
+                            <button id="searchBtn" class="search-btn"><i class="fas fa-search"></i></button>
                             <div id="searchDropdown" class="search-dropdown"><div id="searchResults" class="search-results"></div></div>
                         </div>
                     </div>
                     <div class="header-actions">
-                        <button id="cartBtn" class="cart-btn" aria-label="Abrir carrinho de compras"><i class="fas fa-shopping-bag"></i><span id="cartCount" class="cart-count">0</span></button>
+                        <button id="cartBtn" class="cart-btn"><i class="fas fa-shopping-bag"></i><span id="cartCount" class="cart-count">0</span></button>
                     </div>
                 </div>
             </div>
@@ -65,21 +67,7 @@
                     <div class="product-card skeleton"><div class="skeleton-image"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div></div></div>
                 </div>
                 <!-- NOVO: Sensor invisível para o celular saber a hora de carregar -->
-                <div id="infinite-scroll-trigger" style="height: 20px; margin-bottom: 20px;"></div>
-                <!-- BLOCO DE SUGESTÕES QUE APARECE NO FIM DA CATEGORIA -->
-                <div id="end-category-suggestions" style="display: none; padding: 20px 0; border-top: 2px solid var(--gold-light); margin-top: 30px;">
-                    <h2 class="section-title" style="font-size: 1.2rem; margin-bottom: 20px; text-align: center;">
-                        <i class="fas fa-handshake"></i> Quem viu, também gostou
-                    </h2>
-                    <div id="suggestionsGrid" class="products-grid"></div>
-                </div>
-                <!-- CONTAINER DE SUGESTÕES (Aparece no fim da categoria) -->
-                <div id="end-category-suggestions" style="display: none; padding: 20px 0; border-top: 2px solid var(--gold-light); margin-top: 30px;">
-                    <h2 class="section-title" style="font-size: 1.2rem; margin-bottom: 20px;">
-                        <i class="fas fa-handshake"></i> Quem viu, também gostou
-                    </h2>
-                    <div id="suggestionsGrid" class="products-grid"></div>
-                </div>
+                <div id="infinite-scroll-trigger" style="height: 20px; margin-bottom: 50px;"></div>
             </section>
 
             <!-- PROVA SOCIAL -->
@@ -145,7 +133,7 @@
     </div>
     <div id="cartOverlay" class="cart-overlay"></div>
 
-    <a href="https://api.whatsapp.com/send/?phone=5565993337205" class="whatsapp-float" target="_blank" aria-label="Falar com atendente no WhatsApp"><i class="fab fa-whatsapp"></i></a>
+    <a href="https://api.whatsapp.com/send/?phone=5565993337205" class="whatsapp-float" target="_blank"><i class="fab fa-whatsapp"></i></a>
 
     <!-- FOOTER COMPLETO -->
     <footer class="footer">
@@ -170,9 +158,9 @@
         </div>
     </footer>
 
-    <section class="seo-footer-area" style="opacity: 1; background: #eee;">
-    <div class="container-fluid"><p class="seo-text" style="color: #333;">Etevalda Joias Cuiabá é referência em joias finas...</p></div>
-</section>
+    <section class="seo-footer-area">
+        <div class="container-fluid"><p class="seo-text">Etevalda Joias Cuiabá é referência em joias finas, alianças de ouro e prata 925 em Mato Grosso. Entregamos em Cuiabá e Várzea Grande com pagamento na entrega.</p></div>
+    </section>
 
     <!-- CARREGAMENTO DE ALTA PERFORMANCE -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
