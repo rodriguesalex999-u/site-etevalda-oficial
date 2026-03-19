@@ -591,11 +591,28 @@ function renderSocialProof() {
     `).join('');
 }
 
-function renderCarousel() {
-    const carousel = document.getElementById('infiniteCarousel');
+function getProductsForCarousel(carouselIndex) {
+    if (!allProductsLoaded.length) return [];
+    
+    // Embaralha todos os produtos
+    const shuffled = [...allProductsLoaded].sort(() => Math.random() - 0.5);
+    
+    // Divide os produtos em 5 grupos diferentes para cada carrossel
+    const productsPerCarousel = Math.ceil(shuffled.length / 5);
+    const startIndex = (carouselIndex - 1) * productsPerCarousel;
+    const endIndex = Math.min(startIndex + productsPerCarousel, shuffled.length);
+    
+    const carouselProducts = shuffled.slice(startIndex, endIndex);
+    
+    // Duplica para criar o efeito infinito
+    return [...carouselProducts, ...carouselProducts];
+}
+
+function renderCarousel(carouselId = 'infiniteCarousel', carouselIndex = 1) {
+    const carousel = document.getElementById(carouselId);
     if (!carousel || !allProductsLoaded.length) return;
 
-    const carouselProducts = [...allProductsLoaded, ...allProductsLoaded];
+    const carouselProducts = getProductsForCarousel(carouselIndex);
     carousel.innerHTML = carouselProducts.map(p => {
         const images = Array.isArray(p.images) ? p.images : [];
         return `
@@ -610,11 +627,20 @@ function renderCarousel() {
     }).join('');
 }
 
+// Função para renderizar todos os carrosséis
+function renderAllCarousels() {
+    renderCarousel('infiniteCarousel', 1);
+    renderCarousel('infiniteCarousel2', 2);
+    renderCarousel('infiniteCarousel3', 3);
+    renderCarousel('infiniteCarousel4', 4);
+    renderCarousel('infiniteCarousel5', 5);
+}
+
 // ========================================
 // 10. FUNÇÕES DE UTILIDADE
 // ========================================
 function showSecondarySections() {
-    const sections = ['socialProofSection', 'faqSection', 'carouselSection', 'teamCarouselSection'];
+    const sections = ['socialProofSection', 'faqSection', 'carouselSection', 'carouselSection2', 'carouselSection3', 'carouselSection4', 'carouselSection5', 'teamCarouselSection'];
     sections.forEach(id => {
         const section = document.getElementById(id);
         if (section) {
@@ -1747,7 +1773,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await loadTeamImage();
                 await loadTeamCarousel();
                 
-                renderCarousel();
+                renderAllCarousels();
                 renderSocialProof();
                 renderFaqs();
                 renderTeamCarousel();

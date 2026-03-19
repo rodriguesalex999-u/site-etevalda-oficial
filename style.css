@@ -1987,6 +1987,24 @@ CROSS-SELL GRID NO MODAL
     gap: 6px;
     padding: 0 8px;
 }
+
+/* Desktop: 4 colunas */
+@media (min-width: 768px) {
+    .cross-sell-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        padding: 0 10px;
+    }
+}
+
+/* Large Desktop: 5 colunas */
+@media (min-width: 1024px) {
+    .cross-sell-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+        padding: 0 15px;
+    }
+}
 /* Card de produto no grid do modal */
 .cross-sell-card {
     background: var(--white);
@@ -2011,6 +2029,20 @@ CROSS-SELL GRID NO MODAL
     object-fit: cover !important;
     transition: transform 0.3s ease;
 }
+
+/* Desktop: imagens maiores */
+@media (min-width: 768px) {
+    .cross-sell-card img {
+        height: 120px;
+    }
+}
+
+/* Large Desktop: imagens ainda maiores */
+@media (min-width: 1024px) {
+    .cross-sell-card img {
+        height: 140px;
+    }
+}
 .cross-sell-card:hover img {
     transform: scale(1.05);
 }
@@ -2032,10 +2064,31 @@ CROSS-SELL GRID NO MODAL
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
 .cross-sell-card .price {
     color: var(--gold-primary);
     font-weight: 600;
     font-size: 0.75rem;
+}
+
+/* Desktop: textos maiores */
+@media (min-width: 768px) {
+    .cross-sell-card .name {
+        font-size: 0.75rem;
+    }
+    .cross-sell-card .price {
+        font-size: 0.85rem;
+    }
+}
+
+/* Large Desktop: textos ainda maiores */
+@media (min-width: 1024px) {
+    .cross-sell-card .name {
+        font-size: 0.85rem;
+    }
+    .cross-sell-card .price {
+        font-size: 0.95rem;
+    }
 }
 .cross-sell-card .price::before {
     content: 'R$ ';
@@ -2088,9 +2141,29 @@ SUPER ZOOM OVERLAY
     max-width: 100%;
     max-height: 100%;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
+}
+
+.super-zoom-media-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.super-zoom-media-container img,
+.super-zoom-media-container video {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
 }
 .super-zoom-content img,
 .super-zoom-content video {
@@ -2192,6 +2265,44 @@ SUPER ZOOM OVERLAY
 .super-zoom-nav.prev {
     right: auto;
     left: 20px;
+}
+
+/* ========================================
+RESPONSIVE - DESKTOP FIXES
+======================================== */
+@media (min-width: 768px) {
+    .super-zoom-overlay {
+        padding: 40px;
+    }
+    
+    .super-zoom-content {
+        max-width: 90vw;
+        max-height: 90vh;
+    }
+    
+    .super-zoom-media-container {
+        max-width: 90vw;
+        max-height: 90vh;
+    }
+    
+    .super-zoom-media-container img,
+    .super-zoom-media-container video {
+        max-width: 90vw;
+        max-height: 85vh;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow-xl);
+    }
+}
+
+@media (min-width: 1200px) {
+    .super-zoom-media-container img,
+    .super-zoom-media-container video {
+        max-width: 80vw;
+        max-height: 80vh;
+    }
 }
 
 /* ========================================
