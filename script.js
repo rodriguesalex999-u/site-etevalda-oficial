@@ -514,6 +514,9 @@ function renderCategories() {
         list.innerHTML += `<li data-category="${cat.id}">${cat.name}</li>`;
     });
 
+    // Verificar se tem categoria na URL ao carregar
+    checkCategoryFromURL();
+
     list.querySelectorAll('li').forEach(button => {
         button.addEventListener('click', () => {
             list.querySelectorAll('li').forEach(el => el.classList.remove('active'));
@@ -523,6 +526,20 @@ function renderCategories() {
             currentPage = 1; 
             allProductsLoaded = []; 
             hasMoreProducts = true; 
+
+            // MUDAR A URL SEM RECARREGAR A PÁGINA
+            if (currentCategory === 'all') {
+                history.pushState({}, '', '/');
+            } else {
+                // Encontrar o nome da categoria pelo ID
+                const category = categories.find(c => c.id == currentCategory);
+                if (category) {
+                    const categorySlug = category.name.toLowerCase()
+                        .replace(/\s+/g, '-')
+                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                    history.pushState({ category: currentCategory }, '', `/#${categorySlug}`);
+                }
+            }
 
             const container = document.getElementById('productsContainer');
             if (container) container.innerHTML = ''; 
@@ -742,6 +759,11 @@ function setupHistoryAPI() {
         }
     });
 }
+
+// Listener para quando o usuário navegar pelo histórico (botão voltar/avançar)
+window.addEventListener('popstate', () => {
+    checkCategoryFromURL();
+});
 
 function setupTouchListeners() {
     const modalContent = document.querySelector('.modal-content');
@@ -1874,6 +1896,48 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTimeout(() => showLoading(false), 500);
     }
 });
+
+// ========================================
+// FUNÇÃO PARA LER CATEGORIA DA URL
+// ========================================
+function checkCategoryFromURL() {
+    const hash = window.location.hash.substring(1); // Remove o #
+    if (!hash) return;
+
+    // Mapear nomes amigáveis para IDs de categoria
+    const categoryMap = {};
+    categories.forEach(cat => {
+        const friendlyName = cat.name.toLowerCase()
+            .replace(/\s+/g, '-')
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        categoryMap[friendlyName] = cat.id;
+    });
+
+    // Se o hash corresponder a uma categoria
+    if (categoryMap[hash]) {
+        currentCategory = categoryMap[hash];
+        
+        // Atualizar a classe active no menu
+        const list = document.getElementById('categoryList');
+        if (list) {
+            list.querySelectorAll('li').forEach(el => {
+                const isActive = el.dataset.category == currentCategory;
+                el.classList.toggle('active', isActive);
+            });
+        }
+        
+        // Resetar e carregar produtos da categoria
+        currentPage = 1;
+        allProductsLoaded = [];
+        hasMoreProducts = true;
+        
+        const container = document.getElementById('productsContainer');
+        if (container) container.innerHTML = '';
+        
+        showLoading(true);
+        loadProducts(true);
+    }
+}
 
 // Expor funções globais
 window.openProductModal = openProductModal;
