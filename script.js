@@ -52,12 +52,17 @@ const WHATSAPP_BASE_URL = 'https://api.whatsapp.com/send/?phone=5565993337205&te
 let teamImageUrl = '';
 
 // ========================================
-// 3. DICIONÁRIO DE BAIRROS
+// 3. DICIONÁRIO DE BAIRROS - INTELIGÊNCIA NACIONAL
 // ========================================
 const NEIGHBORHOODS = {
-    'Cuiabá': ['CPA', 'Pedra 90', 'Boa Esperança', 'Jardim das Américas', 'Centro', 'Jardim Europa', 'Bandeirantes', 'Goiabeiras'],
-    'Várzea Grande': ['Cristo Rei', 'Parque do Lago', 'Mapim', 'Centro', 'Jardim América', 'Morada do Ouro']
+    'Cuiabá': ['Pedra 90', 'Cristo Rei', 'Cpa 2', 'Jardim Vitoria', 'Santa Rosa'],
+    'Rondonópolis': ['Vila Aurora', 'Jardim Primavera', 'Vila Operaria', 'Cidade Alta', 'Parque Sagrada Familia'],
+    'Sinop': ['Jardim Jacarandas', 'São Cristovão', 'Jardim Violetas', 'Centro Comercial'],
+    'Diamantino': ['Novo Diamantino', 'Jardim Imperial', 'Jardim das Americas', 'Bairro da Ponte', 'São Benedito']
 };
+
+const GENERIC_NEIGHBORHOODS = ['Centro', 'Vila Nova', 'Jardim Planalto', 'Bairro Novo', 'Parque das Nações', 'Jardim das Flores'];
+
 const CUSTOMER_NAMES = [
     'Ana', 'Bruna', 'Carla', 'Daniela', 'Fernanda', 'Gabriela', 'Helena', 'Isabela',
     'João', 'Pedro', 'Lucas', 'Mateus', 'Rafael', 'Thiago'
@@ -1684,7 +1689,28 @@ function startGeoNotifications() {
 function showGeoNotification() {
     if (!allProductsLoaded.length) return;
 
-    const neighborhood = detectedLocation.neighborhoods[Math.floor(Math.random() * detectedLocation.neighborhoods.length)];
+    // Obtém a cidade detectada pela API
+    const detectedCity = detectedLocation.city;
+    let neighborhood;
+    let locationText;
+
+    // Lógica inteligente para escolher o bairro
+    if (NEIGHBORHOODS[detectedCity]) {
+        // Se for uma das 4 cidades de MT, usa bairro específico
+        neighborhood = NEIGHBORHOODS[detectedCity][Math.floor(Math.random() * NEIGHBORHOODS[detectedCity].length)];
+        locationText = `${detectedCity}`;
+    } else {
+        // Se for QUALQUER OUTRA cidade (Rio de Janeiro, São Paulo, etc.), usa bairro genérico
+        neighborhood = GENERIC_NEIGHBORHOODS[Math.floor(Math.random() * GENERIC_NEIGHBORHOODS.length)];
+        locationText = `${detectedCity}`;
+    }
+
+    // Fallback: Se a API falhar totalmente, usa Cuiabá como padrão
+    if (!detectedCity || detectedCity.trim() === '') {
+        neighborhood = NEIGHBORHOODS['Cuiabá'][Math.floor(Math.random() * NEIGHBORHOODS['Cuiabá'].length)];
+        locationText = 'Cuiabá';
+    }
+
     const customerName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
     const randomProduct = allProductsLoaded[Math.floor(Math.random() * allProductsLoaded.length)];
 
@@ -1692,7 +1718,7 @@ function showGeoNotification() {
     const notificationText = document.getElementById('geoNotificationText');
 
     if (notification && notificationText) {
-        notificationText.innerHTML = `<strong>${customerName}</strong> do <strong>${neighborhood}</strong> comprou <strong>${randomProduct.name}</strong>`;
+        notificationText.innerHTML = `<strong>${customerName}</strong> de <strong>${locationText}</strong> - <strong>${neighborhood}</strong> comprou <strong>${randomProduct.name}</strong>`;
         notification.style.display = 'block';
         setTimeout(() => notification.style.display = 'none', 8000);
     }
