@@ -1151,6 +1151,9 @@ function renderModalCarousel() {
     renderModalCarouselIndividual('modalInfiniteCarousel2', 2);
     renderModalCarouselIndividual('modalInfiniteCarousel3', 3);
     renderModalCarouselIndividual('modalInfiniteCarousel4', 4);
+    
+    // Configura swipe com velocidade para todos os carrosseis
+    setupModalCarouselSwipe();
 }
 
 // Função auxiliar para renderizar cada carrossel individual
@@ -1158,7 +1161,7 @@ function renderModalCarouselIndividual(carouselId, carouselIndex) {
     const modalCarousel = document.getElementById(carouselId);
     if (!modalCarousel) return;
 
-    // Pega produtos aleatórios diferentes do produto atual
+    // Pega produtos aleatórios de TODAS as categorias (igual página principal)
     // Usa o carouselIndex para garantir que cada carrossel tenha produtos diferentes
     const randomProducts = [...allProductsLoaded]
         .filter(p => p.id !== currentModalProduct?.id)
@@ -1189,6 +1192,153 @@ function renderModalCarouselIndividual(carouselId, carouselIndex) {
             </div>
         `;
     }).join('');
+}
+
+// ========================================
+// CONTROLE DE SWIPE COM VELOCIDADE PARA CARROSSEIS DO MODAL
+// ========================================
+function setupModalCarouselSwipe() {
+    const carousels = document.querySelectorAll('.modal-infinite-carousel');
+    
+    carousels.forEach(carousel => {
+        let isDragging = false;
+        let startX = 0;
+        let currentX = 0;
+        let scrollLeft = 0;
+        let velocity = 0;
+        let animationFrame = null;
+        let lastTime = 0;
+        let lastX = 0;
+        
+        // Função para aplicar física de desaceleração
+        function applyPhysics() {
+            if (Math.abs(velocity) > 0.1) {
+                carousel.scrollLeft += velocity;
+                velocity *= 0.95; // Fricção/desaceleração
+                animationFrame = requestAnimationFrame(applyPhysics);
+            } else {
+                velocity = 0;
+                if (animationFrame) {
+                    cancelAnimationFrame(animationFrame);
+                    animationFrame = null;
+                }
+            }
+        }
+        
+        // Mouse events para desktop
+        carousel.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.pageX - carousel.offsetLeft;
+            scrollLeft = carousel.scrollLeft;
+            lastX = startX;
+            lastTime = Date.now();
+            carousel.style.cursor = 'grabbing';
+            carousel.style.scrollBehavior = 'auto';
+            
+            // Para animação anterior se existir
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+        });
+        
+        carousel.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            e.preventDefault();
+            
+            currentX = e.pageX - carousel.offsetLeft;
+            const currentTime = Date.now();
+            const deltaTime = currentTime - lastTime;
+            const deltaX = currentX - lastX;
+            
+            // Calcula velocidade baseada no movimento
+            if (deltaTime > 0) {
+                velocity = -(deltaX / deltaTime) * 10; // Multiplica para aumentar sensibilidade
+            }
+            
+            const walk = (currentX - startX) * 2; // Sensibilidade do arrasto
+            carousel.scrollLeft = scrollLeft - walk;
+            
+            lastX = currentX;
+            lastTime = currentTime;
+        });
+        
+        carousel.addEventListener('mouseup', () => {
+            isDragging = false;
+            carousel.style.cursor = 'grab';
+            carousel.style.scrollBehavior = 'smooth';
+            
+            // Aplica física de desaceleração quando solta
+            if (Math.abs(velocity) > 0.5) {
+                applyPhysics();
+            }
+        });
+        
+        carousel.addEventListener('mouseleave', () => {
+            isDragging = false;
+            carousel.style.cursor = 'grab';
+            carousel.style.scrollBehavior = 'smooth';
+            
+            // Aplica física de desaceleração quando sai da área
+            if (Math.abs(velocity) > 0.5) {
+                applyPhysics();
+            }
+        });
+        
+        // Touch events para mobile
+        carousel.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            startX = e.touches[0].pageX - carousel.offsetLeft;
+            scrollLeft = carousel.scrollLeft;
+            lastX = startX;
+            lastTime = Date.now();
+            carousel.style.scrollBehavior = 'auto';
+            
+            // Para animação anterior se existir
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
+            }
+        }, { passive: true });
+        
+        carousel.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            
+            currentX = e.touches[0].pageX - carousel.offsetLeft;
+            const currentTime = Date.now();
+            const deltaTime = currentTime - lastTime;
+            const deltaX = currentX - lastX;
+            
+            // Calcula velocidade baseada no movimento
+            if (deltaTime > 0) {
+                velocity = -(deltaX / deltaTime) * 15; // Maior sensibilidade para touch
+            }
+            
+            const walk = (currentX - startX) * 2; // Sensibilidade do arrasto
+            carousel.scrollLeft = scrollLeft - walk;
+            
+            lastX = currentX;
+            lastTime = currentTime;
+        }, { passive: true });
+        
+        carousel.addEventListener('touchend', () => {
+            isDragging = false;
+            carousel.style.scrollBehavior = 'smooth';
+            
+            // Aplica física de desaceleração quando solta
+            if (Math.abs(velocity) > 0.5) {
+                applyPhysics();
+            }
+        });
+        
+        // Previne comportamento padrão do scroll
+        carousel.addEventListener('dragstart', (e) => {
+            e.preventDefault();
+        });
+        
+        // Cursor inicial
+        carousel.style.cursor = 'grab';
+    });
 }
 
 function openSuperZoom(mediaUrl, type = 'image', mediaList = [], currentIndex = 0) {
@@ -1245,39 +1395,39 @@ function renderSuperZoomMedia() {
     
     let mediaHTML = '';
     if (currentMedia.type === 'video') {
-    mediaHTML = `<video src="${currentMedia.url}" controls autoplay loop playsinline style="max-width:100%;max-height:90vh;object-fit:contain;"></video>`;
+        mediaHTML = `<video src="${currentMedia.url}" controls autoplay loop playsinline style="max-width:100%;max-height:90vh;object-fit:contain;"></video>`;
     } else {
-    mediaHTML = `<img src="${currentMedia.url}" alt="Zoom" style="max-width:100%;max-height:90vh;object-fit:contain;">`;
-}
+        mediaHTML = `<img src="${currentMedia.url}" alt="Zoom" style="max-width:100%;max-height:90vh;object-fit:contain;">`;
+    }
 
-if (currentModalProduct) {
-    const product = currentModalProduct;
-    let whatsappMessage = `Olá! Gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}`;
-    
-    if (product.tem_solitario && product.solitario_price > 0) {
-        const total = product.price + product.solitario_price;
-        whatsappMessage = `Olá! Gostei do produto: *${product.name}* + *${product.additional_product_name || 'Solitário'}* (R$ ${product.solitario_price.toFixed(2).replace('.', ',')}) - Total: R$ ${total.toFixed(2).replace('.', ',')}`;
+    if (currentModalProduct) {
+        const product = currentModalProduct;
+        let whatsappMessage = `Olá! Gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}`;
+        
+        if (product.tem_solitario && product.solitario_price > 0) {
+            const total = product.price + product.solitario_price;
+            whatsappMessage = `Olá! Gostei do produto: *${product.name}* + *${product.additional_product_name || 'Solitário'}* (R$ ${product.solitario_price.toFixed(2).replace('.', ',')}) - Total: R$ ${total.toFixed(2).replace('.', ',')}`;
+        }
+        
+        whatsappMessage += `. Consegue me entregar hoje?`;
+        
+        mediaHTML += `
+            <a href="https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(whatsappMessage)}" 
+               target="_blank" 
+               class="zoom-whatsapp-btn highlighted">
+               <i class="fab fa-whatsapp"></i> FALAR NO WHATSAPP
+            </a>
+        `;
     }
-    
-    whatsappMessage += `. Consegue me entregar hoje?`;
-    
-    mediaHTML += `
-        <a href="https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(whatsappMessage)}" 
-           target="_blank" 
-           class="zoom-whatsapp-btn highlighted">
-           <i class="fab fa-whatsapp"></i> FALAR NO WHATSAPP
-        </a>
-    `;
-}
 
-if (currentZoomIndex === 0 && currentModalProduct) {
-    if (currentModalProduct.badge_text) {
-        mediaHTML += `<div class="super-zoom-badge">${currentModalProduct.badge_text}</div>`;
+    if (currentZoomIndex === 0 && currentModalProduct) {
+        if (currentModalProduct.badge_text) {
+            mediaHTML += `<div class="super-zoom-badge">${currentModalProduct.badge_text}</div>`;
+        }
+        if (currentModalProduct.sold_today) {
+            mediaHTML += `<div class="super-zoom-sold">Vendido Hoje</div>`;
+        }
     }
-    if (currentModalProduct.sold_today) {
-        mediaHTML += `<div class="super-zoom-sold">Vendido Hoje</div>`;
-    }
-}
     
     content.innerHTML = `
         ${navigationHTML}
