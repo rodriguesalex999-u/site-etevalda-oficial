@@ -798,12 +798,8 @@
                         <input type="text" id="productPrice" required placeholder="299,99 ou 299.99">
                     </div>
                     <div class="form-group">
-                        <label><i class="fas fa-gem"></i> Preço Adicional (R$)</label>
-                        <input type="text" id="additionalPrice" placeholder="99,99">
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-tag"></i> Nome do Produto Adicional</label>
-                        <input type="text" id="additionalProductName" placeholder="Ex: Solitário, Corrente, Pulseira...">
+                        <label><i class="fas fa-gem"></i> Preço do Solitário (R$)</label>
+                        <input type="text" id="solitarioPrice" placeholder="99,99">
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-list"></i> Categoria *</label>
@@ -812,10 +808,10 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label><i class="fas fa-check-circle"></i> Possui Produto Adicional?</label>
+                        <label><i class="fas fa-check-circle"></i> Tem Solitário?</label>
                         <div class="checkbox-group">
-                            <input type="checkbox" id="temAdicional">
-                            <label for="temAdicional">Sim</label>
+                            <input type="checkbox" id="temSolitario">
+                            <label for="temSolitario">Sim</label>
                         </div>
                     </div>
                     
@@ -949,7 +945,7 @@
                             <th>Imagem</th>
                             <th>Nome</th>
                             <th>Preço</th>
-                            <th>Adicional</th>
+                            <th>Solitário</th>
                             <th>Categoria</th>
                             <th>Vendido Hoje</th>
                             <th>Upsell</th>
@@ -1019,9 +1015,18 @@
                         <label><i class="fas fa-user"></i> Nome *</label>
                         <input type="text" id="reviewName" required placeholder="Maria Silva">
                     </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-image"></i> Foto do Cliente</label>
-                        <input type="url" id="reviewImage" placeholder="https://i.postimg.cc/foto.jpg">
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-image"></i> Foto do Cliente (Upload ou Link)</label>
+                        <div class="upload-container">
+                            <div class="upload-area" onclick="document.getElementById('fileInputReview').click()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <h3>Clique para subir foto da Avaliação</h3>
+                                <p>ou arraste aqui (WebP automático)</p>
+                            </div>
+                            <input type="file" id="fileInputReview" accept="image/*" style="display: none;" onchange="handleGenericUpload(this.files, 'reviewImage', 'reviewPreviewGrid')">
+                            <div class="image-preview-grid" id="reviewPreviewGrid"></div>
+                            <input type="url" id="reviewImage" placeholder="URL da imagem aparecerá aqui ou cole um link externo">
+                        </div>
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-star"></i> Avaliação *</label>
@@ -1122,8 +1127,17 @@
             <form id="socialProofForm">
                 <div class="form-grid">
                     <div class="form-group full-width">
-                        <label><i class="fas fa-image"></i> URL da Imagem *</label>
-                        <input type="url" id="proofImage" required placeholder="https://i.postimg.cc/imagem.jpg">
+                        <label><i class="fas fa-image"></i> Foto de Prova Social (Upload ou Link) *</label>
+                        <div class="upload-container">
+                            <div class="upload-area" onclick="document.getElementById('fileInputProof').click()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <h3>Clique para subir foto de Prova Social</h3>
+                                <p>ou arraste aqui (WebP automático)</p>
+                            </div>
+                            <input type="file" id="fileInputProof" accept="image/*" style="display: none;" onchange="handleGenericUpload(this.files, 'proofImage', 'proofPreviewGrid')">
+                            <div class="image-preview-grid" id="proofPreviewGrid"></div>
+                            <input type="url" id="proofImage" required placeholder="URL da imagem aparecerá aqui ou cole um link externo">
+                        </div>
                     </div>
                     <div class="form-group full-width">
                         <label><i class="fas fa-quote-right"></i> Legenda</label>
@@ -1176,9 +1190,18 @@
             <form id="teamCarouselForm">
                 <div class="form-grid">
                     <div class="form-group full-width">
-                        <label><i class="fas fa-image"></i> URL da Foto *</label>
-                        <input type="url" id="teamCarouselImage" required placeholder="https://i.postimg.cc/foto-da-equipe.jpg">
-                        <small style="color: var(--medium-gray);">Foto da sua equipe ou do seu produto.</small>
+                        <label><i class="fas fa-image"></i> Foto da Equipe (Upload ou Link) *</label>
+                        <div class="upload-container">
+                            <div class="upload-area" onclick="document.getElementById('fileInputTeam').click()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <h3>Clique para subir foto da Equipe</h3>
+                                <p>ou arraste aqui (WebP automático)</p>
+                            </div>
+                            <input type="file" id="fileInputTeam" accept="image/*" style="display: none;" onchange="handleGenericUpload(this.files, 'teamCarouselImage', 'teamPreviewGrid')">
+                            <div class="image-preview-grid" id="teamPreviewGrid"></div>
+                            <input type="url" id="teamCarouselImage" required placeholder="URL da imagem aparecerá aqui ou cole um link externo">
+                            <small style="color: var(--medium-gray);">Foto da sua equipe ou do seu produto.</small>
+                        </div>
                     </div>
                     <div class="form-group full-width">
                         <label><i class="fas fa-quote-right"></i> Legenda</label>
@@ -1247,22 +1270,21 @@
                     <input type="text" id="editProductPrice" required>
                 </div>
                 <div class="form-group">
-                    <label>Preço Adicional (R$)</label>
-                    <input type="text" id="editAdditionalPrice">
+                    <label>Preço do Solitário (R$)</label>
+                    <input type="text" id="editSolitarioPrice">
                 </div>
-                <div class="form-group">
-                    <label>Nome do Produto Adicional</label>
-                    <input type="text" id="editAdditionalProductName">
-                </div>
+            </div>
+            
+            <div class="form-grid">
                 <div class="form-group">
                     <label>Categoria *</label>
                     <select id="editProductCategory" required></select>
                 </div>
                 <div class="form-group">
-                    <label>Possui Produto Adicional?</label>
+                    <label>Tem Solitário?</label>
                     <div class="checkbox-group">
-                        <input type="checkbox" id="editTemAdicional">
-                        <label for="editTemAdicional">Sim</label>
+                        <input type="checkbox" id="editTemSolitario">
+                        <label for="editTemSolitario">Sim</label>
                     </div>
                 </div>
             </div>
@@ -1328,48 +1350,8 @@
             </div>
             
             <div class="form-group full-width">
-                <label><i class="fas fa-images"></i> Imagens do Produto *</label>
-                
-                <div class="upload-container">
-                    <!-- Área de upload -->
-                    <div class="upload-area" onclick="document.getElementById('editFileInput').click()">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <h3>Clique para selecionar imagens</h3>
-                        <p>ou arraste e solte aqui</p>
-                        <p style="font-size: 12px; margin-top: 10px;">JPG, PNG, WebP (até 10MB)</p>
-                    </div>
-                    
-                    <!-- Input file oculto -->
-                    <input type="file" id="editFileInput" accept="image/jpeg,image/jpg,image/png,image/webp" multiple style="display: none;" onchange="handleEditFileSelect(this.files)">
-                    
-                    <!-- Barra de progresso -->
-                    <div class="upload-progress-container" id="editUploadProgressContainer">
-                        <div class="upload-progress">
-                            <div class="upload-progress-bar" id="editUploadProgressBar"></div>
-                        </div>
-                        <div class="upload-status" id="editUploadStatus">
-                            <i class="fas fa-spinner fa-spin"></i>
-                            <span id="editUploadStatusText">Processando imagens...</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Input para adicionar URL manualmente -->
-                    <div class="upload-url-input">
-                        <input type="url" id="editImageUrlInput" placeholder="https://... (cole uma URL externa)">
-                        <button type="button" onclick="addEditImageFromUrl()">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                    
-                    <!-- Grid de preview das imagens -->
-                    <div class="image-preview-grid" id="editImagePreviewGrid">
-                        <!-- As imagens serão inseridas aqui -->
-                    </div>
-                    
-                    <!-- Textarea oculta para armazenar as URLs -->
-                    <textarea id="editImages" class="images-textarea" placeholder="As URLs serão inseridas automaticamente aqui..." readonly required></textarea>
-                    <small style="color: var(--medium-gray);">A primeira imagem será a principal no site</small>
-                </div>
+                <label>URLs das Imagens (uma por linha) *</label>
+                <textarea id="editImages" required rows="4"></textarea>
             </div>
             
             <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Atualizar Produto</button>
@@ -1662,6 +1644,40 @@
         textarea.value = imageUrls.join('\n');
     }
 
+    // FUNÇÃO PARA UPLOAD GENÉRICO (AVALIAÇÕES E PROVA SOCIAL)
+    async function handleGenericUpload(files, inputId, previewId) {
+        if (!files || files.length === 0) return;
+        const file = files[0]; // Apenas uma foto por vez nestes campos
+        const progressContainer = document.getElementById('uploadProgressContainer');
+        const progressBar = document.getElementById('uploadProgressBar');
+        
+        progressContainer.style.display = 'block';
+        updateUploadStatus(`Convertendo ${file.name}...`);
+
+        try {
+            const url = await uploadImage(file, 0, 1);
+            document.getElementById(inputId).value = url;
+            
+            // Mostrar prévia
+            const grid = document.getElementById(previewId);
+            grid.innerHTML = `
+                <div class="preview-item">
+                    <img src="${url}">
+                    <div class="preview-item-overlay">
+                        <button type="button" onclick="document.getElementById('${inputId}').value=''; document.getElementById('${previewId}').innerHTML=''">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>`;
+            
+            showToast('✅ Upload concluído!');
+        } catch (error) {
+            showToast('Erro no upload: ' + error.message, 'error');
+        } finally {
+            setTimeout(() => { progressContainer.style.display = 'none'; }, 2000);
+        }
+    }
+
     /**
      * Inicializa o preview com URLs existentes
      * @param {string[]} urls - Array de URLs
@@ -1726,15 +1742,22 @@
     }
 
     async function loadAllData() {
-        await Promise.all([
-            loadCategories(),
-            loadProducts(),
-            loadReviews(),
-            loadFaqs(),
-            loadSocialProof(),
-            loadTeamCarousel()
-        ]);
-        updateStats();
+        try {
+            console.log('🚀 Iniciando carregamento de todos os dados...');
+            await Promise.all([
+                loadCategories(),
+                loadProducts(),
+                loadReviews(),
+                loadFaqs(),
+                loadSocialProof(),
+                loadTeamCarousel()
+            ]);
+            console.log('✅ Todos os dados carregados com sucesso!');
+            updateStats();
+        } catch (error) {
+            console.error('❌ Erro ao carregar todos os dados:', error);
+            showToast('Erro ao carregar dados', 'error');
+        }
     }
 
     // ========================================
@@ -1873,20 +1896,38 @@
     // PRODUTOS
     // ========================================
     async function loadProducts() {
-        const { data } = await _supabase
-            .from('products')
-            .select('*, categories(name)')
-            .order('id', { ascending: false });
+        try {
+            console.log('🔄 Carregando produtos...');
+            const { data, error } = await _supabase
+                .from('products')
+                .select('*, categories(name)')
+                .order('id', { ascending: false });
 
-        allProducts = data || [];
-        renderProductTable(allProducts);
+            if (error) {
+                console.error('❌ Erro ao carregar produtos:', error);
+                showToast('Erro ao carregar produtos: ' + error.message, 'error');
+                return;
+            }
+
+            console.log('✅ Produtos carregados:', data);
+            allProducts = data || [];
+            renderProductTable(allProducts);
+        } catch (error) {
+            console.error('❌ Erro na função loadProducts:', error);
+            showToast('Erro ao carregar produtos', 'error');
+        }
     }
 
     function renderProductTable(productsToShow) {
+        console.log('🎨 Renderizando tabela com produtos:', productsToShow);
         const tbody = document.getElementById('productsTableBody');
-        if (!tbody) return;
+        if (!tbody) {
+            console.error('❌ Elemento tbody não encontrado!');
+            return;
+        }
 
         if (!productsToShow || productsToShow.length === 0) {
+            console.log('📭 Nenhum produto para exibir');
             tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:40px;">
                 <i class="fas fa-box-open fa-3x" style="color:var(--medium-gray);"></i>
                 <p>Nenhum produto encontrado</p>
@@ -1894,6 +1935,7 @@
             return;
         }
 
+        console.log(`📊 Renderizando ${productsToShow.length} produtos`);
         tbody.innerHTML = productsToShow.map(p => {
             const img = p.images?.[0] || 'https://via.placeholder.com/60';
             const priceFormatted = parseFloat(p.price).toFixed(2).replace('.', ',');
@@ -1927,6 +1969,7 @@
                 </td>
             </tr>`;
         }).join('');
+        console.log('✅ Tabela renderizada com sucesso!');
     }
 
     function setupProductSearch() {
@@ -1967,10 +2010,9 @@
         document.getElementById('editProductId').value = product.id;
         document.getElementById('editProductName').value = product.name || '';
         document.getElementById('editProductPrice').value = product.price ? product.price.toFixed(2).replace('.', ',') : '';
-        document.getElementById('editAdditionalPrice').value = product.solitario_price ? product.solitario_price.toFixed(2).replace('.', ',') : '';
-        document.getElementById('editAdditionalProductName').value = product.additional_product_name || '';
+        document.getElementById('editSolitarioPrice').value = product.solitario_price ? product.solitario_price.toFixed(2).replace('.', ',') : '';
         document.getElementById('editProductCategory').value = product.category_id || '';
-        document.getElementById('editTemAdicional').checked = product.tem_solitario || false;
+        document.getElementById('editTemSolitario').checked = product.tem_solitario || false;
         document.getElementById('editBadgeText').value = product.badge_text || '';
         document.getElementById('editBadgeColor').value = product.badge_color || '#FBBF24';
         document.getElementById('editSoldToday').checked = product.sold_today || false;
@@ -1980,30 +2022,12 @@
         document.getElementById('editVideoHasAudio').checked = product.video_has_audio !== false;
         document.getElementById('editDescription').value = product.description || '';
         
-        // Carregar imagens existentes no preview
         if (product.images) {
-            let images = [];
             if (Array.isArray(product.images)) {
-                images = product.images;
+                document.getElementById('editImages').value = product.images.join('\n');
             } else if (typeof product.images === 'string') {
-                images = product.images.split('\n').map(url => url.trim()).filter(url => url);
+                document.getElementById('editImages').value = product.images;
             }
-            
-            // Limpar array global e preview
-            editImageUrls = [];
-            const previewGrid = document.getElementById('editImagePreviewGrid');
-            if (previewGrid) {
-                previewGrid.innerHTML = '';
-            }
-            
-            // Adicionar imagens existentes ao preview
-            images.forEach(url => {
-                editImageUrls.push(url);
-                addEditImageToPreview(url);
-            });
-            
-            // Atualizar textarea
-            updateEditImagesTextarea();
         }
         
         document.getElementById('editProductModal').classList.add('active');
@@ -2013,156 +2037,15 @@
         document.getElementById('editProductModal').classList.remove('active');
     }
 
-    // ========================================
-    // FUNÇÕES DE UPLOAD PARA EDIÇÃO
-    // ========================================
-    
-    // Array para imagens da edição
-    let editImageUrls = [];
-    
-    async function handleEditFileSelect(files) {
-        if (!files || files.length === 0) return;
-
-        // Mostrar container de progresso
-        const progressContainer = document.getElementById('editUploadProgressContainer');
-        const progressBar = document.getElementById('editUploadProgressBar');
-        const statusText = document.getElementById('editUploadStatusText');
-        
-        progressContainer.style.display = 'block';
-        progressBar.style.width = '0%';
-        
-        let successCount = 0;
-        let errorCount = 0;
-
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            
-            try {
-                // Atualizar barra de progresso
-                const progress = ((i) / files.length) * 100;
-                progressBar.style.width = `${progress}%`;
-                
-                // Fazer upload
-                const url = await uploadImage(file, i, files.length);
-                
-                // Adicionar URL à lista
-                editImageUrls.push(url);
-                addEditImageToPreview(url);
-                
-                successCount++;
-                
-            } catch (error) {
-                console.error('Erro ao processar imagem:', error);
-                showToast(`Erro em ${file.name}: ${error.message}`, 'error');
-                errorCount++;
-            }
-        }
-
-        // Atualizar barra para 100%
-        progressBar.style.width = '100%';
-        
-        // Mostrar resumo
-        statusText.innerHTML = `${successCount} imagens enviadas com sucesso! ${errorCount > 0 ? `(${errorCount} falhas)` : ''}`;
-        
-        // Esconder progresso após 3 segundos
-        setTimeout(() => {
-            progressContainer.style.display = 'none';
-        }, 3000);
-
-        // Atualizar textarea
-        updateEditImagesTextarea();
-    }
-    
-    function addEditImageFromUrl() {
-        const input = document.getElementById('editImageUrlInput');
-        const url = input.value.trim();
-        
-        if (!url) {
-            showToast('Digite uma URL válida!', 'error');
-            return;
-        }
-        
-        // Validar URL básica
-        try {
-            new URL(url);
-        } catch {
-            showToast('URL inválida!', 'error');
-            return;
-        }
-        
-        editImageUrls.push(url);
-        addEditImageToPreview(url);
-        updateEditImagesTextarea();
-        
-        input.value = '';
-        showToast('✅ Imagem adicionada!');
-    }
-    
-    function addEditImageToPreview(url) {
-        const previewGrid = document.getElementById('editImagePreviewGrid');
-        if (!previewGrid) return;
-        
-        const previewItem = document.createElement('div');
-        previewItem.className = 'preview-item';
-        previewItem.innerHTML = `
-            <img src="${url}" alt="Preview" onerror="this.src='https://via.placeholder.com/100'">
-            <div class="preview-item-overlay">
-                <button type="button" onclick="removeEditImage('${url}')">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-        `;
-        
-        previewGrid.appendChild(previewItem);
-    }
-    
-    function removeEditImage(url) {
-        // Remover do array
-        const index = editImageUrls.indexOf(url);
-        if (index > -1) {
-            editImageUrls.splice(index, 1);
-        }
-        
-        // Remover do preview
-        const previewGrid = document.getElementById('editImagePreviewGrid');
-        if (previewGrid) {
-            const items = previewGrid.querySelectorAll('.preview-item');
-            items.forEach(item => {
-                const img = item.querySelector('img');
-                if (img && img.src === url) {
-                    item.remove();
-                }
-            });
-        }
-        
-        // Atualizar textarea
-        updateEditImagesTextarea();
-    }
-    
-    function updateEditImagesTextarea() {
-        const textarea = document.getElementById('editImages');
-        if (textarea) {
-            textarea.value = editImageUrls.join('\n');
-        }
-    }
-    
-    function updateEditUploadStatus(message) {
-        const statusText = document.getElementById('editUploadStatusText');
-        if (statusText) {
-            statusText.textContent = message;
-        }
-    }
-
     document.getElementById('editProductForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         
         const id = document.getElementById('editProductId').value;
         const name = document.getElementById('editProductName').value.trim();
         const priceRaw = document.getElementById('editProductPrice').value.trim();
-        const additionalPriceRaw = document.getElementById('editAdditionalPrice').value.trim();
-        const additionalProductName = document.getElementById('editAdditionalProductName').value.trim();
+        const solitarioRaw = document.getElementById('editSolitarioPrice').value.trim();
         const categoryId = parseInt(document.getElementById('editProductCategory').value);
-        const temAdicional = document.getElementById('editTemAdicional').checked;
+        const temSolitario = document.getElementById('editTemSolitario').checked;
         const badgeText = document.getElementById('editBadgeText').value.trim() || null;
         const badgeColor = document.getElementById('editBadgeColor').value;
         const soldToday = document.getElementById('editSoldToday').checked;
@@ -2190,20 +2073,19 @@
             return;
         }
 
-        let additionalPrice = parseCurrency(additionalPriceRaw);
-        if (temAdicional && additionalPrice <= 0) {
-            showToast('Preço adicional inválido!', 'error');
+        let solitarioPrice = parseCurrency(solitarioRaw);
+        if (temSolitario && solitarioPrice <= 0) {
+            showToast('Preço do solitário inválido!', 'error');
             return;
         }
-        if (!temAdicional) additionalPrice = 0;
+        if (!temSolitario) solitarioPrice = 0;
 
         const productData = {
             name,
             price,
-            solitario_price: additionalPrice,
-            additional_product_name: additionalProductName,
+            solitario_price: solitarioPrice,
             category_id: categoryId,
-            tem_solitario: temAdicional,
+            tem_solitario: temSolitario,
             badge_text: badgeText,
             badge_color: badgeColor,
             sold_today: soldToday,
@@ -2239,10 +2121,9 @@
 
         const name = document.getElementById('productName').value.trim();
         const priceRaw = document.getElementById('productPrice').value.trim();
-        const additionalPriceRaw = document.getElementById('additionalPrice').value.trim();
-        const additionalProductName = document.getElementById('additionalProductName').value.trim();
+        const solitarioRaw = document.getElementById('solitarioPrice').value.trim();
         const categoryId = parseInt(document.getElementById('productCategory').value);
-        const temAdicional = document.getElementById('temAdicional').checked;
+        const temSolitario = document.getElementById('temSolitario').checked;
         const badgeText = document.getElementById('badgeSelect').value.trim() || null;
         const badgeColor = document.getElementById('badgeColor').value;
         const soldToday = document.getElementById('soldToday').checked;
@@ -2264,32 +2145,25 @@
             return;
         }
 
-        const images = imageUrls;
-        if (images.length === 0) {
-            showToast('Adicione pelo menos uma imagem!', 'error');
-            return;
-        }
-
         const price = parseCurrency(priceRaw);
         if (price <= 0) {
             showToast('Preço inválido!', 'error');
             return;
         }
 
-        let additionalPrice = parseCurrency(additionalPriceRaw);
-        if (temAdicional && additionalPrice <= 0) {
-            showToast('Preço adicional inválido!', 'error');
+        let solitarioPrice = parseCurrency(solitarioRaw);
+        if (temSolitario && solitarioPrice <= 0) {
+            showToast('Preço do solitário inválido!', 'error');
             return;
         }
-        if (!temAdicional) additionalPrice = 0;
+        if (!temSolitario) solitarioPrice = 0;
 
         const productData = {
             name,
             price,
-            solitario_price: additionalPrice,
-            additional_product_name: additionalProductName || null,
+            solitario_price: solitarioPrice,
             category_id: categoryId,
-            tem_solitario: temAdicional,
+            tem_solitario: temSolitario,
             badge_text: badgeText,
             badge_color: badgeColor,
             sold_today: soldToday,
