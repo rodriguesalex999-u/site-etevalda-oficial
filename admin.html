@@ -798,8 +798,12 @@
                         <input type="text" id="productPrice" required placeholder="299,99 ou 299.99">
                     </div>
                     <div class="form-group">
-                        <label><i class="fas fa-gem"></i> Preço do Solitário (R$)</label>
-                        <input type="text" id="solitarioPrice" placeholder="99,99">
+                        <label><i class="fas fa-gem"></i> Preço Adicional (R$)</label>
+                        <input type="text" id="additionalPrice" placeholder="99,99">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Nome do Produto Adicional</label>
+                        <input type="text" id="additionalProductName" placeholder="Ex: Solitário, Corrente, Pulseira...">
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-list"></i> Categoria *</label>
@@ -808,10 +812,10 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label><i class="fas fa-check-circle"></i> Tem Solitário?</label>
+                        <label><i class="fas fa-check-circle"></i> Possui Produto Adicional?</label>
                         <div class="checkbox-group">
-                            <input type="checkbox" id="temSolitario">
-                            <label for="temSolitario">Sim</label>
+                            <input type="checkbox" id="temAdicional">
+                            <label for="temAdicional">Sim</label>
                         </div>
                     </div>
                     
@@ -945,7 +949,7 @@
                             <th>Imagem</th>
                             <th>Nome</th>
                             <th>Preço</th>
-                            <th>Solitário</th>
+                            <th>Adicional</th>
                             <th>Categoria</th>
                             <th>Vendido Hoje</th>
                             <th>Upsell</th>
@@ -1243,21 +1247,22 @@
                     <input type="text" id="editProductPrice" required>
                 </div>
                 <div class="form-group">
-                    <label>Preço do Solitário (R$)</label>
-                    <input type="text" id="editSolitarioPrice">
+                    <label>Preço Adicional (R$)</label>
+                    <input type="text" id="editAdditionalPrice">
                 </div>
-            </div>
-            
-            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nome do Produto Adicional</label>
+                    <input type="text" id="editAdditionalProductName">
+                </div>
                 <div class="form-group">
                     <label>Categoria *</label>
                     <select id="editProductCategory" required></select>
                 </div>
                 <div class="form-group">
-                    <label>Tem Solitário?</label>
+                    <label>Possui Produto Adicional?</label>
                     <div class="checkbox-group">
-                        <input type="checkbox" id="editTemSolitario">
-                        <label for="editTemSolitario">Sim</label>
+                        <input type="checkbox" id="editTemAdicional">
+                        <label for="editTemAdicional">Sim</label>
                     </div>
                 </div>
             </div>
@@ -1962,9 +1967,10 @@
         document.getElementById('editProductId').value = product.id;
         document.getElementById('editProductName').value = product.name || '';
         document.getElementById('editProductPrice').value = product.price ? product.price.toFixed(2).replace('.', ',') : '';
-        document.getElementById('editSolitarioPrice').value = product.solitario_price ? product.solitario_price.toFixed(2).replace('.', ',') : '';
+        document.getElementById('editAdditionalPrice').value = product.solitario_price ? product.solitario_price.toFixed(2).replace('.', ',') : '';
+        document.getElementById('editAdditionalProductName').value = product.additional_product_name || '';
         document.getElementById('editProductCategory').value = product.category_id || '';
-        document.getElementById('editTemSolitario').checked = product.tem_solitario || false;
+        document.getElementById('editTemAdicional').checked = product.tem_solitario || false;
         document.getElementById('editBadgeText').value = product.badge_text || '';
         document.getElementById('editBadgeColor').value = product.badge_color || '#FBBF24';
         document.getElementById('editSoldToday').checked = product.sold_today || false;
@@ -2153,9 +2159,10 @@
         const id = document.getElementById('editProductId').value;
         const name = document.getElementById('editProductName').value.trim();
         const priceRaw = document.getElementById('editProductPrice').value.trim();
-        const solitarioRaw = document.getElementById('editSolitarioPrice').value.trim();
+        const additionalPriceRaw = document.getElementById('editAdditionalPrice').value.trim();
+        const additionalProductName = document.getElementById('editAdditionalProductName').value.trim();
         const categoryId = parseInt(document.getElementById('editProductCategory').value);
-        const temSolitario = document.getElementById('editTemSolitario').checked;
+        const temAdicional = document.getElementById('editTemAdicional').checked;
         const badgeText = document.getElementById('editBadgeText').value.trim() || null;
         const badgeColor = document.getElementById('editBadgeColor').value;
         const soldToday = document.getElementById('editSoldToday').checked;
@@ -2183,19 +2190,20 @@
             return;
         }
 
-        let solitarioPrice = parseCurrency(solitarioRaw);
-        if (temSolitario && solitarioPrice <= 0) {
-            showToast('Preço do solitário inválido!', 'error');
+        let additionalPrice = parseCurrency(additionalPriceRaw);
+        if (temAdicional && additionalPrice <= 0) {
+            showToast('Preço adicional inválido!', 'error');
             return;
         }
-        if (!temSolitario) solitarioPrice = 0;
+        if (!temAdicional) additionalPrice = 0;
 
         const productData = {
             name,
             price,
-            solitario_price: solitarioPrice,
+            solitario_price: additionalPrice,
+            additional_product_name: additionalProductName || null,
             category_id: categoryId,
-            tem_solitario: temSolitario,
+            tem_solitario: temAdicional,
             badge_text: badgeText,
             badge_color: badgeColor,
             sold_today: soldToday,
@@ -2231,9 +2239,10 @@
 
         const name = document.getElementById('productName').value.trim();
         const priceRaw = document.getElementById('productPrice').value.trim();
-        const solitarioRaw = document.getElementById('solitarioPrice').value.trim();
+        const additionalPriceRaw = document.getElementById('additionalPrice').value.trim();
+        const additionalProductName = document.getElementById('additionalProductName').value.trim();
         const categoryId = parseInt(document.getElementById('productCategory').value);
-        const temSolitario = document.getElementById('temSolitario').checked;
+        const temAdicional = document.getElementById('temAdicional').checked;
         const badgeText = document.getElementById('badgeSelect').value.trim() || null;
         const badgeColor = document.getElementById('badgeColor').value;
         const soldToday = document.getElementById('soldToday').checked;
@@ -2255,25 +2264,32 @@
             return;
         }
 
+        const images = imageUrls;
+        if (images.length === 0) {
+            showToast('Adicione pelo menos uma imagem!', 'error');
+            return;
+        }
+
         const price = parseCurrency(priceRaw);
         if (price <= 0) {
             showToast('Preço inválido!', 'error');
             return;
         }
 
-        let solitarioPrice = parseCurrency(solitarioRaw);
-        if (temSolitario && solitarioPrice <= 0) {
-            showToast('Preço do solitário inválido!', 'error');
+        let additionalPrice = parseCurrency(additionalPriceRaw);
+        if (temAdicional && additionalPrice <= 0) {
+            showToast('Preço adicional inválido!', 'error');
             return;
         }
-        if (!temSolitario) solitarioPrice = 0;
+        if (!temAdicional) additionalPrice = 0;
 
         const productData = {
             name,
             price,
-            solitario_price: solitarioPrice,
+            solitario_price: additionalPrice,
+            additional_product_name: additionalProductName || null,
             category_id: categoryId,
-            tem_solitario: temSolitario,
+            tem_solitario: temAdicional,
             badge_text: badgeText,
             badge_color: badgeColor,
             sold_today: soldToday,
