@@ -442,7 +442,7 @@ function renderProductCard(p, index) {
     const priceFormatted = p.price.toFixed(2).replace('.', ',');
 
     const solitarioHtml = p.tem_solitario && p.solitario_price && p.solitario_price > 0
-        ? `<div class="product-solitario"><i class="fas fa-gem"></i> Solitário: R$ ${p.solitario_price.toFixed(2).replace('.', ',')}</div>`
+        ? `<div class="product-solitario"><i class="fas fa-gem"></i> ${p.additional_product_name || 'Solitário'}: R$ ${p.solitario_price.toFixed(2).replace('.', ',')}</div>`
         : '';
 
     const soldTodayHtml = p.sold_today ? `<div class="product-sold-today">Vendido Hoje</div>` : '';
@@ -927,7 +927,7 @@ async function openProductModal(id) {
 
     const solitarioHtml = product.tem_solitario && product.solitario_price > 0 ? `
         <div class="solitario-discreto">
-            <i class="fas fa-gem"></i> Solitário vendido separadamente: R$ ${solitarioFormatted}
+            <i class="fas fa-gem"></i> ${product.additional_product_name || 'Solitário'} vendido separadamente: R$ ${solitarioFormatted}
         </div>
     ` : '';
 
@@ -1256,7 +1256,7 @@ if (currentModalProduct) {
     
     if (product.tem_solitario && product.solitario_price > 0) {
         const total = product.price + product.solitario_price;
-        whatsappMessage = `Olá! Gostei do produto: *${product.name}* + *Solitário* (R$ ${product.solitario_price.toFixed(2).replace('.', ',')}) - Total: R$ ${total.toFixed(2).replace('.', ',')}`;
+        whatsappMessage = `Olá! Gostei do produto: *${product.name}* + *${product.additional_product_name || 'Solitário'}* (R$ ${product.solitario_price.toFixed(2).replace('.', ',')}) - Total: R$ ${total.toFixed(2).replace('.', ',')}`;
     }
     
     whatsappMessage += `. Consegue me entregar hoje?`;
@@ -1585,7 +1585,7 @@ function buyViaWhatsApp(id) {
     
     if (p.tem_solitario && p.solitario_price > 0) {
         const total = p.price + p.solitario_price;
-        msg = `Olá! Gostei do produto: *${p.name}* + *Solitário* (R$ ${p.solitario_price.toFixed(2).replace('.', ',')}) - Total: R$ ${total.toFixed(2).replace('.', ',')}`;
+        msg = `Olá! Gostei do produto: *${p.name}* + *${p.additional_product_name || 'Solitário'}* (R$ ${p.solitario_price.toFixed(2).replace('.', ',')}) - Total: R$ ${total.toFixed(2).replace('.', ',')}`;
     }
     
     msg += `. Consegue me entregar hoje?`;
