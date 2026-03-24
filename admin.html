@@ -1062,7 +1062,7 @@
         <div class="table-section">
             <h2 class="section-title"><i class="fas fa-list"></i> Avaliações</h2>
             <div class="table-responsive">
-                <table>
+                能able
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -1350,8 +1350,43 @@
             </div>
             
             <div class="form-group full-width">
-                <label>URLs das Imagens (uma por linha) *</label>
-                <textarea id="editImages" required rows="4"></textarea>
+                <label><i class="fas fa-images"></i> Imagens do Produto *</label>
+                <div class="upload-container">
+                    <!-- Área de upload -->
+                    <div class="upload-area" onclick="document.getElementById('editFileInput').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h3>Clique para selecionar imagens</h3>
+                        <p>ou arraste e solte aqui</p>
+                        <small>Formatos: JPG, PNG, WebP (máx 10MB)</small>
+                        <input type="file" id="editFileInput" accept="image/*" multiple style="display: none;">
+                    </div>
+                    
+                    <!-- Container de progresso -->
+                    <div class="upload-progress-container" id="editUploadProgressContainer">
+                        <div class="upload-progress">
+                            <div class="upload-progress-bar" id="editUploadProgressBar"></div>
+                        </div>
+                        <div class="upload-status" id="editUploadStatusText">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Enviando imagens...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Preview das imagens -->
+                    <div class="image-preview-grid" id="editImagePreviewGrid"></div>
+                    
+                    <!-- Opção de adicionar URL manualmente -->
+                    <div class="upload-url-input">
+                        <input type="url" id="editImageUrlInput" placeholder="https://exemplo.com/imagem.jpg">
+                        <button type="button" onclick="addEditImageFromUrl()">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Textarea oculta para armazenar as URLs -->
+                    <textarea id="editImages" class="images-textarea" placeholder="As URLs serão inseridas automaticamente aqui..." readonly></textarea>
+                    <small style="color: var(--medium-gray);">A primeira imagem será a principal no site</small>
+                </div>
             </div>
             
             <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Atualizar Produto</button>
@@ -1392,6 +1427,9 @@
     
     // Array para armazenar as URLs das imagens
     let imageUrls = [];
+    
+    // Array para armazenar as URLs das imagens no modo de edição
+    let editImageUrls = [];
 
     // ========================================
     // FUNÇÕES DE UPLOAD E CONVERSÃO WEBP
@@ -1695,6 +1733,161 @@
     }
 
     // ========================================
+    // FUNÇÕES DE UPLOAD PARA MODO DE EDIÇÃO
+    // ========================================
+
+    /**
+     * Processa múltiplas imagens selecionadas no modo de edição
+     * @param {FileList} files - Lista de arquivos selecionados
+     */
+    async function handleEditFileSelect(files) {
+        if (!files || files.length === 0) return;
+
+        // Mostrar container de progresso
+        const progressContainer = document.getElementById('editUploadProgressContainer');
+        const progressBar = document.getElementById('editUploadProgressBar');
+        const statusText = document.getElementById('editUploadStatusText');
+        
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+        
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            
+            try {
+                // Atualizar barra de progresso
+                const progress = ((i) / files.length) * 100;
+                progressBar.style.width = `${progress}%`;
+                
+                // Fazer upload
+                const url = await uploadImage(file, i, files.length);
+                
+                // Adicionar URL à lista de edição
+                editImageUrls.push(url);
+                addEditImageToPreview(url);
+                
+                successCount++;
+                
+            } catch (error) {
+                console.error('Erro ao processar imagem:', error);
+                showToast(`Erro em ${file.name}: ${error.message}`, 'error');
+                errorCount++;
+            }
+        }
+
+        // Atualizar barra para 100%
+        progressBar.style.width = '100%';
+        
+        // Mostrar resumo
+        statusText.innerHTML = `${successCount} imagens enviadas com sucesso! ${errorCount > 0 ? `(${errorCount} falhas)` : ''}`;
+        
+        // Esconder progresso após 3 segundos
+        setTimeout(() => {
+            progressContainer.style.display = 'none';
+        }, 3000);
+
+        // Atualizar textarea de edição
+        updateEditImagesTextarea();
+    }
+
+    /**
+     * Adiciona uma imagem ao preview no modo de edição
+     * @param {string} url - URL da imagem
+     */
+    function addEditImageToPreview(url) {
+        const grid = document.getElementById('editImagePreviewGrid');
+        
+        const item = document.createElement('div');
+        item.className = 'preview-item';
+        item.innerHTML = `
+            <img src="${url}" alt="Preview" loading="lazy">
+            <div class="preview-item-overlay">
+                <button type="button" onclick="removeEditImage('${url}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+        
+        grid.appendChild(item);
+    }
+
+    /**
+     * Remove uma imagem do preview e da lista no modo de edição
+     * @param {string} url - URL da imagem a remover
+     */
+    function removeEditImage(url) {
+        // Remover do array de edição
+        editImageUrls = editImageUrls.filter(u => u !== url);
+        
+        // Remover do preview de edição
+        const grid = document.getElementById('editImagePreviewGrid');
+        const items = grid.querySelectorAll('.preview-item');
+        items.forEach(item => {
+            const img = item.querySelector('img');
+            if (img && img.src === url) {
+                item.remove();
+            }
+        });
+        
+        // Atualizar textarea de edição
+        updateEditImagesTextarea();
+    }
+
+    /**
+     * Adiciona uma imagem a partir de URL externa no modo de edição
+     */
+    function addEditImageFromUrl() {
+        const urlInput = document.getElementById('editImageUrlInput');
+        const url = urlInput.value.trim();
+        
+        if (!url) {
+            showToast('Digite uma URL válida!', 'error');
+            return;
+        }
+        
+        // Validação básica de URL
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            showToast('URL deve começar com http:// ou https://', 'error');
+            return;
+        }
+        
+        // Adicionar à lista de edição
+        editImageUrls.push(url);
+        addEditImageToPreview(url);
+        updateEditImagesTextarea();
+        
+        // Limpar input
+        urlInput.value = '';
+    }
+
+    /**
+     * Atualiza o textarea com todas as URLs das imagens no modo de edição
+     */
+    function updateEditImagesTextarea() {
+        const textarea = document.getElementById('editImages');
+        textarea.value = editImageUrls.join('\n');
+    }
+
+    /**
+     * Inicializa o preview com URLs existentes no modo de edição
+     * @param {string[]} urls - Array de URLs
+     */
+    function initializeEditImagePreview(urls) {
+        const grid = document.getElementById('editImagePreviewGrid');
+        grid.innerHTML = '';
+        editImageUrls = urls || [];
+        
+        editImageUrls.forEach(url => {
+            addEditImageToPreview(url);
+        });
+        
+        updateEditImagesTextarea();
+    }
+
+    // ========================================
     // LOGIN SEGURO COM SUPABASE AUTH
     // ========================================
     async function loginWithSupabase() {
@@ -1786,6 +1979,37 @@
     // ========================================
     document.getElementById('badgeSelect')?.addEventListener('input', updateTagPreview);
     document.getElementById('badgeColor')?.addEventListener('change', updateTagPreview);
+    
+    // Event listeners para upload de imagens no modo de edição
+    document.getElementById('editFileInput')?.addEventListener('change', (e) => {
+        if (e.target.files[0]) {
+            handleEditFileSelect(e.target.files);
+        }
+    });
+    
+    // Drag and drop para upload no modo de edição
+    const editUploadArea = document.getElementById('editFileInput')?.parentElement;
+    if (editUploadArea) {
+        editUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            editUploadArea.style.borderColor = 'var(--gold-primary)';
+            editUploadArea.style.background = 'var(--gold-light)';
+        });
+        
+        editUploadArea.addEventListener('dragleave', () => {
+            editUploadArea.style.borderColor = '';
+            editUploadArea.style.background = '';
+        });
+        
+        editUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            editUploadArea.style.borderColor = '';
+            editUploadArea.style.background = '';
+            if (e.dataTransfer.files[0]) {
+                handleEditFileSelect(e.dataTransfer.files);
+            }
+        });
+    }
     
     function updateTagPreview() {
         const text = document.getElementById('badgeSelect').value.trim();
@@ -2023,11 +2247,15 @@
         document.getElementById('editDescription').value = product.description || '';
         
         if (product.images) {
+            let imagesArray = [];
             if (Array.isArray(product.images)) {
-                document.getElementById('editImages').value = product.images.join('\n');
+                imagesArray = product.images;
             } else if (typeof product.images === 'string') {
-                document.getElementById('editImages').value = product.images;
+                imagesArray = product.images.split('\n').filter(url => url.trim());
             }
+            
+            // Inicializar o preview das imagens no modo de edição
+            initializeEditImagePreview(imagesArray);
         }
         
         document.getElementById('editProductModal').classList.add('active');
@@ -2035,6 +2263,13 @@
 
     function closeEditModal() {
         document.getElementById('editProductModal').classList.remove('active');
+        // Limpar as imagens de edição ao fechar o modal
+        editImageUrls = [];
+        const editGrid = document.getElementById('editImagePreviewGrid');
+        if (editGrid) {
+            editGrid.innerHTML = '';
+        }
+        updateEditImagesTextarea();
     }
 
     document.getElementById('editProductForm')?.addEventListener('submit', async (e) => {
@@ -2054,14 +2289,14 @@
         const videoUrl = document.getElementById('editVideoUrl').value.trim() || null;
         const videoHasAudio = document.getElementById('editVideoHasAudio').checked;
         const description = document.getElementById('editDescription').value.trim() || null;
-        const imagesRaw = document.getElementById('editImages').value.trim();
-
+        
         if (!name || !priceRaw || !categoryId) {
             showToast('Preencha os campos obrigatórios!', 'error');
             return;
         }
-
-        const images = imagesRaw.split('\n').map(l => l.trim()).filter(l => l);
+        
+        // Usar o array de imagens de edição em vez do textarea
+        const images = editImageUrls;
         if (images.length === 0) {
             showToast('Adicione pelo menos uma imagem!', 'error');
             return;

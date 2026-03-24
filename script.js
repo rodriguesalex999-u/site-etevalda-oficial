@@ -1,262 +1,82 @@
 // ========================================
-// GRUPO ETEVALDA MT - MOBILE-FIRST SCRIPT
-// VERSÃO OTIMIZADA PARA COREWEBVITALS
+// GRUPO ETEVALDA MT - VERSÃO FUNCIONAL
 // ========================================
 
-// ========================================
 // 1. CONFIGURAÇÃO DO SUPABASE
-// ========================================
 const SUPABASE_URL = 'https://vnrfmsyanrvqqhmqyixk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_xGLDFQarl-DhshRW0932FQ_asug0TUK';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ========================================
 // 2. ESTADO DA APLICAÇÃO
-// ========================================
 let products = [];
 let categories = [];
-let teamCarouselItems = [];
-let allReviews = [];
-let faqs = [];
-let socialProofImages = [];
 let cart = [];
 let currentCategory = 'all';
 let searchQuery = '';
-
-// Variáveis para Lazy Loading - Mobile first: 6 produtos
-let currentPage = 1;
-let productsPerPage = 12;
-let hasMoreProducts = true;
-let isLoadingMore = false;
 let allProductsLoaded = [];
-
-// Variáveis do modal
-let currentModalProduct = null;
-let currentMediaList = [];
-
-// Variáveis do Super Zoom
+let faqs = [];
+let socialProofImages = [];
+let deliveryTimerInterval = null;
+let viewerIncrementTimeout = null;
 let currentZoomIndex = 0;
 let superZoomMediaList = [];
+let currentModalProduct = null;
+let currentMediaList = [];
+let currentMediaIndex = 0;
+let complementShownIds = [];
+let isLoadingMoreComplement = false;
+let productViewers = {};
+let viewerOpenCount = 0;
 
-// Variáveis para Touch Swipe
-let touchStartX = 0;
-let touchEndX = 0;
-
-// Variáveis para o cronômetro de entrega
-let deliveryTimerInterval = null;
-
-// Link do WhatsApp
-const WHATSAPP_BASE_URL = 'https://api.whatsapp.com/send/?phone=5565993337205&text=Já%20vi%20seu%20catálogo,%20quero%20comprar,%20consegue%20me%20entregar%20hoje?&type=phone_number&app_absent=0';
-
-// Configuração da imagem da equipe
-let teamImageUrl = '';
-
-// ========================================
-// 3. DICIONÁRIO DE BAIRROS - INTELIGÊNCIA NACIONAL
-// ========================================
+// Dicionários para notificações geo-localizadas
 const NEIGHBORHOODS = {
-    'Cuiabá': ['Pedra 90', 'Cristo Rei', 'Cpa 2', 'Jardim Vitoria', 'Santa Rosa'],
-    'Rondonópolis': ['Vila Aurora', 'Jardim Primavera', 'Vila Operaria', 'Cidade Alta', 'Parque Sagrada Familia'],
-    'Sinop': ['Jardim Jacarandas', 'São Cristovão', 'Jardim Violetas', 'Centro Comercial'],
-    'Diamantino': ['Novo Diamantino', 'Jardim Imperial', 'Jardim das Americas', 'Bairro da Ponte', 'São Benedito']
+    'Cuiabá': ['Centro', 'Alvorada', 'Porto', 'Duque de Caxias', 'Popular', 'Goiaba'],
+    'Várzea Grande': ['Centro', 'Jardim América', 'Morada do Ouro', 'Santa Izabel', 'Planalto'],
+    'Rondonópolis': ['Centro', 'Ouro Branco', 'Jardim dos Girassóis'],
+    'Barra do Bugres': ['Centro', 'Setor Sul', 'Vila Operária']
 };
 
-const GENERIC_NEIGHBORHOODS = ['Centro', 'Vila Nova', 'Jardim Planalto', 'Bairro Novo', 'Parque das Nações', 'Jardim das Flores'];
-
-const CUSTOMER_NAMES = [
-    'Ana', 'Bruna', 'Carla', 'Daniela', 'Fernanda', 'Gabriela', 'Helena', 'Isabela',
-    'João', 'Pedro', 'Lucas', 'Mateus', 'Rafael', 'Thiago'
-];
+const CUSTOMER_NAMES = ['Ana', 'Maria', 'João', 'Pedro', 'Carla', 'Lucas', 'Fernanda', 'Carlos'];
 let detectedLocation = { city: 'Cuiabá', neighborhoods: NEIGHBORHOODS['Cuiabá'] };
+let detectedState = 'MT';
 
-// ========================================
-// 4. PWA - SMART INSTALL PROMPT
-// ========================================
-let deferredPrompt;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-
-    const hasSeenPrompt = localStorage.getItem('pwa_prompt_shown');
-
-    if (!hasSeenPrompt) {
-        setTimeout(() => {
-            showInstallPrompt();
-        }, 165000);
-    }
-});
-
-function showInstallPrompt() {
-    if (localStorage.getItem('pwa_prompt_shown')) return;
-
-    const promptBanner = document.createElement('div');
-    promptBanner.id = 'pwa-install-banner';
-    promptBanner.className = 'pwa-install-banner';
-    promptBanner.innerHTML = `
-        <div class="pwa-banner-content">
-            <div class="pwa-icon"><i class="fas fa-crown"></i></div>
-            <div class="pwa-text">
-                <strong>Instale o App Etevalda MT</strong>
-                <span>Tenha acesso rápido e ofertas exclusivas</span>
-            </div>
-            <div class="pwa-buttons">
-                <button class="pwa-install-btn">Instalar App</button>
-                <button class="pwa-later-btn">Agora não</button>
-            </div>
-        </div>
-    `;
-
-    document.body.appendChild(promptBanner);
-
-    setTimeout(() => {
-        promptBanner.classList.add('show');
-    }, 100);
-
-    promptBanner.querySelector('.pwa-install-btn').addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-
-        if (outcome === 'accepted') {
-            console.log('Usuário aceitou instalar o PWA');
-            trackPWAInteraction('installed');
-        }
-
-        deferredPrompt = null;
-        promptBanner.remove();
-    });
-
-    promptBanner.querySelector('.pwa-later-btn').addEventListener('click', () => {
-        trackPWAInteraction('dismissed');
-        promptBanner.remove();
-    });
-}
-
-function trackPWAInteraction(action) {
-    localStorage.setItem('pwa_prompt_shown', 'true');
-    localStorage.setItem('pwa_action', action);
-    localStorage.setItem('pwa_timestamp', Date.now().toString());
-}
-
-// ========================================
-// 5. MANIFEST.JSON
-// ========================================
-function createManifest() {
-    const manifest = {
-        name: 'Etevalda MT',
-        short_name: 'Etevalda',
-        description: 'A maior loja de variedades de Mato Grosso',
-        start_url: '/',
-        display: 'standalone',
-        background_color: '#D4AF37',
-        theme_color: '#D4AF37',
-        icons: []
-    };
-
-    const manifestString = JSON.stringify(manifest);
-    const blob = new Blob([manifestString], { type: 'application/json' });
-    const manifestURL = URL.createObjectURL(blob);
-
-    let link = document.querySelector('link[rel="manifest"]');
-    if (!link) {
-        link = document.createElement('link');
-        link.rel = 'manifest';
-        document.head.appendChild(link);
-    }
-    link.href = manifestURL;
-}
-
-// ========================================
-// 6. FUNÇÃO PARA FILTRAR IMAGENS POSTIMG.CC
-// ========================================
-function isValidImageUrl(url) {
-    return url && url.trim() !== '';
-}
-
-function filterValidImages(images) {
-    if (!Array.isArray(images)) return [];
-    return images.filter(img => isValidImageUrl(img));
-}
-
-// ========================================
-// 7. FUNÇÕES DE CARREGAMENTO
-// ========================================
+// 3. FUNÇÕES DE CARREGAMENTO
 async function loadProducts(reset = false) {
     if (reset) {
-        currentPage = 1;
         allProductsLoaded = [];
-        hasMoreProducts = true; 
     }
-
-    if (!hasMoreProducts || isLoadingMore) return;
-
-    isLoadingMore = true;
-    if (!reset) showLoadingMore();
 
     try {
         let query = _supabase.from('products').select('*');
 
         if (currentCategory !== 'all') {
-            query = query.eq('category_id', currentCategory).order('id', { ascending: false }).limit(1000); 
-            hasMoreProducts = false;    
+            query = query.eq('category_id', currentCategory).order('id', { ascending: false });
         } else {
-            const from = (currentPage - 1) * productsPerPage;
-            const to = from + productsPerPage - 1;
-            query = query.order('random_index').range(from, to);
-            hasMoreProducts = true;
+            query = query.order('random_index');
         }
 
         const { data, error } = await query;
         if (error) throw error;
 
         if (data && data.length > 0) {
-            let filteredData = data.filter(p => {
-                const validImages = filterValidImages(p.images);
-                return validImages.length > 0;
-            }).map(p => ({
-                ...p,
-                images: filterValidImages(p.images)
-            }));
-
-            if (currentCategory === 'all') {
-                filteredData = filteredData.sort(() => Math.random() - 0.5);
-            }
+            const filteredData = data.filter(p => {
+                const images = Array.isArray(p.images) ? p.images : [];
+                return images.length > 0;
+            });
 
             allProductsLoaded = reset ? filteredData : [...allProductsLoaded, ...filteredData];
-            products = allProductsLoaded;
-
-            if (currentCategory === 'all' && data.length < productsPerPage) {
-                hasMoreProducts = false;
-            }
-            currentPage++;
-        } else {
-            hasMoreProducts = false;
         }
 
         renderProducts();
 
     } catch (error) {
         console.error('Erro ao carregar produtos:', error);
-    } finally {
-        isLoadingMore = false;
-        hideLoadingMore();
-        showLoading(false);
     }
 }
 
 async function loadCategories() {
     const { data } = await _supabase.from('categories').select('*').order('id');
     categories = data || [];
-}
-
-async function loadReviews() {
-    const { data } = await _supabase
-        .from('reviews')
-        .select('*, products(name)')
-        .order('id', { ascending: false });
-    allReviews = data || [];
 }
 
 async function loadFaqs() {
@@ -271,226 +91,12 @@ async function loadSocialProof() {
         .eq('is_active', true)
         .order('display_order');
     
-    socialProofImages = (data || []).filter(item => isValidImageUrl(item.image_url));
-}
-
-// ========================================
-// NOVAS FUNÇÕES: CARROSSEL DA EQUIPE
-// ========================================
-async function loadTeamCarousel() {
-    const { data } = await _supabase
-        .from('team_carousel')
-        .select('*')
-        .eq('is_active', true)
-        .order('display_order', { ascending: true });
-
-    teamCarouselItems = data || [];
-    console.log('Fotos da equipe carregadas:', teamCarouselItems.length);
-}
-
-function renderTeamCarousel() {
-    const section = document.getElementById('teamCarouselSection');
-    const track = document.getElementById('teamCarouselTrack');
-    const dotsContainer = document.getElementById('teamCarouselDots');
-
-    if (!section || !track) return;
-
-    if (teamCarouselItems.length === 0) {
-        section.style.display = 'none';
-        return;
-    }
-
-    section.style.display = 'block';
-    section.classList.add('visible');
-
-    track.innerHTML = teamCarouselItems.map(item => `
-        <div class="team-carousel-item">
-            <img src="${item.image_url}" alt="Equipe Etevalda" class="team-carousel-image" loading="lazy" onerror="this.src='https://via.placeholder.com/800x450?text=Equipe'">
-            ${item.caption ? `<div class="team-carousel-caption">${item.caption}</div>` : ''}
-        </div>
-    `).join('');
-
-    if (dotsContainer) {
-        dotsContainer.innerHTML = teamCarouselItems.map((_, index) => `
-            <button class="team-carousel-dot ${index === 0 ? 'active' : ''}" data-index="${index}"></button>
-        `).join('');
-    }
-
-    initTeamCarousel();
-}
-
-function initTeamCarousel() {
-    const track = document.getElementById('teamCarouselTrack');
-    const dots = document.querySelectorAll('.team-carousel-dot');
-    if (!track || dots.length === 0) return;
-
-    let currentIndex = 0;
-    let startX = 0;
-    let currentX = 0;
-    let isDragging = false;
-
-    const updateCarousel = (index) => {
-        if (index < 0) index = 0;
-        if (index >= teamCarouselItems.length) index = teamCarouselItems.length - 1;
-        
-        currentIndex = index;
-        const translateX = -currentIndex * 100;
-        track.style.transform = `translateX(${translateX}%)`;
-
-        dots.forEach((dot, i) => {
-            dot.classList.toggle('active', i === currentIndex);
-        });
-    };
-
-    dots.forEach(dot => {
-        dot.addEventListener('click', (e) => {
-            const index = parseInt(e.target.dataset.index);
-            updateCarousel(index);
-        });
+    socialProofImages = (data || []).filter(item => {
+        return item.image_url && item.image_url.trim() !== '';
     });
-
-    const handleDragStart = (e) => {
-        isDragging = true;
-        startX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-        currentX = startX;
-        track.style.transition = 'none';
-        track.style.cursor = 'grabbing';
-    };
-
-    const handleDragMove = (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        
-        const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-        const diff = clientX - currentX;
-        currentX = clientX;
-
-        const currentTranslate = parseFloat(track.style.transform.replace('translateX(', '').replace('%)', '')) || 0;
-        const newTranslate = currentTranslate + (diff / track.clientWidth) * 100;
-        
-        if (newTranslate > 10 || newTranslate < -((teamCarouselItems.length - 1) * 100) - 10) return;
-        
-        track.style.transform = `translateX(${newTranslate}%)`;
-    };
-
-    const handleDragEnd = () => {
-        if (!isDragging) return;
-        isDragging = false;
-        track.style.transition = 'transform 0.3s ease';
-        track.style.cursor = 'grab';
-
-        const currentTranslate = parseFloat(track.style.transform.replace('translateX(', '').replace('%)', '')) || 0;
-        const itemIndex = Math.round(-currentTranslate / 100);
-        const newIndex = Math.max(0, Math.min(itemIndex, teamCarouselItems.length - 1));
-        updateCarousel(newIndex);
-    };
-
-    track.addEventListener('mousedown', handleDragStart);
-    track.addEventListener('touchstart', handleDragStart, { passive: true });
-    
-    window.addEventListener('mousemove', handleDragMove);
-    window.addEventListener('touchmove', handleDragMove, { passive: false });
-    
-    window.addEventListener('mouseup', handleDragEnd);
-    window.addEventListener('touchend', handleDragEnd);
-
-    track.addEventListener('dragstart', (e) => e.preventDefault());
-
-    updateCarousel(0);
 }
 
-// ========================================
-// 8. FUNÇÃO PARA CARREGAR IMAGEM DA EQUIPE (ANTIGA)
-// ========================================
-async function loadTeamImage() {
-    try {
-        const { data, error } = await _supabase
-            .from('social_proof')
-            .select('image_url')
-            .eq('caption', 'TEAM_IMAGE')
-            .order('id', { ascending: false })
-            .limit(1);
-        
-        if (!error && data && data.length > 0) {
-            teamImageUrl = data[0].image_url;
-        } else {
-            teamImageUrl = 'https://via.placeholder.com/800x450?text=Equipe+Etevalda';
-        }
-        
-        const teamImg = document.getElementById('teamImage');
-        if (teamImg) {
-            teamImg.src = teamImageUrl;
-            teamImg.onerror = () => {
-                teamImg.src = 'https://via.placeholder.com/800x450?text=Equipe+Etevalda';
-            };
-        }
-    } catch (error) {
-        console.error('Erro ao carregar imagem da equipe:', error);
-    }
-}
-
-// ========================================
-// 9. FUNÇÕES DE RENDERIZAÇÃO
-// ========================================
-function renderProductCard(p, index) {
-    const images = Array.isArray(p.images) ? p.images : [];
-    const mainImage = images[0] || 'https://via.placeholder.com/200';
-    
-    const loadingStrategy = index < 2 ? 'eager' : 'lazy';
-    const priority = index === 0 ? 'fetchpriority="high"' : '';
-    const secondImage = images[1] || mainImage;
-    const priceFormatted = p.price.toFixed(2).replace('.', ',');
-
-    const solitarioHtml = p.tem_solitario && p.solitario_price && p.solitario_price > 0
-        ? `<div class="product-solitario"><i class="fas fa-gem"></i> ${p.additional_product_name || 'Solitário'}: R$ ${p.solitario_price.toFixed(2).replace('.', ',')}</div>`
-        : '';
-
-    const soldTodayHtml = p.sold_today ? `<div class="product-sold-today">Vendido Hoje</div>` : '';
-
-    return `
-        <div class="product-card"
-            onclick="openProductModal(${p.id})"
-            onmouseenter="hoverImage(this, '${secondImage}')"
-            onmouseleave="unhoverImage(this, '${mainImage}')"
-            ontouchstart="hoverImage(this, '${secondImage}')"
-            ontouchend="unhoverImage(this, '${mainImage}')"
-            data-main-image="${mainImage}"
-            data-second-image="${secondImage}">
-            <div class="product-image">
-                ${soldTodayHtml}
-                ${p.badge_text ? `<div class="product-badge">${p.badge_text}</div>` : ''}
-<img src="${mainImage}" alt="${p.name}" loading="${loadingStrategy}" ${priority} onerror="this.src='https://via.placeholder.com/200'">            </div>
-            <div class="product-info">
-                <span class="product-category">${p.categories?.name || ''}</span>
-                <h3 class="product-name">${p.name}</h3>
-                <div class="product-price">R$ ${priceFormatted}</div>
-                ${solitarioHtml}
-                <div class="product-buttons" onclick="event.stopPropagation()">
-                    <button class="btn-primary" onclick="addToCart(${p.id})">
-                        <i class="fas fa-cart-plus"></i>
-                    </button>
-                    <button class="btn-secondary" aria-label="Comprar ${p.name} pelo WhatsApp" onclick="buyViaWhatsApp(${p.id})">
-                        <i class="fab fa-whatsapp"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-window.hoverImage = function(card, secondImage) {
-    const img = card.querySelector('.product-image img');
-    const mainImage = card.dataset.mainImage;
-    if (secondImage !== mainImage) {
-        img.src = secondImage;
-    }
-};
-
-window.unhoverImage = function(card, mainImage) {
-    const img = card.querySelector('.product-image img');
-    img.src = mainImage;
-};
-
+// 4. FUNÇÕES DE RENDERIZAÇÃO
 function renderProducts() {
     const container = document.getElementById('productsContainer');
     if (!container) return;
@@ -506,7 +112,39 @@ function renderProducts() {
         return;
     }
 
-    container.innerHTML = filtered.map((p, index) => renderProductCard(p, index)).join('');
+    // Gerar viewers aleatórios para cada produto (consistente enquanto na mesma renderização)
+    filtered.forEach(p => {
+        if (!productViewers[p.id]) {
+            productViewers[p.id] = Math.floor(Math.random() * 38) + 3;
+        }
+    });
+
+    container.innerHTML = filtered.map(p => {
+        const images = Array.isArray(p.images) ? p.images : [];
+        const hasMultipleImages = images.length > 1;
+        const soldTodayHtml = p.sold_today ? '<div class="product-sold-today">Vendido Hoje</div>' : '';
+        const viewers = productViewers[p.id] || 5;
+        const fakeMarkup = 1 + (0.15 + (((p.id * 7) % 16) / 100));
+        const oldPrice = (p.price * fakeMarkup).toFixed(2).replace('.', ',');
+        
+        return `
+        <div class="product-card" onclick="openProductModal(${p.id})">
+            <div class="product-image ${hasMultipleImages ? 'has-hover' : ''}">
+                <img id="product-img-${p.id}" src="${images[0] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-main">
+                ${hasMultipleImages ? `<img id="product-img-hover-${p.id}" src="${images[1] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-hover">` : ''}
+                ${soldTodayHtml}
+            </div>
+            <div class="product-info">
+                <h3>${p.name}</h3>
+                <div class="product-price-block">
+                    <span class="price-old">R$ ${oldPrice}</span>
+                    <span class="product-price">R$ ${p.price.toFixed(2).replace('.', ',')}</span>
+                </div>
+                <div class="product-viewers-badge"><i class="fas fa-eye"></i> ${viewers}</div>
+            </div>
+        </div>
+    `;
+    }).join('');
 }
 
 function renderCategories() {
@@ -519,41 +157,507 @@ function renderCategories() {
         list.innerHTML += `<li data-category="${cat.id}">${cat.name}</li>`;
     });
 
-    // Verificar se tem categoria na URL ao carregar
-    checkCategoryFromURL();
-
     list.querySelectorAll('li').forEach(button => {
         button.addEventListener('click', () => {
             list.querySelectorAll('li').forEach(el => el.classList.remove('active'));
             button.classList.add('active');
             
             currentCategory = button.dataset.category;
-            currentPage = 1; 
-            allProductsLoaded = []; 
-            hasMoreProducts = true; 
-
-            // MUDAR A URL SEM RECARREGAR A PÁGINA
-            if (currentCategory === 'all') {
-                history.pushState({}, '', '/');
-            } else {
-                // Encontrar o nome da categoria pelo ID
-                const category = categories.find(c => c.id == currentCategory);
-                if (category) {
-                    const categorySlug = category.name.toLowerCase()
-                        .replace(/\s+/g, '-')
-                        .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                    history.pushState({ category: currentCategory }, '', `/#${categorySlug}`);
-                }
-            }
-
-            const container = document.getElementById('productsContainer');
-            if (container) container.innerHTML = ''; 
+            allProductsLoaded = [];
+            productViewers = {};
             
-            showLoading(true); 
+            const container = document.getElementById('productsContainer');
+            if (container) container.innerHTML = '';
+            
             loadProducts(true);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });
+}
+
+// Funções de Hover de Imagem
+window.hoverImage = function(productId, hoverState) {
+    const mainImg = document.getElementById(`product-img-${productId}`);
+    const hoverImg = document.getElementById(`product-img-hover-${productId}`);
+    
+    if (mainImg && hoverImg) {
+        mainImg.style.display = hoverState ? 'none' : 'block';
+        hoverImg.style.display = hoverState ? 'block' : 'none';
+    }
+};
+
+window.unhoverImage = function(productId, hoverState) {
+    const mainImg = document.getElementById(`product-img-${productId}`);
+    const hoverImg = document.getElementById(`product-img-hover-${productId}`);
+    
+    if (mainImg && hoverImg) {
+        mainImg.style.display = 'block';
+        hoverImg.style.display = 'none';
+    }
+};
+
+// Funções de Super Zoom
+function openSuperZoom(productId) {
+    const product = allProductsLoaded.find(p => p.id === productId);
+    if (!product) return;
+
+    const images = Array.isArray(product.images) ? product.images : [];
+    superZoomMediaList = images;
+    currentZoomIndex = 0;
+    currentModalProduct = product;
+
+    renderSuperZoomMedia();
+    document.getElementById('superZoomOverlay').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function renderSuperZoomMedia() {
+    const content = document.getElementById('superZoomContent');
+    if (!content || !superZoomMediaList.length) return;
+
+    const currentImage = superZoomMediaList[currentZoomIndex];
+    const navigationHtml = superZoomMediaList.length > 1 ? `
+        <button class="super-zoom-nav super-zoom-prev" onclick="changeZoom(-1)">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="super-zoom-nav super-zoom-next" onclick="changeZoom(1)">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    ` : '';
+
+    const whatsappHtml = currentModalProduct ? `
+        <button class="super-zoom-whatsapp" onclick="buyViaWhatsApp(${currentModalProduct.id})">
+            <i class="fab fa-whatsapp"></i> Comprar Agora
+        </button>
+    ` : '';
+
+    const counterHtml = superZoomMediaList.length > 1 ? 
+        `<div class="super-zoom-counter">${currentZoomIndex + 1} / ${superZoomMediaList.length}</div>` : '';
+
+    const solitarioZoomHtml = currentModalProduct && currentModalProduct.tem_solitario && currentModalProduct.solitario_price > 0 ? `
+        <div class="solitario-overlay solitario-overlay-zoom">
+            <i class="fas fa-gem"></i> Solitário vendido separado: R$ ${currentModalProduct.solitario_price.toFixed(2).replace('.', ',')}
+        </div>
+    ` : '';
+
+    content.innerHTML = `
+        ${navigationHtml}
+        <div class="super-zoom-image-container" style="position: relative;">
+            <img src="${currentImage}" alt="Super Zoom" style="max-width: 90vw; max-height: 90vh; object-fit: contain;">
+            ${solitarioZoomHtml}
+        </div>
+        ${counterHtml}
+        ${whatsappHtml}
+    `;
+}
+
+function changeZoom(direction) {
+    if (superZoomMediaList.length <= 1) return;
+    
+    currentZoomIndex = (currentZoomIndex + direction + superZoomMediaList.length) % superZoomMediaList.length;
+    renderSuperZoomMedia();
+}
+
+window.closeSuperZoom = function() {
+    document.getElementById('superZoomOverlay').style.display = 'none';
+    document.body.style.overflow = '';
+    superZoomMediaList = [];
+    currentZoomIndex = 0;
+    currentModalProduct = null;
+};
+
+// Funções de Timer e Notificações
+function startDeliveryTimer() {
+    if (deliveryTimerInterval) {
+        clearInterval(deliveryTimerInterval);
+    }
+
+    const endTime = new Date();
+    endTime.setHours(endTime.getHours() + 3);
+    endTime.setMinutes(59);
+    endTime.setSeconds(59);
+
+    deliveryTimerInterval = setInterval(() => {
+        const now = new Date();
+        const diff = endTime - now;
+
+        if (diff <= 0) {
+            clearInterval(deliveryTimerInterval);
+            const timerElement = document.getElementById('deliveryTimer');
+            if (timerElement) {
+                timerElement.innerHTML = `
+                    <i class="fas fa-check-circle"></i>
+                    <span class="timer-text">Entrega encerrada</span>
+                `;
+            }
+            return;
+        }
+
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        const timeString = `${hours.toString().padStart(2, '0')}h ${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+        
+        const timerElement = document.getElementById('deliveryTimer');
+        if (timerElement) {
+            timerElement.innerHTML = `
+                <i class="fas fa-clock"></i>
+                <span class="timer-countdown">${timeString}</span>
+                <span class="timer-text">para receber hoje!</span>
+            `;
+        }
+    }, 1000);
+}
+
+// Incremento inteligente de viewers com psicologia
+function startSmartViewerIncrement(productId) {
+    if (viewerIncrementTimeout) {
+        clearTimeout(viewerIncrementTimeout);
+        viewerIncrementTimeout = null;
+    }
+
+    viewerOpenCount++;
+
+    // Timing variável para não parecer automático:
+    // 1º produto: 5-7s | 2º: 7-10s | 3º+: 8-14s (com variação aleatória)
+    let baseDelay;
+    if (viewerOpenCount === 1) {
+        baseDelay = 5000 + Math.floor(Math.random() * 2000);
+    } else if (viewerOpenCount === 2) {
+        baseDelay = 7000 + Math.floor(Math.random() * 3000);
+    } else {
+        baseDelay = 8000 + Math.floor(Math.random() * 6000);
+    }
+    // Adicionar variação extra ímpar/par para quebrar padrão
+    if (viewerOpenCount % 2 === 0) baseDelay += Math.floor(Math.random() * 2000);
+
+    viewerIncrementTimeout = setTimeout(() => {
+        const viewersEl = document.getElementById('modalViewersCount');
+        const numberEl = document.getElementById('viewersNumber');
+        if (!viewersEl || !numberEl) return;
+
+        // Fase 1: Piscar para chamar atenção do cérebro
+        viewersEl.classList.add('viewers-flash');
+
+        // Fase 2: Após 1s do flash (tempo para o olho migrar), incrementar + som
+        setTimeout(() => {
+            const currentCount = parseInt(numberEl.textContent) || 0;
+            const newCount = currentCount + 1;
+            numberEl.textContent = newCount;
+
+            // Atualizar no mapa para consistência
+            if (productId) productViewers[productId] = newCount;
+
+            // Animação de número subindo
+            numberEl.classList.add('viewer-number-up');
+            setTimeout(() => numberEl.classList.remove('viewer-number-up'), 600);
+
+            // Som sutil de notificação
+            playViewerSound();
+
+            // Remover flash
+            viewersEl.classList.remove('viewers-flash');
+        }, 1000);
+    }, baseDelay);
+}
+
+// Som sutil para o incremento de viewers
+function playViewerSound() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.05);
+        osc.frequency.setValueAtTime(1320, ctx.currentTime + 0.1);
+        
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+        
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.2);
+    } catch (e) {
+        // Silenciar erros de áudio (ex: autoplay policy)
+    }
+}
+
+function showGeoNotification() {
+    if (!allProductsLoaded.length) return;
+
+    const detectedCity = detectedLocation.city;
+    const neighborhood = detectedLocation.neighborhoods[Math.floor(Math.random() * detectedLocation.neighborhoods.length)];
+    const customerName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
+    const randomProduct = allProductsLoaded[Math.floor(Math.random() * allProductsLoaded.length)];
+
+    const notification = document.getElementById('geoNotification');
+    const notificationText = document.getElementById('geoNotificationText');
+
+    if (notification && notificationText) {
+        notificationText.innerHTML = `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> comprou <strong>${randomProduct.name}</strong>`;
+        notification.style.display = 'block';
+        setTimeout(() => notification.style.display = 'none', 8000);
+    }
+}
+
+function startGeoNotifications() {
+    setTimeout(showGeoNotification, 20000);
+    setInterval(showGeoNotification, 20000);
+}
+
+async function initGeoLocationBackground() {
+    try {
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        if (data.city) {
+            if (NEIGHBORHOODS[data.city]) {
+                detectedLocation = { city: data.city, neighborhoods: NEIGHBORHOODS[data.city] };
+            } else {
+                detectedLocation.city = data.city;
+            }
+        }
+        if (data.region_code) {
+            detectedState = data.region_code;
+        }
+    } catch (e) {
+        // Mantém valores padrão (Cuiabá, MT)
+    }
+}
+
+// Funções de Mídia do Modal
+function changeModalMedia(index) {
+    currentMediaIndex = index;
+    const mainMedia = document.getElementById('modalMainMedia');
+    const thumbnails = document.querySelectorAll('.modal-thumb');
+    
+    if (!mainMedia || !currentMediaList[index]) return;
+    
+    // Atualizar mídia principal
+    if (currentMediaList[index].type === 'video') {
+        mainMedia.innerHTML = `<video src="${currentMediaList[index].url}" autoplay muted loop playsinline></video>`;
+    } else {
+        mainMedia.innerHTML = `<img src="${currentMediaList[index].url}" alt="${currentModalProduct?.name}">`;
+    }
+    
+    // Atualizar thumbnails
+    thumbnails.forEach((thumb, i) => {
+        thumb.classList.toggle('active', i === index);
+    });
+}
+
+function setupModalMediaClick() {
+    const mainMedia = document.getElementById('modalMainMedia');
+    if (!mainMedia) return;
+    
+    mainMedia.addEventListener('click', () => {
+        if (currentMediaList[currentMediaIndex]?.type === 'image') {
+            openSuperZoom(currentModalProduct?.id);
+        }
+    });
+}
+
+function setupModalVideoAudio(hasAudio) {
+    const videos = document.querySelectorAll('#modalMainMedia video');
+    videos.forEach(video => {
+        if (hasAudio) {
+            video.muted = false;
+        } else {
+            video.muted = true;
+        }
+    });
+}
+
+function handleNextPhotoClick(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    const nextIndex = (currentMediaIndex + 1) % currentMediaList.length;
+    changeModalMedia(nextIndex);
+}
+
+function setupNextPhotoButton() {
+    const nextBtn = document.getElementById('nextPhotoBtn');
+    if (!nextBtn) return;
+    
+    // Remover listener anterior para evitar duplicação
+    nextBtn.removeEventListener('click', handleNextPhotoClick);
+    
+    if (currentMediaList.length <= 1) {
+        nextBtn.style.display = 'none';
+        return;
+    }
+    
+    nextBtn.style.display = 'flex';
+    nextBtn.addEventListener('click', handleNextPhotoClick);
+}
+
+function renderStars(rating) {
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+    
+    let stars = '';
+    for (let i = 0; i < fullStars; i++) {
+        stars += '<i class="fas fa-star"></i>';
+    }
+    if (hasHalfStar) {
+        stars += '<i class="fas fa-star-half-alt"></i>';
+    }
+    for (let i = 0; i < emptyStars; i++) {
+        stars += '<i class="far fa-star"></i>';
+    }
+    
+    return stars;
+}
+
+function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function shareProduct(id) {
+    const product = allProductsLoaded.find(p => p.id === id);
+    if (!product) {
+        showToast('Produto não encontrado para compartilhar.');
+        return;
+    }
+
+    const shareData = {
+        title: product.name,
+        text: `Olha só essa joia incrível da Etevalda MT: ${product.name} por apenas R$ ${product.price.toFixed(2).replace('.', ',')}!`,
+        url: window.location.href.split('#')[0] + `#product-${product.id}`
+    };
+
+    try {
+        if (navigator.share) {
+            navigator.share(shareData);
+            showToast('Compartilhado com sucesso!');
+        } else {
+            navigator.clipboard.writeText(shareData.url);
+            showToast('Link copiado para a área de transferência!');
+        }
+    } catch (err) {
+        console.log('Compartilhamento cancelado ou erro:', err);
+    }
+}
+
+// Função para renderizar o carrossel do modal
+function renderModalCarousel() {
+    if (!allProductsLoaded.length) return;
+
+    // Renderiza os 3 carrosseis com produtos diferentes
+    renderModalCarouselIndividual('modalInfiniteCarousel', 1);
+    renderModalCarouselIndividual('modalInfiniteCarousel2', 2);
+    renderModalCarouselIndividual('modalInfiniteCarousel3', 3);
+}
+
+function renderModalCarouselIndividual(carouselId, carouselIndex) {
+    const modalCarousel = document.getElementById(carouselId);
+    if (!modalCarousel) return;
+
+    // Pega produtos aleatórios de TODAS as categorias (igual página principal)
+    const randomProducts = [...allProductsLoaded]
+        .filter(p => p.id !== currentModalProduct?.id)
+        .sort(() => Math.random() - 0.5)
+        .slice((carouselIndex - 1) * 8, carouselIndex * 8);
+
+    // Se não tiver produtos suficientes, pega mais aleatórios
+    if (randomProducts.length < 8) {
+        // Pega mais produtos do início se necessário
+        const additionalProducts = [...allProductsLoaded]
+            .filter(p => p.id !== currentModalProduct?.id)
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 16 - randomProducts.length);
+        randomProducts.push(...additionalProducts);
+    }
+
+    // Duplica múltiplas vezes para criar o efeito verdadeiramente infinito
+    const carouselProducts = [...randomProducts, ...randomProducts, ...randomProducts, ...randomProducts];
+    
+    modalCarousel.innerHTML = carouselProducts.map(p => {
+        const images = Array.isArray(p.images) ? p.images : [];
+        return `
+            <div class="modal-carousel-item" onclick="openProductModal(${p.id})">
+                <img src="${images[0]}" alt="${p.name}" loading="lazy">
+                <div class="modal-carousel-item-info">
+                    <div class="modal-carousel-item-name">${p.name}</div>
+                    <div class="modal-carousel-item-price">R$ ${p.price.toFixed(2).replace('.', ',')}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // Configura animação infinita contínua
+    modalCarousel.style.animation = 'carouselScroll 60s linear infinite';
+}
+
+// Funções de Carrossel
+function getProductsForCarousel(carouselIndex) {
+    if (!allProductsLoaded.length) return [];
+    
+    const shuffled = [...allProductsLoaded].sort(() => Math.random() - 0.5);
+    const productsPerCarousel = Math.ceil(shuffled.length / 5);
+    const startIndex = (carouselIndex - 1) * productsPerCarousel;
+    const endIndex = Math.min(startIndex + productsPerCarousel, shuffled.length);
+    
+    const carouselProducts = shuffled.slice(startIndex, endIndex);
+    return [...carouselProducts, ...carouselProducts];
+}
+
+function renderCarousel(carouselId = 'infiniteCarousel', carouselIndex = 1) {
+    const carousel = document.getElementById(carouselId);
+    if (!carousel || !allProductsLoaded.length) return;
+
+    const carouselProducts = getProductsForCarousel(carouselIndex);
+    
+    // Duplica múltiplas vezes para criar efeito verdadeiramente infinito
+    const infiniteProducts = [...carouselProducts, ...carouselProducts, ...carouselProducts, ...carouselProducts];
+    
+    carousel.innerHTML = infiniteProducts.map(p => {
+        const images = Array.isArray(p.images) ? p.images : [];
+        return `
+            <div class="carousel-item" onclick="openProductModal(${p.id})">
+                <img src="${images[0] || 'https://via.placeholder.com/150'}" alt="${p.name}" loading="lazy" style="aspect-ratio: 1/1; object-fit: cover;">
+                <div class="carousel-item-info">
+                    <div class="carousel-item-name">${p.name}</div>
+                    <div class="carousel-item-price">R$ ${p.price.toFixed(2).replace('.', ',')}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    // Configura animação infinita contínua
+    carousel.style.animation = 'carouselScroll 150s linear infinite';
+}
+
+function renderAllCarousels() {
+    renderCarousel('infiniteCarousel', 1);
+    renderCarousel('infiniteCarousel2', 2);
+    renderCarousel('infiniteCarousel3', 3);
+    renderCarousel('infiniteCarousel4', 4);
+    renderCarousel('infiniteCarousel5', 5);
+}
+
+function renderSocialProof() {
+    const grid = document.getElementById('socialProofGrid');
+    if (!grid) return;
+
+    if (!socialProofImages || socialProofImages.length === 0) {
+        grid.innerHTML = '<p style="text-align:center;">Nenhuma imagem de prova social disponível</p>';
+        return;
+    }
+
+    grid.innerHTML = socialProofImages.slice(0, 3).map(item => `
+        <div class="social-proof-card">
+            <div class="social-proof-image">
+                <img src="${item.image_url}" alt="Prova Social" loading="lazy" style="aspect-ratio: 1/1; object-fit: cover;">
+            </div>
+            <div class="social-proof-overlay">
+                <p class="social-proof-text">${item.caption || 'Cliente satisfeito'}</p>
+            </div>
+        </div>
+    `).join('');
 }
 
 function renderFaqs() {
@@ -578,6 +682,524 @@ function renderFaqs() {
     `).join('');
 }
 
+function showSecondarySections() {
+    const sections = ['socialProofSection', 'faqSection', 'carouselSection', 'carouselSection2', 'carouselSection3', 'carouselSection4', 'carouselSection5', 'teamCarouselSection'];
+    sections.forEach(id => {
+        const section = document.getElementById(id);
+        if (section) {
+            section.style.opacity = '1';
+            section.style.height = 'auto';
+            section.style.overflow = 'visible';
+        }
+    });
+    
+    renderAllCarousels();
+    renderSocialProof();
+    renderFaqs();
+}
+
+// 5. FUNÇÕES DO MODAL
+
+// Helper: Buscar nome da categoria pelo ID
+function getCategoryName(categoryId) {
+    const cat = categories.find(c => c.id === parseInt(categoryId));
+    return cat ? cat.name : '';
+}
+
+// Helper: Buscar produtos upsell (mesma upsell_category)
+function getUpsellProducts(product, maxItems = 6) {
+    if (!product.upsell_category) return [];
+    
+    // Encontrar o ID da categoria upsell pelo nome
+    const upsellCat = categories.find(c => c.name.toLowerCase() === product.upsell_category.toLowerCase());
+    
+    let upsellProducts = [];
+    
+    if (upsellCat) {
+        // Buscar produtos da categoria upsell
+        upsellProducts = allProductsLoaded.filter(p => 
+            p.id !== product.id && 
+            p.category_id === upsellCat.id
+        );
+    }
+    
+    // Se não encontrou por ID, tentar por nome da upsell_category
+    if (upsellProducts.length === 0) {
+        upsellProducts = allProductsLoaded.filter(p => 
+            p.id !== product.id && 
+            p.upsell_category && 
+            p.upsell_category.toLowerCase() === product.upsell_category.toLowerCase()
+        );
+    }
+    
+    // Embaralhar e limitar
+    return upsellProducts.sort(() => Math.random() - 0.5).slice(0, maxItems);
+}
+
+// Helper: Buscar produtos complementares (outras categorias + fallback)
+function getComplementaryProducts(product, excludeIds = [], maxItems = 10) {
+    // 1. Prioridade: produtos de OUTRAS categorias (complementam o estilo)
+    let complementary = allProductsLoaded.filter(p => 
+        p.id !== product.id && 
+        !excludeIds.includes(p.id) &&
+        p.category_id !== product.category_id
+    );
+    
+    // 2. Embaralhar para variedade
+    complementary = complementary.sort(() => Math.random() - 0.5);
+    
+    // 3. Se não tiver suficiente, incluir da mesma categoria também
+    if (complementary.length < maxItems) {
+        const sameCategory = allProductsLoaded.filter(p => 
+            p.id !== product.id && 
+            !excludeIds.includes(p.id) &&
+            p.category_id === product.category_id &&
+            !complementary.find(c => c.id === p.id)
+        ).sort(() => Math.random() - 0.5);
+        
+        complementary = [...complementary, ...sameCategory];
+    }
+    
+    return complementary.slice(0, maxItems);
+}
+
+// Helper: Renderizar card de produto para recomendação (upsell - horizontal 3 colunas)
+function renderUpsellCard(p) {
+    const images = Array.isArray(p.images) ? p.images : [];
+    const img = images[0] || 'https://via.placeholder.com/150';
+    return `
+        <div class="upsell-product-card" onclick="openProductModal(${p.id})">
+            <div class="upsell-product-image">
+                <img src="${img}" alt="${p.name}" loading="lazy">
+            </div>
+            <div class="upsell-product-name">${p.name}</div>
+            <div class="upsell-product-price">R$ ${p.price.toFixed(2).replace('.', ',')}</div>
+        </div>
+    `;
+}
+
+// Helper: Renderizar card de produto para "Complemente seu Estilo" (grid 2 colunas)
+function renderComplementCard(p) {
+    const images = Array.isArray(p.images) ? p.images : [];
+    const img = images[0] || 'https://via.placeholder.com/300';
+    return `
+        <div class="complement-product-card" onclick="openProductModal(${p.id})">
+            <div class="complement-product-image">
+                <img src="${img}" alt="${p.name}" loading="lazy">
+            </div>
+            <div class="complement-product-name">${p.name}</div>
+            <div class="complement-product-price">
+                <span class="complement-price-prefix">R$</span> 
+                <span class="complement-price-value">${p.price.toFixed(2).replace('.', ',')}</span>
+            </div>
+        </div>
+    `;
+}
+
+function openProductModal(id) {
+    const product = allProductsLoaded.find(p => p.id === id);
+    if (!product) return;
+
+    currentModalProduct = product;
+    const images = Array.isArray(product.images) ? product.images : [];
+    const soldTodayHtml = product.sold_today ? '<div class="product-sold-today">Vendido Hoje</div>' : '';
+    const viewersCount = productViewers[id] || (Math.floor(Math.random() * 38) + 3);
+    const rating = product.default_rating || 5;
+    const categoryName = getCategoryName(product.category_id);
+
+    // Criar lista de mídia para o modal
+    currentMediaList = images.map((img, index) => ({
+        type: 'image',
+        url: img,
+        thumbnail: img,
+        index: index
+    }));
+
+    // Adicionar vídeos se existirem
+    if (product.video_url) {
+        currentMediaList.unshift({
+            type: 'video',
+            url: product.video_url,
+            thumbnail: product.video_thumbnail || images[0] || 'https://via.placeholder.com/400',
+            index: -1
+        });
+    }
+
+    // Thumbnails para navegação
+    const thumbnailsHtml = currentMediaList.map((media, index) => `
+        <div class="modal-thumb ${media.type === 'video' ? 'video-thumb' : ''} ${index === 0 ? 'active' : ''}" onclick="changeModalMedia(${index})">
+            <img src="${media.thumbnail}" alt="">
+            ${index === 0 && product.badge_text ? `<span class="thumb-badge">${product.badge_text}</span>` : ''}
+        </div>
+    `).join('');
+
+    const solitarioOverlayHtml = product.tem_solitario && product.solitario_price > 0 ? `
+        <div class="solitario-overlay">
+            <i class="fas fa-gem"></i> Solitário vendido separado: R$ ${product.solitario_price.toFixed(2).replace('.', ',')}
+        </div>
+    ` : '';
+
+    // Buscar produtos para as seções de recomendação
+    const upsellProducts = getUpsellProducts(product, 6);
+    const upsellIds = upsellProducts.map(p => p.id);
+    const complementProducts = getComplementaryProducts(product, upsellIds, 10);
+
+    // Gerar HTML das seções de recomendação
+    const upsellHtml = upsellProducts.length > 0 ? `
+        <div class="upsell-section">
+            <h3 class="upsell-title"><i class="fas fa-eye"></i> Quem viu, também gostou</h3>
+            <div class="upsell-products-row">
+                ${upsellProducts.map(p => renderUpsellCard(p)).join('')}
+            </div>
+        </div>
+    ` : '';
+
+    // Guardar IDs já exibidos para o scroll infinito
+    complementShownIds = [product.id, ...upsellIds, ...complementProducts.map(p => p.id)];
+
+    const complementHtml = `
+        <div class="complement-section">
+            <h3 class="complement-title"><i class="fas fa-infinity"></i> Complemente seu Estilo</h3>
+            <div class="complement-products-grid" id="complementGrid">
+                ${complementProducts.map(p => renderComplementCard(p)).join('')}
+            </div>
+            <div id="complementLoader" class="complement-loader" style="display:none; text-align:center; padding:15px;"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>
+        </div>
+    `;
+
+    const modalHtml = `
+            <div class="modal-media-container">
+                <div class="modal-main-media" id="modalMainMedia" style="position: relative;">
+                    ${currentMediaList[0]?.type === 'video'
+                        ? `<video src="${currentMediaList[0].url}" autoplay muted loop playsinline></video>`
+                        : `<img src="${currentMediaList[0]?.url || ''}" alt="${product.name}">`}
+                    ${soldTodayHtml}
+                    ${solitarioOverlayHtml}
+                </div>
+                <div class="modal-thumbnails">${thumbnailsHtml}</div>
+            </div>
+            <div class="modal-product-info">
+                ${categoryName ? `<div class="modal-category-label">${categoryName.toUpperCase()}</div>` : ''}
+                <h2>${product.name}</h2>
+                ${product.tem_solitario && product.solitario_price > 0 ? `<div class="solitario-info-line"><i class="fas fa-gem"></i> Solitário vendido separado: R$ ${product.solitario_price.toFixed(2).replace('.', ',')}</div>` : ''}
+                <div class="modal-price">R$ ${product.price.toFixed(2).replace('.', ',')}</div>
+                <div class="looking-now" id="modalViewersCount" data-count="${viewersCount}"><i class="fas fa-eye"></i> <span id="viewersNumber">${viewersCount}</span> pessoas vendo agora</div>
+                <div class="product-rating-large">${renderStars(rating)}</div>
+                <div class="modal-buttons">
+                    <button class="btn-mercadopago-modal" onclick="buyViaMercadoPago(${product.id})" id="mpBtn-${product.id}">
+                        <i class="fas fa-credit-card"></i> Comprar Agora
+                    </button>
+                    <button class="btn-whatsapp-modal" aria-label="Falar com atendente no WhatsApp sobre este produto" 
+                    onclick="buyViaWhatsApp(${product.id})">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </button>
+                </div>
+                <div class="modal-buttons-secondary">
+                    <button class="btn-add-cart-modal" onclick="addToCart(${product.id})">
+                        <i class="fas fa-cart-plus"></i> Adicionar ao Carrinho
+                    </button>
+                </div>
+                <div class="modal-buttons-share">
+                    <button class="btn-share" onclick="shareProduct(${product.id})">
+                        <i class="fas fa-share-alt"></i> <span>COMPARTILHE COM SEU AMOR</span>
+                    </button>
+                </div>
+                <div class="modal-description">${product.description || ''}</div>
+                
+                ${upsellHtml}
+                ${complementHtml}
+            </div>
+    `;
+
+    document.getElementById('modalContainer').innerHTML = modalHtml;
+    document.getElementById('productModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Iniciar incremento inteligente de viewers
+    startSmartViewerIncrement(id);
+    
+    // Configurar mídia do modal
+    setupModalMediaClick();
+    setupModalVideoAudio(product.video_has_audio);
+    setupNextPhotoButton();
+    setupComplementInfiniteScroll();
+    
+    // Scroll modal content para o topo (não a página)
+    const modalContent = document.querySelector('#productModal .modal-content');
+    if (modalContent) modalContent.scrollTop = 0;
+    
+    // Configurar botão voltar do celular
+    if (window.history.length > 1) {
+        window.addEventListener('popstate', handleMobileBack);
+        window.history.pushState({ modalOpen: true }, '', window.location.href);
+    }
+}
+
+function closeProductModal() {
+    const modal = document.getElementById('productModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+    
+    // Limpar estado do modal
+    currentModalProduct = null;
+    currentMediaList = [];
+    currentMediaIndex = 0;
+    
+    // Limpar estado do scroll infinito de complementos
+    complementShownIds = [];
+    isLoadingMoreComplement = false;
+    
+    // Esconder botão de próxima foto
+    const nextBtn = document.getElementById('nextPhotoBtn');
+    if (nextBtn) nextBtn.style.display = 'none';
+    
+    // Parar viewer increment timer se existir
+    if (viewerIncrementTimeout) {
+        clearTimeout(viewerIncrementTimeout);
+        viewerIncrementTimeout = null;
+    }
+    
+    // Remover scroll listener do complemento
+    const scrollableEl = modal.querySelector('.modal-content');
+    if (scrollableEl) {
+        scrollableEl.removeEventListener('scroll', handleComplementScroll);
+        scrollableEl.scrollTop = 0;
+    }
+    
+    // Garantir que o histórico do navegador funcione corretamente no mobile
+    if (window.history.length > 1) {
+        window.removeEventListener('popstate', handleMobileBack);
+    }
+}
+
+function handleMobileBack(event) {
+    // Fechar modal quando o usuário pressionar o botão voltar do celular
+    const modal = document.getElementById('productModal');
+    if (modal && modal.classList.contains('active')) {
+        closeProductModal();
+        event.preventDefault();
+    }
+}
+
+// FUNÇÃO INFINITA PARA COMPLEMENTE SEU ESTILO
+function setupComplementInfiniteScroll() {
+    // O elemento que realmente scrolla é .modal-content (overflow-y: auto), não #productModal
+    const modal = document.getElementById('productModal');
+    if (!modal) return;
+    const scrollableEl = modal.querySelector('.modal-content');
+    if (!scrollableEl) return;
+    
+    // Remover listener anterior se existir (evita duplicação)
+    scrollableEl.removeEventListener('scroll', handleComplementScroll);
+    scrollableEl.addEventListener('scroll', handleComplementScroll);
+}
+
+let complementScrollTimeout;
+function handleComplementScroll() {
+    clearTimeout(complementScrollTimeout);
+    complementScrollTimeout = setTimeout(() => {
+        checkAndLoadMoreComplement();
+    }, 100);
+}
+
+function checkAndLoadMoreComplement() {
+    const modal = document.getElementById('productModal');
+    if (!modal) return;
+    const scrollableEl = modal.querySelector('.modal-content');
+    const complementGrid = document.getElementById('complementGrid');
+    
+    if (!scrollableEl || !complementGrid || isLoadingMoreComplement) return;
+    
+    // Verificar se está próximo ao final (últimos 300px)
+    const distanceFromBottom = scrollableEl.scrollHeight - (scrollableEl.scrollTop + scrollableEl.clientHeight);
+    
+    if (distanceFromBottom < 300) {
+        loadMoreComplementProducts();
+    }
+}
+
+function loadMoreComplementProducts() {
+    if (isLoadingMoreComplement) return;
+    isLoadingMoreComplement = true;
+    
+    const complementGrid = document.getElementById('complementGrid');
+    const loader = document.getElementById('complementLoader');
+    
+    if (loader) loader.style.display = 'block';
+    
+    // Buscar produtos aleatórios de TODAS as categorias que ainda não foram mostrados
+    const availableProducts = allProductsLoaded.filter(p => !complementShownIds.includes(p.id));
+    
+    // Embaralhar e pegar 4 produtos (para manter grid 2x2)
+    const shuffled = availableProducts.sort(() => Math.random() - 0.5);
+    const newProducts = shuffled.slice(0, 4);
+    
+    if (newProducts.length === 0) {
+        // Não há mais produtos para mostrar
+        if (loader) {
+            loader.innerHTML = '<i class="fas fa-check"></i> Você já viu todos os produtos!';
+            setTimeout(() => loader.style.display = 'none', 2000);
+        }
+        isLoadingMoreComplement = false;
+        return;
+    }
+    
+    // Adicionar os novos produtos ao grid
+    setTimeout(() => {
+        const newCardsHtml = newProducts.map(p => renderComplementCard(p)).join('');
+        complementGrid.insertAdjacentHTML('beforeend', newCardsHtml);
+        
+        // Atualizar IDs mostrados
+        complementShownIds.push(...newProducts.map(p => p.id));
+        
+        if (loader) loader.style.display = 'none';
+        isLoadingMoreComplement = false;
+    }, 500); // Pequeno delay para efeito de carregamento
+}
+
+// 6. FUNÇÕES DO CARRINHO
+function addToCart(productId) {
+    const product = allProductsLoaded.find(p => p.id === productId);
+    if (!product) return;
+
+    const existingItem = cart.find(item => item.id === productId);
+    
+    if (existingItem) {
+        existingItem.quantity = (existingItem.quantity || 1) + 1;
+    } else {
+        cart.push({
+            id: product.id,
+            name: product.name,
+            price: product.price,
+            image: product.images?.[0] || 'https://via.placeholder.com/100',
+            quantity: 1
+        });
+    }
+
+    localStorage.setItem('etevalda_cart', JSON.stringify(cart));
+    updateCartUI();
+    showToast(`${product.name} adicionado ao carrinho!`);
+}
+
+function removeFromCart(productId) {
+    cart = cart.filter(item => item.id !== productId);
+    localStorage.setItem('etevalda_cart', JSON.stringify(cart));
+    updateCartUI();
+}
+
+function updateQuantity(productId, quantity) {
+    const item = cart.find(item => item.id === productId);
+    if (item) {
+        item.quantity = Math.max(1, quantity);
+        localStorage.setItem('etevalda_cart', JSON.stringify(cart));
+        updateCartUI();
+    }
+}
+
+function toggleCart() {
+    const cartSidebar = document.getElementById('cartSidebar');
+    if (cartSidebar) {
+        cartSidebar.classList.toggle('active');
+        document.body.style.overflow = cartSidebar.classList.contains('active') ? 'hidden' : '';
+    }
+}
+
+function updateCartUI() {
+    const cartItems = document.getElementById('cartItems');
+    const cartCount = document.getElementById('cartCount');
+    const cartTotal = document.getElementById('cartTotal');
+
+    if (!cartItems || !cartCount || !cartTotal) return;
+
+    if (cart.length === 0) {
+        cartItems.innerHTML = '<p style="text-align:center; padding:20px;">Carrinho vazio</p>';
+        cartCount.textContent = '0';
+        cartTotal.textContent = 'R$ 0,00';
+        return;
+    }
+
+    cartItems.innerHTML = cart.map(item => `
+        <div class="cart-item">
+            <img src="${item.image}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+            <div class="cart-item-info">
+                <h4>${item.name}</h4>
+                <p>R$ ${item.price.toFixed(2).replace('.', ',')}</p>
+            </div>
+            <div class="cart-item-quantity">
+                <button onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                <span>${item.quantity}</span>
+                <button onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+            </div>
+            <button onclick="removeFromCart(${item.id})" style="background: var(--danger); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">×</button>
+        </div>
+    `).join('');
+
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+    
+    cartCount.textContent = itemCount;
+    cartTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+}
+
+function loadCartFromStorage() {
+    const savedCart = localStorage.getItem('etevalda_cart');
+    if (savedCart) {
+        try {
+            cart = JSON.parse(savedCart);
+        } catch (error) {
+            console.error('Erro ao carregar carrinho:', error);
+            cart = [];
+        }
+    }
+    updateCartUI();
+}
+
+function closeCart() {
+    const cartSidebar = document.getElementById('cartSidebar');
+    if (cartSidebar) {
+        cartSidebar.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+// 7. FUNÇÕES AUXILIARES
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 100);
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, 3000);
+}
+
+function buyViaWhatsApp(productId) {
+    const product = allProductsLoaded.find(p => p.id === productId);
+    if (!product) return;
+
+    const city = detectedLocation.city || 'Cuiabá';
+    const state = detectedState || 'MT';
+    const prep = ['RJ','ES','SP','MG'].includes(state) ? 'do' : 'de';
+    
+    let msg;
+    if (product.tem_solitario && product.solitario_price > 0) {
+        const total = product.price + product.solitario_price;
+        msg = `Oi, sou aqui ${prep} ${city}, ${state}, gostei do produto: *${product.name}* + *${product.additional_product_name || 'Solitário'}* (R$ ${product.solitario_price.toFixed(2).replace('.', ',')}) - Total: R$ ${total.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
+    } else {
+        msg = `Oi, sou aqui ${prep} ${city}, ${state}, gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
+    }
+    
+    window.open(`https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}`, '_blank');
+}
+
 window.playFaqAudio = function(card) {
     const audio = card.querySelector('audio');
     if (audio) {
@@ -592,1551 +1214,197 @@ window.playFaqAudio = function(card) {
     }
 };
 
-function renderSocialProof() {
-    const grid = document.getElementById('socialProofGrid');
-    if (!grid) return;
-
-    if (!socialProofImages || socialProofImages.length === 0) {
-        grid.innerHTML = '<p style="text-align:center;">Nenhuma imagem de prova social disponível</p>';
-        return;
-    }
-
-    grid.innerHTML = socialProofImages.slice(0, 3).map(item => `
-        <div class="social-proof-card">
-            <div class="social-proof-image">
-                <img src="${item.image_url}" alt="Prova Social" loading="lazy" style="aspect-ratio: 1/1; object-fit: cover;">
-            </div>
-            <div class="social-proof-overlay">
-                <p class="social-proof-text">${item.caption || 'Cliente satisfeito'}</p>
-            </div>
-        </div>
-    `).join('');
-}
-
-function getProductsForCarousel(carouselIndex) {
-    if (!allProductsLoaded.length) return [];
-    
-    // Embaralha todos os produtos
-    const shuffled = [...allProductsLoaded].sort(() => Math.random() - 0.5);
-    
-    // Divide os produtos em 5 grupos diferentes para cada carrossel
-    const productsPerCarousel = Math.ceil(shuffled.length / 5);
-    const startIndex = (carouselIndex - 1) * productsPerCarousel;
-    const endIndex = Math.min(startIndex + productsPerCarousel, shuffled.length);
-    
-    const carouselProducts = shuffled.slice(startIndex, endIndex);
-    
-    // Duplica para criar o efeito infinito
-    return [...carouselProducts, ...carouselProducts];
-}
-
-function renderCarousel(carouselId = 'infiniteCarousel', carouselIndex = 1) {
-    const carousel = document.getElementById(carouselId);
-    if (!carousel || !allProductsLoaded.length) return;
-
-    const carouselProducts = getProductsForCarousel(carouselIndex);
-    carousel.innerHTML = carouselProducts.map(p => {
-        const images = Array.isArray(p.images) ? p.images : [];
-        return `
-            <div class="carousel-item" onclick="openProductModal(${p.id})">
-                <img src="${images[0] || 'https://via.placeholder.com/150'}" alt="${p.name}" loading="lazy" style="aspect-ratio: 1/1; object-fit: cover;">
-                <div class="carousel-item-info">
-                    <div class="carousel-item-name">${p.name}</div>
-                    <div class="carousel-item-price">R$ ${p.price.toFixed(2).replace('.', ',')}</div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-// Função para renderizar todos os carrosséis
-function renderAllCarousels() {
-    renderCarousel('infiniteCarousel', 1);
-    renderCarousel('infiniteCarousel2', 2);
-    renderCarousel('infiniteCarousel3', 3);
-    renderCarousel('infiniteCarousel4', 4);
-    renderCarousel('infiniteCarousel5', 5);
-}
-
-// ========================================
-// 10. FUNÇÕES DE UTILIDADE
-// ========================================
-function showSecondarySections() {
-    const sections = ['socialProofSection', 'faqSection', 'carouselSection', 'carouselSection2', 'carouselSection3', 'carouselSection4', 'carouselSection5', 'teamCarouselSection'];
-    sections.forEach(id => {
-        const section = document.getElementById(id);
-        if (section) {
-            section.style.opacity = '1';
-            section.style.height = 'auto';
-            section.style.overflow = 'visible';
-        }
-    });
-}
-
-function showLoading(status) {
-    const skeletons = document.querySelectorAll('.product-card.skeleton');
-    if (status) {
-        skeletons.forEach(s => s.style.display = 'block');
-    } else {
-        skeletons.forEach(s => s.style.display = 'none');
-    }
-}
-
-function showLoadingMore() {
-    const container = document.getElementById('productsContainer');
-    if (!container) return;
-    if (document.getElementById('loadingMore')) return;
-    
-    const loadingEl = document.createElement('div');
-    loadingEl.id = 'loadingMore';
-    loadingEl.className = 'loading-more';
-    loadingEl.innerHTML = `
-        <div class="loading-spinner"></div>
-        <p>Carregando mais produtos...</p>
-    `;
-    container.appendChild(loadingEl);
-}
-
-function hideLoadingMore() {
-    const loadingEl = document.getElementById('loadingMore');
-    if (loadingEl) loadingEl.remove();
-}
-
-function setupInfiniteScroll() {
-    const trigger = document.getElementById('infinite-scroll-trigger');
-    if (!trigger) return;
-
-    const observer = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && !isLoadingMore && hasMoreProducts) {
-            if (currentCategory === 'all') {
-                loadProducts(false);
-            }
-        }
-    }, {
-        rootMargin: '100px'
-    });
-
-    observer.observe(trigger);
-}
-
-function setupScrollListener() {
-    const header = document.querySelector('.header');
-    const scrollThreshold = 100;
-    let isCollapsed = false;
-
-    window.addEventListener('scroll', debounce(() => {
-        const scrollPosition = window.scrollY;
-        const shouldBeCollapsed = scrollPosition > scrollThreshold;
-
-        if (shouldBeCollapsed !== isCollapsed) {
-            isCollapsed = shouldBeCollapsed;
-            if (shouldBeCollapsed) {
-                header.classList.add('header-collapsed');
-            } else {
-                header.classList.remove('header-collapsed');
-            }
-        }
-    }, 10));
-}
-
-function setupHistoryAPI() {
-    window.addEventListener('popstate', (event) => {
-        const modal = document.getElementById('productModal');
-        const isModalOpen = modal && modal.classList.contains('active');
-        const superZoomOverlay = document.getElementById('superZoomOverlay');
-        const isSuperZoomOpen = superZoomOverlay && superZoomOverlay.classList.contains('active');
-        
-        if (isSuperZoomOpen) {
-            event.preventDefault();
-            closeSuperZoom();
-            return;
-        }
-        if (isModalOpen) {
-            event.preventDefault();
-            closeProductModal();
-            if (location.hash.startsWith('#product-')) {
-                history.replaceState(null, '', location.pathname + location.search);
-            }
-            return;
-        }
-        if (location.hash.startsWith('#product-')) {
-            history.replaceState(null, '', location.pathname + location.search);
-        }
-    });
-}
-
-// Listener para quando o usuário navegar pelo histórico (botão voltar/avançar)
-window.addEventListener('popstate', () => {
-    checkCategoryFromURL();
-});
-
-function setupTouchListeners() {
-    const modalContent = document.querySelector('.modal-content');
-    if (!modalContent) return;
-
-    modalContent.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
-
-    modalContent.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSwipe();
-    }, { passive: true });
-}
-
-function handleSwipe() {
-    const swipeThreshold = 50;
-    if (touchEndX < touchStartX - swipeThreshold) {
-        nextMedia();
-    }
-    if (touchEndX > touchStartX + swipeThreshold) {
-        prevMedia();
-    }
-}
-
-function nextMedia() {
-    if (!currentMediaList || currentMediaList.length === 0) return;
-    const thumbs = document.querySelectorAll('.modal-thumb');
-    let currentIndex = 0;
-    thumbs.forEach((thumb, index) => {
-        if (thumb.classList.contains('active')) currentIndex = index;
-    });
-    const nextIndex = (currentIndex + 1) % thumbs.length;
-    changeModalMedia(nextIndex);
-    showToast(`Foto ${nextIndex + 1} de ${thumbs.length}`);
-}
-
-function prevMedia() {
-    if (!currentMediaList || currentMediaList.length === 0) return;
-    const thumbs = document.querySelectorAll('.modal-thumb');
-    let currentIndex = 0;
-    thumbs.forEach((thumb, index) => {
-        if (thumb.classList.contains('active')) currentIndex = index;
-    });
-    const prevIndex = (currentIndex - 1 + thumbs.length) % thumbs.length;
-    changeModalMedia(prevIndex);
-    showToast(`Foto ${prevIndex + 1} de ${thumbs.length}`);
-}
-
-function setupVideoAudioControl(videoElement, hasAudio = true) {
-    if (!videoElement) return;
-    videoElement.muted = true;
-    videoElement.autoplay = true;
-    videoElement.playsInline = true;
-    videoElement.loop = true;
-
-    if (hasAudio) {
-        const audioBtn = document.createElement('button');
-        audioBtn.className = 'video-audio-toggle';
-        audioBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-        audioBtn.setAttribute('aria-label', 'Ativar áudio');
-
-        audioBtn.onclick = (e) => {
-            e.stopPropagation();
-            if (videoElement.muted) {
-                videoElement.currentTime = 0;
-                videoElement.muted = false;
-                videoElement.play().catch(err => console.log('Autoplay bloqueado:', err));
-                audioBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
-                audioBtn.setAttribute('aria-label', 'Desativar áudio');
-            } else {
-                videoElement.muted = true;
-                audioBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
-                audioBtn.setAttribute('aria-label', 'Ativar áudio');
-            }
-        };
-
-        const container = videoElement.parentElement;
-        if (container) {
-            container.style.position = 'relative';
-            container.appendChild(audioBtn);
-        }
-    }
-}
-
-// ========================================
-// 11. FUNÇÕES DO MODAL
-// ========================================
-async function openProductModal(id) {
-    const { data: product, error } = await _supabase
-        .from('products')
-        .select('*, categories!category_id(name)')
-        .eq('id', id)
-        .single();
-
-    if (error || !product) {
-        console.error("Erro ao carregar detalhes:", error);
-        return;
-    }
-
-    currentModalProduct = product;
-    currentMediaList = [];
-
-    if (product.video_url && product.video_url.trim()) {
-        currentMediaList.push({
-            type: 'video',
-            url: product.video_url,
-            thumbnail: product.images?.[0] || ''
-        });
-    }
-
-    let images = Array.isArray(product.images) ? product.images : [];
-    images.forEach(img => {
-        if (img) {
-            currentMediaList.push({
-                type: 'image',
-                url: img,
-                thumbnail: img
-            });
-        }
-    });
-
-    const productReviews = allReviews.filter(r => r.is_general || r.product_id === id);
-    let upsellProducts = allProductsLoaded.filter(p =>
-        p.id !== product.id && p.category_id === product.category_id
-    ).slice(0, 12);
-
-    let crossSellProducts = [];
-    if (product.related_keywords) {
-        const keywords = product.related_keywords.toLowerCase().split(',').map(k => k.trim());
-        crossSellProducts = allProductsLoaded.filter(p => {
-            if (p.id === product.id) return false;
-            if (!p.related_keywords) return false;
-            const productKeywords = p.related_keywords.toLowerCase().split(',').map(k => k.trim());
-            return keywords.some(k => productKeywords.includes(k));
-        }).slice(0, 12);
-    }
-
-    if (crossSellProducts.length === 0) {
-        crossSellProducts = allProductsLoaded.filter(p =>
-            p.id !== product.id && p.category_id === product.category_id
-        ).slice(0, 12);
-    }
-
-    const priceFormatted = product.price.toFixed(2).replace('.', ',');
-    const solitarioFormatted = product.solitario_price?.toFixed(2).replace('.', ',');
-    const rating = product.default_rating || 5;
-    const viewersCount = Math.floor(Math.random() * 9) + 4;
-
-    const thumbnailsHtml = currentMediaList.map((media, index) => `
-    <div class="modal-thumb ${media.type === 'video' ? 'video-thumb' : ''} ${index === 0 ? 'active' : ''}" onclick="changeModalMedia(${index})">
-        <img src="${media.thumbnail}" alt="">
-        ${index === 0 && product.badge_text ? `<span class="thumb-badge">${product.badge_text}</span>` : ''}
-    </div>
-`).join('');
-
-    const solitarioHtml = product.tem_solitario && product.solitario_price > 0 ? `
-        <div class="solitario-discreto">
-            <i class="fas fa-gem"></i> ${product.additional_product_name || 'Solitário'} vendido separadamente: R$ ${solitarioFormatted}
-        </div>
-    ` : '';
-
-    const modalHtml = `
-    <div class="modal-gallery">
-        <div class="modal-main-media" id="modalMainMedia" style="position: relative;">
-            ${currentMediaList[0]?.type === 'video'
-                ? `<video src="${currentMediaList[0].url}" autoplay muted loop playsinline></video>`
-                : `<img src="${currentMediaList[0]?.url || ''}" alt="${product.name}">`}
-            ${product.badge_text ? `<div class="product-badge modal-badge">${product.badge_text}</div>` : ''}
-            ${product.sold_today ? `<div class="product-sold-today modal-sold-today">Vendido Hoje</div>` : ''}
-        </div>
-    </div>
-        <div class="modal-thumbnails">${thumbnailsHtml}</div>
-        <div class="modal-info">
-            <span class="modal-category">${product.categories?.name || ''}</span>
-            <h2 class="modal-title">${product.name}</h2>
-            <div class="modal-price-main">R$ ${priceFormatted}</div>
-            ${solitarioHtml}
-            <div class="looking-now"><i class="fas fa-eye"></i> ${viewersCount} pessoas vendo agora</div>
-            <div class="urgency-box">
-                <div class="delivery-timer" id="deliveryTimer">
-                    <i class="fas fa-clock"></i>
-                    <span class="timer-countdown">00h 00m 00s</span>
-                    <span class="timer-text">para receber hoje!</span>
-                </div>
-            </div>
-            <div class="product-rating-large">${renderStars(rating)}</div>
-            <div class="modal-buttons">
-                <button class="btn-add-cart-modal" onclick="addToCart(${product.id})"><i class="fas fa-cart-plus"></i> Carrinho</button>
-                <button class="btn-whatsapp-modal" aria-label="Falar com atendente no WhatsApp sobre este produto" 
-                onclick="buyViaWhatsApp(${product.id})"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-                <button class="btn-share" onclick="shareProduct(${product.id})"><i class="fas fa-share-alt"></i> <span>COMPARTILHE<br>COM SEU AMOR</span></button>
-            </div>
-            ${product.description ? `<div class="modal-description">${product.description}</div>` : ''}
-            
-            ${upsellProducts.length > 0 ? `
-                <div class="recommendations-section">
-                    <h4 class="recommendations-title"><i class="fas fa-handshake"></i> Quem viu, também gostou</h4>
-                    <div class="recommendations-grid">
-                        ${upsellProducts.map(r => `
-                            <div class="rec-card" onclick="openProductModal(${r.id})">
-                                <img src="${Array.isArray(r.images) ? r.images[0] : ''}" alt="${r.name}">
-                                <h4>${r.name}</h4>
-                                <div class="price">R$ ${r.price.toFixed(2).replace('.', ',')}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            ` : ''}
-            
-            ${crossSellProducts.length > 0 ? `
-                <div class="cross-sell-section">
-                    <h4 class="cross-sell-title"><i class="fas fa-link"></i> Complemente seu Estilo</h4>
-                    <div class="cross-sell-grid">
-                        ${crossSellProducts.map(r => `
-                            <div class="cross-sell-card" onclick="openProductModal(${r.id}); scrollToTop();">
-                                <img src="${Array.isArray(r.images) ? r.images[0] : ''}" alt="${r.name}">
-                                <div class="info">
-                                    <div class="name">${r.name}</div>
-                                    <div class="price">R$ ${r.price.toFixed(2).replace('.', ',')}</div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            ` : ''}
-            
-            <!-- CARROSSEL DE PRODUTOS SIMILARES NO MODAL -->
-            <div class="modal-carousel-section">
-                <div class="modal-carousel-container">
-                    <div id="modalInfiniteCarousel" class="modal-infinite-carousel"></div>
-                </div>
-            </div>
-            <div class="modal-carousel-section">
-                <div class="modal-carousel-container">
-                    <div id="modalInfiniteCarousel2" class="modal-infinite-carousel"></div>
-                </div>
-            </div>
-            <div class="modal-carousel-section">
-                <div class="modal-carousel-container">
-                    <div id="modalInfiniteCarousel3" class="modal-infinite-carousel"></div>
-                </div>
-            </div>
-            <div class="modal-carousel-section">
-                <div class="modal-carousel-container">
-                    <div id="modalInfiniteCarousel4" class="modal-infinite-carousel"></div>
-                </div>
-            </div>
-        </div>
-    `;
-
-    document.getElementById('modalContainer').innerHTML = modalHtml;
-    document.getElementById('productModal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-    document.getElementById('modalContainer').scrollTop = 0;
-    startDeliveryTimer();
-    history.pushState({ modalOpen: true, productId: id }, '', `#product-${id}`);
-    setupModalMediaClick();
-    setupModalVideoAudio(product.video_has_audio);
-    setupNextPhotoButton();
-    renderModalCarousel(); // Adiciona o carrossel do modal
-    scrollToTop();
-}
-
-function renderStars(rating) {
-    const fullStars = '★'.repeat(rating);
-    const emptyStars = '☆'.repeat(5 - rating);
-    return `<span class="stars">${fullStars}${emptyStars}</span>`;
-}
-
-function setupNextPhotoButton() {
-    const nextBtn = document.getElementById('nextPhotoBtn');
-    if (!nextBtn) return;
-    if (currentMediaList.length > 1) {
-        nextBtn.style.display = 'flex';
-        nextBtn.onclick = (e) => {
-            e.stopPropagation();
-            nextMedia();
-        };
-    } else {
-        nextBtn.style.display = 'none';
-    }
-}
-
-function setupModalMediaClick() {
-    const mainMedia = document.getElementById('modalMainMedia');
-    if (!mainMedia) return;
-    const img = mainMedia.querySelector('img');
-    const video = mainMedia.querySelector('video');
-
-    if (img) {
-        img.style.cursor = 'zoom-in';
-        img.onclick = (e) => {
-            e.stopPropagation();
-            const activeThumb = document.querySelector('.modal-thumb.active');
-            let currentIndex = 0;
-            if (activeThumb) {
-                const thumbs = document.querySelectorAll('.modal-thumb');
-                thumbs.forEach((thumb, index) => {
-                    if (thumb.classList.contains('active')) currentIndex = index;
-                });
-            }
-            openSuperZoom(img.src, 'image', currentMediaList, currentIndex);
-        };
-    }
-
-    if (video) {
-        video.style.cursor = 'zoom-in';
-        video.onclick = (e) => {
-            e.stopPropagation();
-            const activeThumb = document.querySelector('.modal-thumb.active');
-            let currentIndex = 0;
-            if (activeThumb) {
-                const thumbs = document.querySelectorAll('.modal-thumb');
-                thumbs.forEach((thumb, index) => {
-                    if (thumb.classList.contains('active')) currentIndex = index;
-                });
-            }
-            openSuperZoom(video.src, 'video', currentMediaList, currentIndex);
-        };
-    }
-}
-
-function setupModalVideoAudio(hasAudio = true) {
-    const mainMedia = document.getElementById('modalMainMedia');
-    if (!mainMedia) return;
-    const video = mainMedia.querySelector('video');
-    if (video) {
-        setupVideoAudioControl(video, hasAudio);
-    }
-}
-
-function changeModalMedia(index) {
-    if (!currentMediaList[index]) return;
-    const media = currentMediaList[index];
-    const mainContainer = document.getElementById('modalMainMedia');
-    const hasAudio = currentModalProduct?.video_has_audio ?? true;
-
-    if (media.type === 'video') {
-        mainContainer.innerHTML = `<video src="${media.url}" autoplay muted loop playsinline></video>`;
-        setupModalVideoAudio(hasAudio);
-        setupModalMediaClick();
-    } else {
-        mainContainer.innerHTML = `<img src="${media.url}" alt="">`;
-        setupModalMediaClick();
-    }
-
-    document.querySelectorAll('.modal-thumb').forEach((thumb, i) => {
-        thumb.classList.toggle('active', i === index);
-    });
-}
-
-function closeProductModal() {
-    document.getElementById('productModal').classList.remove('active');
-    document.body.style.overflow = '';
-    currentModalProduct = null;
-    currentMediaList = [];
-    if (deliveryTimerInterval) {
-        clearInterval(deliveryTimerInterval);
-        deliveryTimerInterval = null;
-    }
-    if (history.state?.modalOpen) {
-        history.replaceState(null, '', location.pathname + location.search);
-    }
-}
-
-function scrollToTop() {
-    const modalContent = document.querySelector('.modal-content');
-    if (modalContent) {
-        modalContent.scrollTop = 0;
-    }
-}
-
-// Função para renderizar o carrossel do modal
-function renderModalCarousel() {
-    if (!allProductsLoaded.length) return;
-
-    // Renderiza os 4 carrosseis com produtos diferentes
-    renderModalCarouselIndividual('modalInfiniteCarousel', 1);
-    renderModalCarouselIndividual('modalInfiniteCarousel2', 2);
-    renderModalCarouselIndividual('modalInfiniteCarousel3', 3);
-    renderModalCarouselIndividual('modalInfiniteCarousel4', 4);
-    
-    // Configura swipe com velocidade para todos os carrosseis
-    setupModalCarouselSwipe();
-}
-
-// Função auxiliar para renderizar cada carrossel individual
-function renderModalCarouselIndividual(carouselId, carouselIndex) {
-    const modalCarousel = document.getElementById(carouselId);
-    if (!modalCarousel) return;
-
-    // Pega produtos aleatórios de TODAS as categorias (igual página principal)
-    // Usa o carouselIndex para garantir que cada carrossel tenha produtos diferentes
-    const randomProducts = [...allProductsLoaded]
-        .filter(p => p.id !== currentModalProduct?.id)
-        .sort(() => Math.random() - 0.5)
-        .slice((carouselIndex - 1) * 8, carouselIndex * 8); // Pega 8 produtos diferentes para cada carrossel
-
-    // Se não tiver produtos suficientes, pega mais aleatórios
-    if (randomProducts.length < 8) {
-        const moreProducts = [...allProductsLoaded]
-            .filter(p => p.id !== currentModalProduct?.id && !randomProducts.some(rp => rp.id === p.id))
-            .sort(() => Math.random() - 0.5)
-            .slice(0, 8 - randomProducts.length);
-        randomProducts.push(...moreProducts);
-    }
-
-    // Duplica para criar o efeito infinito
-    const carouselProducts = [...randomProducts, ...randomProducts];
-
-    modalCarousel.innerHTML = carouselProducts.map(p => {
-        const images = Array.isArray(p.images) ? p.images : [];
-        return `
-            <div class="modal-carousel-item" onclick="openProductModal(${p.id})">
-                <img src="${images[0] || 'https://via.placeholder.com/150'}" alt="${p.name}" loading="lazy">
-                <div class="modal-carousel-item-info">
-                    <div class="modal-carousel-item-name">${p.name}</div>
-                    <div class="modal-carousel-item-price">R$ ${p.price.toFixed(2).replace('.', ',')}</div>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-// ========================================
-// CONTROLE DE SWIPE COM VELOCIDADE PARA CARROSSEIS DO MODAL
-// ========================================
-function setupModalCarouselSwipe() {
-    const carousels = document.querySelectorAll('.modal-infinite-carousel');
-    
-    carousels.forEach(carousel => {
-        let isDragging = false;
-        let startX = 0;
-        let currentX = 0;
-        let scrollLeft = 0;
-        let velocity = 0;
-        let animationFrame = null;
-        let lastTime = 0;
-        let lastX = 0;
-        
-        // Função para aplicar física de desaceleração
-        function applyPhysics() {
-            if (Math.abs(velocity) > 0.1) {
-                carousel.scrollLeft += velocity;
-                velocity *= 0.95; // Fricção/desaceleração
-                animationFrame = requestAnimationFrame(applyPhysics);
-            } else {
-                velocity = 0;
-                if (animationFrame) {
-                    cancelAnimationFrame(animationFrame);
-                    animationFrame = null;
-                }
-            }
-        }
-        
-        // Mouse events para desktop
-        carousel.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            startX = e.pageX - carousel.offsetLeft;
-            scrollLeft = carousel.scrollLeft;
-            lastX = startX;
-            lastTime = Date.now();
-            carousel.style.cursor = 'grabbing';
-            carousel.style.scrollBehavior = 'auto';
-            
-            // Para animação anterior se existir
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame);
-                animationFrame = null;
-            }
-        });
-        
-        carousel.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            e.preventDefault();
-            
-            currentX = e.pageX - carousel.offsetLeft;
-            const currentTime = Date.now();
-            const deltaTime = currentTime - lastTime;
-            const deltaX = currentX - lastX;
-            
-            // Calcula velocidade baseada no movimento
-            if (deltaTime > 0) {
-                velocity = -(deltaX / deltaTime) * 10; // Multiplica para aumentar sensibilidade
-            }
-            
-            const walk = (currentX - startX) * 2; // Sensibilidade do arrasto
-            carousel.scrollLeft = scrollLeft - walk;
-            
-            lastX = currentX;
-            lastTime = currentTime;
-        });
-        
-        carousel.addEventListener('mouseup', () => {
-            isDragging = false;
-            carousel.style.cursor = 'grab';
-            carousel.style.scrollBehavior = 'smooth';
-            
-            // Aplica física de desaceleração quando solta
-            if (Math.abs(velocity) > 0.5) {
-                applyPhysics();
-            }
-        });
-        
-        carousel.addEventListener('mouseleave', () => {
-            isDragging = false;
-            carousel.style.cursor = 'grab';
-            carousel.style.scrollBehavior = 'smooth';
-            
-            // Aplica física de desaceleração quando sai da área
-            if (Math.abs(velocity) > 0.5) {
-                applyPhysics();
-            }
-        });
-        
-        // Touch events para mobile
-        carousel.addEventListener('touchstart', (e) => {
-            isDragging = true;
-            startX = e.touches[0].pageX - carousel.offsetLeft;
-            scrollLeft = carousel.scrollLeft;
-            lastX = startX;
-            lastTime = Date.now();
-            carousel.style.scrollBehavior = 'auto';
-            
-            // Para animação anterior se existir
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame);
-                animationFrame = null;
-            }
-        }, { passive: true });
-        
-        carousel.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
-            
-            currentX = e.touches[0].pageX - carousel.offsetLeft;
-            const currentTime = Date.now();
-            const deltaTime = currentTime - lastTime;
-            const deltaX = currentX - lastX;
-            
-            // Calcula velocidade baseada no movimento
-            if (deltaTime > 0) {
-                velocity = -(deltaX / deltaTime) * 15; // Maior sensibilidade para touch
-            }
-            
-            const walk = (currentX - startX) * 2; // Sensibilidade do arrasto
-            carousel.scrollLeft = scrollLeft - walk;
-            
-            lastX = currentX;
-            lastTime = currentTime;
-        }, { passive: true });
-        
-        carousel.addEventListener('touchend', () => {
-            isDragging = false;
-            carousel.style.scrollBehavior = 'smooth';
-            
-            // Aplica física de desaceleração quando solta
-            if (Math.abs(velocity) > 0.5) {
-                applyPhysics();
-            }
-        });
-        
-        // Previne comportamento padrão do scroll
-        carousel.addEventListener('dragstart', (e) => {
-            e.preventDefault();
-        });
-        
-        // Cursor inicial
-        carousel.style.cursor = 'grab';
-    });
-}
-
-function openSuperZoom(mediaUrl, type = 'image', mediaList = [], currentIndex = 0) {
-    const overlay = document.getElementById('superZoomOverlay');
-    const content = document.getElementById('superZoomContent');
-    if (!overlay || !content) return;
-
-    superZoomMediaList = mediaList.length > 0 ? mediaList : [{ url: mediaUrl, type: type }];
-    currentZoomIndex = currentIndex;
-
-    renderSuperZoomMedia();
-
-    overlay.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    history.pushState({ superZoomOpen: true }, '', '#super-zoom');
-    setupSuperZoomSwipe();
-}
-
-function closeSuperZoom() {
-    const overlay = document.getElementById('superZoomOverlay');
-    const content = document.getElementById('superZoomContent');
-    if (!overlay || !content) return;
-
-    overlay.classList.remove('active');
-    content.innerHTML = '';
-    document.body.style.overflow = '';
-    if (location.hash === '#super-zoom') {
-        history.replaceState(null, '', location.pathname + location.search);
-    }
-}
-
-function renderSuperZoomMedia() {
-    const content = document.getElementById('superZoomContent');
-    if (!content || superZoomMediaList.length === 0) return;
-    
-    const currentMedia = superZoomMediaList[currentZoomIndex];
-    const hasMultiple = superZoomMediaList.length > 1;
-    
-    let navigationHTML = '';
-    if (hasMultiple) {
-        navigationHTML = `
-            <button class="super-zoom-nav super-zoom-prev" onclick="prevSuperZoomMedia()">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="super-zoom-nav super-zoom-next" onclick="nextSuperZoomMedia()">
-                <i class="fas fa-chevron-right"></i>
-            </button>
-            <button class="next-photo-btn" onclick="nextSuperZoomMedia()">
-                <i class="fas fa-arrow-right"></i>
-            </button>
-            <div class="super-zoom-counter">${currentZoomIndex + 1} / ${superZoomMediaList.length}</div>
-        `;
-    }
-    
-    let mediaHTML = '';
-    if (currentMedia.type === 'video') {
-        mediaHTML = `<video src="${currentMedia.url}" controls autoplay loop playsinline style="max-width:100%;max-height:90vh;object-fit:contain;"></video>`;
-    } else {
-        mediaHTML = `<img src="${currentMedia.url}" alt="Zoom" style="max-width:100%;max-height:90vh;object-fit:contain;">`;
-    }
-
-    if (currentModalProduct) {
-        const product = currentModalProduct;
-        let whatsappMessage = `Olá! Gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}`;
-        
-        if (product.tem_solitario && product.solitario_price > 0) {
-            const total = product.price + product.solitario_price;
-            whatsappMessage = `Olá! Gostei do produto: *${product.name}* + *${product.additional_product_name || 'Solitário'}* (R$ ${product.solitario_price.toFixed(2).replace('.', ',')}) - Total: R$ ${total.toFixed(2).replace('.', ',')}`;
-        }
-        
-        whatsappMessage += `. Consegue me entregar hoje?`;
-        
-        mediaHTML += `
-            <a href="https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(whatsappMessage)}" 
-               target="_blank" 
-               class="zoom-whatsapp-btn highlighted">
-               <i class="fab fa-whatsapp"></i> FALAR NO WHATSAPP
-            </a>
-        `;
-    }
-
-    if (currentZoomIndex === 0 && currentModalProduct) {
-        if (currentModalProduct.badge_text) {
-            mediaHTML += `<div class="super-zoom-badge">${currentModalProduct.badge_text}</div>`;
-        }
-        if (currentModalProduct.sold_today) {
-            mediaHTML += `<div class="super-zoom-sold">Vendido Hoje</div>`;
-        }
-    }
-    
-    content.innerHTML = `
-        ${navigationHTML}
-        <div class="super-zoom-media-container">
-            ${mediaHTML}
-        </div>
-    `;
-}
-
-function nextSuperZoomMedia() {
-    if (superZoomMediaList.length <= 1) return;
-    currentZoomIndex = (currentZoomIndex + 1) % superZoomMediaList.length;
-    renderSuperZoomMedia();
-    showToast(`Foto ${currentZoomIndex + 1} de ${superZoomMediaList.length}`);
-}
-
-function prevSuperZoomMedia() {
-    if (superZoomMediaList.length <= 1) return;
-    currentZoomIndex = (currentZoomIndex - 1 + superZoomMediaList.length) % superZoomMediaList.length;
-    renderSuperZoomMedia();
-    showToast(`Foto ${currentZoomIndex + 1} de ${superZoomMediaList.length}`);
-}
-
-function setupSuperZoomListeners() {
-    document.getElementById('superZoomOverlay')?.addEventListener('click', (e) => {
-        if (e.target.id === 'superZoomOverlay') {
-            closeSuperZoom();
-        }
-    });
-
-    document.getElementById('superZoomClose')?.addEventListener('click', closeSuperZoom);
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            closeSuperZoom();
-        }
-    });
-}
-
-function setupSuperZoomSwipe() {
-    const overlay = document.getElementById('superZoomOverlay');
-    if (!overlay) return;
-    
-    let touchStartX = 0;
-    let touchEndX = 0;
-    
-    overlay.addEventListener('touchstart', (e) => {
-        touchStartX = e.changedTouches[0].screenX;
-    }, { passive: true });
-    
-    overlay.addEventListener('touchend', (e) => {
-        touchEndX = e.changedTouches[0].screenX;
-        handleSuperZoomSwipe();
-    }, { passive: true });
-    
-    function handleSuperZoomSwipe() {
-        const swipeThreshold = 50;
-        const diff = touchStartX - touchEndX;
-        if (Math.abs(diff) < swipeThreshold) return;
-        if (diff > 0) {
-            nextSuperZoomMedia();
-        } else {
-            prevSuperZoomMedia();
-        }
-    }
-}
-
-// ========================================
-// 13. FUNÇÕES DE COMPARTILHAMENTO
-// ========================================
-async function shareProduct(id) {
-    const product = allProductsLoaded.find(p => p.id === id);
-    if (!product) {
-        showToast('Produto não encontrado para compartilhar.');
-        return;
-    }
-
-    const shareData = {
-        title: product.name,
-        text: `Olha só essa joia incrível da Etevalda MT: ${product.name} por apenas R$ ${product.price.toFixed(2).replace('.', ',')}!`,
-        url: window.location.href.split('#')[0] + `#product-${product.id}`
-    };
-
-    try {
-        if (navigator.share) {
-            await navigator.share(shareData);
-            showToast('Compartilhado com sucesso!');
-        } else {
-            navigator.clipboard.writeText(shareData.url);
-            showToast('Link copiado para a área de transferência!');
-        }
-    } catch (err) {
-        console.log('Compartilhamento cancelado ou erro:', err);
-    }
-}
-
-// ========================================
-// 14. FUNÇÕES DO TIMER
-// ========================================
-function startDeliveryTimer() {
-    const timerElement = document.getElementById('deliveryTimer');
-    if (!timerElement) return;
-    
-    if (deliveryTimerInterval) {
-        clearInterval(deliveryTimerInterval);
-    }
-    
-    let savedTime = sessionStorage.getItem('deliveryTimerTime');
-    let startTime = savedTime ? parseInt(savedTime) : Date.now();
-    const totalTime = 2 * 60 * 60 * 1000;
-    
-    function updateTimer() {
-        const elapsed = Date.now() - startTime;
-        const remaining = Math.max(0, totalTime - elapsed);
-        
-        if (remaining === 0) {
-            timerElement.innerHTML = `
-                <i class="fas fa-clock"></i>
-                <span class="delivery-today">Receba hoje e só pague na entrega</span>
-            `;
-            sessionStorage.removeItem('deliveryTimerTime');
-            return;
-        }
-        
-        const totalSeconds = Math.floor(remaining / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-        
-        timerElement.innerHTML = `
-            <i class="fas fa-clock"></i>
-            <span class="timer-countdown">${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</span>
-            <span class="timer-text">para receber hoje!</span>
-        `;
-        
-        sessionStorage.setItem('deliveryTimerTime', startTime.toString());
-    }
-    
-    updateTimer();
-    deliveryTimerInterval = setInterval(updateTimer, 1000);
-}
-
-// ========================================
-// 15. FUNÇÕES DO CARRINHO
-// ========================================
-function addToCart(productId) {
+// MERCADO PAGO - CHECKOUT PRO
+async function buyViaMercadoPago(productId) {
     const product = allProductsLoaded.find(p => p.id === productId);
     if (!product) return;
 
-    const existingItem = cart.find(item => item.id === productId);
+    const btn = document.getElementById(`mpBtn-${productId}`);
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+    }
 
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.push({
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            image: Array.isArray(product.images) ? product.images[0] : '',
-            quantity: 1
+    const categoryName = getCategoryName(product.category_id);
+    const images = Array.isArray(product.images) ? product.images : [];
+
+    // Facebook Pixel - Rastrear início de checkout
+    if (typeof fbq !== 'undefined') {
+        fbq('track', 'InitiateCheckout', {
+            content_name: product.name,
+            content_category: categoryName,
+            value: product.price,
+            currency: 'BRL'
         });
     }
 
-    saveCart();
-    updateCartUI();
-    animateCart();
-    showToast('Adicionado ao carrinho!');
-}
-
-function removeFromCart(productId) {
-    cart = cart.filter(item => item.id !== productId);
-    saveCart();
-    updateCartUI();
-}
-
-function updateQuantity(productId, change) {
-    const item = cart.find(item => item.id === productId);
-    if (!item) return;
-
-    item.quantity += change;
-
-    if (item.quantity <= 0) {
-        removeFromCart(productId);
-    } else {
-        saveCart();
-        updateCartUI();
-    }
-}
-
-function clearCart() {
-    if (cart.length && confirm('Limpar carrinho?')) {
-        cart = [];
-        saveCart();
-        updateCartUI();
-        closeCart();
-    }
-}
-
-function saveCart() {
-    localStorage.setItem('grupoetevalda_cart', JSON.stringify(cart));
-}
-
-function loadCartFromStorage() {
-    const saved = localStorage.getItem('grupoetevalda_cart');
-    if (saved) {
-        cart = JSON.parse(saved);
-        updateCartUI();
-    }
-}
-
-function updateCartUI() {
-    const container = document.getElementById('cartItems');
-    const totalEl = document.getElementById('cartTotal');
-    const countEl = document.getElementById('cartCount');
-
-    if (!container) return;
-
-    let total = 0;
-    let qtdTotal = 0;
-
-    if (cart.length === 0) {
-        container.innerHTML = '<p style="text-align:center; padding:40px;">Carrinho vazio</p>';
-        totalEl.textContent = 'R$ 0,00';
-        countEl.textContent = '0';
-        countEl.style.display = 'none';
-        return;
-    }
-
-    container.innerHTML = cart.map(item => {
-        total += item.price * item.quantity;
-        qtdTotal += item.quantity;
-        return `
-            <div class="cart-item">
-                <img src="${item.image}" alt="">
-                <div class="cart-item-info">
-                    <div class="cart-item-name">${item.name}</div>
-                    <div class="cart-item-price">R$ ${item.price.toFixed(2).replace('.', ',')}</div>
-                    <div class="cart-item-quantity">
-                        <button onclick="updateQuantity(${item.id}, -1)">-</button>
-                        <span>${item.quantity}</span>
-                        <button onclick="updateQuantity(${item.id}, 1)">+</button>
-                    </div>
-                </div>
-                <button class="cart-item-remove" onclick="removeFromCart(${item.id})"><i class="fas fa-times"></i></button>
-            </div>
-        `;
-    }).join('');
-
-    totalEl.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-    countEl.textContent = qtdTotal;
-    countEl.style.display = qtdTotal > 0 ? 'flex' : 'none';
-}
-
-function animateCart() {
-    const cartBtn = document.getElementById('cartBtn');
-    if (!cartBtn) return;
-    cartBtn.classList.add('cart-bounce', 'cart-glow');
-    setTimeout(() => {
-        cartBtn.classList.remove('cart-bounce', 'cart-glow');
-    }, 500);
-}
-
-function toggleCart() {
-    const sidebar = document.getElementById('cartSidebar');
-    const overlay = document.getElementById('cartOverlay');
-    sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
-    document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
-}
-
-function closeCart() {
-    document.getElementById('cartSidebar').classList.remove('active');
-    document.getElementById('cartOverlay').classList.remove('active');
-    document.body.style.overflow = '';
-}
-
-function checkoutWhatsApp() {
-    if (cart.length === 0) {
-        showToast('Carrinho vazio!');
-        return;
-    }
-
-    let itemsList = '';
-    let total = 0;
-
-    cart.forEach((item, index) => {
-        const subtotal = item.price * item.quantity;
-        total += subtotal;
-        itemsList += `${index + 1}. ${item.name} (x${item.quantity}) - R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
-    });
-
-    const message = `🛍️ *NOVO PEDIDO*\n${itemsList}\n💰 *Total: R$ ${total.toFixed(2).replace('.', ',')}*\nPago na entrega.`;
-    const url = `https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(message)}&type=phone_number&app_absent=0`;
-    window.open(url, '_blank');
-}
-
-function buyViaWhatsApp(id) {
-    const p = allProductsLoaded.find(p => p.id === id);
-    if (!p) {
-        window.open(WHATSAPP_BASE_URL, '_blank');
-        return;
-    }
-
-    let msg = `Olá! Gostei do produto: *${p.name}* - R$ ${p.price.toFixed(2).replace('.', ',')}`;
-    
-    if (p.tem_solitario && p.solitario_price > 0) {
-        const total = p.price + p.solitario_price;
-        msg = `Olá! Gostei do produto: *${p.name}* + *${p.additional_product_name || 'Solitário'}* (R$ ${p.solitario_price.toFixed(2).replace('.', ',')}) - Total: R$ ${total.toFixed(2).replace('.', ',')}`;
-    }
-    
-    msg += `. Consegue me entregar hoje?`;
-    
-    const url = `https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}&type=phone_number&app_absent=0`;
-    window.open(url, '_blank');
-}
-
-// ========================================
-// 16. FUNÇÕES DE BUSCA
-// ========================================
-function handleSearch(query) {
-    searchQuery = query;
-    renderProducts();
-
-    const dropdown = document.getElementById('searchDropdown');
-    if (dropdown) {
-        setTimeout(() => { dropdown.style.display = 'none'; }, 200);
-    }
-}
-
-function resetFilters() {
-    searchQuery = '';
-    currentCategory = 'all';
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) searchInput.value = '';
-
-    document.querySelectorAll('.category-list li').forEach(li => {
-        li.classList.toggle('active', li.dataset.category === 'all');
-    });
-
-    renderProducts();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function initPredictiveSearch() {
-    const searchInput = document.getElementById('searchInput');
-    const searchDropdown = document.getElementById('searchDropdown');
-    const searchResults = document.getElementById('searchResults');
-
-    if (!searchInput) return;
-
-    document.addEventListener('click', (e) => {
-        if (!searchInput.contains(e.target) && !searchDropdown?.contains(e.target)) {
-            if (searchDropdown) searchDropdown.style.display = 'none';
-        }
-    });
-
-    searchInput.addEventListener('input', debounce((e) => {
-        const query = e.target.value.trim().toLowerCase();
-        handleSearch(query);
-
-        if (query.length < 2 || !searchDropdown || !searchResults) {
-            if (searchDropdown) searchDropdown.style.display = 'none';
-            return;
-        }
-
-        const results = allProductsLoaded.filter(p =>
-            p.name.toLowerCase().includes(query)
-        ).slice(0, 5);
-
-        if (results.length > 0) {
-            searchResults.innerHTML = results.map(p => `
-                <div class="search-result-item" onclick="openProductModal(${p.id}); searchDropdown.style.display='none';">
-                    <img src="${Array.isArray(p.images) ? p.images[0] : ''}" alt="">
-                    <div class="search-result-info">
-                        <div class="search-result-name">${p.name}</div>
-                        <div class="search-result-price">R$ ${p.price.toFixed(2).replace('.', ',')}</div>
-                    </div>
-                </div>
-            `).join('');
-            searchDropdown.style.display = 'block';
-        } else {
-            searchResults.innerHTML = '<div class="search-no-results">Nada encontrado</div>';
-            searchDropdown.style.display = 'block';
-        }
-    }, 300));
-}
-
-// ========================================
-// 17. FUNÇÕES DE GEOLOCALIZAÇÃO
-// ========================================
-async function initGeoLocationBackground() {
     try {
-        const response = await fetch('https://ipapi.co/json/');
+        const response = await fetch('/api/create-preference', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                title: product.name,
+                price: product.price,
+                quantity: 1,
+                category: categoryName,
+                productId: product.id,
+                picture_url: images[0] || ''
+            })
+        });
+
         const data = await response.json();
-        if (data.city && NEIGHBORHOODS[data.city]) {
-            detectedLocation = { city: data.city, neighborhoods: NEIGHBORHOODS[data.city] };
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Erro ao criar pagamento');
         }
-        startGeoNotifications();
-    } catch {
-        startGeoNotifications();
-    }
-}
 
-function startGeoNotifications() {
-    setTimeout(showGeoNotification, 25000);
-    setInterval(showGeoNotification, 120000);
-}
-
-function showGeoNotification() {
-    if (!allProductsLoaded.length) return;
-
-    // Obtém a cidade detectada pela API
-    const detectedCity = detectedLocation.city;
-    let neighborhood;
-    let locationText;
-
-    // Lógica inteligente para escolher o bairro
-    if (NEIGHBORHOODS[detectedCity]) {
-        // Se for uma das 4 cidades de MT, usa bairro específico
-        neighborhood = NEIGHBORHOODS[detectedCity][Math.floor(Math.random() * NEIGHBORHOODS[detectedCity].length)];
-        locationText = `${detectedCity}`;
-    } else {
-        // Se for QUALQUER OUTRA cidade (Rio de Janeiro, São Paulo, etc.), usa bairro genérico
-        neighborhood = GENERIC_NEIGHBORHOODS[Math.floor(Math.random() * GENERIC_NEIGHBORHOODS.length)];
-        locationText = `${detectedCity}`;
-    }
-
-    // Fallback: Se a API falhar totalmente, usa Cuiabá como padrão
-    if (!detectedCity || detectedCity.trim() === '') {
-        neighborhood = NEIGHBORHOODS['Cuiabá'][Math.floor(Math.random() * NEIGHBORHOODS['Cuiabá'].length)];
-        locationText = 'Cuiabá';
-    }
-
-    const customerName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
-    const randomProduct = allProductsLoaded[Math.floor(Math.random() * allProductsLoaded.length)];
-
-    const notification = document.getElementById('geoNotification');
-    const notificationText = document.getElementById('geoNotificationText');
-
-    if (notification && notificationText) {
-        notificationText.innerHTML = `<strong>${customerName}</strong> de <strong>${locationText}</strong> - <strong>${neighborhood}</strong> comprou <strong>${randomProduct.name}</strong>`;
-        notification.style.display = 'block';
-        setTimeout(() => notification.style.display = 'none', 8000);
-    }
-}
-
-// ========================================
-// 18. FUNÇÕES DE TIMER DA EQUIPE (DESATIVADA)
-// ========================================
-function startTeamTimer() {
-    console.log('Timer da equipe antigo desativado - usando novo carrossel');
-}
-
-// ========================================
-// 19. CONFIGURAÇÃO DE EVENTOS
-// ========================================
-function setupEventListeners() {
-    document.getElementById('modalCloseBtn')?.addEventListener('click', closeProductModal);
-    document.getElementById('modalOverlay')?.addEventListener('click', closeProductModal);
-    document.getElementById('cartBtn')?.addEventListener('click', toggleCart);
-    document.getElementById('closeCart')?.addEventListener('click', closeCart);
-    document.getElementById('cartOverlay')?.addEventListener('click', closeCart);
-    document.getElementById('checkoutBtn')?.addEventListener('click', checkoutWhatsApp);
-    document.getElementById('clearCartBtn')?.addEventListener('click', clearCart);
-    document.getElementById('searchBtn')?.addEventListener('click', () => {
-        const input = document.getElementById('searchInput');
-        if (input) handleSearch(input.value);
-    });
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            closeProductModal();
-            closeCart();
-            closeSuperZoom();
+        // Redirecionar para o Checkout Pro do Mercado Pago
+        if (data.init_point) {
+            window.location.href = data.init_point;
+        } else {
+            throw new Error('URL de pagamento não recebida');
         }
-    });
-}
 
-function showToast(msg) {
-    const toast = document.getElementById('toast');
-    if (!toast) return;
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
-function debounce(fn, wait) {
-    let timeout;
-    return (...args) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => fn(...args), wait);
-    };
-}
-
-// ========================================
-// 20. FUNÇÃO RENDER SKELETON
-// ========================================
-function renderSkeleton() {
-    const container = document.getElementById('productsContainer');
-    if (!container) return;
-    
-    const skeletons = document.querySelectorAll('.product-card.skeleton');
-    if (skeletons.length > 0) {
-        skeletons.forEach(s => s.style.display = 'block');
-    } else {
-        container.innerHTML = `
-            <div class="product-card skeleton"><div class="skeleton-image"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div></div></div>
-            <div class="product-card skeleton"><div class="skeleton-image"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div></div></div>
-            <div class="product-card skeleton"><div class="skeleton-image"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div></div></div>
-            <div class="product-card skeleton"><div class="skeleton-image"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div></div></div>
-            <div class="product-card skeleton"><div class="skeleton-image"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div></div></div>
-            <div class="product-card skeleton"><div class="skeleton-image"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div></div></div>
-        `;
-    }
-}
-
-// ========================================
-// 21. FUNÇÃO PARA CARREGAR SUGESTÕES
-// ========================================
-async function showEndCategorySuggestions() {
-    const container = document.getElementById('end-category-suggestions');
-    const grid = document.getElementById('suggestionsGrid');
-    if (!container || !grid) return;
-
-    if (container.style.display === 'block') return;
-
-    const { data: suggestions } = await _supabase
-        .from('products')
-        .select('*, categories(name)')
-        .neq('category_id', currentCategory) 
-        .order('random_index')
-        .limit(10);
-
-    if (suggestions && suggestions.length > 0) {
-        grid.innerHTML = suggestions.map((p, index) => renderProductCard(p, index + 100)).join('');
-        container.style.display = 'block';
-    }
-}
-
-// ========================================
-// 22. NOVA FUNÇÃO: Configurar LCP com preload
-// ========================================
-function setupLCPPreload() {
-    if (allProductsLoaded.length === 0) return;
-    
-    const firstValidProduct = allProductsLoaded.find(p => {
-        const images = filterValidImages(p.images);
-        return images.length > 0;
-    });
-    
-    if (firstValidProduct) {
-        const validImages = filterValidImages(firstValidProduct.images);
-        if (validImages.length > 0) {
-            const lcpPreload = document.getElementById('lcpPreload');
-            if (lcpPreload) {
-                lcpPreload.href = validImages[0];
-                lcpPreload.setAttribute('imagesrcset', validImages[0]);
-                console.log('🎯 LCP Preload configurado:', validImages[0]);
-            }
+    } catch (error) {
+        console.error('Erro Mercado Pago:', error);
+        showToast('Erro ao processar pagamento. Tente via WhatsApp!', 'error');
+        
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-credit-card"></i> Comprar Agora';
         }
     }
 }
 
-// ========================================
-// 23. FUNÇÃO PARA CARREGAR TAWK.TO
-// ========================================
-function loadTawkTo() {
-    var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
-    (function() {
-        var s1 = document.createElement("script"), s0 = document.getElementsByTagName("script")[0];
-        s1.async = true;
-        s1.src = 'https://embed.tawk.to/65e8a3d28d261e1b5f5f8b2a/1hoh7vq1q';
-        s1.charset = 'UTF-8';
-        s1.setAttribute('crossorigin', '*');
-        s0.parentNode.insertBefore(s1, s0);
-    })();
-}
-
-// ========================================
-// 24. INICIALIZAÇÃO PRINCIPAL
-// ========================================
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 Grupo Etevalda MT - Versão Tempo Real');
-
-    createManifest();
-
+// 8. INICIALIZAÇÃO
+async function initializeApp() {
     try {
-        renderSkeleton();
-        await loadCategories();
-        await loadProducts(true);
-        
-        setupLCPPreload();
-        
+        await Promise.all([
+            loadCategories(),
+            loadProducts(true),
+            loadFaqs(),
+            loadSocialProof()
+        ]);
+
         renderCategories();
         renderProducts();
-        
         loadCartFromStorage();
         
-        setupEventListeners();
-        setupHistoryAPI();
-        setupInfiniteScroll();
-        setupScrollListener();
+        showSecondarySections();
         
-        initPredictiveSearch();
+        // Detectar cidade/estado do cliente via IP
+        initGeoLocationBackground();
         
-        setTimeout(async () => {
-            try {
-                await loadReviews();
-                await loadFaqs();
-                await loadSocialProof();
-                await loadTeamImage();
-                await loadTeamCarousel();
-                
-                renderAllCarousels();
-                renderSocialProof();
-                renderFaqs();
-                renderTeamCarousel();
-                
-                showSecondarySections();
-                
-                initGeoLocationBackground();
-                startTeamTimer();
-                setupSuperZoomListeners();
-                
-                if ('ontouchstart' in window) {
-                    setupTouchListeners();
-                }
-                
-                console.log('✅ Seções secundárias carregadas');
-            } catch (error) {
-                console.error('Erro ao carregar seções secundárias:', error);
-            }
-        }, 3000);
+        // Iniciar notificações geo-localizadas
+        startGeoNotifications();
 
-        setTimeout(() => {
-            loadTawkTo();
-        }, 10000);
+        console.log('✅ Site carregado com sucesso!');
 
     } catch (error) {
         console.error('❌ Erro:', error);
-        showToast('Erro ao carregar produtos');
-    } finally {
-        setTimeout(() => showLoading(false), 500);
     }
-});
+    
+    // Event Listeners para modais e carrinho
+    setupModalListeners();
+    setupCartListeners();
+}
 
-// ========================================
-// FUNÇÃO PARA LER CATEGORIA DA URL
-// ========================================
-function checkCategoryFromURL() {
-    const hash = window.location.hash.substring(1); // Remove o #
-    if (!hash) return;
-
-    // Mapear nomes amigáveis para IDs de categoria
-    const categoryMap = {};
-    categories.forEach(cat => {
-        const friendlyName = cat.name.toLowerCase()
-            .replace(/\s+/g, '-')
-            .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-        categoryMap[friendlyName] = cat.id;
-    });
-
-    // Se o hash corresponder a uma categoria
-    if (categoryMap[hash]) {
-        currentCategory = categoryMap[hash];
-        
-        // Atualizar a classe active no menu
-        const list = document.getElementById('categoryList');
-        if (list) {
-            list.querySelectorAll('li').forEach(el => {
-                const isActive = el.dataset.category == currentCategory;
-                el.classList.toggle('active', isActive);
-            });
+function setupModalListeners() {
+    // Botão fechar modal
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    if (modalCloseBtn) {
+        modalCloseBtn.addEventListener('click', closeProductModal);
+    }
+    
+    // Overlay do modal
+    const modalOverlay = document.getElementById('modalOverlay');
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', closeProductModal);
+    }
+    
+    // Botão fechar Super Zoom
+    const superZoomClose = document.getElementById('superZoomClose');
+    if (superZoomClose) {
+        superZoomClose.addEventListener('click', closeSuperZoom);
+    }
+    
+    // Tecla ESC para fechar modais
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const superZoom = document.getElementById('superZoomOverlay');
+            const modal = document.getElementById('productModal');
+            
+            // Prioridade: Super Zoom > Modal
+            if (superZoom && superZoom.style.display === 'flex') {
+                closeSuperZoom();
+            } else if (modal && modal.classList.contains('active')) {
+                closeProductModal();
+            }
         }
-        
-        // Resetar e carregar produtos da categoria
-        currentPage = 1;
-        allProductsLoaded = [];
-        hasMoreProducts = true;
-        
-        const container = document.getElementById('productsContainer');
-        if (container) container.innerHTML = '';
-        
-        showLoading(true);
-        loadProducts(true);
+    });
+}
+
+function setupCartListeners() {
+    // Botões do carrinho
+    const cartBtn = document.getElementById('cartBtn');
+    if (cartBtn) {
+        cartBtn.addEventListener('click', toggleCart);
+    }
+    
+    const closeCart = document.getElementById('closeCart');
+    if (closeCart) {
+        closeCart.addEventListener('click', () => {
+            document.getElementById('cartSidebar').classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    }
+    
+    const cartOverlay = document.getElementById('cartOverlay');
+    if (cartOverlay) {
+        cartOverlay.addEventListener('click', () => {
+            document.getElementById('cartSidebar').classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    }
+    
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', () => {
+            if (cart.length === 0) {
+                showToast('Carrinho vazio!');
+                return;
+            }
+            
+            let message = 'Olá! Gostaria de finalizar meu pedido:\n\n';
+            cart.forEach(item => {
+                message += `• ${item.name} - R$ ${item.price.toFixed(2).replace('.', ',')} (Qtd: ${item.quantity})\n`;
+            });
+            
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            message += `\nTotal: R$ ${total.toFixed(2).replace('.', ',')}`;
+            
+            window.open(`https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(message)}`, '_blank');
+        });
     }
 }
 
+// Event Listeners
+document.addEventListener('DOMContentLoaded', initializeApp);
+
 // Expor funções globais
 window.openProductModal = openProductModal;
-window.changeModalMedia = changeModalMedia;
 window.closeProductModal = closeProductModal;
-window.buyViaWhatsApp = buyViaWhatsApp;
-window.resetFilters = resetFilters;
 window.addToCart = addToCart;
 window.removeFromCart = removeFromCart;
 window.updateQuantity = updateQuantity;
 window.toggleCart = toggleCart;
 window.closeCart = closeCart;
-window.checkoutWhatsApp = checkoutWhatsApp;
-window.clearCart = clearCart;
-window.handleSearch = handleSearch;
-window.playFaqAudio = playFaqAudio;
-window.scrollToTop = scrollToTop;
-window.openSuperZoom = openSuperZoom;
-window.nextSuperZoomMedia = nextSuperZoomMedia;
-window.prevSuperZoomMedia = prevSuperZoomMedia;
-window.closeSuperZoom = closeSuperZoom;
+window.buyViaWhatsApp = buyViaWhatsApp;
+window.buyViaMercadoPago = buyViaMercadoPago;
 window.hoverImage = hoverImage;
 window.unhoverImage = unhoverImage;
-window.nextMedia = nextMedia;
-window.prevMedia = prevMedia;
+window.openSuperZoom = openSuperZoom;
+window.closeSuperZoom = closeSuperZoom;
+window.changeZoom = changeZoom;
+window.changeModalMedia = changeModalMedia;
 window.shareProduct = shareProduct;

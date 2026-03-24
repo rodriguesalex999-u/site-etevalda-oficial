@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <!-- Facebook Pixel Code -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '8641232282765044');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=8641232282765044&ev=PageView&noscript=1"/></noscript>
+    <!-- End Facebook Pixel Code -->
+
         <!-- PRELOAD DA IMAGEM PRIORITÁRIA (LCP) -->
     <link rel="preload" as="image" href="https://vnrfmsyanrvqqhmqyixk.supabase.co/storage/v1/object/public/produtos/produtos/1773710851783-1w34bjz7.webp" fetchpriority="high">
     <meta charset="UTF-8">
@@ -29,7 +45,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://vnrfmsyanrvqqhmqyixk.supabase.co">
 
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -81,8 +97,8 @@
                     <div class="product-card skeleton"><div class="skeleton-image"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div></div></div>
                     <div class="product-card skeleton"><div class="skeleton-image"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div></div></div>
                 </div>
-                <!-- NOVO: Sensor invisível para o celular saber a hora de carregar -->
-                <div id="infinite-scroll-trigger" style="height: 20px; margin-bottom: 50px;"></div>
+                <!-- Trigger para Infinite Scroll -->
+                <div id="infinite-scroll-trigger"></div>
             </section>
 
             <!-- PROVA SOCIAL -->
@@ -158,6 +174,7 @@
                 <div id="cartItems" class="cart-items"></div>
                 <div class="cart-footer">
                     <div class="cart-total"><span>Total:</span><strong id="cartTotal">R$ 0,00</strong></div>
+                    <button id="clearCartBtn" class="btn-clear-cart">Limpar Carrinho</button>
                     <button id="checkoutBtn" class="btn-whatsapp-cart"><i class="fab fa-whatsapp"></i> Finalizar Pedido</button>
                 </div>
             </div>
@@ -196,6 +213,22 @@
             <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
             <script src="script.js" defer></script>
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+
+            <!--Start of Tawk.to Script - Carrega após 1min35s -->
+            <script type="text/javascript">
+            setTimeout(function(){
+                var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+                (function(){
+                    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+                    s1.async=true;
+                    s1.src='https://embed.tawk.to/68bae4146198bb19234dc085/1j4d0lsrm';
+                    s1.charset='UTF-8';
+                    s1.setAttribute('crossorigin','*');
+                    s0.parentNode.insertBefore(s1,s0);
+                })();
+            }, 95000);
+            </script>
+            <!--End of Tawk.to Script-->
         </div>
     </main>
 </body>
