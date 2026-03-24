@@ -80,8 +80,43 @@
             </div>
         </div>
         <nav class="nav-categories">
-            <div class="container-fluid"><ul id="categoryList" class="category-list"><li class="active" data-category="all">Todos</li></ul></div>
+            <div class="container-fluid">
+                <div class="categories-wrapper">
+                    <button id="categoriesToggleBtn" class="categories-toggle-btn" type="button">
+                        <i class="fas fa-th-list"></i>
+                        <span>Todas as Categorias</span>
+                        <i class="fas fa-chevron-down categories-chevron" id="catChevron"></i>
+                    </button>
+                    <div id="categoriesDropdown" class="categories-dropdown">
+                        <ul id="categoryList" class="category-list"><li class="active" data-category="all">Todos</li></ul>
+                    </div>
+                </div>
+            </div>
         </nav>
+        <script>
+        (function() {
+            var btn = document.getElementById('categoriesToggleBtn');
+            var dd  = document.getElementById('categoriesDropdown');
+            var chv = document.getElementById('catChevron');
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dd.classList.toggle('open');
+                chv.classList.toggle('rotated');
+            });
+            dd.addEventListener('click', function(e) {
+                if (e.target.tagName === 'LI') {
+                    dd.classList.remove('open');
+                    chv.classList.remove('rotated');
+                }
+            });
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.categories-wrapper')) {
+                    dd.classList.remove('open');
+                    chv.classList.remove('rotated');
+                }
+            });
+        })();
+        </script>
     </header>
 
     <main class="main-content">
