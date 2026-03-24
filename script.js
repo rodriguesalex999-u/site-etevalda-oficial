@@ -942,7 +942,7 @@ function openProductModal(id) {
     if (modalContent) modalContent.scrollTop = 0;
     
     // Configurar botão voltar do celular
-    window.history.pushState({ modalOpen: true, productId: productId }, '', window.location.href);
+    window.history.pushState({ modalOpen: true, productId: product.id }, '', window.location.href);
 }
 
 function closeProductModal() {
@@ -1116,8 +1116,10 @@ function updateQuantity(productId, quantity) {
 
 function toggleCart() {
     const cartSidebar = document.getElementById('cartSidebar');
+    const cartOverlay = document.getElementById('cartOverlay');
     if (cartSidebar) {
         cartSidebar.classList.toggle('active');
+        if (cartOverlay) cartOverlay.classList.toggle('active');
         document.body.style.overflow = cartSidebar.classList.contains('active') ? 'hidden' : '';
     }
 }
@@ -1174,8 +1176,10 @@ function loadCartFromStorage() {
 
 function closeCart() {
     const cartSidebar = document.getElementById('cartSidebar');
+    const cartOverlay = document.getElementById('cartOverlay');
     if (cartSidebar) {
         cartSidebar.classList.remove('active');
+        if (cartOverlay) cartOverlay.classList.remove('active');
         document.body.style.overflow = '';
     }
 }
@@ -1315,9 +1319,14 @@ async function initializeApp() {
         
         // Iniciar notificações geo-localizadas
         startGeoNotifications();
-        
-        // Mostrar botão WhatsApp após 8 segundos para melhorar performance
-        showWhatsAppFloatDelayed();
+
+        setTimeout(() => {
+            const whatsappBtn = document.querySelector('.whatsapp-float');
+            if (whatsappBtn) {
+                whatsappBtn.style.opacity = '1';
+                whatsappBtn.style.visibility = 'visible';
+            }
+        }, 8000);
 
         console.log('✅ Site carregado com sucesso!');
 
@@ -1372,10 +1381,12 @@ function setupCartListeners() {
         cartBtn.addEventListener('click', toggleCart);
     }
     
-    const closeCart = document.getElementById('closeCart');
-    if (closeCart) {
-        closeCart.addEventListener('click', () => {
+    const closeCartBtn = document.getElementById('closeCart');
+    if (closeCartBtn) {
+        closeCartBtn.addEventListener('click', () => {
             document.getElementById('cartSidebar').classList.remove('active');
+            const overlay = document.getElementById('cartOverlay');
+            if (overlay) overlay.classList.remove('active');
             document.body.style.overflow = '';
         });
     }
@@ -1384,7 +1395,18 @@ function setupCartListeners() {
     if (cartOverlay) {
         cartOverlay.addEventListener('click', () => {
             document.getElementById('cartSidebar').classList.remove('active');
+            cartOverlay.classList.remove('active');
             document.body.style.overflow = '';
+        });
+    }
+    
+    const clearCartBtn = document.getElementById('clearCartBtn');
+    if (clearCartBtn) {
+        clearCartBtn.addEventListener('click', () => {
+            cart = [];
+            localStorage.setItem('etevalda_cart', JSON.stringify(cart));
+            updateCartUI();
+            showToast('Carrinho limpo!');
         });
     }
     
@@ -1411,16 +1433,6 @@ function setupCartListeners() {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', initializeApp);
-
-// Função para mostrar botão WhatsApp com delay
-function showWhatsAppFloatDelayed() {
-    setTimeout(() => {
-        const whatsappBtn = document.querySelector('.whatsapp-float');
-        if (whatsappBtn) {
-            whatsappBtn.classList.add('show');
-        }
-    }, 8000); // 8 segundos
-}
 
 // Expor funções globais
 window.openProductModal = openProductModal;
