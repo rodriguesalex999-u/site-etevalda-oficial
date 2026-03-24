@@ -41,6 +41,11 @@ let detectedLocation = { city: 'Cuiabá', neighborhoods: NEIGHBORHOODS['Cuiabá'
 let detectedState = 'MT';
 
 // 3. FUNÇÕES DE CARREGAMENTO
+// Inicializar listener do popstate uma vez no carregamento da página
+document.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('popstate', handleMobileBack);
+});
+
 async function loadProducts(reset = false) {
     if (reset) {
         allProductsLoaded = [];
@@ -208,6 +213,9 @@ function openSuperZoom(productId) {
     renderSuperZoomMedia();
     document.getElementById('superZoomOverlay').style.display = 'flex';
     document.body.style.overflow = 'hidden';
+    
+    // Adicionar estado ao histórico para o super zoom
+    window.history.pushState({ superZoomOpen: true, productId: productId }, '', window.location.href);
 }
 
 function renderSuperZoomMedia() {
@@ -263,6 +271,11 @@ window.closeSuperZoom = function() {
     superZoomMediaList = [];
     currentZoomIndex = 0;
     currentModalProduct = null;
+    
+    // Voltar para o modal quando fechado pelo botão X
+    if (window.history.state && window.history.state.superZoomOpen) {
+        window.history.back();
+    }
 };
 
 // Funções de Timer e Notificações
@@ -929,10 +942,7 @@ function openProductModal(id) {
     if (modalContent) modalContent.scrollTop = 0;
     
     // Configurar botão voltar do celular
-    if (window.history.length > 1) {
-        window.addEventListener('popstate', handleMobileBack);
-        window.history.pushState({ modalOpen: true }, '', window.location.href);
-    }
+    window.history.pushState({ modalOpen: true, productId: productId }, '', window.location.href);
 }
 
 function closeProductModal() {
@@ -966,19 +976,27 @@ function closeProductModal() {
         scrollableEl.scrollTop = 0;
     }
     
-    // Garantir que o histórico do navegador funcione corretamente no mobile
-    if (window.history.length > 1) {
-        window.removeEventListener('popstate', handleMobileBack);
+    // Voltar para a página anterior usando o histórico
+    if (window.history.state && window.history.state.modalOpen) {
+        window.history.back();
     }
 }
 
 function handleMobileBack(event) {
-    // Fechar modal quando o usuário pressionar o botão voltar do celular
     const modal = document.getElementById('productModal');
-    if (modal && modal.classList.contains('active')) {
+    const superZoom = document.getElementById('superZoomOverlay');
+    
+    // Prioridade: Super Zoom > Modal
+    if (superZoom && superZoom.style.display === 'flex') {
+        closeSuperZoom();
+        event.preventDefault();
+        event.stopPropagation();
+    } else if (modal && modal.classList.contains('active')) {
         closeProductModal();
         event.preventDefault();
+        event.stopPropagation();
     }
+    // Se não for nenhum dos dois, deixar o comportamento normal do navegador
 }
 
 // FUNÇÃO INFINITA PARA COMPLEMENTE SEU ESTILO
@@ -1297,6 +1315,9 @@ async function initializeApp() {
         
         // Iniciar notificações geo-localizadas
         startGeoNotifications();
+        
+        // Mostrar botão WhatsApp após 8 segundos para melhorar performance
+        showWhatsAppFloatDelayed();
 
         console.log('✅ Site carregado com sucesso!');
 
@@ -1390,6 +1411,16 @@ function setupCartListeners() {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', initializeApp);
+
+// Função para mostrar botão WhatsApp com delay
+function showWhatsAppFloatDelayed() {
+    setTimeout(() => {
+        const whatsappBtn = document.querySelector('.whatsapp-float');
+        if (whatsappBtn) {
+            whatsappBtn.classList.add('show');
+        }
+    }, 8000); // 8 segundos
+}
 
 // Expor funções globais
 window.openProductModal = openProductModal;
