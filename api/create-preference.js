@@ -27,8 +27,6 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Campos obrigatórios: title, price' });
         }
 
-        // Monta a URL base do site para redirecionamentos
-        // Prioridade: origin do request > env SITE_URL > domínio fixo
         const baseUrl = req.headers.origin
             || process.env.SITE_URL
             || 'https://www.etevaldajoias.com';
@@ -45,6 +43,11 @@ export default async function handler(req, res) {
                     currency_id: 'BRL'
                 }
             ],
+            // AQUI ESTÁ O FRETE FIXO DE R$ 14,99
+            shipments: {
+                cost: 14.99,
+                mode: "not_specified" 
+            },
             back_urls: {
                 success: `${baseUrl}/sucesso.html?categoria=${encodeURIComponent(category || '')}`,
                 failure: `${baseUrl}/index.html?status=failure`,
