@@ -152,14 +152,21 @@ function renderProducts() {
     }).join('');
 }
 
+function slugifyCategory(name) {
+    return name.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-|-$/g, '');
+}
+
 function renderCategories() {
     const list = document.getElementById('categoryList');
     if (!list) return;
 
-    list.innerHTML = '<li class="active" data-category="all">Todos</li>';
+    list.innerHTML = '<li class="active" data-category="all" data-slug="all">Todos</li>';
 
     categories.forEach(cat => {
-        list.innerHTML += `<li data-category="${cat.id}">${cat.name}</li>`;
+        list.innerHTML += `<li data-category="${cat.id}" data-slug="${slugifyCategory(cat.name)}">${cat.name}</li>`;
     });
 
     list.querySelectorAll('li').forEach(button => {
@@ -171,12 +178,28 @@ function renderCategories() {
             allProductsLoaded = [];
             productViewers = {};
             
+            const slug = button.dataset.slug;
+            if (slug === 'all') {
+                history.replaceState(null, '', window.location.pathname);
+            } else {
+                window.location.hash = slug;
+            }
+            
             const container = document.getElementById('productsContainer');
             if (container) container.innerHTML = '';
             
             loadProducts(true);
         });
     });
+}
+
+function applyHashCategory() {
+    const hash = window.location.hash.slice(1);
+    if (!hash || hash === 'all') return;
+    const list = document.getElementById('categoryList');
+    if (!list) return;
+    const match = list.querySelector(`li[data-slug="${hash}"]`);
+    if (match) match.click();
 }
 
 // Funções de Hover de Imagem
@@ -201,7 +224,7 @@ window.unhoverImage = function(productId, hoverState) {
 };
 
 // Funções de Super Zoom
-function openSuperZoom(productId) {
+function openSuperZoom(productId, skipHistory = false) {
     const product = allProductsLoaded.find(p => p.id === productId);
     if (!product) return;
 
@@ -214,8 +237,10 @@ function openSuperZoom(productId) {
     document.getElementById('superZoomOverlay').style.display = 'flex';
     document.body.style.overflow = 'hidden';
     
-    // Adicionar estado ao histórico para o super zoom
-    window.history.pushState({ superZoomOpen: true, productId: productId }, '', window.location.href);
+    // Adicionar estado ao histórico para o super zoom (apenas quando acionado manualmente)
+    if (!skipHistory) {
+        window.history.pushState({ superZoomOpen: true, productId: productId }, '', window.location.href);
+    }
 }
 
 function renderSuperZoomMedia() {
@@ -1266,7 +1291,7 @@ async function buyViaMercadoPago(productId) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 title: product.name,
-                price: product.price,
+                price: product.price + 14.99,
                 quantity: 1,
                 category: categoryName,
                 productId: product.id,
@@ -1309,6 +1334,7 @@ async function initializeApp() {
         ]);
 
         renderCategories();
+        applyHashCategory();
         renderProducts();
         loadCartFromStorage();
         
