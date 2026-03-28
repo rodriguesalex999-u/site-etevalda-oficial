@@ -55,9 +55,7 @@ async function loadProducts(reset = false) {
         let query = _supabase.from('products').select('*');
 
         if (currentCategory !== 'all') {
-            query = query.eq('category_id', currentCategory).order('id', { ascending: false });
-        } else {
-            query = query.order('random_index');
+            query = query.eq('category_id', currentCategory);
         }
 
         const { data, error } = await query;
@@ -68,6 +66,14 @@ async function loadProducts(reset = false) {
                 const images = Array.isArray(p.images) ? p.images : [];
                 return images.length > 0;
             });
+
+            // EMBARALHAR (SÓ SE NÃO TIVER BUSCA ATIVA)
+            if (!searchQuery) {
+                for (let i = filteredData.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [filteredData[i], filteredData[j]] = [filteredData[j], filteredData[i]];
+                }
+            }
 
             allProductsLoaded = reset ? filteredData : [...allProductsLoaded, ...filteredData];
         }
@@ -224,13 +230,13 @@ window.unhoverImage = function(productId, hoverState) {
 };
 
 // Funções de Super Zoom
-function openSuperZoom(productId, skipHistory = false) {
+function openSuperZoom(productId, skipHistory = false, startIndex = 0) {
     const product = allProductsLoaded.find(p => p.id === productId);
     if (!product) return;
 
     const images = Array.isArray(product.images) ? product.images : [];
     superZoomMediaList = images;
-    currentZoomIndex = 0;
+    currentZoomIndex = startIndex;
     currentModalProduct = product;
 
     renderSuperZoomMedia();
@@ -239,7 +245,23 @@ function openSuperZoom(productId, skipHistory = false) {
     
     // Adicionar estado ao histórico para o super zoom (apenas quando acionado manualmente)
     if (!skipHistory) {
-        window.history.pushState({ superZoomOpen: true, productId: productId }, '', window.location.href);
+        // Verifica se já estamos no estado do modal para não duplicar
+        if (window.history.state && window.history.state.modalOpen) {
+            // Substitui o estado atual pelo Super Zoom (não empilha)
+            window.history.replaceState({ 
+                superZoomOpen: true, 
+                productId: productId, 
+                currentIndex: startIndex,
+                modalOpen: true  // Mantém a informação que o modal estava aberto
+            }, '', window.location.href);
+        } else {
+            // Empilha normalmente
+            window.history.pushState({ 
+                superZoomOpen: true, 
+                productId: productId, 
+                currentIndex: startIndex 
+            }, '', window.location.href);
+        }
     }
 }
 
@@ -275,7 +297,7 @@ function renderSuperZoomMedia() {
     content.innerHTML = `
         ${navigationHtml}
         <div class="super-zoom-image-container" style="position: relative;">
-            <img src="${currentImage}" alt="Super Zoom" style="max-width: 90vw; max-height: 90vh; object-fit: contain;">
+            <img src="${currentImage}" alt="Super Zoom" style="max-width: 90vw; max-height: 90vh; object-fit: contain; cursor: pointer;" onclick="changeZoom(1)">
             ${solitarioZoomHtml}
         </div>
         ${counterHtml}
@@ -288,6 +310,15 @@ function changeZoom(direction) {
     
     currentZoomIndex = (currentZoomIndex + direction + superZoomMediaList.length) % superZoomMediaList.length;
     renderSuperZoomMedia();
+    
+    // Atualizar o histórico com o índice atual (para manter consistência no voltar)
+    if (window.history.state && window.history.state.superZoomOpen && currentModalProduct) {
+        window.history.replaceState({ 
+            superZoomOpen: true, 
+            productId: currentModalProduct.id, 
+            currentIndex: currentZoomIndex 
+        }, '', window.location.href);
+    }
 }
 
 window.closeSuperZoom = function() {
@@ -297,10 +328,8 @@ window.closeSuperZoom = function() {
     currentZoomIndex = 0;
     currentModalProduct = null;
     
-    // Voltar para o modal quando fechado pelo botão X
-    if (window.history.state && window.history.state.superZoomOpen) {
-        window.history.back();
-    }
+    // NÃO chamar history.back() aqui, apenas limpar o estado
+    // O navegador já vai lidar com o voltar sozinho se o usuário apertar o botão
 };
 
 // Funções de Timer e Notificações
@@ -484,6 +513,20 @@ function changeModalMedia(index) {
     thumbnails.forEach((thumb, i) => {
         thumb.classList.toggle('active', i === index);
     });
+    
+    // ==== ADICIONE ESTA LINHA PARA ATUALIZAR O ZOOM CORRETAMENTE ====
+    // Quando o usuário clicar para abrir o super zoom, vai abrir na imagem atual
+    const mainMediaDiv = document.getElementById('modalMainMedia');
+    if (mainMediaDiv) {
+        // Remover listener antigo para evitar duplicação
+        const newMainMedia = mainMediaDiv.cloneNode(true);
+        mainMediaDiv.parentNode.replaceChild(newMainMedia, mainMediaDiv);
+        newMainMedia.addEventListener('click', () => {
+            if (currentMediaList[currentMediaIndex]?.type === 'image') {
+                openSuperZoom(currentModalProduct?.id, false, currentMediaIndex);
+            }
+        });
+    }
 }
 
 function setupModalMediaClick() {
@@ -975,6 +1018,17 @@ function closeProductModal() {
     modal.classList.remove('active');
     document.body.style.overflow = '';
     
+    // ===== PARAR TODOS OS VÍDEOS DO MODAL =====
+    const videos = document.querySelectorAll('#modalMainMedia video, .modal-main-media video');
+    videos.forEach(video => {
+        if (video) {
+            video.pause();
+            // Resetar o tempo do vídeo para o início
+            video.currentTime = 0;
+        }
+    });
+    // ===== FIM DA PAUSA DOS VÍDEOS =====
+    
     // Limpar estado do modal
     currentModalProduct = null;
     currentMediaList = [];
@@ -1001,10 +1055,8 @@ function closeProductModal() {
         scrollableEl.scrollTop = 0;
     }
     
-    // Voltar para a página anterior usando o histórico
-    if (window.history.state && window.history.state.modalOpen) {
-        window.history.back();
-    }
+    // NÃO chamar history.back() aqui também
+    // Deixar o navegador gerenciar o histórico sozinho
 }
 
 function handleMobileBack(event) {
@@ -1013,10 +1065,22 @@ function handleMobileBack(event) {
     
     // Prioridade: Super Zoom > Modal
     if (superZoom && superZoom.style.display === 'flex') {
-        closeSuperZoom();
+        // Fecha apenas o Super Zoom, mantém o modal aberto
+        document.getElementById('superZoomOverlay').style.display = 'none';
+        document.body.style.overflow = '';
+        superZoomMediaList = [];
+        currentZoomIndex = 0;
+        currentModalProduct = null;
+        
+        // Remove o estado do Super Zoom do histórico
+        if (window.history.state && window.history.state.superZoomOpen) {
+            window.history.replaceState({ modalOpen: true, productId: currentModalProduct?.id }, '', window.location.href);
+        }
+        
         event.preventDefault();
         event.stopPropagation();
     } else if (modal && modal.classList.contains('active')) {
+        // Fecha apenas o modal
         closeProductModal();
         event.preventDefault();
         event.stopPropagation();
@@ -1457,10 +1521,224 @@ function setupCartListeners() {
     }
 }
 
-// Event Listeners
-document.addEventListener('DOMContentLoaded', initializeApp);
+// ========================================
+// INICIALIZAÇÃO E EVENT LISTENERS
+// ========================================
 
-// Expor funções globais
+document.addEventListener('DOMContentLoaded', () => {
+    initializeApp();
+
+    // ===== CAMPO DE BUSCA ATIVADO =====
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+
+    if (searchInput) {
+        const performSearch = () => {
+            searchQuery = searchInput.value.trim();
+            
+            // Se tiver busca ativa, mostra TODOS os produtos e filtra pelo nome
+            if (searchQuery.length > 0) {
+                currentCategory = 'all';
+                // Remove destaque das categorias
+                document.querySelectorAll('#categoryList li').forEach(li => li.classList.remove('active'));
+                const allCategoryBtn = document.querySelector('[data-category="all"]');
+                if (allCategoryBtn) allCategoryBtn.classList.add('active');
+            }
+            
+            // Recarrega produtos com a busca
+            loadProducts(true);
+        };
+
+        // Busca em tempo real (enquanto digita)
+        searchInput.addEventListener('input', () => {
+            clearTimeout(window.searchTimeout);
+            window.searchTimeout = setTimeout(performSearch, 300);
+        });
+
+        // Busca ao clicar no botão
+        if (searchBtn) {
+            searchBtn.addEventListener('click', performSearch);
+        }
+    }
+    // ===== FIM DA ATIVAÇÃO DA BUSCA =====
+});
+
+// ========================================
+// MÚSICA DE FUNDO (AUTOPLAY COM VOLUME 60%)
+// ========================================
+
+let bgMusic = null;
+let musicStarted = false;
+let originalVolume = 0.60; // Volume 60%
+let isVideoPlaying = false;
+
+// Função para iniciar a música de fundo
+function startBackgroundMusic() {
+    bgMusic = document.getElementById('bgMusic');
+    if (!bgMusic) return;
+    
+    // Configurar volume em 60%
+    bgMusic.volume = originalVolume;
+    
+    // Tentar tocar a música
+    bgMusic.play().then(() => {
+        musicStarted = true;
+        console.log('🎵 Música de fundo iniciada (volume 60%)');
+    }).catch((error) => {
+        console.log('❌ Autoplay bloqueado pelo navegador. Aguardando interação do usuário...');
+        // Se o navegador bloqueou o autoplay, aguarda o primeiro clique do usuário
+        document.body.addEventListener('click', function startMusicOnClick() {
+            if (!musicStarted && bgMusic) {
+                bgMusic.play().catch(e => console.log('Ainda não foi possível tocar'));
+                musicStarted = true;
+            }
+            document.body.removeEventListener('click', startMusicOnClick);
+        }, { once: true });
+    });
+}
+
+// Função para reduzir o volume da música de fundo para 12% (quando vídeo tocar)
+function reduceBackgroundMusic() {
+    if (!bgMusic || !musicStarted) return;
+    isVideoPlaying = true;
+    
+    // Reduz o volume gradualmente para 12%
+    let step = 0;
+    const targetVolume = 0.12;
+    const interval = setInterval(() => {
+        if (bgMusic.volume > targetVolume + 0.01) {
+            bgMusic.volume = Math.max(targetVolume, bgMusic.volume - 0.05);
+        } else {
+            clearInterval(interval);
+            console.log('🔊 Música reduzida para 12% (vídeo tocando)');
+        }
+    }, 50);
+}
+
+// Função para restaurar o volume da música de fundo para 60% (quando vídeo terminar)
+function restoreBackgroundMusic() {
+    if (!bgMusic || !musicStarted) return;
+    isVideoPlaying = false;
+    
+    // Volta o volume gradualmente para 60%
+    let step = 0;
+    const targetVolume = originalVolume;
+    const interval = setInterval(() => {
+        if (bgMusic.volume < targetVolume - 0.01) {
+            bgMusic.volume = Math.min(targetVolume, bgMusic.volume + 0.05);
+        } else {
+            clearInterval(interval);
+            console.log('🔊 Música restaurada para 60%');
+        }
+    }, 50);
+}
+
+// Função para pausar completamente a música de fundo (se necessário)
+function pauseBackgroundMusic() {
+    if (bgMusic && musicStarted && !bgMusic.paused) {
+        bgMusic.pause();
+    }
+}
+
+// Função para retomar a música de fundo
+function resumeBackgroundMusic() {
+    if (bgMusic && musicStarted && bgMusic.paused && !isVideoPlaying) {
+        bgMusic.play().catch(e => console.log('Erro ao retomar música'));
+    }
+}
+
+// Iniciar a música 3 segundos após a página carregar
+setTimeout(() => {
+    startBackgroundMusic();
+}, 4000);
+
+// ========================================
+// INTEGRAÇÃO COM OS VÍDEOS DO MODAL
+// ========================================
+
+// Função para monitorar vídeos no modal (quando abrir)
+function setupVideoAudioControl() {
+    // Observa quando o modal é aberto para configurar os vídeos
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.addedNodes.length) {
+                // Verificar se há vídeos no modal
+                const videos = document.querySelectorAll('#modalMainMedia video, .modal-main-media video');
+                videos.forEach(video => {
+                    // Evitar configurar múltiplas vezes
+                    if (video.hasAttribute('data-audio-controlled')) return;
+                    video.setAttribute('data-audio-controlled', 'true');
+                    
+                    // Quando o vídeo começar a tocar
+                    video.addEventListener('play', function() {
+                        reduceBackgroundMusic();
+                    });
+                    
+                    // Quando o vídeo pausar
+                    video.addEventListener('pause', function() {
+                        restoreBackgroundMusic();
+                    });
+                    
+                    // Quando o vídeo terminar
+                    video.addEventListener('ended', function() {
+                        restoreBackgroundMusic();
+                    });
+                    
+                    // Quando o vídeo for removido
+                    video.addEventListener('emptied', function() {
+                        restoreBackgroundMusic();
+                    });
+                });
+            }
+        });
+    });
+    
+    // Observar mudanças no modal
+    const modal = document.getElementById('productModal');
+    if (modal) {
+        observer.observe(modal, { childList: true, subtree: true });
+    }
+    
+    // Também observar quando o modal abre/fecha
+    const originalOpenModal = window.openProductModal;
+    if (originalOpenModal) {
+        window.openProductModal = function(id) {
+            // Chamar a função original
+            originalOpenModal(id);
+            // Aguardar o modal ser renderizado e configurar vídeos
+            setTimeout(() => {
+                const videos = document.querySelectorAll('#modalMainMedia video, .modal-main-media video');
+                videos.forEach(video => {
+                    if (video.hasAttribute('data-audio-controlled')) return;
+                    video.setAttribute('data-audio-controlled', 'true');
+                    
+                    video.addEventListener('play', () => reduceBackgroundMusic());
+                    video.addEventListener('pause', () => restoreBackgroundMusic());
+                    video.addEventListener('ended', () => restoreBackgroundMusic());
+                });
+            }, 500);
+        };
+    }
+    
+    const originalCloseModal = window.closeProductModal;
+    if (originalCloseModal) {
+        window.closeProductModal = function() {
+            originalCloseModal();
+            // Quando fechar o modal, restaurar a música
+            restoreBackgroundMusic();
+        };
+    }
+}
+
+// Iniciar o controle de vídeos após o carregamento
+document.addEventListener('DOMContentLoaded', () => {
+    setupVideoAudioControl();
+});
+
+// ========================================
+// FUNÇÕES GLOBAIS (MANTIDAS)
+// ========================================
+
 window.openProductModal = openProductModal;
 window.closeProductModal = closeProductModal;
 window.addToCart = addToCart;
