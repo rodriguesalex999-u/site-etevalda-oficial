@@ -266,22 +266,204 @@
             <script src="script.js" defer></script>
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
 
-            <!--Start of Tawk.to Script - Carrega após 1min35s -->
-            <script type="text/javascript">
-            setTimeout(function(){
-                var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-                (function(){
-                    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-                    s1.async=true;
-                    s1.src='https://embed.tawk.to/68bae4146198bb19234dc085/1j4d0lsrm';
-                    s1.charset='UTF-8';
-                    s1.setAttribute('crossorigin','*');
-                    s0.parentNode.insertBefore(s1,s0);
-                })();
-            }, 95000);
-            </script>
-            <!--End of Tawk.to Script-->
+            <!--Start of Tawk.to Script - Carrega após 1min20s -->
+<script type="text/javascript">
+setTimeout(function(){
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+        var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+        s1.async=true;
+        s1.src='https://embed.tawk.to/68bae4146198bb19234dc085/1j4d0lsrm';
+        s1.charset='UTF-8';
+        s1.setAttribute('crossorigin','*');
+        s0.parentNode.insertBefore(s1,s0);
+    })();
+}, 80000);
+</script>
+<!--End of Tawk.to Script-->
         </div>
     </main>
+
+    <!-- Botão Flutuante "Todas Categorias" (aparece após header sumir) -->
+<div id="floatingCategoriesBtn" style="position: fixed; top: 10px; left: 10px; z-index: 999; display: none;">
+    <button id="floatingCategoriesToggle" class="categories-toggle-btn" style="background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark)); color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-family: 'Inter', 'Poppins', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px;">
+        <i class="fas fa-th-list"></i>
+        <span>Todas Categorias</span>
+        <i class="fas fa-chevron-down" style="font-size: 0.7rem;"></i>
+    </button>
+</div>
+
+<style>
+    #floatingCategoriesBtn {
+        transition: opacity 0.3s ease;
+    }
+    #floatingCategoriesBtn.show {
+        display: block;
+        animation: fadeInUp 0.3s ease;
+    }
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<script>
+    // Botão flutuante "Todas Categorias"
+    (function() {
+        const floatingBtn = document.getElementById('floatingCategoriesBtn');
+        const originalBtn = document.getElementById('categoriesToggleBtn');
+        const dropdown = document.getElementById('categoriesDropdown');
+        const chevron = document.getElementById('catChevron');
+        let headerCollapsed = false;
+        let timeoutId = null;
+        
+        // Função para mostrar o botão flutuante
+        function showFloatingButton() {
+            if (floatingBtn && !floatingBtn.classList.contains('show')) {
+                floatingBtn.classList.add('show');
+                floatingBtn.style.display = 'block';
+            }
+        }
+        
+        // Função para esconder o botão flutuante
+        function hideFloatingButton() {
+            if (floatingBtn && floatingBtn.classList.contains('show')) {
+                floatingBtn.classList.remove('show');
+                floatingBtn.style.display = 'none';
+            }
+        }
+        
+        // Verificar se o header está colapsado
+        function checkHeaderCollapsed() {
+            const header = document.querySelector('.header');
+            if (header) {
+                const isCollapsed = header.classList.contains('header-collapsed');
+                
+                if (isCollapsed && !headerCollapsed) {
+                    // Header acabou de sumir - aguardar 5 segundos e mostrar botão
+                    headerCollapsed = true;
+                    if (timeoutId) clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => {
+                        if (headerCollapsed) {
+                            showFloatingButton();
+                        }
+                    }, 5000);
+                } else if (!isCollapsed && headerCollapsed) {
+                    // Header voltou a aparecer - esconder botão imediatamente
+                    headerCollapsed = false;
+                    hideFloatingButton();
+                    if (timeoutId) {
+                        clearTimeout(timeoutId);
+                        timeoutId = null;
+                    }
+                }
+            }
+        }
+        
+        // Configurar o botão flutuante para abrir o dropdown
+        if (floatingBtn) {
+            const floatingToggle = document.getElementById('floatingCategoriesToggle');
+            if (floatingToggle) {
+                floatingToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (dropdown) {
+                        dropdown.classList.toggle('open');
+                        const floatingChevron = floatingToggle.querySelector('.fa-chevron-down');
+                        if (floatingChevron) {
+                            floatingChevron.classList.toggle('rotated');
+                        }
+                    }
+                });
+            }
+        }
+        
+        // Fechar dropdown ao clicar fora
+        document.addEventListener('click', function(e) {
+            if (floatingBtn && dropdown && !e.target.closest('#floatingCategoriesBtn') && !e.target.closest('.categories-wrapper')) {
+                dropdown.classList.remove('open');
+                const floatingChevron = floatingBtn.querySelector('.fa-chevron-down');
+                if (floatingChevron) {
+                    floatingChevron.classList.remove('rotated');
+                }
+            }
+        });
+        
+        // Monitorar o header para saber quando ele colapsa
+        const header = document.querySelector('.header');
+        if (header) {
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === 'class') {
+                        checkHeaderCollapsed();
+                    }
+                });
+            });
+            observer.observe(header, { attributes: true });
+            
+            // Verificar estado inicial
+            checkHeaderCollapsed();
+        }
+        
+        // Também monitorar scroll para detectar quando o header colapsa
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', function() {
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollTop > 100 && !headerCollapsed) {
+                // Se já passou de 100px e header não está colapsado, verificar
+                checkHeaderCollapsed();
+            } else if (scrollTop < 50 && headerCollapsed) {
+                // Se voltou ao topo, verificar
+                checkHeaderCollapsed();
+            }
+            lastScrollTop = scrollTop;
+        });
+        
+        // Fechar dropdown quando clicar em uma categoria (no botão flutuante também)
+        if (dropdown) {
+            dropdown.addEventListener('click', function(e) {
+                if (e.target.tagName === 'LI') {
+                    dropdown.classList.remove('open');
+                    const floatingChevron = floatingBtn?.querySelector('.fa-chevron-down');
+                    if (floatingChevron) {
+                        floatingChevron.classList.remove('rotated');
+                    }
+                }
+            });
+        }
+    })();
+</script>
+<!-- MODAL DE CONFIRMAÇÃO DE CIDADE -->
+<div id="cityConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center;">
+    <div style="background: #111; border-radius: 16px; max-width: 350px; width: 90%; padding: 24px; border: 1px solid var(--gold-primary);">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <i class="fas fa-map-marker-alt" style="font-size: 40px; color: var(--gold-primary);"></i>
+        </div>
+        <h3 style="color: var(--gold-primary); text-align: center; margin-bottom: 16px;">Confirmar sua cidade</h3>
+        <p style="color: #ccc; text-align: center; margin-bottom: 20px;" id="cityConfirmMessage">Identificamos que você está em <strong id="detectedCityDisplay">Cuiabá</strong></p>
+        
+        <div id="cityListContainer">
+            <button id="confirmCityBtn" style="width: 100%; background: var(--gold-primary); color: #000; padding: 12px; border-radius: 8px; font-weight: bold; margin-bottom: 10px; cursor: pointer;">✅ Está certo</button>
+            <button id="changeCityBtn" style="width: 100%; background: transparent; border: 1px solid var(--gold-primary); color: var(--gold-primary); padding: 12px; border-radius: 8px; margin-bottom: 10px; cursor: pointer;">📝 Alterar cidade</button>
+        </div>
+        
+        <div id="citySelectorDiv" style="display: none;">
+            <select id="citySelect" style="width: 100%; padding: 12px; border-radius: 8px; background: #222; color: #fff; border: 1px solid var(--gold-primary); margin-bottom: 10px;">
+                <option value="Cuiabá">Cuiabá</option>
+                <option value="Várzea Grande">Várzea Grande</option>
+                <option value="Rondonópolis">Rondonópolis</option>
+                <option value="Sinop">Sinop</option>
+                <option value="Outra">Outra (digitar)</option>
+            </select>
+            <input type="text" id="customCityInput" placeholder="Digite sua cidade" style="display: none; width: 100%; padding: 12px; border-radius: 8px; background: #222; color: #fff; border: 1px solid var(--gold-primary); margin-bottom: 10px;">
+            <button id="saveCityBtn" style="width: 100%; background: var(--gold-primary); color: #000; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;">Salvar cidade</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>

@@ -3965,6 +3965,8 @@ CARROSSEL DO MODAL
 
     50% { transform: translateY(5px); }
 
+    
+
 }
 
 
@@ -4648,39 +4650,39 @@ SUPER ZOOM CINEMA
 
 
 .super-zoom-nav {
-
     position: absolute;
-
     top: 50%;
-
     transform: translateY(-50%);
-
     background: var(--gold-primary);
-
     color: var(--white);
-
     border: none;
-
-    width: 60px;
-
-    height: 60px;
-
+    width: 45px;
+    height: 45px;
     border-radius: 50%;
-
     display: flex;
-
     justify-content: center;
-
     align-items: center;
-
     cursor: pointer;
-
     font-size: 18px;
-
     transition: all var(--transition-fast);
-
     box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+    z-index: 10005;
+    opacity: 0.9;
+}
 
+.super-zoom-nav:hover {
+    opacity: 1;
+    background: var(--gold-dark);
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Ajuste para telas pequenas (celular) */
+@media (max-width: 768px) {
+    .super-zoom-nav {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
 }
 
 
@@ -4762,43 +4764,48 @@ SUPER ZOOM CINEMA
 
 
 .super-zoom-whatsapp {
-
     position: absolute;
-
     bottom: 80px;
-
     left: 50%;
-
-    transform: translateX(-50%);
-
+    transform: translateX(-50%) !important;
     background: var(--whatsapp);
-
     color: var(--white);
-
     border: none;
-
-    padding: 15px 30px;
-
-    border-radius: var(--radius-md);
-
+    padding: 12px 40px;
+    border-radius: 50px;
     font-size: 18px;
-
     font-weight: 600;
-
     cursor: pointer;
-
-    transition: all var(--transition-fast);
-
+    transition: all 0.3s ease;
     box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
-
-    display: flex;
-
+    display: inline-flex;
     align-items: center;
-
-    gap: 10px;
-
+    justify-content: center;
+    gap: 12px;
     z-index: 10001;
+    white-space: nowrap;
+    animation: pulseWhatsappButton 2s infinite ease-in-out;
+    margin: 0 auto;
+    right: auto;
+    text-align: center;
+}
 
+.super-zoom-whatsapp:hover {
+    background: var(--whatsapp-dark);
+    transform: translateX(-50%) translateY(-2px) !important;
+    box-shadow: 0 6px 25px rgba(37, 211, 102, 0.6);
+    animation: none;
+}
+
+/* Ajuste para celular */
+@media (max-width: 768px) {
+    .super-zoom-whatsapp {
+        padding: 10px 25px;
+        font-size: 14px;
+        gap: 8px;
+        bottom: 60px;
+        transform: translateX(-50%) !important;
+    }
 }
 
 
@@ -4816,29 +4823,26 @@ SUPER ZOOM CINEMA
 
 
 .super-zoom-counter {
-
     position: absolute;
-
     bottom: 20px;
-
     left: 50%;
-
     transform: translateX(-50%);
-
     background: rgba(0, 0, 0, 0.8);
-
     color: var(--white);
-
-    padding: 10px 20px;
-
+    padding: 8px 16px;
     border-radius: 25px;
-
     font-family: Arial, sans-serif;
-
     font-size: 14px;
-
     font-weight: 600;
+    z-index: 10002;
+}
 
+@media (max-width: 768px) {
+    .super-zoom-counter {
+        bottom: 15px;
+        padding: 6px 12px;
+        font-size: 12px;
+    }
 }
 
 

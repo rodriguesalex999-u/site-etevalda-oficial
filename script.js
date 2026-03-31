@@ -459,38 +459,65 @@ function showGeoNotification() {
     const neighborhood = detectedLocation.neighborhoods[Math.floor(Math.random() * detectedLocation.neighborhoods.length)];
     const customerName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
     const randomProduct = allProductsLoaded[Math.floor(Math.random() * allProductsLoaded.length)];
+    
+    // Função para pegar apenas as 2 primeiras palavras do nome do produto
+    function getFirstTwoWords(productName) {
+        const words = productName.split(' ');
+        if (words.length >= 2) {
+            return words.slice(0, 2).join(' ');
+        }
+        return productName;
+    }
+    
+    const shortProductName = getFirstTwoWords(randomProduct.name);
 
     const notification = document.getElementById('geoNotification');
     const notificationText = document.getElementById('geoNotificationText');
 
     if (notification && notificationText) {
-        notificationText.innerHTML = `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> comprou <strong>${randomProduct.name}</strong>`;
+        notificationText.innerHTML = `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> acabou de comprar <strong>${shortProductName}</strong>`;
         notification.style.display = 'block';
         setTimeout(() => notification.style.display = 'none', 8000);
     }
 }
 
 function startGeoNotifications() {
-    setTimeout(showGeoNotification, 20000);
-    setInterval(showGeoNotification, 20000);
+    setTimeout(showGeoNotification, 60000);  // Primeira notificação após 1 minuto (60000ms)
+    setInterval(showGeoNotification, 60000); // Próximas a cada 1 minuto
 }
 
 async function initGeoLocationBackground() {
     try {
+        // Verificar se o usuário já escolheu uma cidade antes
+        const savedCity = localStorage.getItem('user_city');
+        if (savedCity) {
+            detectedLocation.city = savedCity;
+            console.log(`📍 Cidade carregada da memória: ${savedCity}`);
+            return;
+        }
+        
+        // Tentar detectar a cidade via IP (apenas como sugestão)
         const response = await fetch('https://ipapi.co/json/');
         const data = await response.json();
-        if (data.city) {
-            if (NEIGHBORHOODS[data.city]) {
-                detectedLocation = { city: data.city, neighborhoods: NEIGHBORHOODS[data.city] };
-            } else {
-                detectedLocation.city = data.city;
-            }
+        const detectedCity = data.city || 'Cuiabá';
+        
+        if (NEIGHBORHOODS[detectedCity]) {
+            detectedLocation = { city: detectedCity, neighborhoods: NEIGHBORHOODS[detectedCity] };
+        } else {
+            detectedLocation.city = detectedCity;
         }
+        
         if (data.region_code) {
             detectedState = data.region_code;
         }
+        
+        // Guardar a cidade detectada para usar como sugestão
+        window.detectedCitySuggestion = detectedCity;
+        
     } catch (e) {
-        // Mantém valores padrão (Cuiabá, MT)
+        console.warn('Erro na detecção de localização, usando Cuiabá como padrão');
+        detectedLocation.city = 'Cuiabá';
+        window.detectedCitySuggestion = 'Cuiabá';
     }
 }
 
@@ -522,8 +549,8 @@ function changeModalMedia(index) {
         const newMainMedia = mainMediaDiv.cloneNode(true);
         mainMediaDiv.parentNode.replaceChild(newMainMedia, mainMediaDiv);
         newMainMedia.addEventListener('click', () => {
-            if (currentMediaList[currentMediaIndex]?.type === 'image') {
-                openSuperZoom(currentModalProduct?.id, false, currentMediaIndex);
+            if (currentMediaList[currentMediaIndex]?.type === 'image' && currentModalProduct) {
+                openSuperZoom(currentModalProduct.id, false, currentMediaIndex);
             }
         });
     }
@@ -534,8 +561,10 @@ function setupModalMediaClick() {
     if (!mainMedia) return;
     
     mainMedia.addEventListener('click', () => {
-        if (currentMediaList[currentMediaIndex]?.type === 'image') {
-            openSuperZoom(currentModalProduct?.id);
+        // Verificar se há um produto atual e se é uma imagem
+        if (currentMediaList[currentMediaIndex]?.type === 'image' && currentModalProduct) {
+            // Passar o productId e o índice da imagem atual
+            openSuperZoom(currentModalProduct.id, false, currentMediaIndex);
         }
     });
 }
@@ -1295,21 +1324,148 @@ function showToast(message) {
 function buyViaWhatsApp(productId) {
     const product = allProductsLoaded.find(p => p.id === productId);
     if (!product) return;
+    
+    // Armazenar o produto atual para usar depois
+    window.currentWhatsAppProduct = product;
+    
+    // Verificar se o usuário já escolheu a cidade antes
+    const savedCity = localStorage.getItem('user_city');
+    
+    if (savedCity) {
+        // Já tem cidade salva, manda direto
+        sendWhatsAppMessage(product, savedCity);
+    } else {
+        // Mostrar modal de confirmação de cidade
+        showCityConfirmModal();
+    }
+}
 
-    const city = detectedLocation.city || 'Cuiabá';
+// Função para enviar a mensagem do WhatsApp
+function sendWhatsAppMessage(product, city) {
     const state = detectedState || 'MT';
     const prep = ['RJ','ES','SP','MG'].includes(state) ? 'do' : 'de';
+    
+    const LOCAL_CITIES = ['Cuiabá', 'Várzea Grande', 'Rondonópolis', 'Sinop'];
+    const isLocal = LOCAL_CITIES.includes(city);
+    const greeting = isLocal ? 'Oi' : 'Olá';
     
     let msg;
     if (product.tem_solitario && product.solitario_price > 0) {
         const total = product.price + product.solitario_price;
-        msg = `Oi, sou aqui ${prep} ${city}, ${state}, gostei do produto: *${product.name}* + *${product.additional_product_name || 'Solitário'}* (R$ ${product.solitario_price.toFixed(2).replace('.', ',')}) - Total: R$ ${total.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
+        msg = `${greeting}, sou aqui ${prep} ${city}, ${state}, gostei do produto: *${product.name}* + *${product.additional_product_name || 'Solitário'}* (R$ ${product.solitario_price.toFixed(2).replace('.', ',')}) - Total: R$ ${total.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
     } else {
-        msg = `Oi, sou aqui ${prep} ${city}, ${state}, gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
+        msg = `${greeting}, sou aqui ${prep} ${city}, ${state}, gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
     }
     
     window.open(`https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}`, '_blank');
 }
+
+// Função para mostrar o modal de confirmação de cidade
+function showCityConfirmModal() {
+    const modal = document.getElementById('cityConfirmModal');
+    const messageSpan = document.getElementById('detectedCityDisplay');
+    const suggestedCity = window.detectedCitySuggestion || 'Cuiabá';
+    
+    if (messageSpan) {
+        messageSpan.textContent = suggestedCity;
+    }
+    
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+    
+    // Configurar os botões
+    setupCityModalButtons(suggestedCity);
+}
+
+// Função para configurar os botões do modal
+function setupCityModalButtons(suggestedCity) {
+    const confirmBtn = document.getElementById('confirmCityBtn');
+    const changeBtn = document.getElementById('changeCityBtn');
+    const cityListContainer = document.getElementById('cityListContainer');
+    const citySelectorDiv = document.getElementById('citySelectorDiv');
+    const citySelect = document.getElementById('citySelect');
+    const customCityInput = document.getElementById('customCityInput');
+    const saveCityBtn = document.getElementById('saveCityBtn');
+    const modal = document.getElementById('cityConfirmModal');
+    
+    // Botão "Está certo" - usa a cidade sugerida
+    if (confirmBtn) {
+        const newConfirmBtn = confirmBtn.cloneNode(true);
+        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+        newConfirmBtn.addEventListener('click', () => {
+            const chosenCity = suggestedCity;
+            localStorage.setItem('user_city', chosenCity);
+            detectedLocation.city = chosenCity;
+            if (modal) modal.style.display = 'none';
+            if (window.currentWhatsAppProduct) {
+                sendWhatsAppMessage(window.currentWhatsAppProduct, chosenCity);
+            }
+        });
+    }
+    
+    // Botão "Alterar cidade" - mostra o seletor
+    if (changeBtn) {
+        const newChangeBtn = changeBtn.cloneNode(true);
+        changeBtn.parentNode.replaceChild(newChangeBtn, changeBtn);
+        newChangeBtn.addEventListener('click', () => {
+            if (cityListContainer) cityListContainer.style.display = 'none';
+            if (citySelectorDiv) citySelectorDiv.style.display = 'block';
+        });
+    }
+    
+    // Quando muda a opção do select
+    if (citySelect) {
+        citySelect.addEventListener('change', (e) => {
+            if (e.target.value === 'Outra') {
+                if (customCityInput) customCityInput.style.display = 'block';
+            } else {
+                if (customCityInput) customCityInput.style.display = 'none';
+            }
+        });
+    }
+    
+    // Botão salvar cidade
+    if (saveCityBtn) {
+        const newSaveBtn = saveCityBtn.cloneNode(true);
+        saveCityBtn.parentNode.replaceChild(newSaveBtn, saveCityBtn);
+        newSaveBtn.addEventListener('click', () => {
+            let chosenCity = citySelect ? citySelect.value : 'Cuiabá';
+            
+            if (chosenCity === 'Outra') {
+                chosenCity = customCityInput ? customCityInput.value.trim() : '';
+                if (!chosenCity) {
+                    alert('Por favor, digite o nome da sua cidade');
+                    return;
+                }
+            }
+            
+            localStorage.setItem('user_city', chosenCity);
+            detectedLocation.city = chosenCity;
+            if (modal) modal.style.display = 'none';
+            if (window.currentWhatsAppProduct) {
+                sendWhatsAppMessage(window.currentWhatsAppProduct, chosenCity);
+            }
+        });
+    }
+}
+
+// Função para fechar o modal (opcional)
+function closeCityModal() {
+    const modal = document.getElementById('cityConfirmModal');
+    if (modal) modal.style.display = 'none';
+}
+
+// Adicionar evento para fechar ao clicar fora
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('cityConfirmModal');
+    if (modal && modal.style.display === 'flex') {
+        const modalContent = modal.querySelector('div > div');
+        if (modalContent && !modalContent.contains(e.target) && !e.target.closest('#cityConfirmModal div')) {
+            modal.style.display = 'none';
+        }
+    }
+});
 
 window.playFaqAudio = function(card) {
     const audio = card.querySelector('audio');
@@ -1755,3 +1911,8 @@ window.closeSuperZoom = closeSuperZoom;
 window.changeZoom = changeZoom;
 window.changeModalMedia = changeModalMedia;
 window.shareProduct = shareProduct;
+
+// Exportar funções para uso global (localização)
+window.sendWhatsAppMessage = sendWhatsAppMessage;
+window.showCityConfirmModal = showCityConfirmModal;
+window.closeCityModal = closeCityModal;
