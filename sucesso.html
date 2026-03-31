@@ -161,6 +161,29 @@
             font-size: 0.8rem;
         }
         .footer-text i { color: var(--gold-primary); }
+        .shipping-box, .shipping-error-box {
+            display: none;
+            align-items: flex-start;
+            gap: 12px;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .shipping-box {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+        }
+        .shipping-box i { color: #16a34a; font-size: 1.4rem; margin-top: 2px; flex-shrink: 0; }
+        .shipping-box strong { color: #15803d; font-size: 0.95rem; display: block; }
+        .shipping-box p { color: #166534; font-size: 0.85rem; margin-top: 3px; }
+        .shipping-error-box {
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+        }
+        .shipping-error-box i { color: #d97706; font-size: 1.4rem; margin-top: 2px; flex-shrink: 0; }
+        .shipping-error-box strong { color: #92400e; font-size: 0.95rem; display: block; }
+        .shipping-error-box p { color: #78350f; font-size: 0.85rem; margin-top: 3px; }
 
         @media (max-width: 480px) {
             .success-container { padding: 35px 25px; }
@@ -180,6 +203,21 @@
 
         <div class="pending-box" id="pendingBox">
             <p><i class="fas fa-clock"></i> Seu pagamento está em análise. Você receberá a confirmação em breve.</p>
+        </div>
+
+        <div class="shipping-box" id="shippingBox">
+            <i class="fas fa-truck"></i>
+            <div>
+                <strong>Frete de R$ 14,99 processado!</strong>
+                <p>Seu pedido está na fila de envio. O código de rastreio chegará via WhatsApp em breve.</p>
+            </div>
+        </div>
+        <div class="shipping-error-box" id="shippingErrorBox">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <strong>Frete sendo finalizado</strong>
+                <p>Se precisar do rastreio, entre em contato via WhatsApp com o número do pedido.</p>
+            </div>
         </div>
 
         <div class="redirect-info" id="redirectInfo">
@@ -205,11 +243,15 @@
     </div>
 
     <script>
-        // Redirecionamento Inteligente por Categoria
+        // Redirecionamento Inteligente por Categoria e Rastreio de ROI
         (function() {
             const params = new URLSearchParams(window.location.search);
             const categoria = params.get('categoria') || '';
             const status = params.get('status') || 'approved';
+            const paymentId = params.get('payment_id') || '';
+            
+            // ===== AQUI ESTÁ A CORREÇÃO: LENDO 'valor' QUE VEM DA API =====
+            const valorVenda = parseFloat(params.get('valor') || '0');
 
             // Mostrar box de pendente se necessário
             if (status === 'pending') {
@@ -219,9 +261,34 @@
                 document.querySelector('.success-icon i').className = 'fas fa-clock';
             }
 
-            // Facebook Pixel - Track Purchase
+            // Facebook Pixel - Track Purchase com o valor real capturado
             if (typeof fbq !== 'undefined' && status === 'approved') {
-                fbq('track', 'Purchase', { content_category: categoria });
+                fbq('track', 'Purchase', {
+                    content_category: categoria,
+                    value: valorVenda, // ENVIA O VALOR REAL PARA O FACEBOOK CALCULAR O ROI
+                    currency: 'BRL'
+                });
+                console.log('📊 Pixel disparado: Purchase - Valor R$', valorVenda);
+            }
+
+            // Processar frete silenciosamente via Melhor Envio
+            if (paymentId && status === 'approved') {
+                fetch('/api/process-shipping', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ payment_id: paymentId })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('shippingBox').style.display = 'flex';
+                    } else {
+                        document.getElementById('shippingErrorBox').style.display = 'flex';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('shippingErrorBox').style.display = 'flex';
+                });
             }
 
             // Mapear categoria para nome amigável e âncora da página
