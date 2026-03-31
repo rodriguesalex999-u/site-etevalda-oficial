@@ -1372,6 +1372,7 @@ function showCityConfirmModal() {
     
     if (modal) {
         modal.style.display = 'flex';
+        window._cityModalOpenTime = Date.now();
     }
     
     // Configurar os botões
@@ -1460,6 +1461,8 @@ function closeCityModal() {
 document.addEventListener('click', function(e) {
     const modal = document.getElementById('cityConfirmModal');
     if (modal && modal.style.display === 'flex') {
+        // Ignorar o mesmo click que abriu o modal (evita fechar imediatamente por bubbling)
+        if (window._cityModalOpenTime && Date.now() - window._cityModalOpenTime < 300) return;
         const modalContent = modal.querySelector('div > div');
         if (modalContent && !modalContent.contains(e.target) && !e.target.closest('#cityConfirmModal div')) {
             modal.style.display = 'none';
