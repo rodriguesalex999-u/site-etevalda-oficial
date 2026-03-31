@@ -917,6 +917,20 @@ function openProductModal(id) {
     const rating = product.default_rating || 5;
     const categoryName = getCategoryName(product.category_id);
 
+    // ===== ADICIONADO: EVENTO DE VISUALIZAÇÃO DE PRODUTO (ViewContent) =====
+    if (typeof fbq !== 'undefined') {
+        fbq('track', 'ViewContent', {
+            content_name: product.name,
+            content_category: categoryName,
+            content_ids: [product.id],
+            content_type: 'product',
+            value: product.price,
+            currency: 'BRL'
+        });
+        console.log('📊 Pixel disparado: ViewContent -', product.name);
+    }
+    // ===== FIM DA ADIÇÃO =====
+
     // Criar lista de mídia para o modal
     currentMediaList = images.map((img, index) => ({
         type: 'image',
@@ -1328,16 +1342,8 @@ function buyViaWhatsApp(productId) {
     // Armazenar o produto atual para usar depois
     window.currentWhatsAppProduct = product;
     
-    // Verificar se o usuário já escolheu a cidade antes
-    const savedCity = localStorage.getItem('user_city');
-    
-    if (savedCity) {
-        // Já tem cidade salva, manda direto
-        sendWhatsAppMessage(product, savedCity);
-    } else {
-        // Mostrar modal de confirmação de cidade
-        showCityConfirmModal();
-    }
+    // SEMPRE mostrar o modal de cidade (não verifica mais cidade salva)
+    showCityConfirmModal();
 }
 
 // Função para enviar a mensagem do WhatsApp
@@ -1360,94 +1366,55 @@ function sendWhatsAppMessage(product, city) {
     window.open(`https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-// Função para mostrar o modal de confirmação de cidade
+// Função para mostrar o modal de cidade (campo de texto livre)
 function showCityConfirmModal() {
     const modal = document.getElementById('cityConfirmModal');
-    const messageSpan = document.getElementById('detectedCityDisplay');
-    const suggestedCity = window.detectedCitySuggestion || 'Cuiabá';
+    const cityTextInput = document.getElementById('cityTextInput');
     
-    if (messageSpan) {
-        messageSpan.textContent = suggestedCity;
-    }
+    if (cityTextInput) cityTextInput.value = '';
     
     if (modal) {
         modal.style.display = 'flex';
         window._cityModalOpenTime = Date.now();
+        setTimeout(() => { if (cityTextInput) cityTextInput.focus(); }, 100);
     }
     
-    // Configurar os botões
-    setupCityModalButtons(suggestedCity);
+    setupCityModalButtons();
 }
 
-// Função para configurar os botões do modal
-function setupCityModalButtons(suggestedCity) {
-    const confirmBtn = document.getElementById('confirmCityBtn');
-    const changeBtn = document.getElementById('changeCityBtn');
-    const cityListContainer = document.getElementById('cityListContainer');
-    const citySelectorDiv = document.getElementById('citySelectorDiv');
-    const citySelect = document.getElementById('citySelect');
-    const customCityInput = document.getElementById('customCityInput');
+// Configura o botão "Ir para o WhatsApp" do modal de cidade
+function setupCityModalButtons() {
     const saveCityBtn = document.getElementById('saveCityBtn');
     const modal = document.getElementById('cityConfirmModal');
+    const cityTextInput = document.getElementById('cityTextInput');
     
-    // Botão "Está certo" - usa a cidade sugerida
-    if (confirmBtn) {
-        const newConfirmBtn = confirmBtn.cloneNode(true);
-        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-        newConfirmBtn.addEventListener('click', () => {
-            const chosenCity = suggestedCity;
-            localStorage.setItem('user_city', chosenCity);
-            detectedLocation.city = chosenCity;
-            if (modal) modal.style.display = 'none';
-            if (window.currentWhatsAppProduct) {
-                sendWhatsAppMessage(window.currentWhatsAppProduct, chosenCity);
-            }
-        });
-    }
+    if (!saveCityBtn) return;
     
-    // Botão "Alterar cidade" - mostra o seletor
-    if (changeBtn) {
-        const newChangeBtn = changeBtn.cloneNode(true);
-        changeBtn.parentNode.replaceChild(newChangeBtn, changeBtn);
-        newChangeBtn.addEventListener('click', () => {
-            if (cityListContainer) cityListContainer.style.display = 'none';
-            if (citySelectorDiv) citySelectorDiv.style.display = 'block';
-        });
-    }
+    const newSaveBtn = saveCityBtn.cloneNode(true);
+    saveCityBtn.parentNode.replaceChild(newSaveBtn, saveCityBtn);
     
-    // Quando muda a opção do select
-    if (citySelect) {
-        citySelect.addEventListener('change', (e) => {
-            if (e.target.value === 'Outra') {
-                if (customCityInput) customCityInput.style.display = 'block';
-            } else {
-                if (customCityInput) customCityInput.style.display = 'none';
-            }
-        });
-    }
+    const doSend = () => {
+        const cityTextEl = document.getElementById('cityTextInput');
+        const chosenCity = cityTextEl ? cityTextEl.value.trim() : '';
+        if (!chosenCity) {
+            cityTextEl && (cityTextEl.style.borderColor = '#e53e3e');
+            setTimeout(() => { if (cityTextEl) cityTextEl.style.borderColor = 'var(--gold-primary)'; }, 1500);
+            return;
+        }
+        localStorage.setItem('user_city', chosenCity);
+        detectedLocation.city = chosenCity;
+        if (modal) modal.style.display = 'none';
+        if (window.currentWhatsAppProduct) {
+            sendWhatsAppMessage(window.currentWhatsAppProduct, chosenCity);
+        }
+    };
     
-    // Botão salvar cidade
-    if (saveCityBtn) {
-        const newSaveBtn = saveCityBtn.cloneNode(true);
-        saveCityBtn.parentNode.replaceChild(newSaveBtn, saveCityBtn);
-        newSaveBtn.addEventListener('click', () => {
-            let chosenCity = citySelect ? citySelect.value : 'Cuiabá';
-            
-            if (chosenCity === 'Outra') {
-                chosenCity = customCityInput ? customCityInput.value.trim() : '';
-                if (!chosenCity) {
-                    alert('Por favor, digite o nome da sua cidade');
-                    return;
-                }
-            }
-            
-            localStorage.setItem('user_city', chosenCity);
-            detectedLocation.city = chosenCity;
-            if (modal) modal.style.display = 'none';
-            if (window.currentWhatsAppProduct) {
-                sendWhatsAppMessage(window.currentWhatsAppProduct, chosenCity);
-            }
-        });
+    newSaveBtn.addEventListener('click', doSend);
+    
+    // Permitir Enter no campo de texto
+    const newInput = document.getElementById('cityTextInput');
+    if (newInput) {
+        newInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSend(); });
     }
 }
 

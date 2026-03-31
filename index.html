@@ -439,30 +439,19 @@ setTimeout(function(){
     })();
 </script>
 <!-- MODAL DE CONFIRMAÇÃO DE CIDADE -->
-<div id="cityConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center;">
-    <div style="background: #111; border-radius: 16px; max-width: 350px; width: 90%; padding: 24px; border: 1px solid var(--gold-primary);">
-        <div style="text-align: center; margin-bottom: 20px;">
-            <i class="fas fa-map-marker-alt" style="font-size: 40px; color: var(--gold-primary);"></i>
+<div id="cityConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; justify-content: center; align-items: center;">
+    <div style="background: #111; border-radius: 16px; max-width: 360px; width: 90%; padding: 28px 24px; border: 1px solid var(--gold-primary); box-shadow: 0 0 40px rgba(212,175,55,0.2);">
+        <div style="text-align: center; margin-bottom: 14px;">
+            <i class="fab fa-whatsapp" style="font-size: 44px; color: #25D366;"></i>
         </div>
-        <h3 style="color: var(--gold-primary); text-align: center; margin-bottom: 16px;">Confirmar sua cidade</h3>
-        <p style="color: #ccc; text-align: center; margin-bottom: 20px;" id="cityConfirmMessage">Identificamos que você está em <strong id="detectedCityDisplay">Cuiabá</strong></p>
-        
-        <div id="cityListContainer">
-            <button id="confirmCityBtn" style="width: 100%; background: var(--gold-primary); color: #000; padding: 12px; border-radius: 8px; font-weight: bold; margin-bottom: 10px; cursor: pointer;">✅ Está certo</button>
-            <button id="changeCityBtn" style="width: 100%; background: transparent; border: 1px solid var(--gold-primary); color: var(--gold-primary); padding: 12px; border-radius: 8px; margin-bottom: 10px; cursor: pointer;">📝 Alterar cidade</button>
-        </div>
-        
-        <div id="citySelectorDiv" style="display: none;">
-            <select id="citySelect" style="width: 100%; padding: 12px; border-radius: 8px; background: #222; color: #fff; border: 1px solid var(--gold-primary); margin-bottom: 10px;">
-                <option value="Cuiabá">Cuiabá</option>
-                <option value="Várzea Grande">Várzea Grande</option>
-                <option value="Rondonópolis">Rondonópolis</option>
-                <option value="Sinop">Sinop</option>
-                <option value="Outra">Outra (digitar)</option>
-            </select>
-            <input type="text" id="customCityInput" placeholder="Digite sua cidade" style="display: none; width: 100%; padding: 12px; border-radius: 8px; background: #222; color: #fff; border: 1px solid var(--gold-primary); margin-bottom: 10px;">
-            <button id="saveCityBtn" style="width: 100%; background: var(--gold-primary); color: #000; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;">Salvar cidade</button>
-        </div>
+        <h3 style="color: var(--gold-primary); text-align: center; margin-bottom: 10px; font-size: 1.15rem;">Falar no WhatsApp</h3>
+        <p style="color: #ccc; text-align: center; margin-bottom: 20px; font-size: 0.92rem; line-height: 1.5;">Digite sua cidade e te atendemos agora pelo WhatsApp 👇</p>
+        <input type="text" id="cityTextInput" placeholder="Ex: São Paulo, Cuiabá, Fortaleza..." autocomplete="off"
+            style="width: 100%; padding: 13px 14px; border-radius: 8px; background: #222; color: #fff; border: 1px solid var(--gold-primary); margin-bottom: 14px; font-size: 1rem; box-sizing: border-box; outline: none;">
+        <button id="saveCityBtn" style="width: 100%; background: #25D366; color: #fff; padding: 13px; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fab fa-whatsapp" style="font-size: 1.2rem;"></i> Ir para o WhatsApp
+        </button>
+        <p style="color: #666; text-align: center; margin-top: 12px; font-size: 0.78rem;">Você será direcionado ao nosso atendimento</p>
     </div>
 </div>
 </body>
