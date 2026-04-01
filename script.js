@@ -1084,6 +1084,8 @@ function closeProductModal() {
     isLoadingMoreComplement = false;
     window.selectedSize = null;
     window.selectedGender = 'Masculino';
+    window.selectedSizeMasc = null;
+    window.selectedSizeFem = null;
     
     // Esconder botão de próxima foto
     const nextBtn = document.getElementById('nextPhotoBtn');
@@ -1943,6 +1945,8 @@ function renderSizeSelectorHtml(product) {
 function setupSizeSelector(product) {
     window.selectedSize = null;
     window.selectedGender = 'Masculino';
+    window.selectedSizeMasc = null;
+    window.selectedSizeFem = null;
     window.selectedSizeType = product.size_type || (product.tem_numeracao ? _sizeCategory(product) : null);
 
     const type = window.selectedSizeType;
@@ -1968,25 +1972,78 @@ window.toggleSizePanel = function() {
 };
 
 window.switchGenderTab = function(btn, gender) {
-    document.querySelectorAll('.sz-gender-tab').forEach(t => t.classList.remove('sz-gender-active'));
+    document.querySelectorAll('.sz-gender-tab').forEach(t => {
+        t.classList.remove('sz-gender-active');
+        t.classList.remove('sz-gender-tab-pulse');
+    });
     btn.classList.add('sz-gender-active');
     window.selectedGender = gender;
-    document.querySelectorAll('.sz-chip').forEach(c => c.classList.remove('sz-chip-active'));
-    window.selectedSize = null;
-    const conf = document.getElementById('sizeConfirmMsg');
-    if (conf) { conf.innerHTML = ''; conf.classList.remove('size-confirm-show'); }
+
+    // Restore chip highlight for this gender's previously chosen size
+    const saved = gender === 'Masculino' ? window.selectedSizeMasc : window.selectedSizeFem;
+    document.querySelectorAll('.sz-chip').forEach(c => {
+        c.classList.remove('sz-chip-active');
+        if (saved && `Nº ${c.textContent.trim()}` === saved) c.classList.add('sz-chip-active');
+    });
 };
 
 window.selectSizeChip = function(btn, size) {
+    const isRing = window.selectedSizeType === 'ring';
+
+    // Highlight only the clicked chip
     document.querySelectorAll('.sz-chip').forEach(c => c.classList.remove('sz-chip-active'));
     btn.classList.add('sz-chip-active');
-    window.selectedSize = size;
-    const gender = window.selectedGender ? window.selectedGender + ' — ' : '';
-    const label = gender + size;
+
+    if (!isRing) {
+        // Bracelet: single gender flow (unchanged)
+        window.selectedSize = size;
+        const conf = document.getElementById('sizeConfirmMsg');
+        if (conf) {
+            conf.innerHTML = `✅ Prontinho! Tamanho <strong>${size}</strong> selecionado. Agora é só clicar em Comprar — nossa equipe entrará em contato antes do envio. 😊`;
+            conf.classList.add('size-confirm-show');
+        }
+        return;
+    }
+
+    // Ring: track per-gender
+    const gender = window.selectedGender;
+    if (gender === 'Masculino') {
+        window.selectedSizeMasc = size;
+    } else {
+        window.selectedSizeFem = size;
+    }
+
+    const masc = window.selectedSizeMasc;
+    const fem  = window.selectedSizeFem;
     const conf = document.getElementById('sizeConfirmMsg');
-    if (conf) {
-        conf.innerHTML = `✅ Prontinho! <strong>${label}</strong> selecionado(a). Agora é só clicar em Comprar — nossa equipe entrará em contato antes do envio. 😊`;
-        conf.classList.add('size-confirm-show');
+
+    if (masc && fem) {
+        // Both selected — final message
+        window.selectedSize = `Masc. ${masc} / Fem. ${fem}`;
+        document.querySelectorAll('.sz-gender-tab').forEach(t => t.classList.remove('sz-gender-tab-pulse'));
+        if (conf) {
+            conf.innerHTML = `✅ Prontinho! Masculino <strong>${masc}</strong> e Feminino <strong>${fem}</strong> selecionados. Agora é só clicar em Comprar — fique tranquilo, nossa equipe entrará em contato com você antes do envio para tirar qualquer dúvida. 😊`;
+            conf.classList.add('size-confirm-show');
+        }
+    } else {
+        // Only one selected — guide to the other
+        window.selectedSize = gender === 'Masculino' ? `Masc. ${size}` : `Fem. ${size}`;
+        const otherLabel = gender === 'Masculino' ? 'feminino' : 'masculino';
+        const promptMsg  = gender === 'Masculino'
+            ? `✅ Masculino <strong>${size}</strong> selecionado. Agora clique ao lado e escolha o feminino. 👉`
+            : `✅ Feminino <strong>${size}</strong> selecionado. Agora clique no masculino para escolher. 👈`;
+        if (conf) {
+            conf.innerHTML = promptMsg;
+            conf.classList.add('size-confirm-show');
+        }
+        // Pulse the other tab
+        document.querySelectorAll('.sz-gender-tab').forEach(t => {
+            if (!t.classList.contains('sz-gender-active')) {
+                t.classList.remove('sz-gender-tab-pulse');
+                void t.offsetWidth; // restart animation
+                t.classList.add('sz-gender-tab-pulse');
+            }
+        });
     }
 };
 

@@ -7277,3 +7277,5 @@ backdrop-filter: blur(5px);
     .size-chain-info > i { color: var(--gold-primary); margin-top: 2px; flex-shrink: 0; }
     .size-badge-hot { display: inline-block; background: var(--gold-primary); color: #000; font-size: 0.72rem; font-weight: 700; padding: 1px 7px; border-radius: 20px; margin: 0 2px; vertical-align: middle; }
     .size-reminder-note { padding: 9px 15px; border-top: 1px solid rgba(255,255,255,0.05); color: #555; font-size: 0.75rem; line-height: 1.5; background: rgba(0,0,0,0.15); }
+@keyframes tabPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.6); border-color: rgba(212,175,55,0.5); } 50% { box-shadow: 0 0 0 6px rgba(212,175,55,0); border-color: var(--gold-primary); } }
+.sz-gender-tab-pulse { animation: tabPulse 1s ease-in-out 4; border-color: rgba(212,175,55,0.5) !important; color: var(--gold-primary) !important; }
