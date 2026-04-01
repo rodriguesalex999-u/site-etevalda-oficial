@@ -798,8 +798,12 @@
                         <input type="text" id="productPrice" required placeholder="299,99 ou 299.99">
                     </div>
                     <div class="form-group">
-                        <label><i class="fas fa-gem"></i> Preço do Solitário (R$)</label>
-                        <input type="text" id="solitarioPrice" placeholder="99,99">
+                        <label><i class="fas fa-gem"></i> Preço do Item Adicional (R$)</label>
+                        <input type="text" id="solitarioPrice" placeholder="99,99 (deixe vazio se não houver)">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Nome do Item Adicional</label>
+                        <input type="text" id="additionalProductName" placeholder="Ex: Solitário, Pulseira, Corrente...">
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-list"></i> Categoria *</label>
@@ -808,11 +812,13 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label><i class="fas fa-check-circle"></i> Tem Solitário?</label>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="temSolitario">
-                            <label for="temSolitario">Sim</label>
-                        </div>
+                        <label><i class="fas fa-ruler"></i> Tipo de Numeração/Tamanho</label>
+                        <select id="sizeType">
+                            <option value="">Não possui</option>
+                            <option value="ring">Aliança / Anel (numeração 10–36, Masc. e Fem.)</option>
+                            <option value="chain">Corrente (tamanho único 70 cm)</option>
+                            <option value="bracelet">Pulseira (tamanhos 21, 22 e 23)</option>
+                        </select>
                     </div>
                     
                     <!-- GRUPO DE TAG COM COR -->
@@ -1270,23 +1276,30 @@
                     <input type="text" id="editProductPrice" required>
                 </div>
                 <div class="form-group">
-                    <label>Preço do Solitário (R$)</label>
-                    <input type="text" id="editSolitarioPrice">
+                    <label>Preço do Item Adicional (R$)</label>
+                    <input type="text" id="editSolitarioPrice" placeholder="deixe vazio se não houver">
                 </div>
             </div>
             
             <div class="form-grid">
                 <div class="form-group">
+                    <label>Nome do Item Adicional</label>
+                    <input type="text" id="editAdditionalProductName" placeholder="Ex: Solitário, Pulseira, Corrente...">
+                </div>
+                <div class="form-group">
                     <label>Categoria *</label>
                     <select id="editProductCategory" required></select>
                 </div>
-                <div class="form-group">
-                    <label>Tem Solitário?</label>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="editTemSolitario">
-                        <label for="editTemSolitario">Sim</label>
-                    </div>
-                </div>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-ruler"></i> Tipo de Numeração/Tamanho</label>
+                <select id="editSizeType">
+                    <option value="">Não possui</option>
+                    <option value="ring">Aliança / Anel (numeração 10–36, Masc. e Fem.)</option>
+                    <option value="chain">Corrente (tamanho único 70 cm)</option>
+                    <option value="bracelet">Pulseira (tamanhos 21, 22 e 23)</option>
+                </select>
             </div>
             
             <div class="form-group full-width">
@@ -2235,8 +2248,9 @@
         document.getElementById('editProductName').value = product.name || '';
         document.getElementById('editProductPrice').value = product.price ? product.price.toFixed(2).replace('.', ',') : '';
         document.getElementById('editSolitarioPrice').value = product.solitario_price ? product.solitario_price.toFixed(2).replace('.', ',') : '';
+        document.getElementById('editAdditionalProductName').value = product.additional_product_name || '';
+        document.getElementById('editSizeType').value = product.size_type || '';
         document.getElementById('editProductCategory').value = product.category_id || '';
-        document.getElementById('editTemSolitario').checked = product.tem_solitario || false;
         document.getElementById('editBadgeText').value = product.badge_text || '';
         document.getElementById('editBadgeColor').value = product.badge_color || '#FBBF24';
         document.getElementById('editSoldToday').checked = product.sold_today || false;
@@ -2279,8 +2293,9 @@
         const name = document.getElementById('editProductName').value.trim();
         const priceRaw = document.getElementById('editProductPrice').value.trim();
         const solitarioRaw = document.getElementById('editSolitarioPrice').value.trim();
+        const additionalProductName = document.getElementById('editAdditionalProductName').value.trim() || null;
+        const sizeType = document.getElementById('editSizeType').value || null;
         const categoryId = parseInt(document.getElementById('editProductCategory').value);
-        const temSolitario = document.getElementById('editTemSolitario').checked;
         const badgeText = document.getElementById('editBadgeText').value.trim() || null;
         const badgeColor = document.getElementById('editBadgeColor').value;
         const soldToday = document.getElementById('editSoldToday').checked;
@@ -2308,19 +2323,18 @@
             return;
         }
 
-        let solitarioPrice = parseCurrency(solitarioRaw);
-        if (temSolitario && solitarioPrice <= 0) {
-            showToast('Preço do solitário inválido!', 'error');
-            return;
-        }
-        if (!temSolitario) solitarioPrice = 0;
+        const solitarioPrice = solitarioRaw ? parseCurrency(solitarioRaw) : 0;
+        const temSolitario = solitarioPrice > 0;
 
         const productData = {
             name,
             price,
             solitario_price: solitarioPrice,
+            additional_product_name: temSolitario ? (additionalProductName || 'Solitário') : null,
             category_id: categoryId,
             tem_solitario: temSolitario,
+            tem_numeracao: !!sizeType,
+            size_type: sizeType,
             badge_text: badgeText,
             badge_color: badgeColor,
             sold_today: soldToday,
@@ -2357,8 +2371,9 @@
         const name = document.getElementById('productName').value.trim();
         const priceRaw = document.getElementById('productPrice').value.trim();
         const solitarioRaw = document.getElementById('solitarioPrice').value.trim();
+        const additionalProductName = document.getElementById('additionalProductName').value.trim() || null;
+        const sizeType = document.getElementById('sizeType').value || null;
         const categoryId = parseInt(document.getElementById('productCategory').value);
-        const temSolitario = document.getElementById('temSolitario').checked;
         const badgeText = document.getElementById('badgeSelect').value.trim() || null;
         const badgeColor = document.getElementById('badgeColor').value;
         const soldToday = document.getElementById('soldToday').checked;
@@ -2386,19 +2401,18 @@
             return;
         }
 
-        let solitarioPrice = parseCurrency(solitarioRaw);
-        if (temSolitario && solitarioPrice <= 0) {
-            showToast('Preço do solitário inválido!', 'error');
-            return;
-        }
-        if (!temSolitario) solitarioPrice = 0;
+        const solitarioPrice = solitarioRaw ? parseCurrency(solitarioRaw) : 0;
+        const temSolitario = solitarioPrice > 0;
 
         const productData = {
             name,
             price,
             solitario_price: solitarioPrice,
+            additional_product_name: temSolitario ? (additionalProductName || 'Solitário') : null,
             category_id: categoryId,
             tem_solitario: temSolitario,
+            tem_numeracao: !!sizeType,
+            size_type: sizeType,
             badge_text: badgeText,
             badge_color: badgeColor,
             sold_today: soldToday,

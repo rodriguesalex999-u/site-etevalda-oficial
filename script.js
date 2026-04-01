@@ -290,7 +290,7 @@ function renderSuperZoomMedia() {
 
     const solitarioZoomHtml = currentModalProduct && currentModalProduct.tem_solitario && currentModalProduct.solitario_price > 0 ? `
         <div class="solitario-overlay solitario-overlay-zoom">
-            <i class="fas fa-gem"></i> Solitário vendido separado: R$ ${currentModalProduct.solitario_price.toFixed(2).replace('.', ',')}
+            <i class="fas fa-gem"></i> ${currentModalProduct.additional_product_name || 'Solitário'} vendido separado: R$ ${currentModalProduct.solitario_price.toFixed(2).replace('.', ',')}
         </div>
     ` : '';
 
@@ -959,7 +959,7 @@ function openProductModal(id) {
 
     const solitarioOverlayHtml = product.tem_solitario && product.solitario_price > 0 ? `
         <div class="solitario-overlay">
-            <i class="fas fa-gem"></i> Solitário vendido separado: R$ ${product.solitario_price.toFixed(2).replace('.', ',')}
+            <i class="fas fa-gem"></i> ${product.additional_product_name || 'Solitário'} vendido separado: R$ ${product.solitario_price.toFixed(2).replace('.', ',')}
         </div>
     ` : '';
 
@@ -1005,9 +1005,10 @@ function openProductModal(id) {
             <div class="modal-product-info">
                 ${categoryName ? `<div class="modal-category-label">${categoryName.toUpperCase()}</div>` : ''}
                 <h2>${product.name}</h2>
-                ${product.tem_solitario && product.solitario_price > 0 ? `<div class="solitario-info-line"><i class="fas fa-gem"></i> Solitário vendido separado: R$ ${product.solitario_price.toFixed(2).replace('.', ',')}</div>` : ''}
+                ${product.tem_solitario && product.solitario_price > 0 ? `<div class="solitario-info-line"><i class="fas fa-gem"></i> ${product.additional_product_name || 'Solitário'} vendido separado: R$ ${product.solitario_price.toFixed(2).replace('.', ',')}</div>` : ''}
                 <div class="modal-price">R$ ${product.price.toFixed(2).replace('.', ',')}</div>
                 <div class="looking-now" id="modalViewersCount" data-count="${viewersCount}"><i class="fas fa-eye"></i> <span id="viewersNumber">${viewersCount}</span> pessoas vendo agora</div>
+                ${renderSizeSelectorHtml(product)}
                 <div class="product-rating-large">${renderStars(rating)}</div>
                 <div class="modal-buttons">
                     <button class="btn-mercadopago-modal" onclick="buyViaMercadoPago(${product.id})" id="mpBtn-${product.id}">
@@ -1047,6 +1048,7 @@ function openProductModal(id) {
     setupModalVideoAudio(product.video_has_audio);
     setupNextPhotoButton();
     setupComplementInfiniteScroll();
+    setupSizeSelector(product);
     
     // Scroll modal content para o topo (não a página)
     const modalContent = document.querySelector('#productModal .modal-content');
@@ -1080,6 +1082,8 @@ function closeProductModal() {
     // Limpar estado do scroll infinito de complementos
     complementShownIds = [];
     isLoadingMoreComplement = false;
+    window.selectedSize = null;
+    window.selectedGender = 'Masculino';
     
     // Esconder botão de próxima foto
     const nextBtn = document.getElementById('nextPhotoBtn');
@@ -1362,7 +1366,11 @@ function sendWhatsAppMessage(product, city) {
     } else {
         msg = `${greeting}, sou aqui ${prep} ${city}, ${state}, gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
     }
-    
+    if (window.selectedSize) {
+        const isRing = window.selectedSizeType === 'ring';
+        const g = isRing && window.selectedGender ? ` (${window.selectedGender})` : '';
+        msg += ` | Numeração/Tamanho: *${window.selectedSize}${g}*`;
+    }
     window.open(`https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}`, '_blank');
 }
 
@@ -1860,6 +1868,127 @@ function setupVideoAudioControl() {
 document.addEventListener('DOMContentLoaded', () => {
     setupVideoAudioControl();
 });
+
+// ========================================
+// SELETOR DE NUMERAÇÃO / TAMANHO
+// ========================================
+
+function _sizeCategory(product) {
+    const cat = (product.categories?.name || '').toLowerCase();
+    if (cat.includes('alian') || cat.includes('anel')) return 'ring';
+    if (cat.includes('corrente'))                       return 'chain';
+    if (cat.includes('pulseira'))                       return 'bracelet';
+    return 'ring'; // fallback padrão para tem_numeracao=true
+}
+
+function renderSizeSelectorHtml(product) {
+    const type = product.size_type || (product.tem_numeracao ? _sizeCategory(product) : null);
+    if (!type) return '';
+    const reminder = `<p class="size-reminder-note">💬 Lembre-se: após finalizar a compra, nossa equipe entrará em contato para tirar qualquer dúvida antes do envio.</p>`;
+
+    if (type === 'chain') {
+        return `
+        <div class="size-selector-wrap">
+            <div class="size-chain-info">
+                <i class="fas fa-ruler"></i>
+                <span>Trabalhamos com correntes de <strong>70 cm</strong> — o tamanho <span class="size-badge-hot">mais vendido</span> ✅<br><small style="color:#888;font-size:0.78rem;">Comprimento ideal para o dia a dia</small></span>
+            </div>
+            ${reminder}
+        </div>`;
+    }
+
+    if (type === 'bracelet') {
+        return `
+        <div class="size-selector-wrap">
+            <button class="size-toggle-btn" onclick="toggleSizePanel()">
+                <i class="fas fa-ruler-horizontal"></i> Escolha o tamanho aqui
+                <i class="fas fa-chevron-down size-chevron" id="sizeChevron"></i>
+            </button>
+            <div class="size-panel" id="sizePanel">
+                <p class="size-hint-text"><i class="fas fa-star" style="color:var(--gold-primary);font-size:0.75rem;"></i> O tamanho <strong>21</strong> já está selecionado por ser o mais vendido, mas você pode escolher outro se preferir.</p>
+                <div class="size-chips-row">
+                    <button class="sz-chip sz-chip-active" onclick="selectSizeChip(this,'21 cm')">21</button>
+                    <button class="sz-chip" onclick="selectSizeChip(this,'22 cm')">22</button>
+                    <button class="sz-chip" onclick="selectSizeChip(this,'23 cm')">23</button>
+                </div>
+                <div class="size-confirm-msg" id="sizeConfirmMsg"></div>
+            </div>
+            ${reminder}
+        </div>`;
+    }
+
+    // ring (aliança / anel)
+    const chips = Array.from({length: 27}, (_, i) => i + 10)
+        .map(n => `<button class="sz-chip" onclick="selectSizeChip(this,'Nº ${n}')">${n}</button>`)
+        .join('');
+    return `
+    <div class="size-selector-wrap">
+        <button class="size-toggle-btn" onclick="toggleSizePanel()">
+            <i class="fas fa-ring"></i> Escolha a numeração aqui
+            <i class="fas fa-chevron-down size-chevron" id="sizeChevron"></i>
+        </button>
+        <div class="size-panel" id="sizePanel">
+            <div class="size-gender-tabs">
+                <button class="sz-gender-tab sz-gender-active" onclick="switchGenderTab(this,'Masculino')">👨 Masculino</button>
+                <button class="sz-gender-tab" onclick="switchGenderTab(this,'Feminino')">👩 Feminino</button>
+            </div>
+            <p class="size-hint-text">Selecione a numeração do anel:</p>
+            <div class="size-chips-row">${chips}</div>
+            <div class="size-confirm-msg" id="sizeConfirmMsg"></div>
+        </div>
+        ${reminder}
+    </div>`;
+}
+
+function setupSizeSelector(product) {
+    window.selectedSize = null;
+    window.selectedGender = 'Masculino';
+    window.selectedSizeType = product.size_type || (product.tem_numeracao ? _sizeCategory(product) : null);
+
+    const type = window.selectedSizeType;
+    if (!type) return;
+    if (type === 'bracelet') {
+        // Pre-select 21 and show panel open
+        window.selectedSize = '21 cm';
+        setTimeout(() => {
+            const panel = document.getElementById('sizePanel');
+            const chevron = document.getElementById('sizeChevron');
+            if (panel) { panel.classList.add('size-panel-open'); }
+            if (chevron) { chevron.style.transform = 'rotate(180deg)'; }
+        }, 80);
+    }
+}
+
+window.toggleSizePanel = function() {
+    const panel = document.getElementById('sizePanel');
+    const chevron = document.getElementById('sizeChevron');
+    if (!panel) return;
+    const open = panel.classList.toggle('size-panel-open');
+    if (chevron) chevron.style.transform = open ? 'rotate(180deg)' : '';
+};
+
+window.switchGenderTab = function(btn, gender) {
+    document.querySelectorAll('.sz-gender-tab').forEach(t => t.classList.remove('sz-gender-active'));
+    btn.classList.add('sz-gender-active');
+    window.selectedGender = gender;
+    document.querySelectorAll('.sz-chip').forEach(c => c.classList.remove('sz-chip-active'));
+    window.selectedSize = null;
+    const conf = document.getElementById('sizeConfirmMsg');
+    if (conf) { conf.innerHTML = ''; conf.classList.remove('size-confirm-show'); }
+};
+
+window.selectSizeChip = function(btn, size) {
+    document.querySelectorAll('.sz-chip').forEach(c => c.classList.remove('sz-chip-active'));
+    btn.classList.add('sz-chip-active');
+    window.selectedSize = size;
+    const gender = window.selectedGender ? window.selectedGender + ' — ' : '';
+    const label = gender + size;
+    const conf = document.getElementById('sizeConfirmMsg');
+    if (conf) {
+        conf.innerHTML = `✅ Prontinho! <strong>${label}</strong> selecionado(a). Agora é só clicar em Comprar — nossa equipe entrará em contato antes do envio. 😊`;
+        conf.classList.add('size-confirm-show');
+    }
+};
 
 // ========================================
 // FUNÇÕES GLOBAIS (MANTIDAS)
