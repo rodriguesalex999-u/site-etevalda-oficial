@@ -39,10 +39,13 @@ const NEIGHBORHOODS = {
 const CUSTOMER_NAMES = ['Ana', 'Maria', 'João', 'Pedro', 'Carla', 'Lucas', 'Fernanda', 'Carlos'];
 let detectedLocation = { city: 'Cuiabá', neighborhoods: NEIGHBORHOODS['Cuiabá'] };
 let detectedState = 'MT';
+let notificationIndex = 0;
 
 // 3. FUNÇÕES DE CARREGAMENTO
 // Inicializar listener do popstate uma vez no carregamento da página
 document.addEventListener('DOMContentLoaded', () => {
+    // Ancora um estado base para que o primeiro 'voltar' nunca saia do site imediatamente
+    window.history.replaceState({ page: 'site' }, '', window.location.href);
     window.addEventListener('popstate', handleMobileBack);
 });
 
@@ -243,25 +246,14 @@ function openSuperZoom(productId, skipHistory = false, startIndex = 0) {
     document.getElementById('superZoomOverlay').style.display = 'flex';
     document.body.style.overflow = 'hidden';
     
-    // Adicionar estado ao histórico para o super zoom (apenas quando acionado manualmente)
+    // Sempre empilha um novo estado para o super zoom — nunca substitui o estado do modal
     if (!skipHistory) {
-        // Verifica se já estamos no estado do modal para não duplicar
-        if (window.history.state && window.history.state.modalOpen) {
-            // Substitui o estado atual pelo Super Zoom (não empilha)
-            window.history.replaceState({ 
-                superZoomOpen: true, 
-                productId: productId, 
-                currentIndex: startIndex,
-                modalOpen: true  // Mantém a informação que o modal estava aberto
-            }, '', window.location.href);
-        } else {
-            // Empilha normalmente
-            window.history.pushState({ 
-                superZoomOpen: true, 
-                productId: productId, 
-                currentIndex: startIndex 
-            }, '', window.location.href);
-        }
+        window.history.pushState({ 
+            superZoomOpen: true, 
+            productId: productId, 
+            currentIndex: startIndex,
+            modalOpen: true
+        }, '', window.location.href);
     }
 }
 
@@ -453,32 +445,27 @@ function playViewerSound() {
 }
 
 function showGeoNotification() {
-    if (!allProductsLoaded.length) return;
-
     const detectedCity = detectedLocation.city;
     const neighborhood = detectedLocation.neighborhoods[Math.floor(Math.random() * detectedLocation.neighborhoods.length)];
     const customerName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
-    const randomProduct = allProductsLoaded[Math.floor(Math.random() * allProductsLoaded.length)];
-    
-    // Função para pegar apenas as 2 primeiras palavras do nome do produto
-    function getFirstTwoWords(productName) {
-        const words = productName.split(' ');
-        if (words.length >= 2) {
-            return words.slice(0, 2).join(' ');
-        }
-        return productName;
-    }
-    
-    const shortProductName = getFirstTwoWords(randomProduct.name);
+
+    const messages = [
+        `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> acabou de comprar!`,
+        `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> mandou mensagem no WhatsApp!`,
+        `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> está fechando a compra!`,
+        `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> avaliou positivo o atendimento!`
+    ];
 
     const notification = document.getElementById('geoNotification');
     const notificationText = document.getElementById('geoNotificationText');
 
     if (notification && notificationText) {
-        notificationText.innerHTML = `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> acabou de comprar <strong>${shortProductName}</strong>`;
+        notificationText.innerHTML = messages[notificationIndex];
         notification.style.display = 'block';
         setTimeout(() => notification.style.display = 'none', 8000);
     }
+
+    notificationIndex = (notificationIndex + 1) % 4;
 }
 
 function startGeoNotifications() {
@@ -1114,22 +1101,17 @@ function handleMobileBack(event) {
     
     // Prioridade: Super Zoom > Modal
     if (superZoom && superZoom.style.display === 'flex') {
-        // Fecha apenas o Super Zoom, mantém o modal aberto
+        // Fecha apenas o Super Zoom — NÃO zera currentModalProduct pois o modal ainda está aberto
         document.getElementById('superZoomOverlay').style.display = 'none';
-        document.body.style.overflow = '';
+        document.body.style.overflow = 'hidden'; // mantém scroll bloqueado pelo modal
         superZoomMediaList = [];
         currentZoomIndex = 0;
-        currentModalProduct = null;
-        
-        // Remove o estado do Super Zoom do histórico
-        if (window.history.state && window.history.state.superZoomOpen) {
-            window.history.replaceState({ modalOpen: true, productId: currentModalProduct?.id }, '', window.location.href);
-        }
+        // currentModalProduct permanece intacto (modal ainda aberto)
         
         event.preventDefault();
         event.stopPropagation();
     } else if (modal && modal.classList.contains('active')) {
-        // Fecha apenas o modal
+        // Fecha o modal
         closeProductModal();
         event.preventDefault();
         event.stopPropagation();
