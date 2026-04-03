@@ -1336,25 +1336,44 @@ function buyViaWhatsApp(productId) {
 
 // Função para enviar a mensagem do WhatsApp
 function sendWhatsAppMessage(product, city) {
-    const state = detectedState || 'MT';
-    const prep = ['RJ','ES','SP','MG'].includes(state) ? 'do' : 'de';
-    
-    const LOCAL_CITIES = ['Cuiabá', 'Várzea Grande', 'Rondonópolis', 'Sinop'];
-    const isLocal = LOCAL_CITIES.includes(city);
-    const greeting = isLocal ? 'Oi' : 'Olá';
-    
+    let locationInput = city.trim();
+    let lowerInput = locationInput.toLowerCase();
+    let normalizedCity = locationInput || "minha cidade";
+    let greeting = "Olá";
+
+    // Normalização para cidades com unidade física (chatbot reconhece esses nomes exatos)
+    if (lowerInput === 'cba' || lowerInput.includes('cuiaba') || lowerInput.includes('cuiabá')) {
+        normalizedCity = "Cuiabá";
+        greeting = "Oi";
+    } else if (lowerInput === 'vg' || lowerInput.includes('varzea') || lowerInput.includes('várzea')) {
+        normalizedCity = "Várzea Grande";
+        greeting = "Oi";
+    } else if (lowerInput.includes('rondono') || lowerInput.includes('rodonopolis')) {
+        normalizedCity = "Rondonópolis";
+        greeting = "Oi";
+    } else if (lowerInput.includes('sinop')) {
+        normalizedCity = "Sinop";
+        greeting = "Oi";
+    } else if (lowerInput.includes('diamantino')) {
+        normalizedCity = "Diamantino";
+        greeting = "Oi";
+    }
+
     let msg;
     if (product.tem_solitario && product.solitario_price > 0) {
         const total = product.price + product.solitario_price;
-        msg = `${greeting}, sou aqui ${prep} ${city}, ${state}, gostei do produto: *${product.name}* + *${product.additional_product_name || 'Solitário'}* (R$ ${product.solitario_price.toFixed(2).replace('.', ',')}) - Total: R$ ${total.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
+        msg = `${greeting}, sou de ${normalizedCity}, gostei do produto: *${product.name}* + *${product.additional_product_name || 'Solitário'}* (R$ ${product.solitario_price.toFixed(2).replace('.', ',')}) - Total: R$ ${total.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
     } else {
-        msg = `${greeting}, sou aqui ${prep} ${city}, ${state}, gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
+        msg = `${greeting}, sou de ${normalizedCity}, gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
     }
+
+    // Mantém a informação de tamanho se existir
     if (window.selectedSize) {
         const isRing = window.selectedSizeType === 'ring';
-        const g = isRing && window.selectedGender ? ` (${window.selectedGender})` : '';
-        msg += ` | Numeração/Tamanho: *${window.selectedSize}${g}*`;
+        const genderInfo = isRing && window.selectedGender ? ` (${window.selectedGender})` : '';
+        msg += ` | Numeração/Tamanho: *${window.selectedSize}${genderInfo}*`;
     }
+
     window.open(`https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}`, '_blank');
 }
 
