@@ -1784,6 +1784,15 @@ function resumeBackgroundMusic() {
     }
 }
 
+// Pausar/retomar música quando usuário sai da aba ou minimiza o app
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        pauseBackgroundMusic();
+    } else {
+        resumeBackgroundMusic();
+    }
+});
+
 // Iniciar a música 3 segundos após a página carregar
 setTimeout(() => {
     startBackgroundMusic();
