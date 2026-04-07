@@ -1372,6 +1372,27 @@
         input.value = url;
         input.autocomplete = 'off';
 
+        input.addEventListener('paste', function(e) {
+            const pasted = (e.clipboardData || window.clipboardData).getData('text');
+            const links = pasted.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            if (links.length <= 1) return; // single link — leave to normal input event
+            e.preventDefault();
+            // Fill current row with the first link
+            input.value = links[0];
+            thumb.src = links[0];
+            thumb.style.display = 'block';
+            // Add a row for each additional link
+            for (let i = 1; i < links.length; i++) {
+                addImageLinkRow(containerId, links[i]);
+            }
+            // Ensure a final empty row exists
+            const rows = container.querySelectorAll('.image-link-row');
+            const lastInput = rows[rows.length - 1].querySelector('input');
+            if (lastInput && lastInput.value.trim() !== '') {
+                addImageLinkRow(containerId);
+            }
+        });
+
         input.addEventListener('input', function() {
             const val = this.value.trim();
             thumb.src = val || '';
