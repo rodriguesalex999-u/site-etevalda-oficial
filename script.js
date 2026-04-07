@@ -133,19 +133,21 @@ function renderProducts() {
         }
     });
 
-    container.innerHTML = filtered.map(p => {
+    container.innerHTML = filtered.map((p, index) => {
         const images = Array.isArray(p.images) ? p.images : [];
         const hasMultipleImages = images.length > 1;
         const soldTodayHtml = p.sold_today ? '<div class="product-sold-today">Vendido Hoje</div>' : '';
         const viewers = productViewers[p.id] || 5;
         const fakeMarkup = 1 + (0.15 + (((p.id * 7) % 16) / 100));
         const oldPrice = (p.price * fakeMarkup).toFixed(2).replace('.', ',');
+        const isPriority = index < 2;
+        const imgAttrs = `width="180" height="180" decoding="async" ${isPriority ? 'fetchpriority="high"' : 'loading="lazy"'}`;
         
         return `
         <div class="product-card" onclick="openProductModal(${p.id})">
             <div class="product-image ${hasMultipleImages ? 'has-hover' : ''}">
-                <img id="product-img-${p.id}" src="${images[0] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-main">
-                ${hasMultipleImages ? `<img id="product-img-hover-${p.id}" src="${images[1] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-hover">` : ''}
+                <img id="product-img-${p.id}" src="${images[0] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-main" ${imgAttrs}>
+                ${hasMultipleImages ? `<img id="product-img-hover-${p.id}" src="${images[1] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-hover" width="180" height="180" loading="lazy" decoding="async">` : ''}
                 ${soldTodayHtml}
             </div>
             <div class="product-info">
@@ -1527,19 +1529,34 @@ async function buyViaMercadoPago(productId) {
 // 8. INICIALIZAÇÃO
 async function initializeApp() {
     try {
+        // Carregamento crítico: apenas categorias e produtos (above the fold)
         await Promise.all([
             loadCategories(),
-            loadProducts(true),
-            loadFaqs(),
-            loadSocialProof()
+            loadProducts(true)
         ]);
 
         renderCategories();
         applyHashCategory();
         renderProducts();
         loadCartFromStorage();
-        
-        showSecondarySections();
+
+        // Seções secundárias: carregadas após o evento 'load' (não bloqueia LCP/FCP)
+        const loadSecondary = async () => {
+            await Promise.all([loadFaqs(), loadSocialProof()]);
+            showSecondarySections();
+        };
+
+        if (document.readyState === 'complete') {
+            'requestIdleCallback' in window
+                ? requestIdleCallback(loadSecondary, { timeout: 3000 })
+                : setTimeout(loadSecondary, 500);
+        } else {
+            window.addEventListener('load', () => {
+                'requestIdleCallback' in window
+                    ? requestIdleCallback(loadSecondary, { timeout: 3000 })
+                    : setTimeout(loadSecondary, 500);
+            }, { once: true });
+        }
         
         // Detectar cidade/estado do cliente via IP
         initGeoLocationBackground();

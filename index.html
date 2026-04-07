@@ -46,8 +46,68 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://vnrfmsyanrvqqhmqyixk.supabase.co">
 
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <!-- Fontes: preload não-bloqueante -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&family=Inter:wght@400;500;600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&family=Inter:wght@400;500;600&display=swap"></noscript>
+
+    <!-- CSS CRÍTICO: header + grid + skeletons (above the fold) -->
+    <style>
+:root{--gold-primary:#D4AF37;--gold-dark:#B8860B;--gold-light:#3a3218;--white:#111111;--black:#FFFFFF;--black-soft:#EEEEEE;--gray-medium:#aaaaaa;--gray-light:#1e1e1e;--gray-placeholder:#1a1a1a;--text-primary:#FFFFFF;--bg-page:#000000;--bg-card:#111111;--border-subtle:#222222;--font-display:'Playfair Display',serif;--shadow-md:0 4px 20px rgba(0,0,0,.12);--shadow-sm:0 2px 8px rgba(0,0,0,.08);--radius-sm:8px;--radius-full:999px;--spacing-xs:.5rem;--spacing-sm:1rem;--spacing-md:1.5rem;--spacing-lg:2rem;--transition-normal:.3s ease;}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;font-size:16px;overflow-x:hidden;width:100%;}
+body{font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:var(--text-primary);background:var(--bg-page);margin:0;padding:0;overflow-x:hidden;width:100%;max-width:100vw;}
+img{max-width:100%;height:auto;display:block;}
+a{text-decoration:none;color:inherit;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;}
+.container-fluid{max-width:1400px;margin:0 auto;padding:0 var(--spacing-md);overflow-x:hidden;width:100%;}
+.header{background:var(--white);box-shadow:var(--shadow-md);position:sticky;top:0;z-index:1000;width:100%;transition:all var(--transition-normal);}
+.header-top{padding:var(--spacing-md) 0;transition:all var(--transition-normal);opacity:1;height:auto;overflow:hidden;}
+.header.header-collapsed .header-top{opacity:0;height:0;padding-top:0;padding-bottom:0;margin:0;}
+.header,.nav-categories,.nav-categories>.container-fluid,.categories-wrapper,.categories-dropdown,.categories-dropdown .category-list{overflow:visible!important;}
+.nav-categories{background:var(--white);border-top:1px solid var(--gold-light);border-bottom:1px solid var(--gold-light);padding:var(--spacing-xs) 0;overflow:visible;position:relative;transition:all var(--transition-normal);}
+.header-top-content{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-lg);}
+.header-logo{flex-shrink:0;}
+.logo-link{display:flex;align-items:center;gap:var(--spacing-xs);}
+.logo-link i{font-size:2.2rem;color:var(--gold-primary);}
+.logo-text{display:flex;flex-direction:column;line-height:1.1;}
+.logo-text span{font-family:var(--font-display);font-size:1.6rem;font-weight:800;color:var(--gold-dark);letter-spacing:2px;}
+.logo-text small{font-size:.7rem;color:var(--gray-medium);letter-spacing:1px;}
+.header-search{flex:1;max-width:500px;transition:all var(--transition-normal);}
+.search-wrapper{position:relative;display:flex;align-items:center;background:var(--white);border:2px solid var(--gold-light);border-radius:var(--radius-full);padding:0 var(--spacing-sm);box-shadow:var(--shadow-sm);}
+.search-input{flex:1;border:none;outline:none;padding:var(--spacing-sm) 0;font-size:.95rem;background:transparent;color:var(--black-soft);}
+.search-btn{background:var(--gold-primary);color:var(--white);width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
+.header-actions{display:flex;align-items:center;gap:var(--spacing-md);}
+.cart-btn{position:relative;background:var(--gold-primary);color:var(--white);width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;box-shadow:var(--shadow-md);}
+.cart-count{position:absolute;top:-5px;right:-5px;background:#E74C3C;color:var(--white);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;}
+.categories-wrapper{position:static;display:inline-block;padding:var(--spacing-xs) 0;}
+.categories-toggle-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--gold-primary),var(--gold-dark));color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:.88rem;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(212,175,55,.35);}
+.categories-chevron{font-size:.72rem;transition:transform .25s ease;}
+.categories-chevron.rotated{transform:rotate(180deg);}
+.categories-dropdown{display:none;position:absolute;top:100%;left:0;right:0;width:100%;z-index:900;background:var(--white);border-top:2px solid var(--gold-primary);}
+.categories-dropdown.open{display:block;}
+.main-content{padding:var(--spacing-lg) 0;min-height:70vh;overflow-x:hidden;width:100%;}
+.products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:var(--spacing-lg);padding:0 12px;}
+@media(min-width:1024px){.products-grid{grid-template-columns:repeat(4,1fr);gap:18px;padding:0 24px;}}
+.product-card{background:var(--bg-card);border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.3);cursor:pointer;border:1px solid var(--border-subtle);position:relative;display:flex;flex-direction:column;align-items:center;}
+.product-image{position:relative;width:100%;height:180px;aspect-ratio:1/1!important;overflow:hidden;flex-shrink:0;background:var(--gray-placeholder);min-height:180px;display:flex;align-items:center;justify-content:center;}
+.product-image img{width:100%!important;height:100%!important;aspect-ratio:1/1!important;object-fit:cover!important;}
+.product-info{padding:8px 10px;flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:2px;}
+.product-info h3,.product-name{font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:400;color:#EEEEEE;line-height:1.35;margin:0;overflow:hidden;}
+.product-price-block{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.price-old{font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#999;text-decoration:line-through;white-space:nowrap;}
+.product-price{font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:var(--gold-primary);white-space:nowrap;}
+.product-viewers-badge{display:flex;align-items:center;gap:3px;font-size:.65rem;font-weight:700;color:#FF4500;background:rgba(255,69,0,.08);padding:2px 6px;border-radius:10px;white-space:nowrap;}
+.product-card.skeleton{cursor:default;pointer-events:none;background:var(--white);}
+.skeleton-image{background:linear-gradient(90deg,var(--gray-light) 25%,#252525 50%,var(--gray-light) 75%);background-size:200% 100%;animation:skeletonLoading 1.5s infinite;height:180px;width:100%;aspect-ratio:1/1;}
+.skeleton-text{background:linear-gradient(90deg,var(--gray-light) 25%,#252525 50%,var(--gray-light) 75%);background-size:200% 100%;animation:skeletonLoading 1.5s infinite;border-radius:var(--radius-sm);margin-bottom:var(--spacing-xs);}
+.skeleton-title{height:14px;width:90%;}
+.skeleton-price{height:12px;width:50%;}
+@keyframes skeletonLoading{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    </style>
+
+    <!-- style.css: carregamento assíncrono -->
+    <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="style.css"></noscript>
 
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-title" content="Etevalda MT">
