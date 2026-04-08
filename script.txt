@@ -13,6 +13,8 @@ let categories = [];
 let cart = [];
 let currentCategory = 'all';
 let searchQuery = '';
+let secondarySectionsLoaded = false;
+let allProductsCache = [];  // sempre contém TODOS os produtos, independente da categoria ativa
 let allProductsLoaded = [];
 let faqs = [];
 let socialProofImages = [];
@@ -39,10 +41,13 @@ const NEIGHBORHOODS = {
 const CUSTOMER_NAMES = ['Ana', 'Maria', 'João', 'Pedro', 'Carla', 'Lucas', 'Fernanda', 'Carlos'];
 let detectedLocation = { city: 'Cuiabá', neighborhoods: NEIGHBORHOODS['Cuiabá'] };
 let detectedState = 'MT';
+let notificationIndex = 0;
 
 // 3. FUNÇÕES DE CARREGAMENTO
 // Inicializar listener do popstate uma vez no carregamento da página
 document.addEventListener('DOMContentLoaded', () => {
+    // Ancora um estado base para que o primeiro 'voltar' nunca saia do site imediatamente
+    window.history.replaceState({ page: 'site' }, '', window.location.href);
     window.addEventListener('popstate', handleMobileBack);
 });
 
@@ -76,6 +81,11 @@ async function loadProducts(reset = false) {
             }
 
             allProductsLoaded = reset ? filteredData : [...allProductsLoaded, ...filteredData];
+
+            // Cache imutável de todos os produtos (usado pelo secondary grid)
+            if (currentCategory === 'all' && reset) {
+                allProductsCache = [...filteredData];
+            }
         }
 
         renderProducts();
@@ -130,19 +140,70 @@ function renderProducts() {
         }
     });
 
-    container.innerHTML = filtered.map(p => {
+    // Vitrine de continuidade: sempre usa o cache completo (todos os produtos, todas as categorias)
+    const secondaryGrid = document.getElementById('secondaryProductsGrid');
+    const secondarySource = allProductsCache.length > 0 ? allProductsCache : allProductsLoaded;
+    if (secondaryGrid && secondarySource.length > 0) {
+        const shuffled = [...secondarySource].sort(() => Math.random() - 0.5);
+        shuffled.forEach(p => {
+            if (!productViewers[p.id]) productViewers[p.id] = Math.floor(Math.random() * 38) + 3;
+        });
+        secondaryGrid.innerHTML = shuffled.map(p => {
+            const imgs = Array.isArray(p.images) ? p.images : [];
+            const hasMulti = imgs.length > 1;
+            const sold = p.sold_today ? '<div class="product-sold-today">Vendido Hoje</div>' : '';
+            const views = productViewers[p.id] || 5;
+            const markup = 1 + (0.15 + (((p.id * 7) % 16) / 100));
+            const oldPr = (p.price * markup).toFixed(2).replace('.', ',');
+            return `
+        <div class="product-card sec-card" onclick="window.openProductModal(${p.id})">
+            <div class="product-image ${hasMulti ? 'has-hover' : ''}">
+                <img src="${imgs[0] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-main" width="180" height="180" loading="lazy" decoding="async">
+                ${hasMulti ? `<img src="${imgs[1] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-hover" width="180" height="180" loading="lazy" decoding="async">` : ''}
+                ${sold}
+            </div>
+            <div class="product-info">
+                <h3>${p.name}</h3>
+                <div class="product-price-block">
+                    <span class="price-old">R$ ${oldPr}</span>
+                    <span class="product-price">R$ ${p.price.toFixed(2).replace('.', ',')}</span>
+                </div>
+                <div class="product-viewers-badge"><i class="fas fa-eye"></i> ${views}</div>
+            </div>
+        </div>`;
+        }).join('');
+
+        // Revelar cards progressivamente conforme entram no campo de visão
+        if ('IntersectionObserver' in window) {
+            const revealObserver = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('sec-card--visible');
+                        obs.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.08 });
+            secondaryGrid.querySelectorAll('.sec-card').forEach(card => revealObserver.observe(card));
+        } else {
+            secondaryGrid.querySelectorAll('.sec-card').forEach(card => card.classList.add('sec-card--visible'));
+        }
+    }
+
+    container.innerHTML = filtered.map((p, index) => {
         const images = Array.isArray(p.images) ? p.images : [];
         const hasMultipleImages = images.length > 1;
         const soldTodayHtml = p.sold_today ? '<div class="product-sold-today">Vendido Hoje</div>' : '';
         const viewers = productViewers[p.id] || 5;
         const fakeMarkup = 1 + (0.15 + (((p.id * 7) % 16) / 100));
         const oldPrice = (p.price * fakeMarkup).toFixed(2).replace('.', ',');
+        const isPriority = index < 2;
+        const imgAttrs = `width="180" height="180" decoding="async" ${isPriority ? 'fetchpriority="high"' : 'loading="lazy"'}`;
         
         return `
-        <div class="product-card" onclick="openProductModal(${p.id})">
+        <div class="product-card" onclick="window.openProductModal(${p.id})">
             <div class="product-image ${hasMultipleImages ? 'has-hover' : ''}">
-                <img id="product-img-${p.id}" src="${images[0] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-main">
-                ${hasMultipleImages ? `<img id="product-img-hover-${p.id}" src="${images[1] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-hover">` : ''}
+                <img id="product-img-${p.id}" src="${images[0] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-main" ${imgAttrs}>
+                ${hasMultipleImages ? `<img id="product-img-hover-${p.id}" src="${images[1] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-hover" width="180" height="180" loading="lazy" decoding="async">` : ''}
                 ${soldTodayHtml}
             </div>
             <div class="product-info">
@@ -195,6 +256,7 @@ function renderCategories() {
             if (container) container.innerHTML = '';
             
             loadProducts(true);
+            updateSectionVisibility(currentCategory);
         });
     });
 }
@@ -243,25 +305,14 @@ function openSuperZoom(productId, skipHistory = false, startIndex = 0) {
     document.getElementById('superZoomOverlay').style.display = 'flex';
     document.body.style.overflow = 'hidden';
     
-    // Adicionar estado ao histórico para o super zoom (apenas quando acionado manualmente)
+    // Sempre empilha um novo estado para o super zoom — nunca substitui o estado do modal
     if (!skipHistory) {
-        // Verifica se já estamos no estado do modal para não duplicar
-        if (window.history.state && window.history.state.modalOpen) {
-            // Substitui o estado atual pelo Super Zoom (não empilha)
-            window.history.replaceState({ 
-                superZoomOpen: true, 
-                productId: productId, 
-                currentIndex: startIndex,
-                modalOpen: true  // Mantém a informação que o modal estava aberto
-            }, '', window.location.href);
-        } else {
-            // Empilha normalmente
-            window.history.pushState({ 
-                superZoomOpen: true, 
-                productId: productId, 
-                currentIndex: startIndex 
-            }, '', window.location.href);
-        }
+        window.history.pushState({ 
+            superZoomOpen: true, 
+            productId: productId, 
+            currentIndex: startIndex,
+            modalOpen: true
+        }, '', window.location.href);
     }
 }
 
@@ -290,7 +341,7 @@ function renderSuperZoomMedia() {
 
     const solitarioZoomHtml = currentModalProduct && currentModalProduct.tem_solitario && currentModalProduct.solitario_price > 0 ? `
         <div class="solitario-overlay solitario-overlay-zoom">
-            <i class="fas fa-gem"></i> Solitário vendido separado: R$ ${currentModalProduct.solitario_price.toFixed(2).replace('.', ',')}
+            <i class="fas fa-gem"></i> ${currentModalProduct.additional_product_name || 'Solitário'} vendido separado: R$ ${currentModalProduct.solitario_price.toFixed(2).replace('.', ',')}
         </div>
     ` : '';
 
@@ -453,32 +504,27 @@ function playViewerSound() {
 }
 
 function showGeoNotification() {
-    if (!allProductsLoaded.length) return;
-
     const detectedCity = detectedLocation.city;
     const neighborhood = detectedLocation.neighborhoods[Math.floor(Math.random() * detectedLocation.neighborhoods.length)];
     const customerName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
-    const randomProduct = allProductsLoaded[Math.floor(Math.random() * allProductsLoaded.length)];
-    
-    // Função para pegar apenas as 2 primeiras palavras do nome do produto
-    function getFirstTwoWords(productName) {
-        const words = productName.split(' ');
-        if (words.length >= 2) {
-            return words.slice(0, 2).join(' ');
-        }
-        return productName;
-    }
-    
-    const shortProductName = getFirstTwoWords(randomProduct.name);
+
+    const messages = [
+        `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> acabou de comprar!`,
+        `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> mandou mensagem no WhatsApp!`,
+        `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> está fechando a compra!`,
+        `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> avaliou positivo o atendimento!`
+    ];
 
     const notification = document.getElementById('geoNotification');
     const notificationText = document.getElementById('geoNotificationText');
 
     if (notification && notificationText) {
-        notificationText.innerHTML = `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> acabou de comprar <strong>${shortProductName}</strong>`;
+        notificationText.innerHTML = messages[notificationIndex];
         notification.style.display = 'block';
         setTimeout(() => notification.style.display = 'none', 8000);
     }
+
+    notificationIndex = (notificationIndex + 1) % 4;
 }
 
 function startGeoNotifications() {
@@ -688,7 +734,7 @@ function renderModalCarouselIndividual(carouselId, carouselIndex) {
     modalCarousel.innerHTML = carouselProducts.map(p => {
         const images = Array.isArray(p.images) ? p.images : [];
         return `
-            <div class="modal-carousel-item" onclick="openProductModal(${p.id})">
+            <div class="modal-carousel-item" onclick="window.openProductModal(${p && p.id ? p.id : 0})">
                 <img src="${images[0]}" alt="${p.name}" loading="lazy">
                 <div class="modal-carousel-item-info">
                     <div class="modal-carousel-item-name">${p.name}</div>
@@ -727,7 +773,7 @@ function renderCarousel(carouselId = 'infiniteCarousel', carouselIndex = 1) {
     carousel.innerHTML = infiniteProducts.map(p => {
         const images = Array.isArray(p.images) ? p.images : [];
         return `
-            <div class="carousel-item" onclick="openProductModal(${p.id})">
+            <div class="carousel-item" onclick="window.openProductModal(${p && p.id ? p.id : 0})">
                 <img src="${images[0] || 'https://via.placeholder.com/150'}" alt="${p.name}" loading="lazy" style="aspect-ratio: 1/1; object-fit: cover;">
                 <div class="carousel-item-info">
                     <div class="carousel-item-name">${p.name}</div>
@@ -792,8 +838,33 @@ function renderFaqs() {
     `).join('');
 }
 
+function updateSectionVisibility(category) {
+    if (!secondarySectionsLoaded) return;
+
+    const isAll = !category || category === 'all';
+    const show = el => { if (el) { el.style.opacity = '1'; el.style.height = 'auto'; el.style.overflow = 'visible'; } };
+    const hide = el => { if (el) { el.style.opacity = '0'; el.style.height = '0'; el.style.overflow = 'hidden'; } };
+
+    // faqSection: escondida em 'all', visível em categoria específica
+    isAll ? hide(document.getElementById('faqSection')) : show(document.getElementById('faqSection'));
+
+    // socialProofSection: sempre visível
+    show(document.getElementById('socialProofSection'));
+
+    // secondaryProductsSection: sempre visível (todas as categorias)
+    show(document.getElementById('secondaryProductsSection'));
+
+    // carrossel 1: sempre visível
+    show(document.getElementById('carouselSection'));
+
+    // carrosséis 2-5: visíveis apenas em 'all'
+    ['carouselSection2', 'carouselSection3', 'carouselSection4', 'carouselSection5'].forEach(id => {
+        isAll ? show(document.getElementById(id)) : hide(document.getElementById(id));
+    });
+}
+
 function showSecondarySections() {
-    const sections = ['socialProofSection', 'faqSection', 'carouselSection', 'carouselSection2', 'carouselSection3', 'carouselSection4', 'carouselSection5', 'teamCarouselSection'];
+    const sections = ['socialProofSection', 'faqSection', 'secondaryProductsSection', 'carouselSection', 'carouselSection2', 'carouselSection3', 'carouselSection4', 'carouselSection5', 'teamCarouselSection'];
     sections.forEach(id => {
         const section = document.getElementById(id);
         if (section) {
@@ -806,6 +877,9 @@ function showSecondarySections() {
     renderAllCarousels();
     renderSocialProof();
     renderFaqs();
+
+    secondarySectionsLoaded = true;
+    updateSectionVisibility(currentCategory);
 }
 
 // 5. FUNÇÕES DO MODAL
@@ -917,6 +991,20 @@ function openProductModal(id) {
     const rating = product.default_rating || 5;
     const categoryName = getCategoryName(product.category_id);
 
+    // ===== ADICIONADO: EVENTO DE VISUALIZAÇÃO DE PRODUTO (ViewContent) =====
+    if (typeof fbq !== 'undefined') {
+        fbq('track', 'ViewContent', {
+            content_name: product.name,
+            content_category: categoryName,
+            content_ids: [product.id],
+            content_type: 'product',
+            value: product.price,
+            currency: 'BRL'
+        });
+        console.log('📊 Pixel disparado: ViewContent -', product.name);
+    }
+    // ===== FIM DA ADIÇÃO =====
+
     // Criar lista de mídia para o modal
     currentMediaList = images.map((img, index) => ({
         type: 'image',
@@ -945,7 +1033,7 @@ function openProductModal(id) {
 
     const solitarioOverlayHtml = product.tem_solitario && product.solitario_price > 0 ? `
         <div class="solitario-overlay">
-            <i class="fas fa-gem"></i> Solitário vendido separado: R$ ${product.solitario_price.toFixed(2).replace('.', ',')}
+            <i class="fas fa-gem"></i> ${product.additional_product_name || 'Solitário'} vendido separado: R$ ${product.solitario_price.toFixed(2).replace('.', ',')}
         </div>
     ` : '';
 
@@ -991,9 +1079,10 @@ function openProductModal(id) {
             <div class="modal-product-info">
                 ${categoryName ? `<div class="modal-category-label">${categoryName.toUpperCase()}</div>` : ''}
                 <h2>${product.name}</h2>
-                ${product.tem_solitario && product.solitario_price > 0 ? `<div class="solitario-info-line"><i class="fas fa-gem"></i> Solitário vendido separado: R$ ${product.solitario_price.toFixed(2).replace('.', ',')}</div>` : ''}
+                ${product.tem_solitario && product.solitario_price > 0 ? `<div class="solitario-info-line"><i class="fas fa-gem"></i> ${product.additional_product_name || 'Solitário'} vendido separado: R$ ${product.solitario_price.toFixed(2).replace('.', ',')}</div>` : ''}
                 <div class="modal-price">R$ ${product.price.toFixed(2).replace('.', ',')}</div>
                 <div class="looking-now" id="modalViewersCount" data-count="${viewersCount}"><i class="fas fa-eye"></i> <span id="viewersNumber">${viewersCount}</span> pessoas vendo agora</div>
+                ${renderSizeSelectorHtml(product)}
                 <div class="product-rating-large">${renderStars(rating)}</div>
                 <div class="modal-buttons">
                     <button class="btn-mercadopago-modal" onclick="buyViaMercadoPago(${product.id})" id="mpBtn-${product.id}">
@@ -1033,6 +1122,7 @@ function openProductModal(id) {
     setupModalVideoAudio(product.video_has_audio);
     setupNextPhotoButton();
     setupComplementInfiniteScroll();
+    setupSizeSelector(product);
     
     // Scroll modal content para o topo (não a página)
     const modalContent = document.querySelector('#productModal .modal-content');
@@ -1066,6 +1156,10 @@ function closeProductModal() {
     // Limpar estado do scroll infinito de complementos
     complementShownIds = [];
     isLoadingMoreComplement = false;
+    window.selectedSize = null;
+    window.selectedGender = 'Masculino';
+    window.selectedSizeMasc = null;
+    window.selectedSizeFem = null;
     
     // Esconder botão de próxima foto
     const nextBtn = document.getElementById('nextPhotoBtn');
@@ -1094,22 +1188,17 @@ function handleMobileBack(event) {
     
     // Prioridade: Super Zoom > Modal
     if (superZoom && superZoom.style.display === 'flex') {
-        // Fecha apenas o Super Zoom, mantém o modal aberto
+        // Fecha apenas o Super Zoom — NÃO zera currentModalProduct pois o modal ainda está aberto
         document.getElementById('superZoomOverlay').style.display = 'none';
-        document.body.style.overflow = '';
+        document.body.style.overflow = 'hidden'; // mantém scroll bloqueado pelo modal
         superZoomMediaList = [];
         currentZoomIndex = 0;
-        currentModalProduct = null;
-        
-        // Remove o estado do Super Zoom do histórico
-        if (window.history.state && window.history.state.superZoomOpen) {
-            window.history.replaceState({ modalOpen: true, productId: currentModalProduct?.id }, '', window.location.href);
-        }
+        // currentModalProduct permanece intacto (modal ainda aberto)
         
         event.preventDefault();
         event.stopPropagation();
     } else if (modal && modal.classList.contains('active')) {
-        // Fecha apenas o modal
+        // Fecha o modal
         closeProductModal();
         event.preventDefault();
         event.stopPropagation();
@@ -1328,125 +1417,102 @@ function buyViaWhatsApp(productId) {
     // Armazenar o produto atual para usar depois
     window.currentWhatsAppProduct = product;
     
-    // Verificar se o usuário já escolheu a cidade antes
-    const savedCity = localStorage.getItem('user_city');
-    
-    if (savedCity) {
-        // Já tem cidade salva, manda direto
-        sendWhatsAppMessage(product, savedCity);
-    } else {
-        // Mostrar modal de confirmação de cidade
-        showCityConfirmModal();
-    }
+    // SEMPRE mostrar o modal de cidade (não verifica mais cidade salva)
+    showCityConfirmModal();
 }
 
 // Função para enviar a mensagem do WhatsApp
 function sendWhatsAppMessage(product, city) {
-    const state = detectedState || 'MT';
-    const prep = ['RJ','ES','SP','MG'].includes(state) ? 'do' : 'de';
-    
-    const LOCAL_CITIES = ['Cuiabá', 'Várzea Grande', 'Rondonópolis', 'Sinop'];
-    const isLocal = LOCAL_CITIES.includes(city);
-    const greeting = isLocal ? 'Oi' : 'Olá';
-    
+    let locationInput = city.trim();
+    let lowerInput = locationInput.toLowerCase();
+    let normalizedCity = locationInput || "minha cidade";
+    let greeting = "Olá";
+
+    // Normalização para cidades com unidade física (chatbot reconhece esses nomes exatos)
+    if (lowerInput === 'cba' || lowerInput.includes('cuiaba') || lowerInput.includes('cuiabá')) {
+        normalizedCity = "Cuiabá";
+        greeting = "Oi";
+    } else if (lowerInput === 'vg' || lowerInput.includes('varzea') || lowerInput.includes('várzea')) {
+        normalizedCity = "Várzea Grande";
+        greeting = "Oi";
+    } else if (lowerInput.includes('rondono') || lowerInput.includes('rodonopolis')) {
+        normalizedCity = "Rondonópolis";
+        greeting = "Oi";
+    } else if (lowerInput.includes('sinop')) {
+        normalizedCity = "Sinop";
+        greeting = "Oi";
+    } else if (lowerInput.includes('diamantino')) {
+        normalizedCity = "Diamantino";
+        greeting = "Oi";
+    }
+
     let msg;
     if (product.tem_solitario && product.solitario_price > 0) {
         const total = product.price + product.solitario_price;
-        msg = `${greeting}, sou aqui ${prep} ${city}, ${state}, gostei do produto: *${product.name}* + *${product.additional_product_name || 'Solitário'}* (R$ ${product.solitario_price.toFixed(2).replace('.', ',')}) - Total: R$ ${total.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
+        msg = `${greeting}, sou de ${normalizedCity}, gostei do produto: *${product.name}* + *${product.additional_product_name || 'Solitário'}* (R$ ${product.solitario_price.toFixed(2).replace('.', ',')}) - Total: R$ ${total.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
     } else {
-        msg = `${greeting}, sou aqui ${prep} ${city}, ${state}, gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
+        msg = `${greeting}, sou de ${normalizedCity}, gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
     }
-    
+
+    // Mantém a informação de tamanho se existir
+    if (window.selectedSize) {
+        const isRing = window.selectedSizeType === 'ring';
+        const genderInfo = isRing && window.selectedGender ? ` (${window.selectedGender})` : '';
+        msg += ` | Numeração/Tamanho: *${window.selectedSize}${genderInfo}*`;
+    }
+
     window.open(`https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-// Função para mostrar o modal de confirmação de cidade
+// Função para mostrar o modal de cidade (campo de texto livre)
 function showCityConfirmModal() {
     const modal = document.getElementById('cityConfirmModal');
-    const messageSpan = document.getElementById('detectedCityDisplay');
-    const suggestedCity = window.detectedCitySuggestion || 'Cuiabá';
+    const cityTextInput = document.getElementById('cityTextInput');
     
-    if (messageSpan) {
-        messageSpan.textContent = suggestedCity;
-    }
+    if (cityTextInput) cityTextInput.value = '';
     
     if (modal) {
         modal.style.display = 'flex';
+        window._cityModalOpenTime = Date.now();
+        setTimeout(() => { if (cityTextInput) cityTextInput.focus(); }, 100);
     }
     
-    // Configurar os botões
-    setupCityModalButtons(suggestedCity);
+    setupCityModalButtons();
 }
 
-// Função para configurar os botões do modal
-function setupCityModalButtons(suggestedCity) {
-    const confirmBtn = document.getElementById('confirmCityBtn');
-    const changeBtn = document.getElementById('changeCityBtn');
-    const cityListContainer = document.getElementById('cityListContainer');
-    const citySelectorDiv = document.getElementById('citySelectorDiv');
-    const citySelect = document.getElementById('citySelect');
-    const customCityInput = document.getElementById('customCityInput');
+// Configura o botão "Ir para o WhatsApp" do modal de cidade
+function setupCityModalButtons() {
     const saveCityBtn = document.getElementById('saveCityBtn');
     const modal = document.getElementById('cityConfirmModal');
+    const cityTextInput = document.getElementById('cityTextInput');
     
-    // Botão "Está certo" - usa a cidade sugerida
-    if (confirmBtn) {
-        const newConfirmBtn = confirmBtn.cloneNode(true);
-        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-        newConfirmBtn.addEventListener('click', () => {
-            const chosenCity = suggestedCity;
-            localStorage.setItem('user_city', chosenCity);
-            detectedLocation.city = chosenCity;
-            if (modal) modal.style.display = 'none';
-            if (window.currentWhatsAppProduct) {
-                sendWhatsAppMessage(window.currentWhatsAppProduct, chosenCity);
-            }
-        });
-    }
+    if (!saveCityBtn) return;
     
-    // Botão "Alterar cidade" - mostra o seletor
-    if (changeBtn) {
-        const newChangeBtn = changeBtn.cloneNode(true);
-        changeBtn.parentNode.replaceChild(newChangeBtn, changeBtn);
-        newChangeBtn.addEventListener('click', () => {
-            if (cityListContainer) cityListContainer.style.display = 'none';
-            if (citySelectorDiv) citySelectorDiv.style.display = 'block';
-        });
-    }
+    const newSaveBtn = saveCityBtn.cloneNode(true);
+    saveCityBtn.parentNode.replaceChild(newSaveBtn, saveCityBtn);
     
-    // Quando muda a opção do select
-    if (citySelect) {
-        citySelect.addEventListener('change', (e) => {
-            if (e.target.value === 'Outra') {
-                if (customCityInput) customCityInput.style.display = 'block';
-            } else {
-                if (customCityInput) customCityInput.style.display = 'none';
-            }
-        });
-    }
+    const doSend = () => {
+        const cityTextEl = document.getElementById('cityTextInput');
+        const chosenCity = cityTextEl ? cityTextEl.value.trim() : '';
+        if (!chosenCity) {
+            cityTextEl && (cityTextEl.style.borderColor = '#e53e3e');
+            setTimeout(() => { if (cityTextEl) cityTextEl.style.borderColor = 'var(--gold-primary)'; }, 1500);
+            return;
+        }
+        localStorage.setItem('user_city', chosenCity);
+        detectedLocation.city = chosenCity;
+        if (modal) modal.style.display = 'none';
+        if (window.currentWhatsAppProduct) {
+            sendWhatsAppMessage(window.currentWhatsAppProduct, chosenCity);
+        }
+    };
     
-    // Botão salvar cidade
-    if (saveCityBtn) {
-        const newSaveBtn = saveCityBtn.cloneNode(true);
-        saveCityBtn.parentNode.replaceChild(newSaveBtn, saveCityBtn);
-        newSaveBtn.addEventListener('click', () => {
-            let chosenCity = citySelect ? citySelect.value : 'Cuiabá';
-            
-            if (chosenCity === 'Outra') {
-                chosenCity = customCityInput ? customCityInput.value.trim() : '';
-                if (!chosenCity) {
-                    alert('Por favor, digite o nome da sua cidade');
-                    return;
-                }
-            }
-            
-            localStorage.setItem('user_city', chosenCity);
-            detectedLocation.city = chosenCity;
-            if (modal) modal.style.display = 'none';
-            if (window.currentWhatsAppProduct) {
-                sendWhatsAppMessage(window.currentWhatsAppProduct, chosenCity);
-            }
-        });
+    newSaveBtn.addEventListener('click', doSend);
+    
+    // Permitir Enter no campo de texto
+    const newInput = document.getElementById('cityTextInput');
+    if (newInput) {
+        newInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSend(); });
     }
 }
 
@@ -1460,6 +1526,8 @@ function closeCityModal() {
 document.addEventListener('click', function(e) {
     const modal = document.getElementById('cityConfirmModal');
     if (modal && modal.style.display === 'flex') {
+        // Ignorar o mesmo click que abriu o modal (evita fechar imediatamente por bubbling)
+        if (window._cityModalOpenTime && Date.now() - window._cityModalOpenTime < 300) return;
         const modalContent = modal.querySelector('div > div');
         if (modalContent && !modalContent.contains(e.target) && !e.target.closest('#cityConfirmModal div')) {
             modal.style.display = 'none';
@@ -1546,19 +1614,34 @@ async function buyViaMercadoPago(productId) {
 // 8. INICIALIZAÇÃO
 async function initializeApp() {
     try {
+        // Carregamento crítico: apenas categorias e produtos (above the fold)
         await Promise.all([
             loadCategories(),
-            loadProducts(true),
-            loadFaqs(),
-            loadSocialProof()
+            loadProducts(true)
         ]);
 
         renderCategories();
         applyHashCategory();
         renderProducts();
         loadCartFromStorage();
-        
-        showSecondarySections();
+
+        // Seções secundárias: carregadas após o evento 'load' (não bloqueia LCP/FCP)
+        const loadSecondary = async () => {
+            await Promise.all([loadFaqs(), loadSocialProof()]);
+            showSecondarySections();
+        };
+
+        if (document.readyState === 'complete') {
+            'requestIdleCallback' in window
+                ? requestIdleCallback(loadSecondary, { timeout: 3000 })
+                : setTimeout(loadSecondary, 500);
+        } else {
+            window.addEventListener('load', () => {
+                'requestIdleCallback' in window
+                    ? requestIdleCallback(loadSecondary, { timeout: 3000 })
+                    : setTimeout(loadSecondary, 500);
+            }, { once: true });
+        }
         
         // Detectar cidade/estado do cliente via IP
         initGeoLocationBackground();
@@ -1699,6 +1782,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelectorAll('#categoryList li').forEach(li => li.classList.remove('active'));
                 const allCategoryBtn = document.querySelector('[data-category="all"]');
                 if (allCategoryBtn) allCategoryBtn.classList.add('active');
+                updateSectionVisibility('all');
             }
             
             // Recarrega produtos com a busca
@@ -1803,6 +1887,15 @@ function resumeBackgroundMusic() {
     }
 }
 
+// Pausar/retomar música quando usuário sai da aba ou minimiza o app
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        pauseBackgroundMusic();
+    } else {
+        resumeBackgroundMusic();
+    }
+});
+
 // Iniciar a música 3 segundos após a página carregar
 setTimeout(() => {
     startBackgroundMusic();
@@ -1890,6 +1983,182 @@ function setupVideoAudioControl() {
 document.addEventListener('DOMContentLoaded', () => {
     setupVideoAudioControl();
 });
+
+// ========================================
+// SELETOR DE NUMERAÇÃO / TAMANHO
+// ========================================
+
+function _sizeCategory(product) {
+    const cat = (product.categories?.name || '').toLowerCase();
+    if (cat.includes('alian') || cat.includes('anel')) return 'ring';
+    if (cat.includes('corrente'))                       return 'chain';
+    if (cat.includes('pulseira'))                       return 'bracelet';
+    return 'ring'; // fallback padrão para tem_numeracao=true
+}
+
+function renderSizeSelectorHtml(product) {
+    const type = product.size_type || (product.tem_numeracao ? _sizeCategory(product) : null);
+    if (!type) return '';
+    const reminder = `<p class="size-reminder-note">💬 Lembre-se: após finalizar a compra, nossa equipe entrará em contato para tirar qualquer dúvida antes do envio.</p>`;
+
+    if (type === 'chain') {
+        return `
+        <div class="size-selector-wrap">
+            <div class="size-chain-info">
+                <i class="fas fa-ruler"></i>
+                <span>Trabalhamos com correntes de <strong>70 cm</strong> — o tamanho <span class="size-badge-hot">mais vendido</span> ✅<br><small style="color:#888;font-size:0.78rem;">Comprimento ideal para o dia a dia</small></span>
+            </div>
+            ${reminder}
+        </div>`;
+    }
+
+    if (type === 'bracelet') {
+        return `
+        <div class="size-selector-wrap">
+            <button class="size-toggle-btn" onclick="toggleSizePanel()">
+                <i class="fas fa-ruler-horizontal"></i> Escolha o tamanho aqui
+                <i class="fas fa-chevron-down size-chevron" id="sizeChevron"></i>
+            </button>
+            <div class="size-panel" id="sizePanel">
+                <p class="size-hint-text"><i class="fas fa-star" style="color:var(--gold-primary);font-size:0.75rem;"></i> O tamanho <strong>21</strong> já está selecionado por ser o mais vendido, mas você pode escolher outro se preferir.</p>
+                <div class="size-chips-row">
+                    <button class="sz-chip sz-chip-active" onclick="selectSizeChip(this,'21 cm')">21</button>
+                    <button class="sz-chip" onclick="selectSizeChip(this,'22 cm')">22</button>
+                    <button class="sz-chip" onclick="selectSizeChip(this,'23 cm')">23</button>
+                </div>
+                <div class="size-confirm-msg" id="sizeConfirmMsg"></div>
+            </div>
+            ${reminder}
+        </div>`;
+    }
+
+    // ring (aliança / anel)
+    const chips = Array.from({length: 27}, (_, i) => i + 10)
+        .map(n => `<button class="sz-chip" onclick="selectSizeChip(this,'Nº ${n}')">${n}</button>`)
+        .join('');
+    return `
+    <div class="size-selector-wrap">
+        <button class="size-toggle-btn" onclick="toggleSizePanel()">
+            <i class="fas fa-ring"></i> Escolha a numeração aqui
+            <i class="fas fa-chevron-down size-chevron" id="sizeChevron"></i>
+        </button>
+        <div class="size-panel" id="sizePanel">
+            <div class="size-gender-tabs">
+                <button class="sz-gender-tab sz-gender-active" onclick="switchGenderTab(this,'Masculino')">👨 Masculino</button>
+                <button class="sz-gender-tab" onclick="switchGenderTab(this,'Feminino')">👩 Feminino</button>
+            </div>
+            <p class="size-hint-text">Selecione a numeração do anel:</p>
+            <div class="size-chips-row">${chips}</div>
+            <div class="size-confirm-msg" id="sizeConfirmMsg"></div>
+        </div>
+        ${reminder}
+    </div>`;
+}
+
+function setupSizeSelector(product) {
+    window.selectedSize = null;
+    window.selectedGender = 'Masculino';
+    window.selectedSizeMasc = null;
+    window.selectedSizeFem = null;
+    window.selectedSizeType = product.size_type || (product.tem_numeracao ? _sizeCategory(product) : null);
+
+    const type = window.selectedSizeType;
+    if (!type) return;
+    if (type === 'bracelet') {
+        // Pre-select 21 and show panel open
+        window.selectedSize = '21 cm';
+        setTimeout(() => {
+            const panel = document.getElementById('sizePanel');
+            const chevron = document.getElementById('sizeChevron');
+            if (panel) { panel.classList.add('size-panel-open'); }
+            if (chevron) { chevron.style.transform = 'rotate(180deg)'; }
+        }, 80);
+    }
+}
+
+window.toggleSizePanel = function() {
+    const panel = document.getElementById('sizePanel');
+    const chevron = document.getElementById('sizeChevron');
+    if (!panel) return;
+    const open = panel.classList.toggle('size-panel-open');
+    if (chevron) chevron.style.transform = open ? 'rotate(180deg)' : '';
+};
+
+window.switchGenderTab = function(btn, gender) {
+    document.querySelectorAll('.sz-gender-tab').forEach(t => {
+        t.classList.remove('sz-gender-active');
+        t.classList.remove('sz-gender-tab-pulse');
+    });
+    btn.classList.add('sz-gender-active');
+    window.selectedGender = gender;
+
+    // Restore chip highlight for this gender's previously chosen size
+    const saved = gender === 'Masculino' ? window.selectedSizeMasc : window.selectedSizeFem;
+    document.querySelectorAll('.sz-chip').forEach(c => {
+        c.classList.remove('sz-chip-active');
+        if (saved && `Nº ${c.textContent.trim()}` === saved) c.classList.add('sz-chip-active');
+    });
+};
+
+window.selectSizeChip = function(btn, size) {
+    const isRing = window.selectedSizeType === 'ring';
+
+    // Highlight only the clicked chip
+    document.querySelectorAll('.sz-chip').forEach(c => c.classList.remove('sz-chip-active'));
+    btn.classList.add('sz-chip-active');
+
+    if (!isRing) {
+        // Bracelet: single gender flow (unchanged)
+        window.selectedSize = size;
+        const conf = document.getElementById('sizeConfirmMsg');
+        if (conf) {
+            conf.innerHTML = `✅ Prontinho! Tamanho <strong>${size}</strong> selecionado. Agora é só clicar em Comprar — nossa equipe entrará em contato antes do envio. 😊`;
+            conf.classList.add('size-confirm-show');
+        }
+        return;
+    }
+
+    // Ring: track per-gender
+    const gender = window.selectedGender;
+    if (gender === 'Masculino') {
+        window.selectedSizeMasc = size;
+    } else {
+        window.selectedSizeFem = size;
+    }
+
+    const masc = window.selectedSizeMasc;
+    const fem  = window.selectedSizeFem;
+    const conf = document.getElementById('sizeConfirmMsg');
+
+    if (masc && fem) {
+        // Both selected — final message
+        window.selectedSize = `Masc. ${masc} / Fem. ${fem}`;
+        document.querySelectorAll('.sz-gender-tab').forEach(t => t.classList.remove('sz-gender-tab-pulse'));
+        if (conf) {
+            conf.innerHTML = `✅ Prontinho! Masculino <strong>${masc}</strong> e Feminino <strong>${fem}</strong> selecionados. Agora é só clicar em Comprar — fique tranquilo, nossa equipe entrará em contato com você antes do envio para tirar qualquer dúvida. 😊`;
+            conf.classList.add('size-confirm-show');
+        }
+    } else {
+        // Only one selected — guide to the other
+        window.selectedSize = gender === 'Masculino' ? `Masc. ${size}` : `Fem. ${size}`;
+        const otherLabel = gender === 'Masculino' ? 'feminino' : 'masculino';
+        const promptMsg  = gender === 'Masculino'
+            ? `✅ Masculino <strong>${size}</strong> selecionado. Agora clique ao lado e escolha o feminino. 👉`
+            : `✅ Feminino <strong>${size}</strong> selecionado. Agora clique no masculino para escolher. 👈`;
+        if (conf) {
+            conf.innerHTML = promptMsg;
+            conf.classList.add('size-confirm-show');
+        }
+        // Pulse the other tab
+        document.querySelectorAll('.sz-gender-tab').forEach(t => {
+            if (!t.classList.contains('sz-gender-active')) {
+                t.classList.remove('sz-gender-tab-pulse');
+                void t.offsetWidth; // restart animation
+                t.classList.add('sz-gender-tab-pulse');
+            }
+        });
+    }
+};
 
 // ========================================
 // FUNÇÕES GLOBAIS (MANTIDAS)
