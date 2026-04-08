@@ -2777,6 +2777,40 @@ button {
 
 ======================================== */
 
+.secondary-products-section {
+
+    min-height: 400px;
+
+    margin: var(--spacing-lg) 0;
+
+    padding: 0 12px;
+
+}
+
+.secondary-products-section .section-header {
+
+    margin-bottom: var(--spacing-md);
+
+}
+
+.sec-card {
+
+    opacity: 0;
+
+    transform: translateY(18px);
+
+    transition: opacity 0.45s ease, transform 0.45s ease;
+
+}
+
+.sec-card--visible {
+
+    opacity: 1;
+
+    transform: translateY(0);
+
+}
+
 .carousel-section {
 
     min-height: 220px;
@@ -2876,6 +2910,14 @@ button {
 .infinite-carousel:hover {
 
     animation-play-state: paused;
+
+}
+
+@keyframes carouselScroll {
+
+    0%   { transform: translateX(0); }
+
+    100% { transform: translateX(-50%); }
 
 }
 

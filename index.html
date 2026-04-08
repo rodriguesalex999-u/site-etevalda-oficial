@@ -31,7 +31,8 @@
     <meta property="og:url" content="https://www.etevaldajoias.com/">
     <meta property="og:title" content="Grupo Etevalda MT - A maior loja de variedades de Mato Grosso">
     <meta property="og:description" content="Joias, alianças e variedades em Cuiabá e Várzea Grande. Pague na entrega!">
-    <meta property="og:image" content="https://vnrfmsyanrvqqhmqyixk.supabase.co/storage/v1/object/public/produtos/produtos/1773710851783-1w34bjz7.webp">
+    <meta property="og:image" content="https://i.postimg.cc/dQz0MFkJ/alianca-corrente-pulseira-em-cuiaba.webp">
+    <link rel="image_src" href="https://i.postimg.cc/dQz0MFkJ/alianca-corrente-pulseira-em-cuiaba.webp">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     
@@ -39,7 +40,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Grupo Etevalda MT">
     <meta name="twitter:description" content="Joias e variedades em MT. Pague na entrega!">
-    <meta name="twitter:image" content="https://vnrfmsyanrvqqhmqyixk.supabase.co/storage/v1/object/public/produtos/produtos/1773710851783-1w34bjz7.webp">
+    <meta name="twitter:image" content="https://i.postimg.cc/dQz0MFkJ/alianca-corrente-pulseira-em-cuiaba.webp">
 
     <!-- PRIORIDADE LCP -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -197,10 +198,9 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
                 <div id="infinite-scroll-trigger"></div>
             </section>
 
-            <!-- PROVA SOCIAL -->
-            <section class="social-proof-section" id="socialProofSection" style="opacity:0; height:0; overflow:hidden;">
-                <div class="section-header"><h2 class="section-title">Quem Confia, Recomenda</h2><p class="section-subtitle">Clientes em todo Mato Grosso</p></div>
-                <div id="socialProofGrid" class="social-proof-grid"></div>
+            <!-- CARROSSEL 1 -->
+            <section class="carousel-section" id="carouselSection" style="opacity:0; height:0; overflow:hidden;">
+                <div id="infiniteCarousel" class="infinite-carousel"></div>
             </section>
 
             <!-- FAQ -->
@@ -208,24 +208,19 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
                 <div class="section-header"><h2 class="section-title">Perguntas Frequentes</h2></div>
                 <div id="faqGrid" class="faq-grid"></div>
             </section>
-            
-            <!-- CARROSSEL DA EQUIPE (NOVA VERSÃO) -->
-            <section id="teamCarouselSection" class="team-carousel-section" style="display: none;">
-                <div class="section-header">
-                    <h2 class="section-title">Variedade Imbatível</h2>
-                    <p class="section-subtitle">Nossa equipe pronta para te atender</p>
-                </div>
-                <div class="team-carousel-container">
-                    <div class="team-carousel-track" id="teamCarouselTrack">
-                        <!-- Os itens serão inseridos aqui pelo JavaScript -->
-                    </div>
-                </div>
-                <div class="team-carousel-dots" id="teamCarouselDots"></div>
+
+            <!-- PROVA SOCIAL -->
+            <section class="social-proof-section" id="socialProofSection" style="opacity:0; height:0; overflow:hidden;">
+                <div class="section-header"><h2 class="section-title">Quem Confia, Recomenda</h2><p class="section-subtitle">Clientes em todo Mato Grosso</p></div>
+                <div id="socialProofGrid" class="social-proof-grid"></div>
             </section>
 
-            <!-- CARROSSEL -->
-            <section class="carousel-section" id="carouselSection" style="opacity:0; height:0; overflow:hidden;">
-                <div id="infiniteCarousel" class="infinite-carousel"></div>
+            <!-- VITRINE DE CONTINUIDADE -->
+            <section class="secondary-products-section" id="secondaryProductsSection" style="opacity:0; height:0; overflow:hidden;">
+                <div class="section-header">
+                    <h2 class="section-title">Veja também outras joias incríveis</h2>
+                </div>
+                <div id="secondaryProductsGrid" class="products-grid"></div>
             </section>
 
             <!-- CARROSSEL 2 -->
@@ -246,6 +241,20 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
             <!-- CARROSSEL 5 -->
             <section class="carousel-section" id="carouselSection5" style="opacity:0; height:0; overflow:hidden;">
                 <div id="infiniteCarousel5" class="infinite-carousel"></div>
+            </section>
+
+            <!-- CARROSSEL DA EQUIPE -->
+            <section id="teamCarouselSection" class="team-carousel-section" style="display: none;">
+                <div class="section-header">
+                    <h2 class="section-title">Variedade Imbatível</h2>
+                    <p class="section-subtitle">Nossa equipe pronta para te atender</p>
+                </div>
+                <div class="team-carousel-container">
+                    <div class="team-carousel-track" id="teamCarouselTrack">
+                        <!-- Os itens serão inseridos aqui pelo JavaScript -->
+                    </div>
+                </div>
+                <div class="team-carousel-dots" id="teamCarouselDots"></div>
             </section>
 
             <!-- MODAL PRODUTO -->

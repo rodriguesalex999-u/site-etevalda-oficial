@@ -13,6 +13,8 @@ let categories = [];
 let cart = [];
 let currentCategory = 'all';
 let searchQuery = '';
+let secondarySectionsLoaded = false;
+let allProductsCache = [];  // sempre contém TODOS os produtos, independente da categoria ativa
 let allProductsLoaded = [];
 let faqs = [];
 let socialProofImages = [];
@@ -79,6 +81,11 @@ async function loadProducts(reset = false) {
             }
 
             allProductsLoaded = reset ? filteredData : [...allProductsLoaded, ...filteredData];
+
+            // Cache imutável de todos os produtos (usado pelo secondary grid)
+            if (currentCategory === 'all' && reset) {
+                allProductsCache = [...filteredData];
+            }
         }
 
         renderProducts();
@@ -133,6 +140,55 @@ function renderProducts() {
         }
     });
 
+    // Vitrine de continuidade: sempre usa o cache completo (todos os produtos, todas as categorias)
+    const secondaryGrid = document.getElementById('secondaryProductsGrid');
+    const secondarySource = allProductsCache.length > 0 ? allProductsCache : allProductsLoaded;
+    if (secondaryGrid && secondarySource.length > 0) {
+        const shuffled = [...secondarySource].sort(() => Math.random() - 0.5);
+        shuffled.forEach(p => {
+            if (!productViewers[p.id]) productViewers[p.id] = Math.floor(Math.random() * 38) + 3;
+        });
+        secondaryGrid.innerHTML = shuffled.map(p => {
+            const imgs = Array.isArray(p.images) ? p.images : [];
+            const hasMulti = imgs.length > 1;
+            const sold = p.sold_today ? '<div class="product-sold-today">Vendido Hoje</div>' : '';
+            const views = productViewers[p.id] || 5;
+            const markup = 1 + (0.15 + (((p.id * 7) % 16) / 100));
+            const oldPr = (p.price * markup).toFixed(2).replace('.', ',');
+            return `
+        <div class="product-card sec-card" onclick="window.openProductModal(${p.id})">
+            <div class="product-image ${hasMulti ? 'has-hover' : ''}">
+                <img src="${imgs[0] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-main" width="180" height="180" loading="lazy" decoding="async">
+                ${hasMulti ? `<img src="${imgs[1] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-hover" width="180" height="180" loading="lazy" decoding="async">` : ''}
+                ${sold}
+            </div>
+            <div class="product-info">
+                <h3>${p.name}</h3>
+                <div class="product-price-block">
+                    <span class="price-old">R$ ${oldPr}</span>
+                    <span class="product-price">R$ ${p.price.toFixed(2).replace('.', ',')}</span>
+                </div>
+                <div class="product-viewers-badge"><i class="fas fa-eye"></i> ${views}</div>
+            </div>
+        </div>`;
+        }).join('');
+
+        // Revelar cards progressivamente conforme entram no campo de visão
+        if ('IntersectionObserver' in window) {
+            const revealObserver = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('sec-card--visible');
+                        obs.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.08 });
+            secondaryGrid.querySelectorAll('.sec-card').forEach(card => revealObserver.observe(card));
+        } else {
+            secondaryGrid.querySelectorAll('.sec-card').forEach(card => card.classList.add('sec-card--visible'));
+        }
+    }
+
     container.innerHTML = filtered.map((p, index) => {
         const images = Array.isArray(p.images) ? p.images : [];
         const hasMultipleImages = images.length > 1;
@@ -144,7 +200,7 @@ function renderProducts() {
         const imgAttrs = `width="180" height="180" decoding="async" ${isPriority ? 'fetchpriority="high"' : 'loading="lazy"'}`;
         
         return `
-        <div class="product-card" onclick="openProductModal(${p.id})">
+        <div class="product-card" onclick="window.openProductModal(${p.id})">
             <div class="product-image ${hasMultipleImages ? 'has-hover' : ''}">
                 <img id="product-img-${p.id}" src="${images[0] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-main" ${imgAttrs}>
                 ${hasMultipleImages ? `<img id="product-img-hover-${p.id}" src="${images[1] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-hover" width="180" height="180" loading="lazy" decoding="async">` : ''}
@@ -200,6 +256,7 @@ function renderCategories() {
             if (container) container.innerHTML = '';
             
             loadProducts(true);
+            updateSectionVisibility(currentCategory);
         });
     });
 }
@@ -677,7 +734,7 @@ function renderModalCarouselIndividual(carouselId, carouselIndex) {
     modalCarousel.innerHTML = carouselProducts.map(p => {
         const images = Array.isArray(p.images) ? p.images : [];
         return `
-            <div class="modal-carousel-item" onclick="openProductModal(${p.id})">
+            <div class="modal-carousel-item" onclick="window.openProductModal(${p && p.id ? p.id : 0})">
                 <img src="${images[0]}" alt="${p.name}" loading="lazy">
                 <div class="modal-carousel-item-info">
                     <div class="modal-carousel-item-name">${p.name}</div>
@@ -716,7 +773,7 @@ function renderCarousel(carouselId = 'infiniteCarousel', carouselIndex = 1) {
     carousel.innerHTML = infiniteProducts.map(p => {
         const images = Array.isArray(p.images) ? p.images : [];
         return `
-            <div class="carousel-item" onclick="openProductModal(${p.id})">
+            <div class="carousel-item" onclick="window.openProductModal(${p && p.id ? p.id : 0})">
                 <img src="${images[0] || 'https://via.placeholder.com/150'}" alt="${p.name}" loading="lazy" style="aspect-ratio: 1/1; object-fit: cover;">
                 <div class="carousel-item-info">
                     <div class="carousel-item-name">${p.name}</div>
@@ -781,8 +838,33 @@ function renderFaqs() {
     `).join('');
 }
 
+function updateSectionVisibility(category) {
+    if (!secondarySectionsLoaded) return;
+
+    const isAll = !category || category === 'all';
+    const show = el => { if (el) { el.style.opacity = '1'; el.style.height = 'auto'; el.style.overflow = 'visible'; } };
+    const hide = el => { if (el) { el.style.opacity = '0'; el.style.height = '0'; el.style.overflow = 'hidden'; } };
+
+    // faqSection: escondida em 'all', visível em categoria específica
+    isAll ? hide(document.getElementById('faqSection')) : show(document.getElementById('faqSection'));
+
+    // socialProofSection: sempre visível
+    show(document.getElementById('socialProofSection'));
+
+    // secondaryProductsSection: sempre visível (todas as categorias)
+    show(document.getElementById('secondaryProductsSection'));
+
+    // carrossel 1: sempre visível
+    show(document.getElementById('carouselSection'));
+
+    // carrosséis 2-5: visíveis apenas em 'all'
+    ['carouselSection2', 'carouselSection3', 'carouselSection4', 'carouselSection5'].forEach(id => {
+        isAll ? show(document.getElementById(id)) : hide(document.getElementById(id));
+    });
+}
+
 function showSecondarySections() {
-    const sections = ['socialProofSection', 'faqSection', 'carouselSection', 'carouselSection2', 'carouselSection3', 'carouselSection4', 'carouselSection5', 'teamCarouselSection'];
+    const sections = ['socialProofSection', 'faqSection', 'secondaryProductsSection', 'carouselSection', 'carouselSection2', 'carouselSection3', 'carouselSection4', 'carouselSection5', 'teamCarouselSection'];
     sections.forEach(id => {
         const section = document.getElementById(id);
         if (section) {
@@ -795,6 +877,9 @@ function showSecondarySections() {
     renderAllCarousels();
     renderSocialProof();
     renderFaqs();
+
+    secondarySectionsLoaded = true;
+    updateSectionVisibility(currentCategory);
 }
 
 // 5. FUNÇÕES DO MODAL
@@ -1697,6 +1782,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelectorAll('#categoryList li').forEach(li => li.classList.remove('active'));
                 const allCategoryBtn = document.querySelector('[data-category="all"]');
                 if (allCategoryBtn) allCategoryBtn.classList.add('active');
+                updateSectionVisibility('all');
             }
             
             // Recarrega produtos com a busca
