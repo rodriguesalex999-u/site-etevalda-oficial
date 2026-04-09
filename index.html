@@ -19,7 +19,7 @@
 
         <link rel="preconnect" href="https://i.postimg.cc">
     <!-- PRELOAD DA IMAGEM PRIORITÁRIA (LCP) -->
-    <link rel="preload" as="image" href="https://vnrfmsyanrvqqhmqyixk.supabase.co/storage/v1/object/public/produtos/produtos/1773710851783-1w34bjz7.webp" fetchpriority="high">
+    <link rel="preload" as="image" href="https://i.postimg.cc/dQz0MFkJ/alianca-corrente-pulseira-em-cuiaba.webp" fetchpriority="high">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="description" content="Grupo Etevalda MT - A maior loja de variedades de Mato Grosso">
@@ -244,7 +244,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
             </section>
 
             <!-- CARROSSEL DA EQUIPE -->
-            <section id="teamCarouselSection" class="team-carousel-section" style="display: none;">
+            <section id="teamCarouselSection" class="team-carousel-section" style="opacity:0; height:0; overflow:hidden;">
                 <div class="section-header">
                     <h2 class="section-title">Variedade Imbatível</h2>
                     <p class="section-subtitle">Nossa equipe pronta para te atender</p>
@@ -255,6 +255,14 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
                     </div>
                 </div>
                 <div class="team-carousel-dots" id="teamCarouselDots"></div>
+            </section>
+
+            <!-- AVALIAÇÕES DOS CLIENTES -->
+            <section class="reviews-carousel-section" id="reviewsSection" style="opacity:0; height:0; overflow:hidden;">
+                <div class="section-header">
+                    <h2 class="section-title reviews-carousel-title"><i class="fas fa-star"></i> O que nossos clientes dizem</h2>
+                </div>
+                <div id="reviewsContainer" class="reviews-carousel"></div>
             </section>
 
             <!-- MODAL PRODUTO -->

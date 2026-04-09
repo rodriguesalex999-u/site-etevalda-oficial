@@ -2015,6 +2015,8 @@ button {
 
     padding: 0 8px;
 
+    min-height: 220px;
+
 }
 
 .reviews-carousel-title {

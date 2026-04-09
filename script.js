@@ -18,6 +18,11 @@ let allProductsCache = [];  // sempre contém TODOS os produtos, independente da
 let allProductsLoaded = [];
 let faqs = [];
 let socialProofImages = [];
+let reviews = [];
+let teamCarouselData = [];
+let teamCarouselIndex = 0;
+let teamCarouselAutoInterval = null;
+let secCardObserver = null;
 let deliveryTimerInterval = null;
 let viewerIncrementTimeout = null;
 let currentZoomIndex = 0;
@@ -117,6 +122,23 @@ async function loadSocialProof() {
     });
 }
 
+async function loadReviews() {
+    const { data } = await _supabase
+        .from('reviews')
+        .select('*')
+        .order('id', { ascending: false });
+    reviews = data || [];
+}
+
+async function loadTeamCarousel() {
+    const { data } = await _supabase
+        .from('team_carousel')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+    teamCarouselData = data || [];
+}
+
 // 4. FUNÇÕES DE RENDERIZAÇÃO
 function renderProducts() {
     const container = document.getElementById('productsContainer');
@@ -173,20 +195,8 @@ function renderProducts() {
         </div>`;
         }).join('');
 
-        // Revelar cards progressivamente conforme entram no campo de visão
-        if ('IntersectionObserver' in window) {
-            const revealObserver = new IntersectionObserver((entries, obs) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('sec-card--visible');
-                        obs.unobserve(entry.target);
-                    }
-                });
-            }, { threshold: 0.08 });
-            secondaryGrid.querySelectorAll('.sec-card').forEach(card => revealObserver.observe(card));
-        } else {
-            secondaryGrid.querySelectorAll('.sec-card').forEach(card => card.classList.add('sec-card--visible'));
-        }
+        // Se a seção já estiver visível (troca de categoria), reconfigurar observer imediatamente
+        if (secondarySectionsLoaded) setupSecCardObserver();
     }
 
     container.innerHTML = filtered.map((p, index) => {
@@ -804,7 +814,7 @@ function renderSocialProof() {
         return;
     }
 
-    grid.innerHTML = socialProofImages.slice(0, 3).map(item => `
+    grid.innerHTML = socialProofImages.map(item => `
         <div class="social-proof-card">
             <div class="social-proof-image">
                 <img src="${item.image_url}" alt="Prova Social" loading="lazy" style="aspect-ratio: 1/1; object-fit: cover;">
@@ -838,6 +848,110 @@ function renderFaqs() {
     `).join('');
 }
 
+function renderReviews() {
+    const container = document.getElementById('reviewsContainer');
+    const section = document.getElementById('reviewsSection');
+    if (!container) return;
+
+    if (!reviews || reviews.length === 0) {
+        if (section) { section.style.height = '0'; section.style.overflow = 'hidden'; }
+        return;
+    }
+
+    container.innerHTML = reviews.map(r => {
+        const rating = r.rating || 5;
+        const starsHtml = Array.from({ length: 5 }, (_, i) =>
+            `<i class="fas fa-star" style="color:${i < rating ? '#ff9500' : '#444'}"></i>`
+        ).join('');
+        const avatarHtml = r.image_url
+            ? `<img src="${r.image_url}" alt="${r.name}" class="review-carousel-avatar" loading="lazy">`
+            : `<div class="review-carousel-avatar" style="display:flex;align-items:center;justify-content:center;background:var(--gold-light);color:var(--gold-primary);font-weight:700;font-size:1.1rem;">${(r.name || '?').charAt(0).toUpperCase()}</div>`;
+        return `
+            <div class="review-carousel-card">
+                <div class="review-carousel-header">
+                    ${avatarHtml}
+                    <div>
+                        <div class="review-carousel-name">${r.name}</div>
+                        <div class="review-carousel-stars">${starsHtml}</div>
+                    </div>
+                </div>
+                <p class="review-carousel-comment">"${r.comment}"</p>
+            </div>`;
+    }).join('');
+}
+
+function renderTeamCarousel() {
+    const track = document.getElementById('teamCarouselTrack');
+    const section = document.getElementById('teamCarouselSection');
+    if (!track) return;
+
+    if (!teamCarouselData || teamCarouselData.length === 0) {
+        if (section) { section.style.height = '0'; section.style.overflow = 'hidden'; }
+        return;
+    }
+
+    track.innerHTML = teamCarouselData.map(item => `
+        <div class="team-carousel-item">
+            <img src="${item.image_url}" alt="${item.caption || 'Etevalda'}" class="team-carousel-image" loading="lazy">
+            ${item.caption ? `<div class="team-carousel-caption">${item.caption}</div>` : ''}
+        </div>`
+    ).join('');
+
+    const dotsEl = document.getElementById('teamCarouselDots');
+    if (dotsEl && teamCarouselData.length > 1) {
+        dotsEl.innerHTML = teamCarouselData.map((_, i) =>
+            `<button class="team-carousel-dot${i === 0 ? ' active' : ''}" onclick="window.goToTeamSlide(${i})"></button>`
+        ).join('');
+    }
+
+    teamCarouselIndex = 0;
+    if (teamCarouselAutoInterval) clearInterval(teamCarouselAutoInterval);
+    if (teamCarouselData.length > 1) {
+        teamCarouselAutoInterval = setInterval(() => {
+            window.goToTeamSlide((teamCarouselIndex + 1) % teamCarouselData.length);
+        }, 4500);
+    }
+}
+
+window.goToTeamSlide = function(index) {
+    teamCarouselIndex = index;
+    const track = document.getElementById('teamCarouselTrack');
+    if (!track) return;
+    const item = track.querySelector('.team-carousel-item');
+    if (!item) return;
+    track.style.transform = `translateX(-${index * item.offsetWidth}px)`;
+    document.querySelectorAll('.team-carousel-dot').forEach((d, i) =>
+        d.classList.toggle('active', i === index)
+    );
+};
+
+function setupSecCardObserver() {
+    const secondaryGrid = document.getElementById('secondaryProductsGrid');
+    if (!secondaryGrid) return;
+
+    if (secCardObserver) {
+        secCardObserver.disconnect();
+        secCardObserver = null;
+    }
+
+    const cards = secondaryGrid.querySelectorAll('.sec-card:not(.sec-card--visible)');
+    if (!cards.length) return;
+
+    if ('IntersectionObserver' in window) {
+        secCardObserver = new IntersectionObserver((entries, obs) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('sec-card--visible');
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.05, rootMargin: '0px 0px 60px 0px' });
+        cards.forEach(card => secCardObserver.observe(card));
+    } else {
+        cards.forEach(card => card.classList.add('sec-card--visible'));
+    }
+}
+
 function updateSectionVisibility(category) {
     if (!secondarySectionsLoaded) return;
 
@@ -854,6 +968,9 @@ function updateSectionVisibility(category) {
     // secondaryProductsSection: sempre visível (todas as categorias)
     show(document.getElementById('secondaryProductsSection'));
 
+    // reviewsSection: sempre visível
+    show(document.getElementById('reviewsSection'));
+
     // carrossel 1: sempre visível
     show(document.getElementById('carouselSection'));
 
@@ -864,10 +981,11 @@ function updateSectionVisibility(category) {
 }
 
 function showSecondarySections() {
-    const sections = ['socialProofSection', 'faqSection', 'secondaryProductsSection', 'carouselSection', 'carouselSection2', 'carouselSection3', 'carouselSection4', 'carouselSection5', 'teamCarouselSection'];
+    const sections = ['socialProofSection', 'faqSection', 'secondaryProductsSection', 'reviewsSection', 'carouselSection', 'carouselSection2', 'carouselSection3', 'carouselSection4', 'carouselSection5', 'teamCarouselSection'];
     sections.forEach(id => {
         const section = document.getElementById(id);
         if (section) {
+            section.style.display = '';
             section.style.opacity = '1';
             section.style.height = 'auto';
             section.style.overflow = 'visible';
@@ -877,9 +995,14 @@ function showSecondarySections() {
     renderAllCarousels();
     renderSocialProof();
     renderFaqs();
+    renderReviews();
+    renderTeamCarousel();
 
     secondarySectionsLoaded = true;
     updateSectionVisibility(currentCategory);
+
+    // Configurar observer APÓS a seção estar visível (corrige comportamento em mobile)
+    setupSecCardObserver();
 }
 
 // 5. FUNÇÕES DO MODAL
@@ -1627,7 +1750,8 @@ async function initializeApp() {
 
         // Seções secundárias: carregadas após o evento 'load' (não bloqueia LCP/FCP)
         const loadSecondary = async () => {
-            await Promise.all([loadFaqs(), loadSocialProof()]);
+            // allSettled garante que showSecondarySections roda mesmo se uma chamada falhar (ex: rede lenta no celular)
+            await Promise.allSettled([loadFaqs(), loadSocialProof(), loadReviews(), loadTeamCarousel()]);
             showSecondarySections();
         };
 
