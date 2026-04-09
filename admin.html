@@ -290,6 +290,13 @@
             border-color: var(--gold-primary);
         }
 
+        /* Multi-categoria checkboxes */
+        .cat-checkboxes-wrap { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; padding:10px; background:rgba(255,255,255,0.03); border-radius:8px; border:1px solid var(--border-color); }
+        .cat-cb-label { display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.82rem; background:var(--dark-bg); color:var(--text-secondary); padding:6px 14px; border-radius:20px; border:1.5px solid var(--border-color); transition:all 0.2s; user-select:none; }
+        .cat-cb-label input[type="checkbox"] { width:14px; height:14px; cursor:pointer; accent-color:var(--gold-primary); }
+        .cat-cb-label:has(input:checked) { border-color:var(--gold-primary); background:rgba(212,175,55,0.12); color:var(--text-primary); font-weight:600; }
+        .btn-secondary { background:var(--dark-bg); border:1px solid var(--border-color); color:var(--text-primary); padding:6px 10px; border-radius:6px; cursor:pointer; transition:all 0.2s; }
+        .btn-secondary:hover { border-color:var(--gold-primary); color:var(--gold-primary); }
         /* Checkbox estilizado */
         .checkbox-group {
             display: flex;
@@ -994,17 +1001,10 @@
                         <label><i class="fas fa-comment"></i> Comentário *</label>
                         <textarea id="reviewComment" required rows="3"></textarea>
                     </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-box"></i> Produto</label>
-                        <select id="reviewProduct">
-                            <option value="">Geral (todos)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="reviewGeneral">
-                            <label for="reviewGeneral">Avaliação geral</label>
-                        </div>
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-tag"></i> Mostrar em quais categorias?</label>
+                        <div id="reviewCatBoxes" class="cat-checkboxes-wrap"><small style="color:var(--medium-gray);">Carregando...</small></div>
+                        <small style="color:var(--medium-gray);margin-top:4px;display:block;">Selecione uma ou mais. "Geral" = aparece em todas as categorias.</small>
                     </div>
                 </div>
                 <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Salvar Avaliação</button>
@@ -1020,7 +1020,7 @@
                             <th>Cliente</th>
                             <th>Avaliação</th>
                             <th>Comentário</th>
-                            <th>Produto</th>
+                            <th>Categorias</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -1048,6 +1048,11 @@
                         <label><i class="fas fa-sort"></i> Ordem</label>
                         <input type="number" id="faqOrder" value="0">
                     </div>
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-tag"></i> Mostrar em quais categorias?</label>
+                        <div id="faqCatBoxes" class="cat-checkboxes-wrap"><small style="color:var(--medium-gray);">Carregando...</small></div>
+                        <small style="color:var(--medium-gray);margin-top:4px;display:block;">Selecione uma ou mais. "Geral" = aparece em todas as categorias.</small>
+                    </div>
                 </div>
                 <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Salvar Pergunta</button>
             </form>
@@ -1061,6 +1066,7 @@
                             <th>ID</th>
                             <th>Ordem</th>
                             <th>Pergunta</th>
+                            <th>Categoria</th>
                             <th>Áudio</th>
                             <th>Ações</th>
                         </tr>
@@ -1105,6 +1111,11 @@
                         <label><i class="fas fa-sort"></i> Ordem de exibição</label>
                         <input type="number" id="proofOrder" value="0">
                     </div>
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-tag"></i> Mostrar em quais categorias?</label>
+                        <div id="proofCatBoxes" class="cat-checkboxes-wrap"><small style="color:var(--medium-gray);">Carregando...</small></div>
+                        <small style="color:var(--medium-gray);margin-top:4px;display:block;">Selecione uma ou mais. "Geral" = aparece em todas as categorias.</small>
+                    </div>
                 </div>
                 <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Salvar Imagem</button>
             </form>
@@ -1118,6 +1129,7 @@
                             <th>ID</th>
                             <th>Imagem</th>
                             <th>Legenda</th>
+                            <th>Categorias</th>
                             <th>Ordem</th>
                             <th>Status</th>
                             <th>Ações</th>
@@ -1170,6 +1182,11 @@
                         <input type="number" id="teamCarouselOrder" value="0">
                         <small>Números menores aparecem primeiro.</small>
                     </div>
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-tag"></i> Mostrar em quais categorias?</label>
+                        <div id="teamCatBoxes" class="cat-checkboxes-wrap"><small style="color:var(--medium-gray);">Carregando...</small></div>
+                        <small style="color:var(--medium-gray);margin-top:4px;display:block;">Selecione uma ou mais. "Geral" = aparece em todas as categorias.</small>
+                    </div>
                 </div>
                 <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Salvar Foto</button>
             </form>
@@ -1183,6 +1200,7 @@
                             <th>ID</th>
                             <th>Foto</th>
                             <th>Legenda</th>
+                            <th>Categorias</th>
                             <th>Ordem</th>
                             <th>Status</th>
                             <th>Ações</th>
@@ -1498,7 +1516,7 @@
     async function loadAllData() {
         try {
             console.log('🚀 Iniciando carregamento de todos os dados...');
-            await Promise.all([
+            await Promise.allSettled([
                 loadCategories(),
                 loadProducts(),
                 loadReviews(),
@@ -1512,6 +1530,59 @@
             console.error('❌ Erro ao carregar todos os dados:', error);
             showToast('Erro ao carregar dados', 'error');
         }
+    }
+
+    // ========================================
+    // HELPERS MULTI-CATEGORIA
+    // ========================================
+    let editingReviewId = null;
+    let editingFaqId = null;
+    let editingSocialProofId = null;
+    window._adminCache = {};
+
+    function buildCatCheckboxes(containerId, prefix) {
+        const wrap = document.getElementById(containerId);
+        if (!wrap) return;
+        const html = [`<label class="cat-cb-label"><input type="checkbox" name="${prefix}_cat" value="all" checked onchange="handleCatCb(this,'${prefix}')"> Geral (Todos)</label>`]
+            .concat((categoriesList || []).map(c =>
+                `<label class="cat-cb-label"><input type="checkbox" name="${prefix}_cat" value="${c.id}" onchange="handleCatCb(this,'${prefix}')"> ${c.name}</label>`
+            )).join('');
+        wrap.innerHTML = html;
+    }
+    window.handleCatCb = function(el, prefix) {
+        const all = document.querySelectorAll(`input[name="${prefix}_cat"]`);
+        const allCb = document.querySelector(`input[name="${prefix}_cat"][value="all"]`);
+        if (el.value === 'all' && el.checked) {
+            all.forEach(cb => { if (cb.value !== 'all') cb.checked = false; });
+        } else if (el.checked) {
+            if (allCb) allCb.checked = false;
+        } else {
+            const anySpecific = [...all].some(cb => cb.value !== 'all' && cb.checked);
+            if (!anySpecific && allCb) allCb.checked = true;
+        }
+    };
+    function getCatIds(prefix) {
+        return [...document.querySelectorAll(`input[name="${prefix}_cat"]:checked`)]
+            .filter(cb => cb.value !== 'all').map(cb => cb.value).join(',');
+    }
+    function setCatIds(prefix, categoryIds) {
+        const all = document.querySelectorAll(`input[name="${prefix}_cat"]`);
+        const allCb = document.querySelector(`input[name="${prefix}_cat"][value="all"]`);
+        all.forEach(cb => { cb.checked = false; });
+        if (!categoryIds || categoryIds === '') {
+            if (allCb) allCb.checked = true;
+        } else {
+            categoryIds.split(',').forEach(id => {
+                const cb = document.querySelector(`input[name="${prefix}_cat"][value="${id.trim()}"]`);
+                if (cb) cb.checked = true;
+            });
+        }
+    }
+    function catLabel(categoryIds) {
+        if (!categoryIds || categoryIds === '') return '<em style="color:var(--medium-gray);">Todas</em>';
+        return categoryIds.split(',').map(id =>
+            (categoriesList || []).find(c => String(c.id) === id.trim())?.name || `Cat.${id}`
+        ).join(', ');
     }
 
     // ========================================
@@ -1570,6 +1641,11 @@
     async function loadCategories() {
         const { data } = await _supabase.from('categories').select('*').order('id');
         categoriesList = data || [];
+        // Construir checkboxes assim que as categorias chegam (independe dos outros loads)
+        buildCatCheckboxes('reviewCatBoxes', 'review');
+        buildCatCheckboxes('faqCatBoxes', 'faq');
+        buildCatCheckboxes('proofCatBoxes', 'proof');
+        buildCatCheckboxes('teamCatBoxes', 'team');
         const tbody = document.getElementById('categoriesTableBody');
         if (tbody) {
             if (!data || data.length === 0) {
@@ -1971,75 +2047,59 @@
     });
 
     async function loadReviews() {
-        const { data } = await _supabase
-            .from('reviews')
-            .select('*, products(name)')
-            .order('id', { ascending: false });
-
+        const { data } = await _supabase.from('reviews').select('*').order('id', { ascending: false });
         const tbody = document.getElementById('reviewsTableBody');
         if (!tbody) return;
-
         if (!data || data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px;">
-                <i class="fas fa-star fa-3x" style="color:var(--medium-gray);"></i>
-                <p>Nenhuma avaliação cadastrada</p>
-            </td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;"><i class="fas fa-star fa-3x" style="color:var(--medium-gray);"></i><p>Nenhuma avaliação cadastrada</p></td></tr>`;
             return;
         }
-
+        data.forEach(r => { window._adminCache[`review_${r.id}`] = r; });
         tbody.innerHTML = data.map(r => `
             <tr>
                 <td><strong>#${r.id}</strong></td>
                 <td>${r.customer_name}</td>
                 <td class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</td>
-                <td>${r.comment.substring(0, 50)}${r.comment.length > 50 ? '...' : ''}</td>
-                <td>${r.products?.name || 'Geral'}</td>
-                <td><button class="btn-danger" onclick="confirmDelete('review', ${r.id})"><i class="fas fa-trash"></i></button></td>
-            </tr>
-        `).join('');
-
-        const { data: products } = await _supabase.from('products').select('id, name').order('id');
-        const select = document.getElementById('reviewProduct');
-        if (select && products) {
-            select.innerHTML = '<option value="">Geral (todos)</option>' +
-                products.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-        }
+                <td>${r.comment.substring(0, 60)}${r.comment.length > 60 ? '...' : ''}</td>
+                <td>${catLabel(r.category_ids)}</td>
+                <td style="display:flex;gap:4px;">
+                    <button class="btn-secondary" onclick="editReview(${r.id})" title="Editar"><i class="fas fa-edit"></i></button>
+                    <button class="btn-danger" onclick="confirmDelete('review',${r.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`).join('');
     }
+    window.editReview = function(id) {
+        const r = window._adminCache[`review_${id}`];
+        if (!r) return;
+        editingReviewId = id;
+        document.getElementById('reviewName').value = r.customer_name;
+        document.getElementById('reviewComment').value = r.comment;
+        document.getElementById('reviewImage').value = r.image_url || '';
+        currentRating = r.rating;
+        document.querySelectorAll('#ratingStars i').forEach((s,i) => { s.className = i < currentRating ? 'fas fa-star' : 'far fa-star'; });
+        setCatIds('review', r.category_ids || '');
+        document.querySelector('#reviewForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Atualizar Avaliação';
+        document.getElementById('reviewForm').scrollIntoView({ behavior:'smooth' });
+    };
 
     document.getElementById('reviewForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-
         const name = document.getElementById('reviewName').value.trim();
-        const rating = currentRating;
         const comment = document.getElementById('reviewComment').value.trim();
         const imageUrl = document.getElementById('reviewImage').value.trim() || null;
-        const productId = document.getElementById('reviewProduct').value;
-        const isGeneral = document.getElementById('reviewGeneral').checked;
-
-        if (!name || !comment) {
-            showToast('Preencha nome e comentário!', 'error');
-            return;
-        }
-
-        const reviewData = {
-            customer_name: name,
-            rating,
-            comment,
-            image_url: imageUrl,
-            product_id: isGeneral ? null : (productId ? parseInt(productId) : null),
-            is_general: isGeneral
-        };
-
-        const { error } = await _supabase.from('reviews').insert([reviewData]);
-
-        if (!error) {
-            showToast('✅ Avaliação cadastrada!');
-            e.target.reset();
-            await loadReviews();
-            updateStats();
+        const categoryIds = getCatIds('review');
+        if (!name || !comment) { showToast('Preencha nome e comentário!', 'error'); return; }
+        const payload = { customer_name: name, rating: currentRating, comment, image_url: imageUrl, category_ids: categoryIds, is_general: categoryIds === '' };
+        let error;
+        if (editingReviewId) {
+            ({ error } = await _supabase.from('reviews').update(payload).eq('id', editingReviewId));
+            if (!error) { showToast('✅ Avaliação atualizada!'); editingReviewId = null; document.querySelector('#reviewForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Salvar Avaliação'; }
         } else {
-            showToast('Erro ao salvar avaliação', 'error');
+            ({ error } = await _supabase.from('reviews').insert([payload]));
+            if (!error) showToast('✅ Avaliação cadastrada!');
         }
+        if (!error) { e.target.reset(); currentRating = 5; setCatIds('review',''); document.querySelectorAll('#ratingStars i').forEach((s,i)=>{ s.className=i<5?'fas fa-star':'far fa-star'; }); await loadReviews(); updateStats(); }
+        else { showToast('Erro ao salvar avaliação', 'error'); console.error(error); }
     });
 
     // ========================================
@@ -2051,46 +2111,57 @@
         if (!tbody) return;
 
         if (!data || data.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px;">
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px;">
                 <i class="fas fa-question-circle fa-3x" style="color:var(--medium-gray);"></i>
                 <p>Nenhuma FAQ cadastrada</p>
             </td></tr>`;
             return;
         }
 
+        data.forEach(f => { window._adminCache[`faq_${f.id}`] = f; });
         tbody.innerHTML = data.map(f => `
             <tr>
                 <td><strong>#${f.id}</strong></td>
                 <td>${f.order_index}</td>
                 <td>${f.question}</td>
-                <td><a href="${f.audio_url}" target="_blank" style="color:var(--info);">🔊 Ouvir</a></td>
-                <td><button class="btn-danger" onclick="confirmDelete('faq', ${f.id})"><i class="fas fa-trash"></i></button></td>
-            </tr>
-        `).join('');
+                <td>${catLabel(f.category_ids)}</td>
+                <td><a href="${f.audio_url}" target="_blank" style="color:var(--info);">&#128266; Ouvir</a></td>
+                <td style="display:flex;gap:4px;">
+                    <button class="btn-secondary" onclick="editFaq(${f.id})" title="Editar"><i class="fas fa-edit"></i></button>
+                    <button class="btn-danger" onclick="confirmDelete('faq',${f.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`).join('');
     }
+    window.editFaq = function(id) {
+        const f = window._adminCache[`faq_${id}`];
+        if (!f) return;
+        editingFaqId = id;
+        document.getElementById('faqQuestion').value = f.question;
+        document.getElementById('faqAudio').value = f.audio_url;
+        document.getElementById('faqOrder').value = f.order_index;
+        setCatIds('faq', f.category_ids || '');
+        document.querySelector('#faqForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Atualizar FAQ';
+        document.getElementById('faqForm').scrollIntoView({ behavior:'smooth' });
+    };
 
     document.getElementById('faqForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-
         const question = document.getElementById('faqQuestion').value.trim();
         const audioUrl = document.getElementById('faqAudio').value.trim();
         const orderIndex = parseInt(document.getElementById('faqOrder').value) || 0;
-
-        if (!question || !audioUrl) {
-            showToast('Preencha pergunta e URL do áudio!', 'error');
-            return;
-        }
-
-        const { error } = await _supabase.from('faqs').insert([{ question, audio_url: audioUrl, order_index: orderIndex }]);
-
-        if (!error) {
-            showToast('✅ FAQ cadastrada!');
-            e.target.reset();
-            await loadFaqs();
-            updateStats();
+        const categoryIds = getCatIds('faq');
+        if (!question || !audioUrl) { showToast('Preencha pergunta e URL do áudio!', 'error'); return; }
+        const payload = { question, audio_url: audioUrl, order_index: orderIndex, category_ids: categoryIds };
+        let error;
+        if (editingFaqId) {
+            ({ error } = await _supabase.from('faqs').update(payload).eq('id', editingFaqId));
+            if (!error) { showToast('✅ FAQ atualizada!'); editingFaqId = null; document.querySelector('#faqForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Salvar Pergunta'; }
         } else {
-            showToast('Erro ao salvar FAQ', 'error');
+            ({ error } = await _supabase.from('faqs').insert([payload]));
+            if (!error) showToast('✅ FAQ cadastrada!');
         }
+        if (!error) { e.target.reset(); setCatIds('faq',''); await loadFaqs(); updateStats(); }
+        else { showToast('Erro ao salvar FAQ', 'error'); console.error(error); }
     });
 
     // ========================================
@@ -2109,44 +2180,53 @@
             return;
         }
 
+        data.forEach(item => { window._adminCache[`proof_${item.id}`] = item; });
         tbody.innerHTML = data.map(item => `
             <tr>
                 <td><strong>#${item.id}</strong></td>
                 <td><img src="${item.image_url}" class="prod-img" onerror="this.src='https://via.placeholder.com/60'"></td>
                 <td>${item.caption || '—'}</td>
+                <td>${catLabel(item.category_ids)}</td>
                 <td>${item.display_order}</td>
                 <td><span class="badge ${item.is_active ? 'badge-true' : 'badge-false'}">${item.is_active ? 'Ativo' : 'Inativo'}</span></td>
-                <td><button class="btn-danger" onclick="confirmDelete('social_proof', ${item.id})"><i class="fas fa-trash"></i></button></td>
-            </tr>
-        `).join('');
+                <td style="display:flex;gap:4px;">
+                    <button class="btn-secondary" onclick="editSocialProof(${item.id})" title="Editar"><i class="fas fa-edit"></i></button>
+                    <button class="btn-danger" onclick="confirmDelete('social_proof',${item.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`).join('');
     }
+    window.editSocialProof = function(id) {
+        const item = window._adminCache[`proof_${id}`];
+        if (!item) return;
+        editingSocialProofId = id;
+        document.getElementById('proofImage').value = item.image_url;
+        document.getElementById('proofCaption').value = item.caption || '';
+        document.getElementById('proofActive').checked = item.is_active;
+        document.getElementById('proofOrder').value = item.display_order;
+        setCatIds('proof', item.category_ids || '');
+        document.querySelector('#socialProofForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Atualizar Imagem';
+        document.getElementById('socialProofForm').scrollIntoView({ behavior:'smooth' });
+    };
 
     document.getElementById('socialProofForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-
         const imageUrl = document.getElementById('proofImage').value.trim();
         const caption = document.getElementById('proofCaption').value.trim() || null;
         const isActive = document.getElementById('proofActive').checked;
         const displayOrder = parseInt(document.getElementById('proofOrder').value) || 0;
-
-        if (!imageUrl) {
-            showToast('Digite a URL da imagem!', 'error');
-            return;
-        }
-
-        const { error } = await _supabase
-            .from('social_proof')
-            .insert([{ image_url: imageUrl, caption, is_active: isActive, display_order: displayOrder }]);
-
-        if (!error) {
-            showToast('✅ Imagem cadastrada!');
-            e.target.reset();
-            document.getElementById('proofActive').checked = true;
-            document.getElementById('proofOrder').value = '0';
-            await loadSocialProof();
+        const categoryIds = getCatIds('proof');
+        if (!imageUrl) { showToast('Digite a URL da imagem!', 'error'); return; }
+        const payload = { image_url: imageUrl, caption, is_active: isActive, display_order: displayOrder, category_ids: categoryIds };
+        let error;
+        if (editingSocialProofId) {
+            ({ error } = await _supabase.from('social_proof').update(payload).eq('id', editingSocialProofId));
+            if (!error) { showToast('✅ Imagem atualizada!'); editingSocialProofId = null; document.querySelector('#socialProofForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Salvar Imagem'; }
         } else {
-            showToast('Erro ao salvar imagem', 'error');
+            ({ error } = await _supabase.from('social_proof').insert([payload]));
+            if (!error) showToast('✅ Imagem cadastrada!');
         }
+        if (!error) { e.target.reset(); document.getElementById('proofActive').checked = true; document.getElementById('proofOrder').value = '0'; setCatIds('proof',''); await loadSocialProof(); }
+        else { showToast('Erro ao salvar imagem', 'error'); console.error(error); }
     });
 
     // ========================================
@@ -2261,45 +2341,53 @@
             return;
         }
 
+        data.forEach(item => { window._adminCache[`team_${item.id}`] = item; });
         tbody.innerHTML = data.map(item => `
             <tr>
                 <td><strong>#${item.id}</strong></td>
                 <td><img src="${item.image_url}" class="prod-img" onerror="this.src='https://via.placeholder.com/60'"></td>
                 <td>${item.caption || '—'}</td>
+                <td>${catLabel(item.category_ids)}</td>
                 <td>${item.display_order}</td>
                 <td><span class="badge ${item.is_active ? 'badge-true' : 'badge-false'}">${item.is_active ? 'Ativo' : 'Inativo'}</span></td>
-                <td><button class="btn-danger" onclick="confirmDelete('team_carousel', ${item.id})"><i class="fas fa-trash"></i></button></td>
-            </tr>
-        `).join('');
+                <td style="display:flex;gap:4px;">
+                    <button class="btn-secondary" onclick="editTeamCarousel(${item.id})" title="Editar"><i class="fas fa-edit"></i></button>
+                    <button class="btn-danger" onclick="confirmDelete('team_carousel',${item.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`).join('');
     }
+    window.editTeamCarousel = function(id) {
+        const item = window._adminCache[`team_${id}`];
+        if (!item) return;
+        window._editingTeamCarouselId = id;
+        document.getElementById('teamCarouselImage').value = item.image_url;
+        document.getElementById('teamCarouselCaption').value = item.caption || '';
+        document.getElementById('teamCarouselActive').checked = item.is_active;
+        document.getElementById('teamCarouselOrder').value = item.display_order;
+        setCatIds('team', item.category_ids || '');
+        document.querySelector('#teamCarouselForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Atualizar Foto';
+        document.getElementById('teamCarouselForm').scrollIntoView({ behavior:'smooth' });
+    };
 
     document.getElementById('teamCarouselForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
-
         const imageUrl = document.getElementById('teamCarouselImage').value.trim();
         const caption = document.getElementById('teamCarouselCaption').value.trim() || null;
         const isActive = document.getElementById('teamCarouselActive').checked;
         const displayOrder = parseInt(document.getElementById('teamCarouselOrder').value) || 0;
-
-        if (!imageUrl) {
-            showToast('Digite a URL da imagem!', 'error');
-            return;
-        }
-
-        const { error } = await _supabase
-            .from('team_carousel')
-            .insert([{ image_url: imageUrl, caption, is_active: isActive, display_order: displayOrder }]);
-
-        if (!error) {
-            showToast('✅ Foto cadastrada!');
-            e.target.reset();
-            document.getElementById('teamCarouselActive').checked = true;
-            document.getElementById('teamCarouselOrder').value = '0';
-            await loadTeamCarousel();
+        const categoryIds = getCatIds('team');
+        if (!imageUrl) { showToast('Digite a URL da imagem!', 'error'); return; }
+        const payload = { image_url: imageUrl, caption, is_active: isActive, display_order: displayOrder, category_ids: categoryIds };
+        let error;
+        if (window._editingTeamCarouselId) {
+            ({ error } = await _supabase.from('team_carousel').update(payload).eq('id', window._editingTeamCarouselId));
+            if (!error) { showToast('✅ Foto atualizada!'); window._editingTeamCarouselId = null; document.querySelector('#teamCarouselForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Salvar Foto'; }
         } else {
-            showToast('Erro ao salvar foto', 'error');
-            console.error(error);
+            ({ error } = await _supabase.from('team_carousel').insert([payload]));
+            if (!error) showToast('✅ Foto cadastrada!');
         }
+        if (!error) { e.target.reset(); document.getElementById('teamCarouselActive').checked = true; document.getElementById('teamCarouselOrder').value = '0'; setCatIds('team',''); await loadTeamCarousel(); }
+        else { showToast('Erro ao salvar foto', 'error'); console.error(error); }
     });
 </script>
 </body>

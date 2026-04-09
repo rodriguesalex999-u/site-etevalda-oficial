@@ -814,7 +814,18 @@ function renderSocialProof() {
         return;
     }
 
-    grid.innerHTML = socialProofImages.map(item => `
+    // Filtrar por category_ids: vazio/null = todas as categorias; específico = só naquela(s)
+    const visibleImages = socialProofImages.filter(item => {
+        if (!item.category_ids || item.category_ids === '') return true;
+        return item.category_ids.split(',').map(s => s.trim()).includes(String(currentCategory));
+    });
+
+    if (visibleImages.length === 0) {
+        grid.innerHTML = '';
+        return;
+    }
+
+    grid.innerHTML = visibleImages.map(item => `
         <div class="social-proof-card">
             <div class="social-proof-image">
                 <img src="${item.image_url}" alt="Prova Social" loading="lazy" style="aspect-ratio: 1/1; object-fit: cover;">
@@ -828,14 +839,25 @@ function renderSocialProof() {
 
 function renderFaqs() {
     const grid = document.getElementById('faqGrid');
-    if (!grid) return;
+    if (!grid) return 0;
 
-    if (!faqs || faqs.length === 0) {
-        grid.innerHTML = '<p>Nenhuma FAQ</p>';
-        return;
+    // Filtrar: category_id nulo/indefinido = aparece em todas as categorias; específico = só naquela categoria
+    const activeFaqs = (faqs || []).filter(f => {
+        // Novo: category_ids (multi, separado por vírgula)
+        if (f.category_ids !== undefined && f.category_ids !== null) {
+            if (f.category_ids === '') return true; // Geral
+            return f.category_ids.split(',').map(s => s.trim()).includes(String(currentCategory));
+        }
+        // Legado: category_id (inteiro simples)
+        return f.category_id === null || f.category_id === undefined || String(f.category_id) === String(currentCategory);
+    });
+
+    if (activeFaqs.length === 0) {
+        grid.innerHTML = '';
+        return 0;
     }
 
-    grid.innerHTML = faqs.map(f => `
+    grid.innerHTML = activeFaqs.map(f => `
         <div class="faq-card" onclick="playFaqAudio(this)">
             <div class="faq-icon"><i class="fas fa-play"></i></div>
             <h3>${f.question}</h3>
@@ -846,6 +868,7 @@ function renderFaqs() {
             </div>
         </div>
     `).join('');
+    return activeFaqs.length;
 }
 
 function renderReviews() {
@@ -858,7 +881,18 @@ function renderReviews() {
         return;
     }
 
-    container.innerHTML = reviews.map(r => {
+    // Filtrar por category_ids: vazio/null = todas as categorias
+    const visibleReviews = reviews.filter(r => {
+        if (!r.category_ids || r.category_ids === '') return true;
+        return r.category_ids.split(',').map(s => s.trim()).includes(String(currentCategory));
+    });
+
+    if (visibleReviews.length === 0) {
+        if (section) { section.style.height = '0'; section.style.overflow = 'hidden'; }
+        return;
+    }
+
+    container.innerHTML = visibleReviews.map(r => {
         const rating = r.rating || 5;
         const starsHtml = Array.from({ length: 5 }, (_, i) =>
             `<i class="fas fa-star" style="color:${i < rating ? '#ff9500' : '#444'}"></i>`
@@ -890,7 +924,18 @@ function renderTeamCarousel() {
         return;
     }
 
-    track.innerHTML = teamCarouselData.map(item => `
+    // Filtrar por category_ids: vazio/null = todas as categorias
+    const visibleTeam = teamCarouselData.filter(item => {
+        if (!item.category_ids || item.category_ids === '') return true;
+        return item.category_ids.split(',').map(s => s.trim()).includes(String(currentCategory));
+    });
+
+    if (visibleTeam.length === 0) {
+        if (section) { section.style.height = '0'; section.style.overflow = 'hidden'; }
+        return;
+    }
+
+    track.innerHTML = visibleTeam.map(item => `
         <div class="team-carousel-item">
             <img src="${item.image_url}" alt="${item.caption || 'Etevalda'}" class="team-carousel-image" loading="lazy">
             ${item.caption ? `<div class="team-carousel-caption">${item.caption}</div>` : ''}
@@ -956,11 +1001,16 @@ function updateSectionVisibility(category) {
     if (!secondarySectionsLoaded) return;
 
     const isAll = !category || category === 'all';
-    const show = el => { if (el) { el.style.opacity = '1'; el.style.height = 'auto'; el.style.overflow = 'visible'; } };
-    const hide = el => { if (el) { el.style.opacity = '0'; el.style.height = '0'; el.style.overflow = 'hidden'; } };
+    const show = el => { if (el) { el.style.opacity = '1'; el.style.height = 'auto'; el.style.overflow = 'visible'; el.style.minHeight = ''; el.style.marginBottom = ''; el.style.paddingTop = ''; el.style.paddingBottom = ''; } };
+    const hide = el => { if (el) { el.style.opacity = '0'; el.style.height = '0'; el.style.overflow = 'hidden'; el.style.minHeight = '0'; el.style.marginBottom = '0'; el.style.paddingTop = '0'; el.style.paddingBottom = '0'; } };
 
-    // faqSection: escondida em 'all', visível em categoria específica
-    isAll ? hide(document.getElementById('faqSection')) : show(document.getElementById('faqSection'));
+    // faqSection: escondida em 'all'; em categoria específica, renderFaqs filtra e decide visibilidade
+    if (isAll) {
+        hide(document.getElementById('faqSection'));
+    } else if (secondarySectionsLoaded) {
+        const faqCount = renderFaqs();
+        faqCount > 0 ? show(document.getElementById('faqSection')) : hide(document.getElementById('faqSection'));
+    }
 
     // socialProofSection: sempre visível
     show(document.getElementById('socialProofSection'));
@@ -971,8 +1021,8 @@ function updateSectionVisibility(category) {
     // reviewsSection: sempre visível
     show(document.getElementById('reviewsSection'));
 
-    // carrossel 1: sempre visível
-    show(document.getElementById('carouselSection'));
+    // carrossel 1: visível apenas em 'all' (em categorias específicas, a sequência é: prova social → FAQ → Veja mais)
+    isAll ? show(document.getElementById('carouselSection')) : hide(document.getElementById('carouselSection'));
 
     // carrosséis 2-5: visíveis apenas em 'all'
     ['carouselSection2', 'carouselSection3', 'carouselSection4', 'carouselSection5'].forEach(id => {
@@ -1104,7 +1154,7 @@ function renderComplementCard(p) {
 }
 
 function openProductModal(id) {
-    const product = allProductsLoaded.find(p => p.id === id);
+    const product = allProductsLoaded.find(p => p.id === id) || allProductsCache.find(p => p.id === id);
     if (!product) return;
 
     currentModalProduct = product;
