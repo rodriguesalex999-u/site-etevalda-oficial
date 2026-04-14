@@ -5828,3 +5828,76 @@ backdrop-filter: blur(5px);
     border-radius: 20px !important;
     font-family: 'Inter', Arial, sans-serif !important;
 }
+
+
+/* ============================================================
+   LUXURY FINAL TOUCHES - Size chips Apple style + Sticky Buy + Typography
+   ============================================================ */
+@media (max-width: 768px) {
+
+    /* Size chips: circular Apple-style */
+    .sz-chip {
+        min-width: 36px !important;
+        width: 36px !important;
+        height: 36px !important;
+        padding: 0 !important;
+        border-radius: 50% !important;
+        border: 1px solid rgba(212,175,55,0.3) !important;
+        background: #0a0a0a !important;
+        color: #777 !important;
+        font-size: 0.78rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0 !important;
+        transition: background 0.18s, color 0.18s, border-color 0.18s, box-shadow 0.18s;
+    }
+    .sz-chip:hover {
+        border-color: var(--gold-primary) !important;
+        color: var(--gold-primary) !important;
+        background: rgba(212,175,55,0.07) !important;
+    }
+    .sz-chip.sz-chip-active {
+        background: var(--gold-primary) !important;
+        color: #000 !important;
+        font-weight: 700 !important;
+        border-color: var(--gold-primary) !important;
+        box-shadow: 0 0 10px rgba(212,175,55,0.5) !important;
+    }
+
+    /* Typography refinements */
+    .modal-product-info h2 {
+        letter-spacing: 0.5px !important;
+    }
+    .modal-social-stars {
+        margin: 3px 0 5px !important;
+    }
+
+    /* Sticky buy button */
+    .modal-sticky-buy {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 10001;
+        padding: 10px 16px 18px;
+        background: linear-gradient(to top, rgba(0,0,0,0.97) 75%, transparent);
+        pointer-events: none;
+    }
+    .modal-sticky-buy.visible {
+        display: block;
+        pointer-events: all;
+    }
+    .modal-sticky-buy-btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--gold-primary);
+        color: #000;
+        font-weight: 800;
+        font-size: 1rem;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-family: 'Inter', Arial, sans-serif;
+        letter-spacing: 0.3px;
+    }
+}

@@ -1348,7 +1348,25 @@ function openProductModal(id) {
     // Scroll modal content para o topo (não a página)
     const modalContent = document.querySelector('#productModal .modal-content');
     if (modalContent) modalContent.scrollTop = 0;
-    
+
+    // Botao sticky de compra para mobile
+    const _existingSticky = document.getElementById('modalStickyBuy');
+    if (_existingSticky) _existingSticky.remove();
+    if (window.innerWidth <= 768) {
+        const _sticky = document.createElement('div');
+        _sticky.id = 'modalStickyBuy';
+        _sticky.className = 'modal-sticky-buy';
+        _sticky.innerHTML = `<button class="modal-sticky-buy-btn" onclick="buyViaMercadoPago(${product.id})"><i class="fas fa-credit-card"></i> Comprar Agora</button>`;
+        document.getElementById('productModal').appendChild(_sticky);
+        const _mpBtn = document.getElementById('mpBtn-' + product.id);
+        if (_mpBtn && window.IntersectionObserver) {
+            const _obs = new IntersectionObserver((entries) => {
+                _sticky.classList.toggle('visible', !entries[0].isIntersecting);
+            }, { threshold: 0.1 });
+            _obs.observe(_mpBtn);
+        }
+    }
+
     // Configurar botão voltar do celular
     window.history.pushState({ modalOpen: true, productId: product.id }, '', window.location.href);
 }
@@ -1357,6 +1375,8 @@ function closeProductModal() {
     const modal = document.getElementById('productModal');
     modal.classList.remove('active');
     document.body.style.overflow = '';
+    const _sticky = document.getElementById('modalStickyBuy');
+    if (_sticky) _sticky.remove();
     
     // ===== PARAR TODOS OS VÍDEOS DO MODAL =====
     const videos = document.querySelectorAll('#modalMainMedia video, .modal-main-media video');
