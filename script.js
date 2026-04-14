@@ -2085,21 +2085,54 @@ let musicStarted = false;
 let originalVolume = 0.60; // Volume 60%
 let isVideoPlaying = false;
 
-// Função para iniciar a música de fundo
-function startBackgroundMusic() {
-    bgMusic = document.getElementById('bgMusic');
+// ===== NOVO: LISTA DE MÚSICAS E CONTROLE DE SEQUÊNCIA =====
+const MUSICAS = [
+    'https://rodriguesalex999-u.github.io/localizacao/eva00.mp3',
+    'https://rodriguesalex999-u.github.io/localizacao/eva0.mp3',
+    'https://rodriguesalex999-u.github.io/localizacao/eva1.mp3',
+    'https://rodriguesalex999-u.github.io/localizacao/ytmusicaeva.mp3',
+    'https://rodriguesalex999-u.github.io/localizacao/eva2.mp3'
+];
+let currentMusicIndex = 0;
+
+// Carregar última música tocada do localStorage
+function loadMusicIndex() {
+    const savedIndex = localStorage.getItem('etevalda_last_music_index');
+    if (savedIndex !== null) {
+        currentMusicIndex = parseInt(savedIndex);
+    }
+}
+
+// Salvar música atual no localStorage
+function saveMusicIndex() {
+    localStorage.setItem('etevalda_last_music_index', currentMusicIndex);
+}
+
+// Avançar para a próxima música
+function nextMusic() {
+    currentMusicIndex = (currentMusicIndex + 1) % MUSICAS.length;
+    saveMusicIndex();
+    if (bgMusic && musicStarted) {
+        const wasPlaying = !bgMusic.paused;
+        bgMusic.src = MUSICAS[currentMusicIndex];
+        bgMusic.load();
+        if (wasPlaying) {
+            bgMusic.play().catch(e => console.log('Erro ao tocar música:', e));
+        }
+    }
+}
+
+// Tocar música atual
+function playCurrentMusic() {
     if (!bgMusic) return;
-    
-    // Configurar volume em 60%
+    bgMusic.src = MUSICAS[currentMusicIndex];
+    bgMusic.load();
     bgMusic.volume = originalVolume;
-    
-    // Tentar tocar a música
     bgMusic.play().then(() => {
         musicStarted = true;
-        console.log('🎵 Música de fundo iniciada (volume 60%)');
+        console.log('🎵 Tocando música:', currentMusicIndex + 1);
     }).catch((error) => {
-        console.log('❌ Autoplay bloqueado pelo navegador. Aguardando interação do usuário...');
-        // Se o navegador bloqueou o autoplay, aguarda o primeiro clique do usuário
+        console.log('❌ Autoplay bloqueado. Aguardando interação...');
         document.body.addEventListener('click', function startMusicOnClick() {
             if (!musicStarted && bgMusic) {
                 bgMusic.play().catch(e => console.log('Ainda não foi possível tocar'));
@@ -2108,6 +2141,21 @@ function startBackgroundMusic() {
             document.body.removeEventListener('click', startMusicOnClick);
         }, { once: true });
     });
+}
+
+// Função para iniciar a música de fundo
+function startBackgroundMusic() {
+    bgMusic = document.getElementById('bgMusic');
+    if (!bgMusic) return;
+    
+    // Carregar índice da última música
+    loadMusicIndex();
+    
+    // Configurar volume em 60%
+    bgMusic.volume = originalVolume;
+    
+    // Tocar a música atual
+    playCurrentMusic();
 }
 
 // Função para reduzir o volume da música de fundo para 12% (quando vídeo tocar)
@@ -2165,6 +2213,8 @@ document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
         pauseBackgroundMusic();
     } else {
+        // Quando voltar para a página, avança para a próxima música
+        nextMusic();
         resumeBackgroundMusic();
     }
 });
