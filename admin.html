@@ -1,0 +1,2419 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin | Grupo Etevalda MT</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --gold-primary: #D4AF37;
+            --gold-dark: #B8941F;
+            --gold-light: #F4E8C1;
+            --black: #1a1a1a;
+            --dark-gray: #2d2d2d;
+            --medium-gray: #666666;
+            --light-gray: #f4f4f4;
+            --white: #ffffff;
+            --success: #10b981;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --warning: #f59e0b;
+            --shadow: 0 4px 20px rgba(0,0,0,0.1);
+            --radius: 12px;
+            
+            /* Cores para tags */
+            --tag-yellow: #FBBF24;
+            --tag-red: #EF4444;
+            --tag-green: #10B981;
+            --tag-blue: #3B82F6;
+            --tag-black: #1F2937;
+            --tag-purple: #8B5CF6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--light-gray); }
+
+        /* Login */
+        #loginArea {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--black), var(--dark-gray));
+        }
+
+        .login-box {
+            background: var(--white);
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .login-box h1 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold-primary);
+            margin-bottom: 8px;
+        }
+
+        .login-box p { color: var(--medium-gray); margin-bottom: 30px; }
+
+        .login-box input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .login-box input:focus {
+            outline: none;
+            border-color: var(--gold-primary);
+        }
+
+        .login-box button {
+            width: 100%;
+            background: var(--gold-primary);
+            color: var(--white);
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .login-box button:hover { background: var(--gold-dark); }
+
+        .login-error { color: var(--danger); margin-top: 15px; display: none; }
+
+        /* Admin Area */
+        #adminArea { display: none; padding: 20px; max-width: 1400px; margin: 0 auto; }
+
+        .header {
+            background: var(--white);
+            padding: 20px 30px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold-dark);
+            font-size: 24px;
+        }
+
+        .header button {
+            background: var(--gold-primary);
+            color: var(--white);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .header button:hover { background: var(--gold-dark); }
+
+        /* Estatísticas */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gold-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold-primary);
+            font-size: 20px;
+        }
+
+        .stat-info h3 { font-size: 13px; color: var(--medium-gray); }
+        .stat-info p { font-size: 24px; font-weight: 700; color: var(--gold-dark); }
+
+        /* Abas */
+        .admin-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: var(--white);
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--medium-gray);
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn:hover {
+            border-color: var(--gold-primary);
+            color: var(--gold-primary);
+        }
+
+        .tab-btn.active {
+            background: var(--gold-primary);
+            border-color: var(--gold-primary);
+            color: var(--white);
+        }
+
+        /* Seções */
+        .tab-section { display: none; }
+        .tab-section.active { display: block; }
+
+        .form-section {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .table-section {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold-primary);
+            margin-bottom: 25px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 2px solid var(--gold-light);
+            padding-bottom: 15px;
+        }
+
+        /* Barra de busca na tabela */
+        .search-bar {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .search-bar input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--gold-primary);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        }
+        
+        .search-bar i {
+            color: var(--gold-primary);
+            font-size: 1.2rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group.full-width { grid-column: 1 / -1; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--black);
+            font-size: 13px;
+        }
+
+        .form-group label i { color: var(--gold-primary); margin-right: 6px; }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--gold-primary);
+        }
+
+        /* Multi-categoria checkboxes */
+        .cat-checkboxes-wrap { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; padding:10px; background:rgba(255,255,255,0.03); border-radius:8px; border:1px solid var(--border-color); }
+        .cat-cb-label { display:flex; align-items:center; gap:6px; cursor:pointer; font-size:0.82rem; background:var(--dark-bg); color:var(--text-secondary); padding:6px 14px; border-radius:20px; border:1.5px solid var(--border-color); transition:all 0.2s; user-select:none; }
+        .cat-cb-label input[type="checkbox"] { width:14px; height:14px; cursor:pointer; accent-color:var(--gold-primary); }
+        .cat-cb-label:has(input:checked) { border-color:var(--gold-primary); background:rgba(212,175,55,0.12); color:var(--text-primary); font-weight:600; }
+        .btn-secondary { background:var(--dark-bg); border:1px solid var(--border-color); color:var(--text-primary); padding:6px 10px; border-radius:6px; cursor:pointer; transition:all 0.2s; }
+        .btn-secondary:hover { border-color:var(--gold-primary); color:var(--gold-primary); }
+        /* Checkbox estilizado */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--gold-primary);
+        }
+
+        /* Grupo de Tag com cor */
+        .tag-group {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        
+        .tag-input {
+            flex: 2;
+        }
+        
+        .tag-color-select {
+            flex: 1;
+        }
+        
+        .tag-preview {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+            background: var(--tag-yellow);
+            color: #000000;
+        }
+
+        /* Opção de áudio */
+        .audio-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--gold-light);
+            padding: 10px 15px;
+            border-radius: var(--radius-sm);
+            margin-top: 10px;
+        }
+
+        .rating-select {
+            display: flex;
+            gap: 10px;
+            font-size: 24px;
+            color: #ddd;
+        }
+
+        .rating-select i {
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .rating-select i.active,
+        .rating-select i:hover {
+            color: var(--gold-primary);
+        }
+
+        .btn-primary {
+            background: var(--gold-primary);
+            color: var(--white);
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-primary:hover { background: var(--gold-dark); }
+
+        .btn-danger {
+            background: var(--danger);
+            color: var(--white);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-edit {
+            background: var(--info);
+            color: var(--white);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .action-buttons { display: flex; gap: 8px; }
+
+        /* Tabela */
+        .table-responsive { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--black);
+            color: var(--gold-primary);
+            padding: 12px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        tr:hover { background: #f9f9f9; }
+
+        .prod-img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid var(--gold-light);
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-true { background: var(--success); color: var(--white); }
+        .badge-false { background: var(--medium-gray); color: var(--white); }
+
+        .stars {
+            color: var(--gold-primary);
+            letter-spacing: 2px;
+        }
+
+        /* ESTILOS PARA LINKS DE IMAGENS EXTERNAS */
+        .image-links-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .image-link-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .image-link-row input[type="url"] {
+            flex: 1;
+            padding: 9px 12px;
+            border: 1px solid var(--gold-primary);
+            border-radius: 8px;
+            background: var(--light-gray);
+            color: var(--dark);
+            font-size: 0.88rem;
+        }
+
+        .image-link-row .link-thumb {
+            width: 38px;
+            height: 38px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid rgba(212,175,55,0.4);
+            flex-shrink: 0;
+        }
+
+        .remove-link-btn {
+            background: #e53e3e;
+            color: #fff;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        .remove-link-btn:hover { background: #c53030; }
+
+        /* Upload container mantido para avaliações e prova social */
+        .upload-container {
+            border: 2px dashed var(--gold-primary);
+            border-radius: var(--radius);
+            padding: 20px;
+            background: var(--white);
+            margin-bottom: 15px;
+        }
+
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            background: var(--light-gray);
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover { background: var(--gold-light); }
+        .upload-area i { font-size: 48px; color: var(--gold-primary); margin-bottom: 10px; }
+        .upload-area h3 { color: var(--gold-dark); margin-bottom: 5px; }
+        .upload-area p { color: var(--medium-gray); font-size: 14px; }
+
+        .upload-url-input { display: flex; gap: 10px; margin-top: 15px; }
+        .upload-url-input input { flex: 1; }
+        .upload-url-input button {
+            background: var(--gold-primary); color: white; border: none;
+            width: 42px; height: 42px; border-radius: 8px; cursor: pointer; transition: 0.3s;
+        }
+        .upload-url-input button:hover { background: var(--gold-dark); transform: scale(1.05); }
+
+        .image-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .preview-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            aspect-ratio: 1 / 1;
+            border: 2px solid var(--gold-light);
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-item-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .preview-item:hover .preview-item-overlay {
+            opacity: 1;
+        }
+
+        .preview-item-overlay button {
+            background: var(--danger);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-item-overlay button:hover {
+            transform: scale(1.1);
+        }
+
+        .images-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border: 2px solid var(--gold-light);
+            border-radius: var(--radius);
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 15px;
+            resize: vertical;
+        }
+
+        /* Modal de Edição */
+        .edit-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 12000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .edit-modal.active { display: flex; }
+
+        .edit-modal-content {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .edit-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--gold-light);
+            padding-bottom: 15px;
+        }
+
+        .edit-modal-header h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold-dark);
+        }
+
+        .edit-modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--medium-gray);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--success);
+            color: var(--white);
+            padding: 16px 24px;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toast.show { display: flex; }
+        .toast.error { background: var(--danger); }
+
+        /* Modal Confirmação */
+        .confirm-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 11000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-overlay.active { display: flex; }
+
+        .confirm-modal {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .confirm-modal i { font-size: 50px; color: #f59e0b; margin-bottom: 20px; }
+        .confirm-buttons { display: flex; gap: 15px; justify-content: center; }
+
+        @media (max-width: 768px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; gap: 15px; text-align: center; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .tag-group { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginArea">
+    <div class="login-box">
+        <h1>Grupo Etevalda MT</h1>
+        <p>Painel Administrativo</p>
+        <input type="email" id="emailInput" placeholder="E-mail" autofocus>
+        <input type="password" id="passwordInput" placeholder="Senha">
+        <button onclick="loginWithSupabase()">
+            <i class="fas fa-lock-open"></i> Acessar Painel
+        </button>
+        <p id="loginError" class="login-error">E-mail ou senha incorretos!</p>
+    </div>
+</div>
+
+<!-- ADMIN AREA -->
+<div id="adminArea">
+    <div class="header">
+        <h1><i class="fas fa-crown" style="color: var(--gold-primary);"></i> Grupo Etevalda MT</h1>
+        <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> Sair</button>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-ring"></i></div>
+            <div class="stat-info"><h3>Produtos</h3><p id="totalProducts">0</p></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-folder"></i></div>
+            <div class="stat-info"><h3>Categorias</h3><p id="totalCategories">4</p></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-star"></i></div>
+            <div class="stat-info"><h3>Avaliações</h3><p id="totalReviews">0</p></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-question-circle"></i></div>
+            <div class="stat-info"><h3>FAQs</h3><p id="totalFaqs">0</p></div>
+        </div>
+    </div>
+
+    <!-- Abas -->
+    <div class="admin-tabs">
+        <button class="tab-btn active" onclick="switchTab('products')"><i class="fas fa-box"></i> Produtos</button>
+        <button class="tab-btn" onclick="switchTab('categories')"><i class="fas fa-folder-tree"></i> Categorias</button>
+        <button class="tab-btn" onclick="switchTab('reviews')"><i class="fas fa-star"></i> Avaliações</button>
+        <button class="tab-btn" onclick="switchTab('faqs')"><i class="fas fa-question"></i> FAQs</button>
+        <button class="tab-btn" onclick="switchTab('social_proof')"><i class="fas fa-images"></i> Prova Social</button>
+        <button class="tab-btn" onclick="switchTab('team_carousel')"><i class="fas fa-users"></i> Equipe</button>
+    </div>
+
+    <!-- PRODUTOS -->
+    <div id="products-tab" class="tab-section active">
+        <div class="form-section">
+            <h2 class="section-title"><i class="fas fa-plus-circle"></i> Cadastrar Produto</h2>
+            <form id="productForm">
+                <!-- CAMPO DE AVALIAÇÃO PADRÃO -->
+                <div class="form-group">
+                    <label><i class="fas fa-star"></i> Avaliação Padrão</label>
+                    <select id="defaultRating">
+                        <option value="5">5 Estrelas ⭐⭐⭐⭐⭐</option>
+                        <option value="4">4 Estrelas ⭐⭐⭐⭐</option>
+                        <option value="3">3 Estrelas ⭐⭐⭐</option>
+                        <option value="2">2 Estrelas ⭐⭐</option>
+                        <option value="1">1 Estrela ⭐</option>
+                    </select>
+                    <small style="color: var(--medium-gray);">Avaliação que aparece no card do produto</small>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-gem"></i> Nome do Produto *</label>
+                        <input type="text" id="productName" required placeholder="Ex: Clássica 6mm">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Preço (R$) *</label>
+                        <input type="text" id="productPrice" required placeholder="299,99 ou 299.99">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-gem"></i> Preço do Item Adicional (R$)</label>
+                        <input type="text" id="solitarioPrice" placeholder="99,99 (deixe vazio se não houver)">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Nome do Item Adicional</label>
+                        <input type="text" id="additionalProductName" placeholder="Ex: Solitário, Pulseira, Corrente...">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-list"></i> Categoria *</label>
+                        <select id="productCategory" required>
+                            <option value="">Selecione...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-ruler"></i> Tipo de Numeração/Tamanho</label>
+                        <select id="sizeType">
+                            <option value="">Não possui</option>
+                            <option value="ring">Aliança / Anel (numeração 10–36, Masc. e Fem.)</option>
+                            <option value="chain">Corrente (tamanho único 70 cm)</option>
+                            <option value="bracelet">Pulseira (tamanhos 21, 22 e 23)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- GRUPO DE TAG COM COR -->
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-star"></i> Tag de Destaque</label>
+                        <div class="tag-group">
+                            <div class="tag-input">
+                                <input type="text" id="badgeSelect" placeholder="Ex: Oferta Relâmpago, Mais Vendido, Lançamento...">
+                            </div>
+                            <div class="tag-color-select">
+                                <select id="badgeColor">
+                                    <option value="#FBBF24">Amarelo</option>
+                                    <option value="#EF4444">Vermelho</option>
+                                    <option value="#10B981">Verde</option>
+                                    <option value="#3B82F6">Azul</option>
+                                    <option value="#1F2937">Preto</option>
+                                    <option value="#8B5CF6">Roxo</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="tagPreview" class="tag-preview" style="background: #FBBF24; color: #000000;">Prévia da Tag</div>
+                    </div>
+
+                    <!-- NOVO CAMPO: VENDIDO HOJE (ESCASSEZ) -->
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-fire"></i> Selo de Escassez</label>
+                        <div class="checkbox-group" style="background: var(--gold-light); padding: 15px; border-radius: var(--radius-sm);">
+                            <input type="checkbox" id="soldToday">
+                            <label for="soldToday"><strong>Exibir selo "Vendido Hoje"</strong> (cria senso de urgência)</label>
+                        </div>
+                    </div>
+
+                    <!-- CAMPO: DESCONTO NO PIX -->
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-percent"></i> Desconto no PIX</label>
+                        <div class="checkbox-group" style="background: var(--gold-light); padding: 15px; border-radius: var(--radius-sm);">
+                            <input type="checkbox" id="hasPixDiscount" checked>
+                            <label for="hasPixDiscount"><strong>Ativar desconto no PIX</strong> (5% de desconto à vista)</label>
+                        </div>
+                        <small style="color: var(--medium-gray);">Se marcado, o produto terá preço com 5% de desconto no PIX. Se desmarcado, mostrará apenas o preço normal.</small>
+                    </div>
+
+                    <!-- NOVO CAMPO: Categoria de Sugestão (Upsell) -->
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-handshake"></i> Categoria de Sugestão (Upsell) *</label>
+                        <select id="upsellCategory" required>
+                            <option value="">Selecione...</option>
+                        </select>
+                        <small style="color: var(--medium-gray); display: block; margin-top: 5px;">
+                            Produtos desta categoria serão sugeridos primeiro no modal (Upsell Inteligente)
+                        </small>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-key"></i> Palavras-chave</label>
+                        <input type="text" id="relatedKeywords" placeholder="aliança, ouro, prata, casamento">
+                    </div>
+                    
+                    <!-- CAMPO DE VÍDEO COM OPÇÃO DE ÁUDIO -->
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-video"></i> URL do Vídeo</label>
+                        <input type="url" id="videoUrl" placeholder="https://youtu.be/... ou https://res.cloudinary.com/...">
+                        <div class="audio-option">
+                            <input type="checkbox" id="videoHasAudio" checked>
+                            <label for="videoHasAudio">Vídeo possui áudio (cliente ativa ao clicar)</label>
+                        </div>
+                        <small style="color: var(--medium-gray);">Vídeo iniciará sem áudio por padrão</small>
+                    </div>
+                    
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-align-left"></i> Descrição</label>
+                        <textarea id="productDescription" rows="3" placeholder="Descrição detalhada do produto..."></textarea>
+                        <small style="color: var(--medium-gray);">Para alianças, a descrição automática será adicionada.</small>
+                    </div>
+
+                    <!-- SISTEMA DE LINKS DE IMAGENS EXTERNAS -->
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-images"></i> Imagens do Produto *</label>
+                        <div id="imageLinksContainer" class="image-links-container"></div>
+                        <small style="color: var(--medium-gray);">Cole links do Postimg. A primeira imagem será a principal no site.</small>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Salvar Produto</button>
+            </form>
+        </div>
+
+        <div class="table-section">
+            <h2 class="section-title"><i class="fas fa-list"></i> Produtos Cadastrados</h2>
+            
+            <!-- Barra de busca em tempo real -->
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="productSearch" placeholder="Buscar produtos por nome..." autocomplete="off">
+            </div>
+            
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Imagem</th>
+                            <th>Nome</th>
+                            <th>Preço</th>
+                            <th>Solitário</th>
+                            <th>Categoria</th>
+                            <th>Vendido Hoje</th>
+                            <th>Upsell</th>
+                            <th>Tag</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody">
+                        <tr><td colspan="10" style="text-align:center; padding:40px;">
+                            <i class="fas fa-spinner fa-spin fa-3x" style="color:var(--gold-primary);"></i>
+                            <p style="margin-top:15px;">Carregando produtos...</p>
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- CATEGORIAS -->
+    <div id="categories-tab" class="tab-section">
+        <div class="form-section">
+            <h2 class="section-title"><i class="fas fa-folder-plus"></i> Nova Categoria</h2>
+            <form id="categoryForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Nome *</label>
+                        <input type="text" id="categoryName" required placeholder="aliancas">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-heading"></i> Título do Banner</label>
+                        <input type="text" id="categoryTitle" placeholder="Alianças de Alto Padrão">
+                    </div>
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-quote-right"></i> Subtítulo</label>
+                        <input type="text" id="categorySubtitle" placeholder="VOCÊ SÓ PAGA NA ENTREGA">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Salvar Categoria</button>
+            </form>
+        </div>
+        <div class="table-section">
+            <h2 class="section-title"><i class="fas fa-list"></i> Categorias</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Título</th>
+                            <th>Subtítulo</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoriesTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- AVALIAÇÕES -->
+    <div id="reviews-tab" class="tab-section">
+        <div class="form-section">
+            <h2 class="section-title"><i class="fas fa-star"></i> Nova Avaliação</h2>
+            <form id="reviewForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label><i class="fas fa-user"></i> Nome *</label>
+                        <input type="text" id="reviewName" required placeholder="Maria Silva">
+                    </div>
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-image"></i> Foto do Cliente (Upload ou Link)</label>
+                        <div class="upload-container">
+                            <div class="upload-area" onclick="document.getElementById('fileInputReview').click()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <h3>Clique para subir foto da Avaliação</h3>
+                                <p>ou arraste aqui (WebP automático)</p>
+                            </div>
+                            <input type="file" id="fileInputReview" accept="image/*" style="display: none;" onchange="handleGenericUpload(this.files, 'reviewImage', 'reviewPreviewGrid')">
+                            <div class="image-preview-grid" id="reviewPreviewGrid"></div>
+                            <input type="url" id="reviewImage" placeholder="URL da imagem aparecerá aqui ou cole um link externo">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-star"></i> Avaliação *</label>
+                        <div class="rating-select" id="ratingStars">
+                            <i class="fas fa-star" data-rating="1"></i>
+                            <i class="fas fa-star" data-rating="2"></i>
+                            <i class="fas fa-star" data-rating="3"></i>
+                            <i class="fas fa-star" data-rating="4"></i>
+                            <i class="fas fa-star" data-rating="5"></i>
+                        </div>
+                        <input type="hidden" id="reviewRating" value="5">
+                    </div>
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-comment"></i> Comentário *</label>
+                        <textarea id="reviewComment" required rows="3"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-tag"></i> Mostrar em quais categorias?</label>
+                        <div id="reviewCatBoxes" class="cat-checkboxes-wrap"><small style="color:var(--medium-gray);">Carregando...</small></div>
+                        <small style="color:var(--medium-gray);margin-top:4px;display:block;">Selecione uma ou mais. "Geral" = aparece em todas as categorias.</small>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Salvar Avaliação</button>
+            </form>
+        </div>
+        <div class="table-section">
+            <h2 class="section-title"><i class="fas fa-list"></i> Avaliações</h2>
+            <div class="table-responsive">
+                能able
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Cliente</th>
+                            <th>Avaliação</th>
+                            <th>Comentário</th>
+                            <th>Categorias</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reviewsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQS -->
+    <div id="faqs-tab" class="tab-section">
+        <div class="form-section">
+            <h2 class="section-title"><i class="fas fa-question-circle"></i> Nova Pergunta</h2>
+            <form id="faqForm">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-question"></i> Pergunta *</label>
+                        <input type="text" id="faqQuestion" required placeholder="Qual a localização da loja?">
+                    </div>
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-headphones"></i> URL do Áudio *</label>
+                        <input type="url" id="faqAudio" required placeholder="https://...mp3">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-sort"></i> Ordem</label>
+                        <input type="number" id="faqOrder" value="0">
+                    </div>
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-tag"></i> Mostrar em quais categorias?</label>
+                        <div id="faqCatBoxes" class="cat-checkboxes-wrap"><small style="color:var(--medium-gray);">Carregando...</small></div>
+                        <small style="color:var(--medium-gray);margin-top:4px;display:block;">Selecione uma ou mais. "Geral" = aparece em todas as categorias.</small>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Salvar Pergunta</button>
+            </form>
+        </div>
+        <div class="table-section">
+            <h2 class="section-title"><i class="fas fa-list"></i> Perguntas Frequentes</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Ordem</th>
+                            <th>Pergunta</th>
+                            <th>Categoria</th>
+                            <th>Áudio</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="faqsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROVA SOCIAL -->
+    <div id="social_proof-tab" class="tab-section">
+        <div class="form-section">
+            <h2 class="section-title"><i class="fas fa-plus-circle"></i> Nova Imagem de Prova Social</h2>
+            <form id="socialProofForm">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-image"></i> Foto de Prova Social (Upload ou Link) *</label>
+                        <div class="upload-container">
+                            <div class="upload-area" onclick="document.getElementById('fileInputProof').click()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <h3>Clique para subir foto de Prova Social</h3>
+                                <p>ou arraste aqui (WebP automático)</p>
+                            </div>
+                            <input type="file" id="fileInputProof" accept="image/*" style="display: none;" onchange="handleGenericUpload(this.files, 'proofImage', 'proofPreviewGrid')">
+                            <div class="image-preview-grid" id="proofPreviewGrid"></div>
+                            <input type="url" id="proofImage" required placeholder="URL da imagem aparecerá aqui ou cole um link externo">
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-quote-right"></i> Legenda</label>
+                        <input type="text" id="proofCaption" placeholder="Ex: Cliente satisfeito com sua aliança">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-check-circle"></i> Ativo?</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="proofActive" checked>
+                            <label for="proofActive">Sim</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-sort"></i> Ordem de exibição</label>
+                        <input type="number" id="proofOrder" value="0">
+                    </div>
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-tag"></i> Mostrar em quais categorias?</label>
+                        <div id="proofCatBoxes" class="cat-checkboxes-wrap"><small style="color:var(--medium-gray);">Carregando...</small></div>
+                        <small style="color:var(--medium-gray);margin-top:4px;display:block;">Selecione uma ou mais. "Geral" = aparece em todas as categorias.</small>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Salvar Imagem</button>
+            </form>
+        </div>
+        <div class="table-section">
+            <h2 class="section-title"><i class="fas fa-images"></i> Imagens de Prova Social</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Imagem</th>
+                            <th>Legenda</th>
+                            <th>Categorias</th>
+                            <th>Ordem</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="socialProofTableBody">
+                        <tr><td colspan="6" style="text-align:center; padding:40px;">
+                            <i class="fas fa-images fa-3x" style="color:var(--medium-gray);"></i>
+                            <p style="margin-top:15px;">Nenhuma imagem cadastrada</p>
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- EQUIPE / VARIEDADE IMBATÍVEL (CARROSSEL) -->
+    <div id="team_carousel-tab" class="tab-section">
+        <div class="form-section">
+            <h2 class="section-title"><i class="fas fa-users"></i> Nova Foto da Equipe (Carrossel)</h2>
+            <form id="teamCarouselForm">
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-image"></i> Foto da Equipe (Upload ou Link) *</label>
+                        <div class="upload-container">
+                            <div class="upload-area" onclick="document.getElementById('fileInputTeam').click()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <h3>Clique para subir foto da Equipe</h3>
+                                <p>ou arraste aqui (WebP automático)</p>
+                            </div>
+                            <input type="file" id="fileInputTeam" accept="image/*" style="display: none;" onchange="handleGenericUpload(this.files, 'teamCarouselImage', 'teamPreviewGrid')">
+                            <div class="image-preview-grid" id="teamPreviewGrid"></div>
+                            <input type="url" id="teamCarouselImage" required placeholder="URL da imagem aparecerá aqui ou cole um link externo">
+                            <small style="color: var(--medium-gray);">Foto da sua equipe ou do seu produto.</small>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-quote-right"></i> Legenda</label>
+                        <textarea id="teamCarouselCaption" rows="2" placeholder="Ex: Equipe Etevalda pronta para te atender!"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-check-circle"></i> Ativo?</label>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="teamCarouselActive" checked>
+                            <label for="teamCarouselActive">Sim, mostrar no site</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-sort"></i> Ordem de exibição</label>
+                        <input type="number" id="teamCarouselOrder" value="0">
+                        <small>Números menores aparecem primeiro.</small>
+                    </div>
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-tag"></i> Mostrar em quais categorias?</label>
+                        <div id="teamCatBoxes" class="cat-checkboxes-wrap"><small style="color:var(--medium-gray);">Carregando...</small></div>
+                        <small style="color:var(--medium-gray);margin-top:4px;display:block;">Selecione uma ou mais. "Geral" = aparece em todas as categorias.</small>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Salvar Foto</button>
+            </form>
+        </div>
+        <div class="table-section">
+            <h2 class="section-title"><i class="fas fa-images"></i> Fotos da Equipe Cadastradas</h2>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Foto</th>
+                            <th>Legenda</th>
+                            <th>Categorias</th>
+                            <th>Ordem</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teamCarouselTableBody">
+                        <tr><td colspan="6" style="text-align:center; padding:40px;">
+                            <i class="fas fa-users fa-3x" style="color:var(--medium-gray);"></i>
+                            <p style="margin-top:15px;">Nenhuma foto cadastrada</p>
+                        </td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL DE EDIÇÃO DE PRODUTO -->
+<div id="editProductModal" class="edit-modal">
+    <div class="edit-modal-content">
+        <div class="edit-modal-header">
+            <h3><i class="fas fa-edit"></i> Editar Produto</h3>
+            <button class="edit-modal-close" onclick="closeEditModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="editProductForm">
+            <input type="hidden" id="editProductId">
+            
+            <div class="form-group full-width">
+                <label>Nome do Produto *</label>
+                <input type="text" id="editProductName" required>
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Preço (R$) *</label>
+                    <input type="text" id="editProductPrice" required>
+                </div>
+                <div class="form-group">
+                    <label>Preço do Item Adicional (R$)</label>
+                    <input type="text" id="editSolitarioPrice" placeholder="deixe vazio se não houver">
+                </div>
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nome do Item Adicional</label>
+                    <input type="text" id="editAdditionalProductName" placeholder="Ex: Solitário, Pulseira, Corrente...">
+                </div>
+                <div class="form-group">
+                    <label>Categoria *</label>
+                    <select id="editProductCategory" required></select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-ruler"></i> Tipo de Numeração/Tamanho</label>
+                <select id="editSizeType">
+                    <option value="">Não possui</option>
+                    <option value="ring">Aliança / Anel (numeração 10–36, Masc. e Fem.)</option>
+                    <option value="chain">Corrente (tamanho único 70 cm)</option>
+                    <option value="bracelet">Pulseira (tamanhos 21, 22 e 23)</option>
+                </select>
+            </div>
+            
+            <div class="form-group full-width">
+                <label>Tag de Destaque</label>
+                <div class="tag-group">
+                    <div class="tag-input">
+                        <input type="text" id="editBadgeText" placeholder="Ex: Oferta Relâmpago">
+                    </div>
+                    <div class="tag-color-select">
+                        <select id="editBadgeColor">
+                            <option value="#FBBF24">Amarelo</option>
+                            <option value="#EF4444">Vermelho</option>
+                            <option value="#10B981">Verde</option>
+                            <option value="#3B82F6">Azul</option>
+                            <option value="#1F2937">Preto</option>
+                            <option value="#8B5CF6">Roxo</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- NOVO CAMPO: VENDIDO HOJE NA EDIÇÃO -->
+            <div class="form-group full-width">
+                <label><i class="fas fa-fire"></i> Selo de Escassez</label>
+                <div class="checkbox-group" style="background: var(--gold-light); padding: 15px; border-radius: var(--radius-sm);">
+                    <input type="checkbox" id="editSoldToday">
+                    <label for="editSoldToday"><strong>Exibir selo "Vendido Hoje"</strong> (cria senso de urgência)</label>
+                </div>
+            </div>
+            
+            <div class="form-group full-width">
+                <label>Categoria de Sugestão (Upsell)</label>
+                <select id="editUpsellCategory"></select>
+            </div>
+
+            <!-- CAMPO DE AVALIAÇÃO PADRÃO NO MODAL DE EDIÇÃO -->
+            <div class="form-group full-width">
+                <label><i class="fas fa-star"></i> Avaliação Padrão</label>
+                <select id="editDefaultRating">
+                    <option value="5">5 Estrelas ⭐⭐⭐⭐⭐</option>
+                    <option value="4">4 Estrelas ⭐⭐⭐⭐</option>
+                    <option value="3">3 Estrelas ⭐⭐⭐</option>
+                    <option value="2">2 Estrelas ⭐⭐</option>
+                    <option value="1">1 Estrela ⭐</option>
+                </select>
+                <small style="color: var(--medium-gray);">Avaliação que aparece no card do produto</small>
+            </div>
+
+            <!-- CAMPO: DESCONTO NO PIX (EDIÇÃO) -->
+            <div class="form-group full-width">
+                <label><i class="fas fa-percent"></i> Desconto no PIX</label>
+                <div class="checkbox-group" style="background: var(--gold-light); padding: 15px; border-radius: var(--radius-sm);">
+                    <input type="checkbox" id="editHasPixDiscount" checked>
+                    <label for="editHasPixDiscount"><strong>Ativar desconto no PIX</strong> (5% de desconto à vista)</label>
+                </div>
+                <small style="color: var(--medium-gray);">Se marcado, o produto terá preço com 5% de desconto no PIX. Se desmarcado, mostrará apenas o preço normal.</small>
+            </div>
+            
+            <div class="form-group full-width">
+                <label>URL do Vídeo</label>
+                <input type="url" id="editVideoUrl" placeholder="https://...">
+                <div class="audio-option">
+                    <input type="checkbox" id="editVideoHasAudio" checked>
+                    <label>Vídeo possui áudio (cliente ativa ao clicar)</label>
+                </div>
+            </div>
+            
+            <div class="form-group full-width">
+                <label>Descrição</label>
+                <textarea id="editDescription" rows="3"></textarea>
+            </div>
+            
+            <div class="form-group full-width">
+                <label><i class="fas fa-images"></i> Imagens do Produto *</label>
+                <div id="editImageLinksContainer" class="image-links-container"></div>
+                <small style="color: var(--medium-gray);">Cole links do Postimg. A primeira imagem será a principal no site.</small>
+            </div>
+            
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Atualizar Produto</button>
+        </form>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="adminToast"></div>
+
+<!-- Modal Confirmação -->
+<div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-modal">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h3>Confirmar exclusão</h3>
+        <p id="confirmMessage">Tem certeza que deseja excluir este item?</p>
+        <div class="confirm-buttons">
+            <button class="btn-primary" onclick="hideConfirm()" style="background: var(--medium-gray);">Cancelar</button>
+            <button class="btn-primary" id="confirmDeleteBtn" style="background: var(--danger);">Excluir</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ========================================
+    // CONFIGURAÇÃO SUPABASE
+    // ========================================
+    const SUPABASE_URL = 'https://vnrfmsyanrvqqhmqyixk.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_xGLDFQarl-DhshRW0932FQ_asug0TUK';
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentTab = 'products';
+    let deleteId = null;
+    let deleteType = null;
+    let currentRating = 5;
+    let categoriesList = [];
+    let allProducts = [];
+    
+    // ========================================
+    // SISTEMA DE LINKS DE IMAGENS EXTERNAS
+    // ========================================
+
+    function addImageLinkRow(containerId, url) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        url = url || '';
+
+        const row = document.createElement('div');
+        row.className = 'image-link-row';
+
+        const thumb = document.createElement('img');
+        thumb.className = 'link-thumb';
+        thumb.style.display = url ? 'block' : 'none';
+        if (url) thumb.src = url;
+
+        const input = document.createElement('input');
+        input.type = 'url';
+        input.placeholder = 'https://i.postimg.cc/... (cole o link da imagem)';
+        input.value = url;
+        input.autocomplete = 'off';
+
+        input.addEventListener('paste', function(e) {
+            const pasted = (e.clipboardData || window.clipboardData).getData('text');
+            const links = pasted.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            if (links.length <= 1) return; // single link — leave to normal input event
+            e.preventDefault();
+            // Fill current row with the first link
+            input.value = links[0];
+            thumb.src = links[0];
+            thumb.style.display = 'block';
+            // Add a row for each additional link
+            for (let i = 1; i < links.length; i++) {
+                addImageLinkRow(containerId, links[i]);
+            }
+            // Ensure a final empty row exists
+            const rows = container.querySelectorAll('.image-link-row');
+            const lastInput = rows[rows.length - 1].querySelector('input');
+            if (lastInput && lastInput.value.trim() !== '') {
+                addImageLinkRow(containerId);
+            }
+        });
+
+        input.addEventListener('input', function() {
+            const val = this.value.trim();
+            thumb.src = val || '';
+            thumb.style.display = val ? 'block' : 'none';
+            const rows = container.querySelectorAll('.image-link-row');
+            if (val && row === rows[rows.length - 1]) {
+                addImageLinkRow(containerId);
+            }
+        });
+
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-link-btn';
+        removeBtn.title = 'Remover';
+        removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+        removeBtn.addEventListener('click', function() {
+            const rows = container.querySelectorAll('.image-link-row');
+            if (rows.length > 1) {
+                row.remove();
+            } else {
+                input.value = '';
+                thumb.style.display = 'none';
+            }
+        });
+
+        row.appendChild(thumb);
+        row.appendChild(input);
+        row.appendChild(removeBtn);
+        container.appendChild(row);
+        if (!url) input.focus();
+    }
+
+    function initImageLinkContainer(containerId, urls) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        if (urls && urls.length > 0) {
+            urls.forEach(u => addImageLinkRow(containerId, u));
+        }
+        addImageLinkRow(containerId, '');
+    }
+
+    function getImageLinks(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return [];
+        return Array.from(container.querySelectorAll('.image-link-row input'))
+            .map(i => i.value.trim())
+            .filter(u => u.length > 0);
+    }
+
+    // FUNÇÃO GENÉRICA DE PREVIEW POR URL (AVALIAÇÕES E PROVA SOCIAL)
+    function handleGenericUpload(files, inputId, previewId) {
+        showToast('Use o campo de URL abaixo para adicionar a imagem.', 'error');
+    }
+
+    // ========================================
+    // LOGIN SEGURO COM SUPABASE AUTH
+    // ========================================
+    async function loginWithSupabase() {
+        const email = document.getElementById('emailInput').value;
+        const password = document.getElementById('passwordInput').value;
+
+        const { data, error } = await _supabase.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        if (error) {
+            document.getElementById('loginError').style.display = 'block';
+            setTimeout(() => document.getElementById('loginError').style.display = 'none', 3000);
+            console.error('Erro no login:', error.message);
+        } else {
+            document.getElementById('loginArea').style.display = 'none';
+            document.getElementById('adminArea').style.display = 'block';
+            loadAllData();
+        }
+    }
+
+    async function logout() {
+        await _supabase.auth.signOut();
+        document.getElementById('loginArea').style.display = 'flex';
+        document.getElementById('adminArea').style.display = 'none';
+    }
+
+    // Verificar se já está logado ao carregar a página
+    window.addEventListener('load', async () => {
+        const { data: { session } } = await _supabase.auth.getSession();
+        if (session) {
+            document.getElementById('loginArea').style.display = 'none';
+            document.getElementById('adminArea').style.display = 'block';
+            loadAllData();
+        }
+    });
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+        document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add('active');
+        document.getElementById(`${tab}-tab`).classList.add('active');
+    }
+
+    async function loadAllData() {
+        try {
+            console.log('🚀 Iniciando carregamento de todos os dados...');
+            await Promise.allSettled([
+                loadCategories(),
+                loadProducts(),
+                loadReviews(),
+                loadFaqs(),
+                loadSocialProof(),
+                loadTeamCarousel()
+            ]);
+            console.log('✅ Todos os dados carregados com sucesso!');
+            updateStats();
+        } catch (error) {
+            console.error('❌ Erro ao carregar todos os dados:', error);
+            showToast('Erro ao carregar dados', 'error');
+        }
+    }
+
+    // ========================================
+    // HELPERS MULTI-CATEGORIA
+    // ========================================
+    let editingReviewId = null;
+    let editingFaqId = null;
+    let editingSocialProofId = null;
+    window._adminCache = {};
+
+    function buildCatCheckboxes(containerId, prefix) {
+        const wrap = document.getElementById(containerId);
+        if (!wrap) return;
+        const html = [`<label class="cat-cb-label"><input type="checkbox" name="${prefix}_cat" value="all" checked onchange="handleCatCb(this,'${prefix}')"> Geral (Todos)</label>`]
+            .concat((categoriesList || []).map(c =>
+                `<label class="cat-cb-label"><input type="checkbox" name="${prefix}_cat" value="${c.id}" onchange="handleCatCb(this,'${prefix}')"> ${c.name}</label>`
+            )).join('');
+        wrap.innerHTML = html;
+    }
+    window.handleCatCb = function(el, prefix) {
+        const all = document.querySelectorAll(`input[name="${prefix}_cat"]`);
+        const allCb = document.querySelector(`input[name="${prefix}_cat"][value="all"]`);
+        if (el.value === 'all' && el.checked) {
+            all.forEach(cb => { if (cb.value !== 'all') cb.checked = false; });
+        } else if (el.checked) {
+            if (allCb) allCb.checked = false;
+        } else {
+            const anySpecific = [...all].some(cb => cb.value !== 'all' && cb.checked);
+            if (!anySpecific && allCb) allCb.checked = true;
+        }
+    };
+    function getCatIds(prefix) {
+        return [...document.querySelectorAll(`input[name="${prefix}_cat"]:checked`)]
+            .filter(cb => cb.value !== 'all').map(cb => cb.value).join(',');
+    }
+    function setCatIds(prefix, categoryIds) {
+        const all = document.querySelectorAll(`input[name="${prefix}_cat"]`);
+        const allCb = document.querySelector(`input[name="${prefix}_cat"][value="all"]`);
+        all.forEach(cb => { cb.checked = false; });
+        if (!categoryIds || categoryIds === '') {
+            if (allCb) allCb.checked = true;
+        } else {
+            categoryIds.split(',').forEach(id => {
+                const cb = document.querySelector(`input[name="${prefix}_cat"][value="${id.trim()}"]`);
+                if (cb) cb.checked = true;
+            });
+        }
+    }
+    function catLabel(categoryIds) {
+        if (!categoryIds || categoryIds === '') return '<em style="color:var(--medium-gray);">Todas</em>';
+        return categoryIds.split(',').map(id =>
+            (categoriesList || []).find(c => String(c.id) === id.trim())?.name || `Cat.${id}`
+        ).join(', ');
+    }
+
+    // ========================================
+    // PARSE DE PREÇO
+    // ========================================
+    function parseCurrency(value) {
+        if (!value) return 0;
+        let cleaned = value.toString().replace(/[^0-9,.]/g, '');
+        if (cleaned.includes(',') && cleaned.includes('.')) {
+            const lastComma = cleaned.lastIndexOf(',');
+            const lastDot = cleaned.lastIndexOf('.');
+            if (lastComma > lastDot) {
+                cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+            } else {
+                cleaned = cleaned.replace(/,/g, '');
+            }
+        } else if (cleaned.includes(',')) {
+            cleaned = cleaned.replace(',', '.');
+        }
+        const num = parseFloat(cleaned);
+        return isNaN(num) ? 0 : Math.max(0, num);
+    }
+
+    // ========================================
+    // PRÉVIA DA TAG
+    // ========================================
+    document.getElementById('badgeSelect')?.addEventListener('input', updateTagPreview);
+    document.getElementById('badgeColor')?.addEventListener('change', updateTagPreview);
+    
+    // Inicializar container de links de imagens do formulário de adição
+    initImageLinkContainer('imageLinksContainer');
+    
+    function updateTagPreview() {
+        const text = document.getElementById('badgeSelect').value.trim();
+        const color = document.getElementById('badgeColor').value;
+        const preview = document.getElementById('tagPreview');
+        
+        if (text) {
+            preview.textContent = text;
+        } else {
+            preview.textContent = 'Prévia da Tag';
+        }
+        
+        preview.style.background = color;
+        
+        if (color === '#FBBF24' || color === '#10B981') {
+            preview.style.color = '#000000';
+        } else {
+            preview.style.color = '#FFFFFF';
+        }
+    }
+
+    // ========================================
+    // CATEGORIAS
+    // ========================================
+    async function loadCategories() {
+        const { data } = await _supabase.from('categories').select('*').order('id');
+        categoriesList = data || [];
+        // Construir checkboxes assim que as categorias chegam (independe dos outros loads)
+        buildCatCheckboxes('reviewCatBoxes', 'review');
+        buildCatCheckboxes('faqCatBoxes', 'faq');
+        buildCatCheckboxes('proofCatBoxes', 'proof');
+        buildCatCheckboxes('teamCatBoxes', 'team');
+        const tbody = document.getElementById('categoriesTableBody');
+        if (tbody) {
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:40px;">
+                    <i class="fas fa-folder-open fa-3x" style="color:var(--medium-gray);"></i>
+                    <p>Nenhuma categoria cadastrada</p>
+                </td></tr>`;
+            } else {
+                tbody.innerHTML = data.map(c => `
+                    <tr>
+                        <td><strong>#${c.id}</strong></td>
+                        <td>${c.name}</td>
+                        <td>${c.hero_title || '—'}</td>
+                        <td>${c.hero_subtitle || '—'}</td>
+                        <td><button class="btn-danger" onclick="confirmDelete('category', ${c.id})"><i class="fas fa-trash"></i></button></td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        const productSelect = document.getElementById('productCategory');
+        const upsellSelect = document.getElementById('upsellCategory');
+        const editProductSelect = document.getElementById('editProductCategory');
+        const editUpsellSelect = document.getElementById('editUpsellCategory');
+
+        if (productSelect && data) {
+            productSelect.innerHTML = '<option value="">Selecione...</option>';
+            data.forEach(c => {
+                productSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+            });
+        }
+
+        if (upsellSelect && data) {
+            upsellSelect.innerHTML = '<option value="">Selecione...</option>';
+            data.forEach(c => {
+                upsellSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+            });
+        }
+        
+        if (editProductSelect && data) {
+            editProductSelect.innerHTML = '<option value="">Selecione...</option>';
+            data.forEach(c => {
+                editProductSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+            });
+        }
+        
+        if (editUpsellSelect && data) {
+            editUpsellSelect.innerHTML = '<option value="">Selecione...</option>';
+            data.forEach(c => {
+                editUpsellSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+            });
+        }
+    }
+
+    document.getElementById('categoryForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('categoryName').value.trim().toLowerCase();
+        const heroTitle = document.getElementById('categoryTitle').value.trim() || null;
+        const heroSubtitle = document.getElementById('categorySubtitle').value.trim() || null;
+
+        if (!name) {
+            showToast('Digite o nome da categoria!', 'error');
+            return;
+        }
+
+        const { error } = await _supabase
+            .from('categories')
+            .insert([{ id: Math.max(...(categoriesList.map(c => c.id) || [4])) + 1, name, hero_title: heroTitle, hero_subtitle: heroSubtitle }]);
+
+        if (!error) {
+            showToast('✅ Categoria criada!');
+            e.target.reset();
+            await loadCategories();
+            updateStats();
+        } else {
+            showToast('Erro ao salvar categoria', 'error');
+        }
+    });
+
+    // ========================================
+    // PRODUTOS
+    // ========================================
+    async function loadProducts() {
+        try {
+            console.log('🔄 Carregando produtos...');
+            const { data, error } = await _supabase
+                .from('products')
+                .select('*, categories(name)')
+                .order('id', { ascending: false });
+
+            if (error) {
+                console.error('❌ Erro ao carregar produtos:', error);
+                showToast('Erro ao carregar produtos: ' + error.message, 'error');
+                return;
+            }
+
+            console.log('✅ Produtos carregados:', data);
+            allProducts = data || [];
+            renderProductTable(allProducts);
+        } catch (error) {
+            console.error('❌ Erro na função loadProducts:', error);
+            showToast('Erro ao carregar produtos', 'error');
+        }
+    }
+
+    function renderProductTable(productsToShow) {
+        console.log('🎨 Renderizando tabela com produtos:', productsToShow);
+        const tbody = document.getElementById('productsTableBody');
+        if (!tbody) {
+            console.error('❌ Elemento tbody não encontrado!');
+            return;
+        }
+
+        if (!productsToShow || productsToShow.length === 0) {
+            console.log('📭 Nenhum produto para exibir');
+            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:40px;">
+                <i class="fas fa-box-open fa-3x" style="color:var(--medium-gray);"></i>
+                <p>Nenhum produto encontrado</p>
+            </td></tr>`;
+            return;
+        }
+
+        console.log(`📊 Renderizando ${productsToShow.length} produtos`);
+        tbody.innerHTML = productsToShow.map(p => {
+            const img = p.images?.[0] || 'https://via.placeholder.com/60';
+            const priceFormatted = parseFloat(p.price).toFixed(2).replace('.', ',');
+            const solitarioFormatted = p.solitario_price && p.solitario_price > 0
+                ? `R$ ${parseFloat(p.solitario_price).toFixed(2).replace('.', ',')}`
+                : '—';
+            const categoryName = p.categories?.name || 'Sem categoria';
+            const upsellCategory = p.upsell_category || '—';
+            const soldToday = p.sold_today ? '✅ Sim' : '❌ Não';
+            
+            let tagStyle = '';
+            if (p.badge_color) {
+                tagStyle = `style="background: ${p.badge_color}; color: ${p.badge_color === '#FBBF24' || p.badge_color === '#10B981' ? '#000000' : '#FFFFFF'}; padding: 4px 8px; border-radius: 20px;"`;
+            }
+
+            return `<tr>
+                <td><strong>#${p.id}</strong></td>
+                <td><img src="${img}" class="prod-img" onerror="this.src='https://via.placeholder.com/60'"></td>
+                <td>${p.name}</td>
+                <td><strong>R$ ${priceFormatted}</strong></td>
+                <td>${solitarioFormatted}</td>
+                <td>${categoryName}</td>
+                <td>${soldToday}</td>
+                <td>${upsellCategory}</td>
+                <td>${p.badge_text ? `<span ${tagStyle}>${p.badge_text}</span>` : '—'}</td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn-edit" onclick="editProduct(${p.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn-danger" onclick="confirmDelete('product', ${p.id})"><i class="fas fa-trash"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+        }).join('');
+        console.log('✅ Tabela renderizada com sucesso!');
+    }
+
+    function setupProductSearch() {
+        const searchInput = document.getElementById('productSearch');
+        if (!searchInput) return;
+        
+        searchInput.addEventListener('input', debounce((e) => {
+            const query = e.target.value.trim().toLowerCase();
+            
+            if (!query) {
+                renderProductTable(allProducts);
+                return;
+            }
+            
+            const filtered = allProducts.filter(p => 
+                p.name.toLowerCase().includes(query)
+            );
+            
+            renderProductTable(filtered);
+        }, 300));
+    }
+
+    // ========================================
+    // EDIÇÃO DE PRODUTO
+    // ========================================
+    async function editProduct(id) {
+        const { data: product } = await _supabase
+            .from('products')
+            .select('*')
+            .eq('id', id)
+            .single();
+            
+        if (!product) {
+            showToast('Produto não encontrado!', 'error');
+            return;
+        }
+        
+        document.getElementById('editProductId').value = product.id;
+        document.getElementById('editProductName').value = product.name || '';
+        document.getElementById('editProductPrice').value = product.price ? product.price.toFixed(2).replace('.', ',') : '';
+        document.getElementById('editSolitarioPrice').value = product.solitario_price ? product.solitario_price.toFixed(2).replace('.', ',') : '';
+        document.getElementById('editAdditionalProductName').value = product.additional_product_name || '';
+        document.getElementById('editSizeType').value = product.size_type || '';
+        document.getElementById('editProductCategory').value = product.category_id || '';
+        document.getElementById('editBadgeText').value = product.badge_text || '';
+        document.getElementById('editBadgeColor').value = product.badge_color || '#FBBF24';
+        document.getElementById('editSoldToday').checked = product.sold_today || false;
+        document.getElementById('editUpsellCategory').value = product.upsell_category || '';
+        document.getElementById('editDefaultRating').value = product.default_rating || 5;
+        document.getElementById('editVideoUrl').value = product.video_url || '';
+        document.getElementById('editVideoHasAudio').checked = product.video_has_audio !== false;
+        document.getElementById('editDescription').value = product.description || '';
+        document.getElementById('editHasPixDiscount').checked = product.has_pix_discount !== false;
+        
+        // Inicializar campos de links de imagem no modal de edição
+        const imagesArray = Array.isArray(product.images)
+            ? product.images
+            : (typeof product.images === 'string'
+                ? product.images.split('\n').filter(u => u.trim())
+                : []);
+        initImageLinkContainer('editImageLinksContainer', imagesArray);
+        
+        document.getElementById('editProductModal').classList.add('active');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editProductModal').classList.remove('active');
+        initImageLinkContainer('editImageLinksContainer');
+    }
+
+    document.getElementById('editProductForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const id = document.getElementById('editProductId').value;
+        const name = document.getElementById('editProductName').value.trim();
+        const priceRaw = document.getElementById('editProductPrice').value.trim();
+        const solitarioRaw = document.getElementById('editSolitarioPrice').value.trim();
+        const additionalProductName = document.getElementById('editAdditionalProductName').value.trim() || null;
+        const sizeType = document.getElementById('editSizeType').value || null;
+        const categoryId = parseInt(document.getElementById('editProductCategory').value);
+        const badgeText = document.getElementById('editBadgeText').value.trim() || null;
+        const badgeColor = document.getElementById('editBadgeColor').value;
+        const soldToday = document.getElementById('editSoldToday').checked;
+        const upsellCategory = document.getElementById('editUpsellCategory').value || null;
+        const defaultRating = parseInt(document.getElementById('editDefaultRating').value);
+        const videoUrl = document.getElementById('editVideoUrl').value.trim() || null;
+        const videoHasAudio = document.getElementById('editVideoHasAudio').checked;
+        const description = document.getElementById('editDescription').value.trim() || null;
+        const hasPixDiscount = document.getElementById('editHasPixDiscount').checked;
+        
+        if (!name || !priceRaw || !categoryId) {
+            showToast('Preencha os campos obrigatórios!', 'error');
+            return;
+        }
+        
+        // Coletar links de imagens dos campos dinâmicos
+        const images = getImageLinks('editImageLinksContainer');
+        if (images.length === 0) {
+            showToast('Adicione pelo menos uma imagem!', 'error');
+            return;
+        }
+
+        const price = parseCurrency(priceRaw);
+        if (price <= 0) {
+            showToast('Preço inválido!', 'error');
+            return;
+        }
+
+        const solitarioPrice = solitarioRaw ? parseCurrency(solitarioRaw) : 0;
+        const temSolitario = solitarioPrice > 0;
+
+        const productData = {
+            name,
+            price,
+            solitario_price: solitarioPrice,
+            additional_product_name: temSolitario ? (additionalProductName || 'Solitário') : null,
+            category_id: categoryId,
+            tem_solitario: temSolitario,
+            tem_numeracao: !!sizeType,
+            size_type: sizeType,
+            badge_text: badgeText,
+            badge_color: badgeColor,
+            sold_today: soldToday,
+            upsell_category: upsellCategory,
+            default_rating: defaultRating,
+            video_url: videoUrl,
+            video_has_audio: videoHasAudio,
+            description,
+            images,
+            has_pix_discount: hasPixDiscount
+        };
+
+        const { error } = await _supabase
+            .from('products')
+            .update(productData)
+            .eq('id', id);
+
+        if (!error) {
+            showToast('✅ Produto atualizado!');
+            closeEditModal();
+            await loadProducts();
+            updateStats();
+        } else {
+            showToast('Erro ao atualizar: ' + error.message, 'error');
+            console.error(error);
+        }
+    });
+
+    // ========================================
+    // FORMULÁRIO DE CADASTRO
+    // ========================================
+    document.getElementById('productForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const name = document.getElementById('productName').value.trim();
+        const priceRaw = document.getElementById('productPrice').value.trim();
+        const solitarioRaw = document.getElementById('solitarioPrice').value.trim();
+        const additionalProductName = document.getElementById('additionalProductName').value.trim() || null;
+        const sizeType = document.getElementById('sizeType').value || null;
+        const categoryId = parseInt(document.getElementById('productCategory').value);
+        const badgeText = document.getElementById('badgeSelect').value.trim() || null;
+        const badgeColor = document.getElementById('badgeColor').value;
+        const soldToday = document.getElementById('soldToday').checked;
+        const upsellCategory = document.getElementById('upsellCategory').value || null;
+        const relatedKeywords = document.getElementById('relatedKeywords').value.trim() || null;
+        const defaultRating = parseInt(document.getElementById('defaultRating').value);
+        const videoUrl = document.getElementById('videoUrl').value.trim() || null;
+        const videoHasAudio = document.getElementById('videoHasAudio').checked;
+        const description = document.getElementById('productDescription').value.trim() || null;
+        const hasPixDiscount = document.getElementById('hasPixDiscount').checked;
+        
+        // Coletar links de imagens dos campos dinâmicos
+        const images = getImageLinks('imageLinksContainer');
+        if (images.length === 0) {
+            showToast('Adicione pelo menos uma imagem!', 'error');
+            return;
+        }
+
+        if (!name || !priceRaw || !categoryId) {
+            showToast('Preencha os campos obrigatórios!', 'error');
+            return;
+        }
+
+        const price = parseCurrency(priceRaw);
+        if (price <= 0) {
+            showToast('Preço inválido!', 'error');
+            return;
+        }
+
+        const solitarioPrice = solitarioRaw ? parseCurrency(solitarioRaw) : 0;
+        const temSolitario = solitarioPrice > 0;
+
+        const productData = {
+            name,
+            price,
+            solitario_price: solitarioPrice,
+            additional_product_name: temSolitario ? (additionalProductName || 'Solitário') : null,
+            category_id: categoryId,
+            tem_solitario: temSolitario,
+            tem_numeracao: !!sizeType,
+            size_type: sizeType,
+            badge_text: badgeText,
+            badge_color: badgeColor,
+            sold_today: soldToday,
+            upsell_category: upsellCategory,
+            related_keywords: relatedKeywords,
+            default_rating: defaultRating,
+            video_url: videoUrl,
+            video_has_audio: videoHasAudio,
+            description,
+            images,
+            has_pix_discount: hasPixDiscount
+        };
+
+        const { error } = await _supabase.from('products').insert([productData]);
+
+        if (!error) {
+            showToast('✅ Produto cadastrado!');
+            e.target.reset();
+            document.getElementById('upsellCategory').value = '';
+            document.getElementById('badgeColor').value = '#FBBF24';
+            document.getElementById('soldToday').checked = false;
+            
+            // Reiniciar container de imagens
+            initImageLinkContainer('imageLinksContainer');
+            
+            updateTagPreview();
+            await loadProducts();
+            updateStats();
+        } else {
+            showToast('Erro ao cadastrar: ' + error.message, 'error');
+            console.error(error);
+        }
+    });
+
+    // ========================================
+    // AVALIAÇÕES
+    // ========================================
+    document.querySelectorAll('#ratingStars i').forEach(star => {
+        star.addEventListener('click', function() {
+            currentRating = parseInt(this.dataset.rating);
+            document.getElementById('reviewRating').value = currentRating;
+            document.querySelectorAll('#ratingStars i').forEach((s, i) => {
+                s.className = i < currentRating ? 'fas fa-star' : 'far fa-star';
+            });
+        });
+    });
+
+    async function loadReviews() {
+        const { data } = await _supabase.from('reviews').select('*').order('id', { ascending: false });
+        const tbody = document.getElementById('reviewsTableBody');
+        if (!tbody) return;
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:40px;"><i class="fas fa-star fa-3x" style="color:var(--medium-gray);"></i><p>Nenhuma avaliação cadastrada</p></td></tr>`;
+            return;
+        }
+        data.forEach(r => { window._adminCache[`review_${r.id}`] = r; });
+        tbody.innerHTML = data.map(r => `
+            <tr>
+                <td><strong>#${r.id}</strong></td>
+                <td>${r.customer_name}</td>
+                <td class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</td>
+                <td>${r.comment.substring(0, 60)}${r.comment.length > 60 ? '...' : ''}</td>
+                <td>${catLabel(r.category_ids)}</td>
+                <td style="display:flex;gap:4px;">
+                    <button class="btn-secondary" onclick="editReview(${r.id})" title="Editar"><i class="fas fa-edit"></i></button>
+                    <button class="btn-danger" onclick="confirmDelete('review',${r.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`).join('');
+    }
+    window.editReview = function(id) {
+        const r = window._adminCache[`review_${id}`];
+        if (!r) return;
+        editingReviewId = id;
+        document.getElementById('reviewName').value = r.customer_name;
+        document.getElementById('reviewComment').value = r.comment;
+        document.getElementById('reviewImage').value = r.image_url || '';
+        currentRating = r.rating;
+        document.querySelectorAll('#ratingStars i').forEach((s,i) => { s.className = i < currentRating ? 'fas fa-star' : 'far fa-star'; });
+        setCatIds('review', r.category_ids || '');
+        document.querySelector('#reviewForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Atualizar Avaliação';
+        document.getElementById('reviewForm').scrollIntoView({ behavior:'smooth' });
+    };
+
+    document.getElementById('reviewForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('reviewName').value.trim();
+        const comment = document.getElementById('reviewComment').value.trim();
+        const imageUrl = document.getElementById('reviewImage').value.trim() || null;
+        const categoryIds = getCatIds('review');
+        if (!name || !comment) { showToast('Preencha nome e comentário!', 'error'); return; }
+        const payload = { customer_name: name, rating: currentRating, comment, image_url: imageUrl, category_ids: categoryIds, is_general: categoryIds === '' };
+        let error;
+        if (editingReviewId) {
+            ({ error } = await _supabase.from('reviews').update(payload).eq('id', editingReviewId));
+            if (!error) { showToast('✅ Avaliação atualizada!'); editingReviewId = null; document.querySelector('#reviewForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Salvar Avaliação'; }
+        } else {
+            ({ error } = await _supabase.from('reviews').insert([payload]));
+            if (!error) showToast('✅ Avaliação cadastrada!');
+        }
+        if (!error) { e.target.reset(); currentRating = 5; setCatIds('review',''); document.querySelectorAll('#ratingStars i').forEach((s,i)=>{ s.className=i<5?'fas fa-star':'far fa-star'; }); await loadReviews(); updateStats(); }
+        else { showToast('Erro ao salvar avaliação', 'error'); console.error(error); }
+    });
+
+    // ========================================
+    // FAQS
+    // ========================================
+    async function loadFaqs() {
+        const { data } = await _supabase.from('faqs').select('*').order('order_index');
+        const tbody = document.getElementById('faqsTableBody');
+        if (!tbody) return;
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px;">
+                <i class="fas fa-question-circle fa-3x" style="color:var(--medium-gray);"></i>
+                <p>Nenhuma FAQ cadastrada</p>
+            </td></tr>`;
+            return;
+        }
+
+        data.forEach(f => { window._adminCache[`faq_${f.id}`] = f; });
+        tbody.innerHTML = data.map(f => `
+            <tr>
+                <td><strong>#${f.id}</strong></td>
+                <td>${f.order_index}</td>
+                <td>${f.question}</td>
+                <td>${catLabel(f.category_ids)}</td>
+                <td><a href="${f.audio_url}" target="_blank" style="color:var(--info);">&#128266; Ouvir</a></td>
+                <td style="display:flex;gap:4px;">
+                    <button class="btn-secondary" onclick="editFaq(${f.id})" title="Editar"><i class="fas fa-edit"></i></button>
+                    <button class="btn-danger" onclick="confirmDelete('faq',${f.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`).join('');
+    }
+    window.editFaq = function(id) {
+        const f = window._adminCache[`faq_${id}`];
+        if (!f) return;
+        editingFaqId = id;
+        document.getElementById('faqQuestion').value = f.question;
+        document.getElementById('faqAudio').value = f.audio_url;
+        document.getElementById('faqOrder').value = f.order_index;
+        setCatIds('faq', f.category_ids || '');
+        document.querySelector('#faqForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Atualizar FAQ';
+        document.getElementById('faqForm').scrollIntoView({ behavior:'smooth' });
+    };
+
+    document.getElementById('faqForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const question = document.getElementById('faqQuestion').value.trim();
+        const audioUrl = document.getElementById('faqAudio').value.trim();
+        const orderIndex = parseInt(document.getElementById('faqOrder').value) || 0;
+        const categoryIds = getCatIds('faq');
+        if (!question || !audioUrl) { showToast('Preencha pergunta e URL do áudio!', 'error'); return; }
+        const payload = { question, audio_url: audioUrl, order_index: orderIndex, category_ids: categoryIds };
+        let error;
+        if (editingFaqId) {
+            ({ error } = await _supabase.from('faqs').update(payload).eq('id', editingFaqId));
+            if (!error) { showToast('✅ FAQ atualizada!'); editingFaqId = null; document.querySelector('#faqForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Salvar Pergunta'; }
+        } else {
+            ({ error } = await _supabase.from('faqs').insert([payload]));
+            if (!error) showToast('✅ FAQ cadastrada!');
+        }
+        if (!error) { e.target.reset(); setCatIds('faq',''); await loadFaqs(); updateStats(); }
+        else { showToast('Erro ao salvar FAQ', 'error'); console.error(error); }
+    });
+
+    // ========================================
+    // PROVA SOCIAL
+    // ========================================
+    async function loadSocialProof() {
+        const { data } = await _supabase.from('social_proof').select('*').order('display_order');
+        const tbody = document.getElementById('socialProofTableBody');
+        if (!tbody) return;
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px;">
+                <i class="fas fa-images fa-3x" style="color:var(--medium-gray);"></i>
+                <p>Nenhuma imagem cadastrada</p>
+            </td></tr>`;
+            return;
+        }
+
+        data.forEach(item => { window._adminCache[`proof_${item.id}`] = item; });
+        tbody.innerHTML = data.map(item => `
+            <tr>
+                <td><strong>#${item.id}</strong></td>
+                <td><img src="${item.image_url}" class="prod-img" onerror="this.src='https://via.placeholder.com/60'"></td>
+                <td>${item.caption || '—'}</td>
+                <td>${catLabel(item.category_ids)}</td>
+                <td>${item.display_order}</td>
+                <td><span class="badge ${item.is_active ? 'badge-true' : 'badge-false'}">${item.is_active ? 'Ativo' : 'Inativo'}</span></td>
+                <td style="display:flex;gap:4px;">
+                    <button class="btn-secondary" onclick="editSocialProof(${item.id})" title="Editar"><i class="fas fa-edit"></i></button>
+                    <button class="btn-danger" onclick="confirmDelete('social_proof',${item.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`).join('');
+    }
+    window.editSocialProof = function(id) {
+        const item = window._adminCache[`proof_${id}`];
+        if (!item) return;
+        editingSocialProofId = id;
+        document.getElementById('proofImage').value = item.image_url;
+        document.getElementById('proofCaption').value = item.caption || '';
+        document.getElementById('proofActive').checked = item.is_active;
+        document.getElementById('proofOrder').value = item.display_order;
+        setCatIds('proof', item.category_ids || '');
+        document.querySelector('#socialProofForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Atualizar Imagem';
+        document.getElementById('socialProofForm').scrollIntoView({ behavior:'smooth' });
+    };
+
+    document.getElementById('socialProofForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const imageUrl = document.getElementById('proofImage').value.trim();
+        const caption = document.getElementById('proofCaption').value.trim() || null;
+        const isActive = document.getElementById('proofActive').checked;
+        const displayOrder = parseInt(document.getElementById('proofOrder').value) || 0;
+        const categoryIds = getCatIds('proof');
+        if (!imageUrl) { showToast('Digite a URL da imagem!', 'error'); return; }
+        const payload = { image_url: imageUrl, caption, is_active: isActive, display_order: displayOrder, category_ids: categoryIds };
+        let error;
+        if (editingSocialProofId) {
+            ({ error } = await _supabase.from('social_proof').update(payload).eq('id', editingSocialProofId));
+            if (!error) { showToast('✅ Imagem atualizada!'); editingSocialProofId = null; document.querySelector('#socialProofForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Salvar Imagem'; }
+        } else {
+            ({ error } = await _supabase.from('social_proof').insert([payload]));
+            if (!error) showToast('✅ Imagem cadastrada!');
+        }
+        if (!error) { e.target.reset(); document.getElementById('proofActive').checked = true; document.getElementById('proofOrder').value = '0'; setCatIds('proof',''); await loadSocialProof(); }
+        else { showToast('Erro ao salvar imagem', 'error'); console.error(error); }
+    });
+
+    // ========================================
+    // ESTATÍSTICAS
+    // ========================================
+    async function updateStats() {
+        const [products, categories, reviews, faqs] = await Promise.all([
+            _supabase.from('products').select('*', { count: 'exact', head: true }),
+            _supabase.from('categories').select('*', { count: 'exact', head: true }),
+            _supabase.from('reviews').select('*', { count: 'exact', head: true }),
+            _supabase.from('faqs').select('*', { count: 'exact', head: true })
+        ]);
+
+        document.getElementById('totalProducts').textContent = products.count || 0;
+        document.getElementById('totalCategories').textContent = categories.count || 4;
+        document.getElementById('totalReviews').textContent = reviews.count || 0;
+        document.getElementById('totalFaqs').textContent = faqs.count || 0;
+    }
+
+    // ========================================
+    // CONFIRMAÇÃO DE EXCLUSÃO
+    // ========================================
+    function confirmDelete(type, id) {
+        deleteType = type;
+        deleteId = id;
+        document.getElementById('confirmOverlay').classList.add('active');
+    }
+
+    function hideConfirm() {
+        document.getElementById('confirmOverlay').classList.remove('active');
+        deleteId = null;
+        deleteType = null;
+    }
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+        if (!deleteId || !deleteType) return;
+
+        const tables = {
+            product: 'products',
+            category: 'categories',
+            review: 'reviews',
+            faq: 'faqs',
+            social_proof: 'social_proof',
+            team_carousel: 'team_carousel'
+        };
+
+        const { error } = await _supabase.from(tables[deleteType]).delete().eq('id', deleteId);
+
+        if (!error) {
+            showToast('✅ Item excluído!');
+            await loadAllData();
+        } else {
+            showToast('Erro ao excluir', 'error');
+        }
+        hideConfirm();
+    });
+
+    document.getElementById('confirmOverlay').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('confirmOverlay')) hideConfirm();
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') hideConfirm();
+        if (e.key === 'Escape') closeEditModal();
+    });
+
+    // ========================================
+    // TOAST
+    // ========================================
+    function showToast(message, type = 'success') {
+        const toast = document.getElementById('adminToast');
+        toast.textContent = message;
+        toast.className = 'toast';
+        if (type === 'error') toast.classList.add('error');
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function debounce(fn, wait) {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => fn(...args), wait);
+        };
+    }
+
+    // ========================================
+    // INICIALIZAÇÃO
+    // ========================================
+    updateTagPreview();
+    
+    setTimeout(() => {
+        setupProductSearch();
+    }, 1000);
+        // ========================================
+    // NOVAS FUNÇÕES: CARROSSEL DA EQUIPE (ADMIN)
+    // ========================================
+    let teamCarouselItems = [];
+
+    async function loadTeamCarousel() {
+        const { data } = await _supabase.from('team_carousel').select('*').order('display_order', { ascending: true });
+        teamCarouselItems = data || [];
+
+        const tbody = document.getElementById('teamCarouselTableBody');
+        if (!tbody) return;
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px;">
+                <i class="fas fa-users fa-3x" style="color:var(--medium-gray);"></i>
+                <p>Nenhuma foto cadastrada</p>
+            </td></tr>`;
+            return;
+        }
+
+        data.forEach(item => { window._adminCache[`team_${item.id}`] = item; });
+        tbody.innerHTML = data.map(item => `
+            <tr>
+                <td><strong>#${item.id}</strong></td>
+                <td><img src="${item.image_url}" class="prod-img" onerror="this.src='https://via.placeholder.com/60'"></td>
+                <td>${item.caption || '—'}</td>
+                <td>${catLabel(item.category_ids)}</td>
+                <td>${item.display_order}</td>
+                <td><span class="badge ${item.is_active ? 'badge-true' : 'badge-false'}">${item.is_active ? 'Ativo' : 'Inativo'}</span></td>
+                <td style="display:flex;gap:4px;">
+                    <button class="btn-secondary" onclick="editTeamCarousel(${item.id})" title="Editar"><i class="fas fa-edit"></i></button>
+                    <button class="btn-danger" onclick="confirmDelete('team_carousel',${item.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`).join('');
+    }
+    window.editTeamCarousel = function(id) {
+        const item = window._adminCache[`team_${id}`];
+        if (!item) return;
+        window._editingTeamCarouselId = id;
+        document.getElementById('teamCarouselImage').value = item.image_url;
+        document.getElementById('teamCarouselCaption').value = item.caption || '';
+        document.getElementById('teamCarouselActive').checked = item.is_active;
+        document.getElementById('teamCarouselOrder').value = item.display_order;
+        setCatIds('team', item.category_ids || '');
+        document.querySelector('#teamCarouselForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Atualizar Foto';
+        document.getElementById('teamCarouselForm').scrollIntoView({ behavior:'smooth' });
+    };
+
+    document.getElementById('teamCarouselForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const imageUrl = document.getElementById('teamCarouselImage').value.trim();
+        const caption = document.getElementById('teamCarouselCaption').value.trim() || null;
+        const isActive = document.getElementById('teamCarouselActive').checked;
+        const displayOrder = parseInt(document.getElementById('teamCarouselOrder').value) || 0;
+        const categoryIds = getCatIds('team');
+        if (!imageUrl) { showToast('Digite a URL da imagem!', 'error'); return; }
+        const payload = { image_url: imageUrl, caption, is_active: isActive, display_order: displayOrder, category_ids: categoryIds };
+        let error;
+        if (window._editingTeamCarouselId) {
+            ({ error } = await _supabase.from('team_carousel').update(payload).eq('id', window._editingTeamCarouselId));
+            if (!error) { showToast('✅ Foto atualizada!'); window._editingTeamCarouselId = null; document.querySelector('#teamCarouselForm button[type="submit"]').innerHTML = '<i class="fas fa-save"></i> Salvar Foto'; }
+        } else {
+            ({ error } = await _supabase.from('team_carousel').insert([payload]));
+            if (!error) showToast('✅ Foto cadastrada!');
+        }
+        if (!error) { e.target.reset(); document.getElementById('teamCarouselActive').checked = true; document.getElementById('teamCarouselOrder').value = '0'; setCatIds('team',''); await loadTeamCarousel(); }
+        else { showToast('Erro ao salvar foto', 'error'); console.error(error); }
+    });
+</script>
+</body>
+</html>
