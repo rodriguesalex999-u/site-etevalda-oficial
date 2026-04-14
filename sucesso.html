@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#D4AF37">
+    <title>Pagamento Confirmado | Grupo Etevalda MT</title>
+
+    <!-- Facebook Pixel -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1186922223282687');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1186922223282687&ev=PageView&noscript=1"/></noscript>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --gold-primary: #D4AF37;
+            --gold-dark: #B8941F;
+            --gold-light: #F4E8C1;
+            --white: #ffffff;
+            --black-soft: #1a1a1a;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .success-container {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 50px 40px;
+            max-width: 520px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.6s ease;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .success-icon {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 0 0 15px rgba(16, 185, 129, 0); }
+        }
+        .success-icon i { font-size: 40px; color: white; }
+        .success-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: var(--black-soft);
+            margin-bottom: 10px;
+        }
+        .success-subtitle {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .pending-box {
+            background: #FFF8E1;
+            border: 1px solid #FFD54F;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            display: none;
+        }
+        .pending-box i { color: #F59E0B; margin-right: 8px; }
+        .pending-box p { color: #92400E; font-size: 0.9rem; }
+        .redirect-info {
+            background: var(--gold-light);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        .redirect-info p {
+            color: var(--gold-dark);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .redirect-info .category-name {
+            color: var(--gold-primary);
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: block;
+            margin-top: 5px;
+        }
+        .countdown {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gold-primary);
+            margin: 15px 0;
+        }
+        .success-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .btn-success {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .btn-gold {
+            background: var(--gold-primary);
+            color: var(--white);
+        }
+        .btn-gold:hover { background: var(--gold-dark); transform: translateY(-2px); }
+        .btn-whatsapp {
+            background: #25D366;
+            color: var(--white);
+        }
+        .btn-whatsapp:hover { background: #1DA851; transform: translateY(-2px); }
+        .btn-outline {
+            background: transparent;
+            color: var(--black-soft);
+            border: 2px solid #e0e0e0;
+        }
+        .btn-outline:hover { border-color: var(--gold-primary); color: var(--gold-primary); }
+        .footer-text {
+            margin-top: 25px;
+            color: #999;
+            font-size: 0.8rem;
+        }
+        .footer-text i { color: var(--gold-primary); }
+        .shipping-box, .shipping-error-box {
+            display: none;
+            align-items: flex-start;
+            gap: 12px;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .shipping-box {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+        }
+        .shipping-box i { color: #16a34a; font-size: 1.4rem; margin-top: 2px; flex-shrink: 0; }
+        .shipping-box strong { color: #15803d; font-size: 0.95rem; display: block; }
+        .shipping-box p { color: #166534; font-size: 0.85rem; margin-top: 3px; }
+        .shipping-error-box {
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+        }
+        .shipping-error-box i { color: #d97706; font-size: 1.4rem; margin-top: 2px; flex-shrink: 0; }
+        .shipping-error-box strong { color: #92400e; font-size: 0.95rem; display: block; }
+        .shipping-error-box p { color: #78350f; font-size: 0.85rem; margin-top: 3px; }
+
+        @media (max-width: 480px) {
+            .success-container { padding: 35px 25px; }
+            .success-title { font-size: 1.4rem; }
+            .success-icon { width: 70px; height: 70px; }
+            .success-icon i { font-size: 30px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="success-container">
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <h1 class="success-title">Pagamento Confirmado!</h1>
+        <p class="success-subtitle">Obrigado pela sua compra! Seu pedido está sendo preparado com carinho pela equipe Etevalda.</p>
+
+        <div class="pending-box" id="pendingBox">
+            <p><i class="fas fa-clock"></i> Seu pagamento está em análise. Você receberá a confirmação em breve.</p>
+        </div>
+
+        <div class="shipping-box" id="shippingBox">
+            <i class="fas fa-truck"></i>
+            <div>
+                <strong>Frete de R$ 14,99 processado!</strong>
+                <p>Seu pedido está na fila de envio. O código de rastreio chegará via WhatsApp em breve.</p>
+            </div>
+        </div>
+        <div class="shipping-error-box" id="shippingErrorBox">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>
+                <strong>Frete sendo finalizado</strong>
+                <p>Se precisar do rastreio, entre em contato via WhatsApp com o número do pedido.</p>
+            </div>
+        </div>
+
+        <div class="redirect-info" id="redirectInfo">
+            <p>Redirecionando para mais produtos de:</p>
+            <span class="category-name" id="categoryDisplay">Carregando...</span>
+        </div>
+
+        <div class="countdown" id="countdown">5</div>
+
+        <div class="success-buttons">
+            <a href="/" class="btn-success btn-gold" id="shopMoreBtn">
+                <i class="fas fa-store"></i> Continuar Comprando
+            </a>
+            <a href="https://api.whatsapp.com/send/?phone=5565993337205&text=Ol%C3%A1!%20Acabei%20de%20fazer%20um%20pedido%20e%20gostaria%20de%20confirmar." class="btn-success btn-whatsapp" target="_blank">
+                <i class="fab fa-whatsapp"></i> Confirmar pelo WhatsApp
+            </a>
+            <a href="/" class="btn-success btn-outline">
+                <i class="fas fa-home"></i> Voltar à Loja
+            </a>
+        </div>
+
+        <p class="footer-text"><i class="fas fa-crown"></i> Grupo Etevalda MT — A maior loja de variedades de Mato Grosso</p>
+    </div>
+
+    <script>
+        // Redirecionamento Inteligente por Categoria e Rastreio de ROI
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const categoria = params.get('categoria') || '';
+            const status = params.get('status') || 'approved';
+            const paymentId = params.get('payment_id') || '';
+            
+            // ===== AQUI ESTÁ A CORREÇÃO: LENDO 'valor' QUE VEM DA API =====
+            const valorVenda = parseFloat(params.get('valor') || '0');
+
+            // Mostrar box de pendente se necessário
+            if (status === 'pending') {
+                document.getElementById('pendingBox').style.display = 'block';
+                document.querySelector('.success-title').textContent = 'Pagamento em Análise';
+                document.querySelector('.success-icon').style.background = 'linear-gradient(135deg, #F59E0B, #D97706)';
+                document.querySelector('.success-icon i').className = 'fas fa-clock';
+            }
+
+            // Facebook Pixel - Track Purchase com o valor real capturado
+            if (typeof fbq !== 'undefined' && status === 'approved') {
+                fbq('track', 'Purchase', {
+                    content_category: categoria,
+                    value: valorVenda, // ENVIA O VALOR REAL PARA O FACEBOOK CALCULAR O ROI
+                    currency: 'BRL'
+                });
+                console.log('📊 Pixel disparado: Purchase - Valor R$', valorVenda);
+            }
+
+            // Processar frete silenciosamente via Melhor Envio
+            if (paymentId && status === 'approved') {
+                fetch('/api/process-shipping', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ payment_id: paymentId })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('shippingBox').style.display = 'flex';
+                    } else {
+                        document.getElementById('shippingErrorBox').style.display = 'flex';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('shippingErrorBox').style.display = 'flex';
+                });
+            }
+
+            // Mapear categoria para nome amigável e âncora da página
+            const categoryMap = {
+                'aliancas': { name: 'Alianças', anchor: '#aliancas' },
+                'alianca-moeda-antiga': { name: 'Aliança Moeda Antiga', anchor: '#alianca-moeda-antiga' },
+                'aliancas-pratas': { name: 'Alianças de Prata', anchor: '#aliancas-pratas' },
+                'relogios-femininos': { name: 'Relógios Femininos', anchor: '#relogios-femininos' },
+                'relogios-masculinos': { name: 'Relógios Masculinos', anchor: '#relogios-masculinos' },
+                'joias': { name: 'Joias', anchor: '#joias' },
+                'pulseiras': { name: 'Pulseiras', anchor: '#pulseiras' },
+                'brincos': { name: 'Brincos', anchor: '#brincos' },
+                'colares': { name: 'Colares', anchor: '#colares' },
+                'aneis': { name: 'Anéis', anchor: '#aneis' }
+            };
+
+            const catKey = categoria.toLowerCase().replace(/\s+/g, '-');
+            const catInfo = categoryMap[catKey] || { name: categoria || 'Todos os Produtos', anchor: '' };
+
+            document.getElementById('categoryDisplay').textContent = catInfo.name;
+
+            // Configurar link do botão "Continuar Comprando" 
+            const targetUrl = catInfo.anchor ? `/${catInfo.anchor}` : '/';
+            document.getElementById('shopMoreBtn').href = targetUrl;
+
+            // Countdown e redirecionamento automático
+            let seconds = 8;
+            const countdownEl = document.getElementById('countdown');
+
+            const timer = setInterval(() => {
+                seconds--;
+                countdownEl.textContent = seconds;
+                if (seconds <= 0) {
+                    clearInterval(timer);
+                    window.location.href = targetUrl;
+                }
+            }, 1000);
+        })();
+    </script>
+</body>
+</html>
