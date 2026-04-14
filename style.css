@@ -5743,7 +5743,7 @@ backdrop-filter: blur(5px);
     /* Bloco de precos - Luxo Joalheria */
     .modal-price-container { background: rgba(0,0,0,0.35); border: 1px solid rgba(212,175,55,0.4); border-radius: 10px; padding: 14px 15px; margin: 8px 0 6px; }
     .modal-price-label { font-size: 0.68rem; font-weight: 700; color: var(--gold-primary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
-    .modal-price-old { font-size: 0.9rem; color: #999; text-decoration: line-through; margin-bottom: 2px; text-transform: uppercase !important; letter-spacing: 0.3px; }
+    .modal-price-old { font-size: 0.9rem; color: #999; text-decoration: none; margin-bottom: 2px; text-transform: uppercase !important; letter-spacing: 0.3px; }
     .modal-main-price { font-size: 1.6rem !important; font-weight: 900 !important; color: #FFD700 !important; line-height: 1.05; text-shadow: 0px 0px 10px rgba(255,215,0,0.5) !important; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .pix-tag { font-size: 0.8rem; font-weight: 700; background: #FFD700; color: #000; padding: 4px 10px; border-radius: 20px; margin-left: 8px; align-self: center; }
     .modal-discount-info { font-size: 0.74rem; color: #4ade80; margin-top: 3px; }
