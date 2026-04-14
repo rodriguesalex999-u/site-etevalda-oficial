@@ -5720,6 +5720,20 @@ backdrop-filter: blur(5px);
 
     .btn-add-cart-modal, .btn-whatsapp-modal, .btn-share, .btn-mercadopago-modal { padding: 10px 12px; font-size: 12px; }
     .modal-buttons-secondary .btn-add-cart-modal { font-size: 11px; padding: 8px 10px; }
+    
+    /* Comando para alinhar botões lado a lado no celular */
+    .modal-buttons {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 8px !important;
+        margin: 10px 0 !important;
+    }
+    .btn-mercadopago-modal, .btn-whatsapp-modal {
+        flex: 1 !important;
+        width: 50% !important;
+        white-space: nowrap !important;
+        padding: 12px 5px !important;
+    }
 
     /* Compactar titulo e estrelas no mobile */
     .modal-product-info { padding-top: 10px !important; }

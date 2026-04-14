@@ -623,13 +623,39 @@ function setupModalMediaClick() {
     const mainMedia = document.getElementById('modalMainMedia');
     if (!mainMedia) return;
     
-    mainMedia.addEventListener('click', () => {
-        // Verificar se há um produto atual e se é uma imagem
+    // Abrir Zoom ao clicar
+    mainMedia.addEventListener('click', (e) => {
         if (currentMediaList[currentMediaIndex]?.type === 'image' && currentModalProduct) {
-            // Passar o productId e o índice da imagem atual
             openSuperZoom(currentModalProduct.id, false, currentMediaIndex);
         }
     });
+
+    // Variáveis para detectar o deslize do dedo (Swipe)
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    mainMedia.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    mainMedia.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipeGesture();
+    }, { passive: true });
+
+    function handleSwipeGesture() {
+        const threshold = 50; // Sensibilidade do deslize
+        if (touchEndX < touchStartX - threshold) {
+            // Deslizou para a esquerda -> Próxima foto
+            const nextIndex = (currentMediaIndex + 1) % currentMediaList.length;
+            changeModalMedia(nextIndex);
+        }
+        if (touchEndX > touchStartX + threshold) {
+            // Deslizou para a direita -> Foto anterior
+            const prevIndex = (currentMediaIndex - 1 + currentMediaList.length) % currentMediaList.length;
+            changeModalMedia(prevIndex);
+        }
+    }
 }
 
 function setupModalVideoAudio(hasAudio) {
