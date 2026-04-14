@@ -5793,19 +5793,8 @@ backdrop-filter: blur(5px);
 
 
 /* ============================================================
-   FORCAR NEGRITO E COR DO PIX - OVERRIDE GLOBAL (max specificity)
+   PIX PRICE - MOBILE ONLY (max specificity)
    ============================================================ */
-.modal-main-price,
-.modal-product-info .modal-main-price,
-#productModal .modal-main-price,
-.modal-content .modal-main-price {
-    font-family: 'Inter', Arial, sans-serif !important;
-    font-weight: 800 !important;
-    font-size: 2.5rem !important;
-    color: #FFD700 !important;
-    text-shadow: 0 0 12px rgba(255,215,0,0.6) !important;
-}
-
 @media (max-width: 768px) {
     .modal-main-price,
     .modal-product-info .modal-main-price,
