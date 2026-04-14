@@ -2077,15 +2077,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ========================================
-// MÚSICA DE FUNDO (AUTOPLAY COM VOLUME 60%)
+// MOTOR DE MÚSICA PREMIUM (SEQUENCIAL + AUTO-PLAY)
 // ========================================
 
 let bgMusic = null;
 let musicStarted = false;
-let originalVolume = 0.60; // Volume 60%
+let originalVolume = 0.60; 
 let isVideoPlaying = false;
 
-// ===== NOVO: LISTA DE MÚSICAS E CONTROLE DE SEQUÊNCIA =====
 const MUSICAS = [
     'https://rodriguesalex999-u.github.io/localizacao/eva00.mp3',
     'https://rodriguesalex999-u.github.io/localizacao/eva0.mp3',
@@ -2095,134 +2094,79 @@ const MUSICAS = [
 ];
 let currentMusicIndex = 0;
 
-// Carregar última música tocada do localStorage
 function loadMusicIndex() {
-    const savedIndex = localStorage.getItem('etevalda_last_music_index');
-    if (savedIndex !== null) {
-        currentMusicIndex = parseInt(savedIndex);
-    }
+    const saved = localStorage.getItem('etevalda_last_music_index');
+    currentMusicIndex = saved !== null ? parseInt(saved) : 0;
 }
 
-// Salvar música atual no localStorage
 function saveMusicIndex() {
     localStorage.setItem('etevalda_last_music_index', currentMusicIndex);
 }
 
-// Avançar para a próxima música
-function nextMusic() {
+function playNextInSequence() {
     currentMusicIndex = (currentMusicIndex + 1) % MUSICAS.length;
     saveMusicIndex();
-    if (bgMusic && musicStarted) {
-        const wasPlaying = !bgMusic.paused;
+    if (bgMusic) {
         bgMusic.src = MUSICAS[currentMusicIndex];
-        bgMusic.load();
-        if (wasPlaying) {
-            bgMusic.play().catch(e => console.log('Erro ao tocar música:', e));
-        }
+        bgMusic.play().catch(e => console.log("Aguardando interação para sequência"));
     }
 }
 
-// Tocar música atual
-function playCurrentMusic() {
-    if (!bgMusic) return;
-    bgMusic.src = MUSICAS[currentMusicIndex];
-    bgMusic.load();
-    bgMusic.volume = originalVolume;
-    bgMusic.play().then(() => {
-        musicStarted = true;
-        console.log('🎵 Tocando música:', currentMusicIndex + 1);
-    }).catch((error) => {
-        console.log('❌ Autoplay bloqueado. Aguardando interação...');
-        document.body.addEventListener('click', function startMusicOnClick() {
-            if (!musicStarted && bgMusic) {
-                bgMusic.play().catch(e => console.log('Ainda não foi possível tocar'));
-                musicStarted = true;
-            }
-            document.body.removeEventListener('click', startMusicOnClick);
-        }, { once: true });
-    });
-}
-
-// Função para iniciar a música de fundo
 function startBackgroundMusic() {
     bgMusic = document.getElementById('bgMusic');
     if (!bgMusic) return;
-    
-    // Carregar índice da última música
+
     loadMusicIndex();
-    
-    // Configurar volume em 60%
+    bgMusic.src = MUSICAS[currentMusicIndex];
     bgMusic.volume = originalVolume;
-    
-    // Tocar a música atual
-    playCurrentMusic();
+
+    // Quando a música atual terminar, toca a próxima automaticamente
+    bgMusic.addEventListener('ended', playNextInSequence);
+
+    // Tentar tocar
+    const playAttempt = () => {
+        if (!musicStarted) {
+            bgMusic.play().then(() => {
+                musicStarted = true;
+            }).catch(() => {
+                console.log("Autoplay bloqueado. O som ligará no primeiro clique.");
+            });
+        }
+    };
+
+    playAttempt();
+    // Liga no primeiro clique em QUALQUER lugar da página
+    document.addEventListener('click', playAttempt, { once: true });
+    document.addEventListener('touchstart', playAttempt, { once: true });
 }
 
-// Função para reduzir o volume da música de fundo para 12% (quando vídeo tocar)
 function reduceBackgroundMusic() {
-    if (!bgMusic || !musicStarted) return;
+    if (!bgMusic) return;
     isVideoPlaying = true;
-    
-    // Reduz o volume gradualmente para 12%
-    let step = 0;
-    const targetVolume = 0.12;
-    const interval = setInterval(() => {
-        if (bgMusic.volume > targetVolume + 0.01) {
-            bgMusic.volume = Math.max(targetVolume, bgMusic.volume - 0.05);
-        } else {
-            clearInterval(interval);
-            console.log('🔊 Música reduzida para 12% (vídeo tocando)');
-        }
-    }, 50);
+    bgMusic.volume = 0.10; // Reduz para 10% quando houver vídeo
 }
 
-// Função para restaurar o volume da música de fundo para 60% (quando vídeo terminar)
 function restoreBackgroundMusic() {
-    if (!bgMusic || !musicStarted) return;
+    if (!bgMusic || isVideoPlaying === false) return;
     isVideoPlaying = false;
-    
-    // Volta o volume gradualmente para 60%
-    let step = 0;
-    const targetVolume = originalVolume;
-    const interval = setInterval(() => {
-        if (bgMusic.volume < targetVolume - 0.01) {
-            bgMusic.volume = Math.min(targetVolume, bgMusic.volume + 0.05);
-        } else {
-            clearInterval(interval);
-            console.log('🔊 Música restaurada para 60%');
-        }
-    }, 50);
+    bgMusic.volume = originalVolume; // Volta para 60%
 }
 
-// Função para pausar completamente a música de fundo (se necessário)
-function pauseBackgroundMusic() {
-    if (bgMusic && musicStarted && !bgMusic.paused) {
-        bgMusic.pause();
-    }
-}
-
-// Função para retomar a música de fundo
-function resumeBackgroundMusic() {
-    if (bgMusic && musicStarted && bgMusic.paused && !isVideoPlaying) {
-        bgMusic.play().catch(e => console.log('Erro ao retomar música'));
-    }
-}
-
-// Pausar/retomar música quando usuário sai da aba ou minimiza o app
+// Manter controle de visibilidade da aba
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-        pauseBackgroundMusic();
+        // Quando ele sai da aba, a música pausa
+        if (bgMusic) bgMusic.pause();
     } else {
-        // Quando voltar para a página, avança para a próxima música
-        nextMusic();
-        resumeBackgroundMusic();
+        // QUANDO ELE VOLTA: o comando playNextInSequence() garante a música nova
+        if (bgMusic && musicStarted && !isVideoPlaying) {
+            playNextInSequence(); 
+        }
     }
 });
 
-// Iniciar a música 3 segundos após a página carregar
-setTimeout(() => {
-    startBackgroundMusic();
-}, 4000);
+// Inicia o motor após 2 segundos
+setTimeout(startBackgroundMusic, 2000);
 
 // ========================================
 // INTEGRAÇÃO COM OS VÍDEOS DO MODAL
