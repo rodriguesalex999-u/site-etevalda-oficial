@@ -1,0 +1,19 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)\\.(jpg|jpeg|png|webp|mp4|gif|svg|ico)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/(.*)\\.(css|js)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400, must-revalidate" }]
+    }
+  ],
+  "redirects": [
+    { "source": "/pares-de-aliancas", "destination": "/#aliancas", "permanent": true },
+    { "source": "/alianca-moeda-antiga", "destination": "/#alianca-moeda-antiga", "permanent": true },
+    { "source": "/aliancas-pratas", "destination": "/#aliancas-pratas", "permanent": true },
+    { "source": "/relogios-femininos", "destination": "/#relogios-femininos", "permanent": true },
+    { "source": "/relogios-masculinos", "destination": "/#relogios-masculinos", "permanent": true }
+  ]
+}
