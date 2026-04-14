@@ -72,10 +72,8 @@ async function loadProducts(reset = false) {
         if (error) throw error;
 
         if (data && data.length > 0) {
-            const filteredData = data.filter(p => {
-                const images = Array.isArray(p.images) ? p.images : [];
-                return images.length > 0;
-            });
+            // FILTRO TEMPORÁRIO REMOVIDO PARA TESTE
+            const filteredData = data;
 
             // EMBARALHAR (SÓ SE NÃO TIVER BUSCA ATIVA)
             if (!searchQuery) {
