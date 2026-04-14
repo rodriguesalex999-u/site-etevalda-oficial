@@ -62,6 +62,7 @@ async function loadProducts(reset = false) {
     }
 
     try {
+        console.log('🔍 Buscando produtos...');
         let query = _supabase.from('products').select('*');
 
         if (currentCategory !== 'all') {
@@ -71,11 +72,11 @@ async function loadProducts(reset = false) {
         const { data, error } = await query;
         if (error) throw error;
 
+        console.log('📦 Dados recebidos:', data);
+
         if (data && data.length > 0) {
-            // FILTRO TEMPORÁRIO REMOVIDO PARA TESTE
             const filteredData = data;
 
-            // EMBARALHAR (SÓ SE NÃO TIVER BUSCA ATIVA)
             if (!searchQuery) {
                 for (let i = filteredData.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
@@ -85,16 +86,19 @@ async function loadProducts(reset = false) {
 
             allProductsLoaded = reset ? filteredData : [...allProductsLoaded, ...filteredData];
 
-            // Cache imutável de todos os produtos (usado pelo secondary grid)
             if (currentCategory === 'all' && reset) {
                 allProductsCache = [...filteredData];
             }
+            
+            console.log('✅ Produtos carregados:', allProductsLoaded.length);
+        } else {
+            console.log('⚠️ Nenhum produto encontrado');
         }
 
         renderProducts();
 
     } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
+        console.error('❌ Erro ao carregar produtos:', error);
     }
 }
 
