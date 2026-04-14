@@ -644,21 +644,21 @@ function setupModalMediaClick() {
     }, { passive: true });
 
     function handleSwipeGesture() {
-        const threshold = 50; // Sensibilidade do deslize
-        if (touchEndX < touchStartX - threshold) {
-            // Deslizou para a esquerda -> Próxima foto
-            if (currentMediaList.length > 1) {
-                const nextIndex = (currentMediaIndex + 1) % currentMediaList.length;
-                changeModalMedia(nextIndex);
-            }
+    const threshold = 50; // Sensibilidade do deslize
+    if (touchEndX < touchStartX - threshold) {
+        // Deslizou para a esquerda -> Próxima foto
+        if (currentMediaList.length > 1) {
+            const nextIndex = (currentMediaIndex + 1) % currentMediaList.length;
+            changeModalMedia(nextIndex);
         }
-        if (touchEndX > touchStartX + threshold) {
-            // Deslizou para a direita -> Foto anterior
-            if (currentMediaList.length > 1) {
-                const prevIndex = (currentMediaIndex - 1 + currentMediaList.length) % currentMediaList.length;
-                changeModalMedia(prevIndex);
-            }
+    }
+    if (touchEndX > touchStartX + threshold) {
+        // Deslizou para a direita -> Foto anterior
+        if (currentMediaList.length > 1) {
+            const prevIndex = (currentMediaIndex - 1 + currentMediaList.length) % currentMediaList.length;
+            changeModalMedia(prevIndex);
         }
+       }
     }
 }
 
