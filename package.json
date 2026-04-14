@@ -1,9 +1,0 @@
-{
-  "name": "etevalta-mt",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Grupo Etevalda MT - Loja de Variedades",
-  "engines": {
-    "node": "20.x"
-  }
-}
