@@ -842,16 +842,6 @@
                         </div>
                     </div>
 
-                    <!-- CAMPO: DESCONTO NO PIX -->
-                    <div class="form-group full-width">
-                        <label><i class="fas fa-percent"></i> Desconto no PIX</label>
-                        <div class="checkbox-group" style="background: var(--gold-light); padding: 15px; border-radius: var(--radius-sm);">
-                            <input type="checkbox" id="hasPixDiscount" checked>
-                            <label for="hasPixDiscount"><strong>Ativar desconto no PIX</strong> (5% de desconto à vista)</label>
-                        </div>
-                        <small style="color: var(--medium-gray);">Se marcado, o produto terá preço com 5% de desconto no PIX. Se desmarcado, mostrará apenas o preço normal.</small>
-                    </div>
-
                     <!-- NOVO CAMPO: Categoria de Sugestão (Upsell) -->
                     <div class="form-group full-width">
                         <label><i class="fas fa-handshake"></i> Categoria de Sugestão (Upsell) *</label>
@@ -1319,16 +1309,6 @@
                     <option value="1">1 Estrela ⭐</option>
                 </select>
                 <small style="color: var(--medium-gray);">Avaliação que aparece no card do produto</small>
-            </div>
-
-            <!-- CAMPO: DESCONTO NO PIX (EDIÇÃO) -->
-            <div class="form-group full-width">
-                <label><i class="fas fa-percent"></i> Desconto no PIX</label>
-                <div class="checkbox-group" style="background: var(--gold-light); padding: 15px; border-radius: var(--radius-sm);">
-                    <input type="checkbox" id="editHasPixDiscount" checked>
-                    <label for="editHasPixDiscount"><strong>Ativar desconto no PIX</strong> (5% de desconto à vista)</label>
-                </div>
-                <small style="color: var(--medium-gray);">Se marcado, o produto terá preço com 5% de desconto no PIX. Se desmarcado, mostrará apenas o preço normal.</small>
             </div>
             
             <div class="form-group full-width">
@@ -1875,7 +1855,6 @@
         document.getElementById('editVideoUrl').value = product.video_url || '';
         document.getElementById('editVideoHasAudio').checked = product.video_has_audio !== false;
         document.getElementById('editDescription').value = product.description || '';
-        document.getElementById('editHasPixDiscount').checked = product.has_pix_discount !== false;
         
         // Inicializar campos de links de imagem no modal de edição
         const imagesArray = Array.isArray(product.images)
@@ -1911,7 +1890,6 @@
         const videoUrl = document.getElementById('editVideoUrl').value.trim() || null;
         const videoHasAudio = document.getElementById('editVideoHasAudio').checked;
         const description = document.getElementById('editDescription').value.trim() || null;
-        const hasPixDiscount = document.getElementById('editHasPixDiscount').checked;
         
         if (!name || !priceRaw || !categoryId) {
             showToast('Preencha os campos obrigatórios!', 'error');
@@ -1951,8 +1929,7 @@
             video_url: videoUrl,
             video_has_audio: videoHasAudio,
             description,
-            images,
-            has_pix_discount: hasPixDiscount
+            images
         };
 
         const { error } = await _supabase
@@ -1992,7 +1969,6 @@
         const videoUrl = document.getElementById('videoUrl').value.trim() || null;
         const videoHasAudio = document.getElementById('videoHasAudio').checked;
         const description = document.getElementById('productDescription').value.trim() || null;
-        const hasPixDiscount = document.getElementById('hasPixDiscount').checked;
         
         // Coletar links de imagens dos campos dinâmicos
         const images = getImageLinks('imageLinksContainer');
@@ -2033,8 +2009,7 @@
             video_url: videoUrl,
             video_has_audio: videoHasAudio,
             description,
-            images,
-            has_pix_discount: hasPixDiscount
+            images
         };
 
         const { error } = await _supabase.from('products').insert([productData]);

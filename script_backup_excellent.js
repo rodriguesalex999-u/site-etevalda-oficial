@@ -340,15 +340,10 @@ function renderSuperZoomMedia() {
         </button>
     ` : '';
 
-    const zoomActionsHtml = currentModalProduct ? `
-        <div class="super-zoom-actions">
-            <button class="super-zoom-mp" onclick="buyViaMercadoPago(${currentModalProduct.id})">
-                <i class="fas fa-credit-card"></i> Comprar no Site
-            </button>
-            <button class="super-zoom-whatsapp" onclick="buyViaWhatsApp(${currentModalProduct.id})">
-                <i class="fab fa-whatsapp"></i> Comprar Agora
-            </button>
-        </div>
+    const whatsappHtml = currentModalProduct ? `
+        <button class="super-zoom-whatsapp" onclick="buyViaWhatsApp(${currentModalProduct.id})">
+            <i class="fab fa-whatsapp"></i> Comprar Agora
+        </button>
     ` : '';
 
     const counterHtml = superZoomMediaList.length > 1 ? 
@@ -367,7 +362,7 @@ function renderSuperZoomMedia() {
             ${solitarioZoomHtml}
         </div>
         ${counterHtml}
-        ${zoomActionsHtml}
+        ${whatsappHtml}
     `;
 }
 
@@ -1168,47 +1163,6 @@ function openProductModal(id) {
     const viewersCount = productViewers[id] || (Math.floor(Math.random() * 38) + 3);
     const rating = product.default_rating || 5;
     const categoryName = getCategoryName(product.category_id);
-    const salesCount = (product.id % 76) + 5;
-    const _catNorm = (categoryName || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    const _nameNorm = product.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-    const _isNoDiscount = _catNorm.includes('alianca') || _catNorm.includes('anei') || _nameNorm.includes('alianca') || _nameNorm.includes('anel');
-    const originalPrice = product.price.toFixed(2).replace('.', ',');
-    const pixPrice = _isNoDiscount ? originalPrice : (product.price * 0.95).toFixed(2).replace('.', ',');
-    const installmentValue = (product.price / 6).toFixed(2).replace('.', ',');
-    const _shippingMsgs = [
-        '\ud83d\ude9a Frete gr\u00e1tis em compras acima de R$ 379,99',
-        '\ud83d\ude9a Compre agora acima de R$ 379,99 e ganhe frete gr\u00e1tis',
-        '\ud83d\ude9a Aproveite: frete gr\u00e1tis para todo o MT acima de R$ 379,99',
-        '\ud83d\ude9a Somente hoje: frete por nossa conta acima de R$ 379,99',
-        '\ud83d\ude9a Ganhe frete gr\u00e1tis adicionando R$ 379,99 no carrinho',
-        '\ud83d\ude9a Entrega VIP e gratuita em pedidos acima de R$ 379,99',
-        '\ud83d\ude9a Quer frete gr\u00e1tis? Finalize seu pedido acima de R$ 379,99',
-        '\ud83d\ude9a Frete Gr\u00e1tis Liberado para compras a partir de R$ 379,99',
-        '\ud83d\ude9a Seu pedido acima de R$ 379,99 viaja com frete gr\u00e1tis!',
-        '\ud83d\ude9a Promo\u00e7\u00e3o: Frete Zero em todo o site acima de R$ 379,99'
-    ];
-    const shippingMsg = _shippingMsgs[product.id % 10];
-    const hasPixDiscount = product.has_pix_discount !== false;
-    let _priceBlock;
-    if (!hasPixDiscount) {
-        _priceBlock = `<div class="modal-price-container">
-             <div class="modal-main-price">R$ ${originalPrice}</div>
-             <div class="modal-installment-line">ou 6x de R$ ${installmentValue} sem juros</div>
-           </div>`;
-    } else if (_isNoDiscount) {
-        _priceBlock = `<div class="modal-price-container">
-             <div class="modal-price-label">PREÇO EXCLUSIVO:</div>
-             <div class="modal-main-price">R$ ${originalPrice}</div>
-             <div class="modal-installment-line">ou 6x de R$ ${installmentValue} sem juros</div>
-           </div>`;
-    } else {
-        _priceBlock = `<div class="modal-price-container">
-             <div class="modal-price-old">De: R$ ${originalPrice}</div>
-             <div class="modal-main-price">R$ ${pixPrice} <span class="pix-tag">no PIX</span></div>
-             <div class="modal-discount-info">(5% de desconto \u00e0 vista)</div>
-             <div class="modal-installment-line">ou 6x de R$ ${installmentValue} sem juros no cart\u00e3o</div>
-           </div>`;
-    }
 
     // ===== ADICIONADO: EVENTO DE VISUALIZAÇÃO DE PRODUTO (ViewContent) =====
     if (typeof fbq !== 'undefined') {
@@ -1298,9 +1252,8 @@ function openProductModal(id) {
             <div class="modal-product-info">
                 ${categoryName ? `<div class="modal-category-label">${categoryName.toUpperCase()}</div>` : ''}
                 <h2>${product.name}</h2>
-                <div class="modal-social-stars"><div class="social-stars-row">⭐⭐⭐⭐⭐</div><div class="social-sales-row">${salesCount} pessoas compraram este mês</div></div>
                 ${product.tem_solitario && product.solitario_price > 0 ? `<div class="solitario-info-line"><i class="fas fa-gem"></i> ${product.additional_product_name || 'Solitário'} vendido separado: R$ ${product.solitario_price.toFixed(2).replace('.', ',')}</div>` : ''}
-                ${_priceBlock}
+                <div class="modal-price">R$ ${product.price.toFixed(2).replace('.', ',')}</div>
                 <div class="looking-now" id="modalViewersCount" data-count="${viewersCount}"><i class="fas fa-eye"></i> <span id="viewersNumber">${viewersCount}</span> pessoas vendo agora</div>
                 ${renderSizeSelectorHtml(product)}
                 <div class="product-rating-large">${renderStars(rating)}</div>
@@ -1318,7 +1271,6 @@ function openProductModal(id) {
                         <i class="fas fa-cart-plus"></i> Adicionar ao Carrinho
                     </button>
                 </div>
-                <div class="modal-delivery-urgency">${shippingMsg}</div>
                 <div class="modal-buttons-share">
                     <button class="btn-share" onclick="shareProduct(${product.id})">
                         <i class="fas fa-share-alt"></i> <span>COMPARTILHE COM SEU AMOR</span>
@@ -1631,52 +1583,52 @@ function showToast(message) {
     }, 3000);
 }
 
-function handleFloatingWhatsApp() {
-    window.currentWhatsAppProduct = null;
-    showCityConfirmModal();
-}
-
 function buyViaWhatsApp(productId) {
-    const product = allProductsLoaded.find(p => p.id === productId) ||
-                    (allProductsCache || []).find(p => p.id === productId);
+    const product = allProductsLoaded.find(p => p.id === productId);
     if (!product) return;
     
+    // Armazenar o produto atual para usar depois
     window.currentWhatsAppProduct = product;
+    
+    // SEMPRE mostrar o modal de cidade (não verifica mais cidade salva)
     showCityConfirmModal();
-}
-
-// Remove acentos e converte para minúsculas para normalização de cidade
-function _normCity(str) {
-    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-}
-
-// Determina saudação baseada na cidade (Oi = unidade física, Olá = outras)
-function _getGreetingAndCity(input) {
-    const norm = _normCity(input.trim());
-    if (norm === 'cba' || norm.includes('cuiaba')) return { greeting: 'Oi', city: 'Cuiabá' };
-    if (norm === 'vg'  || norm.includes('varzea')) return { greeting: 'Oi', city: 'Várzea Grande' };
-    if (norm === 'roo' || norm.includes('rondon')) return { greeting: 'Oi', city: 'Rondonópolis' };
-    if (norm.includes('sinop'))      return { greeting: 'Oi', city: 'Sinop' };
-    if (norm.includes('diamantino')) return { greeting: 'Oi', city: 'Diamantino' };
-    return { greeting: 'Olá', city: input.trim() || 'minha cidade' };
 }
 
 // Função para enviar a mensagem do WhatsApp
 function sendWhatsAppMessage(product, city) {
-    const { greeting, city: normalizedCity } = _getGreetingAndCity(city);
+    let locationInput = city.trim();
+    let lowerInput = locationInput.toLowerCase();
+    let normalizedCity = locationInput || "minha cidade";
+    let greeting = "Olá";
+
+    // Normalização para cidades com unidade física (chatbot reconhece esses nomes exatos)
+    if (lowerInput === 'cba' || lowerInput.includes('cuiaba') || lowerInput.includes('cuiabá')) {
+        normalizedCity = "Cuiabá";
+        greeting = "Oi";
+    } else if (lowerInput === 'vg' || lowerInput.includes('varzea') || lowerInput.includes('várzea')) {
+        normalizedCity = "Várzea Grande";
+        greeting = "Oi";
+    } else if (lowerInput.includes('rondono') || lowerInput.includes('rodonopolis')) {
+        normalizedCity = "Rondonópolis";
+        greeting = "Oi";
+    } else if (lowerInput.includes('sinop')) {
+        normalizedCity = "Sinop";
+        greeting = "Oi";
+    } else if (lowerInput.includes('diamantino')) {
+        normalizedCity = "Diamantino";
+        greeting = "Oi";
+    }
 
     let msg;
-    if (!product) {
-        // Botão flutuante (sem produto selecionado)
-        msg = `${greeting}, sou de ${normalizedCity}, vi seus produtos no site e gostei muito. Como funciona a entrega hoje?`;
-    } else if (product.tem_solitario && product.solitario_price > 0) {
+    if (product.tem_solitario && product.solitario_price > 0) {
         const total = product.price + product.solitario_price;
         msg = `${greeting}, sou de ${normalizedCity}, gostei do produto: *${product.name}* + *${product.additional_product_name || 'Solitário'}* (R$ ${product.solitario_price.toFixed(2).replace('.', ',')}) - Total: R$ ${total.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
     } else {
         msg = `${greeting}, sou de ${normalizedCity}, gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
     }
 
-    if (product && window.selectedSize) {
+    // Mantém a informação de tamanho se existir
+    if (window.selectedSize) {
         const isRing = window.selectedSizeType === 'ring';
         const genderInfo = isRing && window.selectedGender ? ` (${window.selectedGender})` : '';
         msg += ` | Numeração/Tamanho: *${window.selectedSize}${genderInfo}*`;
@@ -1723,8 +1675,9 @@ function setupCityModalButtons() {
         localStorage.setItem('user_city', chosenCity);
         detectedLocation.city = chosenCity;
         if (modal) modal.style.display = 'none';
-        // Sempre chama sendWhatsAppMessage; produto null = botão flutuante
-        sendWhatsAppMessage(window.currentWhatsAppProduct ?? null, chosenCity);
+        if (window.currentWhatsAppProduct) {
+            sendWhatsAppMessage(window.currentWhatsAppProduct, chosenCity);
+        }
     };
     
     newSaveBtn.addEventListener('click', doSend);
@@ -2220,14 +2173,16 @@ function _sizeCategory(product) {
 function renderSizeSelectorHtml(product) {
     const type = product.size_type || (product.tem_numeracao ? _sizeCategory(product) : null);
     if (!type) return '';
+    const reminder = `<p class="size-reminder-note">💬 Lembre-se: após finalizar a compra, nossa equipe entrará em contato para tirar qualquer dúvida antes do envio.</p>`;
 
     if (type === 'chain') {
         return `
         <div class="size-selector-wrap">
             <div class="size-chain-info">
                 <i class="fas fa-ruler"></i>
-                <span>Corrente <strong>70 cm</strong> <span class="size-badge-hot">mais vendido</span> ✅</span>
+                <span>Trabalhamos com correntes de <strong>70 cm</strong> — o tamanho <span class="size-badge-hot">mais vendido</span> ✅<br><small style="color:#888;font-size:0.78rem;">Comprimento ideal para o dia a dia</small></span>
             </div>
+            ${reminder}
         </div>`;
     }
 
@@ -2235,10 +2190,11 @@ function renderSizeSelectorHtml(product) {
         return `
         <div class="size-selector-wrap">
             <button class="size-toggle-btn" onclick="toggleSizePanel()">
-                TAMANHO
+                <i class="fas fa-ruler-horizontal"></i> Escolha o tamanho aqui
                 <i class="fas fa-chevron-down size-chevron" id="sizeChevron"></i>
             </button>
             <div class="size-panel" id="sizePanel">
+                <p class="size-hint-text"><i class="fas fa-star" style="color:var(--gold-primary);font-size:0.75rem;"></i> O tamanho <strong>21</strong> já está selecionado por ser o mais vendido, mas você pode escolher outro se preferir.</p>
                 <div class="size-chips-row">
                     <button class="sz-chip sz-chip-active" onclick="selectSizeChip(this,'21 cm')">21</button>
                     <button class="sz-chip" onclick="selectSizeChip(this,'22 cm')">22</button>
@@ -2246,27 +2202,30 @@ function renderSizeSelectorHtml(product) {
                 </div>
                 <div class="size-confirm-msg" id="sizeConfirmMsg"></div>
             </div>
+            ${reminder}
         </div>`;
     }
 
-    // ring (aliaça / anel)
+    // ring (aliança / anel)
     const chips = Array.from({length: 27}, (_, i) => i + 10)
         .map(n => `<button class="sz-chip" onclick="selectSizeChip(this,'Nº ${n}')">${n}</button>`)
         .join('');
     return `
     <div class="size-selector-wrap">
         <button class="size-toggle-btn" onclick="toggleSizePanel()">
-            NUMERAÇÃO
+            <i class="fas fa-ring"></i> Escolha a numeração aqui
             <i class="fas fa-chevron-down size-chevron" id="sizeChevron"></i>
         </button>
         <div class="size-panel" id="sizePanel">
             <div class="size-gender-tabs">
-                <button class="sz-gender-tab sz-gender-active" onclick="switchGenderTab(this,'Masculino')">&#128104; Masculino</button>
-                <button class="sz-gender-tab" onclick="switchGenderTab(this,'Feminino')">&#128105; Feminino</button>
+                <button class="sz-gender-tab sz-gender-active" onclick="switchGenderTab(this,'Masculino')">👨 Masculino</button>
+                <button class="sz-gender-tab" onclick="switchGenderTab(this,'Feminino')">👩 Feminino</button>
             </div>
+            <p class="size-hint-text">Selecione a numeração do anel:</p>
             <div class="size-chips-row">${chips}</div>
             <div class="size-confirm-msg" id="sizeConfirmMsg"></div>
         </div>
+        ${reminder}
     </div>`;
 }
 
@@ -2397,7 +2356,6 @@ window.changeModalMedia = changeModalMedia;
 window.shareProduct = shareProduct;
 
 // Exportar funções para uso global (localização)
-window.handleFloatingWhatsApp = handleFloatingWhatsApp;
 window.sendWhatsAppMessage = sendWhatsAppMessage;
 window.showCityConfirmModal = showCityConfirmModal;
 window.closeCityModal = closeCityModal;

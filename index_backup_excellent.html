@@ -48,8 +48,8 @@
     <link rel="preconnect" href="https://vnrfmsyanrvqqhmqyixk.supabase.co">
 
     <!-- Fontes: preload não-bloqueante -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&family=Inter:wght@400;500;600;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&family=Inter:wght@400;500;600;800;900&display=swap"></noscript>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&family=Inter:wght@400;500;600&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&family=Inter:wght@400;500;600&display=swap"></noscript>
 
     <!-- CSS CRÍTICO: header + grid + skeletons (above the fold) -->
     <style>
@@ -293,7 +293,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
             </div>
             <div id="cartOverlay" class="cart-overlay"></div>
 
-            <button class="whatsapp-float" onclick="handleFloatingWhatsApp()"><i class="fab fa-whatsapp"></i></button>
+            <a href="https://api.whatsapp.com/send/?phone=5565993337205" class="whatsapp-float" target="_blank"><i class="fab fa-whatsapp"></i></a>
 
             <!-- FOOTER COMPLETO -->
             <footer class="footer">
@@ -356,7 +356,7 @@ setTimeout(function(){
         s1.setAttribute('crossorigin','*');
         s0.parentNode.insertBefore(s1,s0);
     })();
-}, 180000);
+}, 80000);
 </script>
 <!--End of Tawk.to Script-->
         </div>
