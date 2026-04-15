@@ -592,45 +592,30 @@ function changeModalMedia(index) {
     
     if (!mainMedia || !currentMediaList[index]) return;
     
-    // Atualizar mídia principal
+    // Atualiza a foto ou vídeo sem destruir os sensores de movimento do dedo
     if (currentMediaList[index].type === 'video') {
         mainMedia.innerHTML = `<video src="${currentMediaList[index].url}" autoplay muted loop playsinline></video>`;
     } else {
         mainMedia.innerHTML = `<img src="${currentMediaList[index].url}" alt="${currentModalProduct?.name}">`;
     }
     
-    // Atualizar thumbnails
     thumbnails.forEach((thumb, i) => {
         thumb.classList.toggle('active', i === index);
     });
-    
-    // ==== ADICIONE ESTA LINHA PARA ATUALIZAR O ZOOM CORRETAMENTE ====
-    // Quando o usuário clicar para abrir o super zoom, vai abrir na imagem atual
-    const mainMediaDiv = document.getElementById('modalMainMedia');
-    if (mainMediaDiv) {
-        // Remover listener antigo para evitar duplicação
-        const newMainMedia = mainMediaDiv.cloneNode(true);
-        mainMediaDiv.parentNode.replaceChild(newMainMedia, mainMediaDiv);
-        newMainMedia.addEventListener('click', () => {
-            if (currentMediaList[currentMediaIndex]?.type === 'image' && currentModalProduct) {
-                openSuperZoom(currentModalProduct.id, false, currentMediaIndex);
-            }
-        });
-    }
 }
 
 function setupModalMediaClick() {
     const mainMedia = document.getElementById('modalMainMedia');
     if (!mainMedia) return;
     
-    // Abrir Zoom ao clicar
+    // 1. Abrir Zoom ao clicar
     mainMedia.addEventListener('click', (e) => {
         if (currentMediaList[currentMediaIndex]?.type === 'image' && currentModalProduct) {
             openSuperZoom(currentModalProduct.id, false, currentMediaIndex);
         }
     });
 
-    // Variáveis para detectar o deslize do dedo (Swipe)
+    // 2. Sensores de movimento do dedo (Swipe) - Funcionando para todas as fotos
     let touchStartX = 0;
     let touchEndX = 0;
 
@@ -640,26 +625,18 @@ function setupModalMediaClick() {
 
     mainMedia.addEventListener('touchend', (e) => {
         touchEndX = e.changedTouches[0].screenX;
-        handleSwipeGesture();
-    }, { passive: true });
-
-    function handleSwipeGesture() {
-    const threshold = 50; // Sensibilidade do deslize
-    if (touchEndX < touchStartX - threshold) {
-        // Deslizou para a esquerda -> Próxima foto
-        if (currentMediaList.length > 1) {
+        const threshold = 50; 
+        
+        if (touchEndX < touchStartX - threshold) {
+            // Próxima foto
             const nextIndex = (currentMediaIndex + 1) % currentMediaList.length;
             changeModalMedia(nextIndex);
-        }
-    }
-    if (touchEndX > touchStartX + threshold) {
-        // Deslizou para a direita -> Foto anterior
-        if (currentMediaList.length > 1) {
+        } else if (touchEndX > touchStartX + threshold) {
+            // Foto anterior
             const prevIndex = (currentMediaIndex - 1 + currentMediaList.length) % currentMediaList.length;
             changeModalMedia(prevIndex);
         }
-       }
-    }
+    }, { passive: true });
 }
 
 function setupModalVideoAudio(hasAudio) {
@@ -1193,6 +1170,7 @@ function renderComplementCard(p) {
 function openProductModal(id) {
     const product = allProductsLoaded.find(p => p.id === id) || allProductsCache.find(p => p.id === id);
     if (!product) return;
+
 
     currentModalProduct = product;
     const images = Array.isArray(product.images) ? product.images : [];
@@ -2077,7 +2055,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ========================================
-// MOTOR DE MÚSICA PREMIUM (SEQUENCIAL + AUTO-PLAY)
+// MOTOR DE MÚSICA SUPREMO (PC + IPHONE + ANDROID)
 // ========================================
 
 let bgMusic = null;
@@ -2107,8 +2085,10 @@ function playNextInSequence() {
     currentMusicIndex = (currentMusicIndex + 1) % MUSICAS.length;
     saveMusicIndex();
     if (bgMusic) {
+        bgMusic.pause();
         bgMusic.src = MUSICAS[currentMusicIndex];
-        bgMusic.play().catch(e => console.log("Aguardando interação para sequência"));
+        bgMusic.load(); 
+        bgMusic.play().catch(e => console.log("Toque na tela para ouvir a próxima"));
     }
 }
 
@@ -2119,54 +2099,62 @@ function startBackgroundMusic() {
     loadMusicIndex();
     bgMusic.src = MUSICAS[currentMusicIndex];
     bgMusic.volume = originalVolume;
+    
+    // Essencial para iPhone e Android não bloquearem
+    bgMusic.setAttribute('playsinline', 'true');
+    bgMusic.load(); 
 
-    // Quando a música atual terminar, toca a próxima automaticamente
     bgMusic.addEventListener('ended', playNextInSequence);
 
-    // Tentar tocar
-    const playAttempt = () => {
-        if (!musicStarted) {
+    // TÉCNICA SUPREMA: Destravar o áudio no milésimo de segundo do toque
+    const destravarNoToque = () => {
+        if (!musicStarted && bgMusic) {
+            // No celular, o play precisa ser IMEDIATO ao toque
             bgMusic.play().then(() => {
                 musicStarted = true;
-            }).catch(() => {
-                console.log("Autoplay bloqueado. O som ligará no primeiro clique.");
+                console.log("✅ Som ativado no celular");
+                // Uma vez ativado, removemos os avisos para economizar processamento
+                document.removeEventListener('click', destravarNoToque);
+                document.removeEventListener('touchstart', destravarNoToque);
+            }).catch(e => {
+                console.log("Navegador ainda bloqueando...");
             });
         }
     };
 
-    playAttempt();
-    // Liga no primeiro clique em QUALQUER lugar da página
-    document.addEventListener('click', playAttempt, { once: true });
-    document.addEventListener('touchstart', playAttempt, { once: true });
+    // Tenta ligar sozinho (funciona no PC)
+    bgMusic.play().then(() => { musicStarted = true; }).catch(() => {});
+
+    // Gatilhos de toque para o celular
+    document.addEventListener('click', destravarNoToque);
+    document.addEventListener('touchstart', destravarNoToque);
 }
 
 function reduceBackgroundMusic() {
     if (!bgMusic) return;
     isVideoPlaying = true;
-    bgMusic.volume = 0.10; // Reduz para 10% quando houver vídeo
+    bgMusic.volume = 0.08;
 }
 
 function restoreBackgroundMusic() {
     if (!bgMusic || isVideoPlaying === false) return;
     isVideoPlaying = false;
-    bgMusic.volume = originalVolume; // Volta para 60%
+    bgMusic.volume = originalVolume;
 }
 
-// Manter controle de visibilidade da aba
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-        // Quando ele sai da aba, a música pausa
         if (bgMusic) bgMusic.pause();
     } else {
-        // QUANDO ELE VOLTA: o comando playNextInSequence() garante a música nova
+        // Quando volta pro site, toca música nova
         if (bgMusic && musicStarted && !isVideoPlaying) {
-            playNextInSequence(); 
+            playNextInSequence();
         }
     }
 });
 
-// Inicia o motor após 2 segundos
-setTimeout(startBackgroundMusic, 2000);
+// LIGA O MOTOR IMEDIATAMENTE
+startBackgroundMusic();
 
 // ========================================
 // INTEGRAÇÃO COM OS VÍDEOS DO MODAL
