@@ -1294,6 +1294,21 @@ function openProductModal(id) {
         </div>
     `;
 
+    // --- NOVA SEÇÃO: "Veja mais" dentro do Modal ---
+    const seeMoreProducts = allProductsLoaded
+        .filter(p => !complementShownIds.includes(p.id))
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 10);
+
+    const modalSeeMoreHtml = seeMoreProducts.length > 0 ? `
+        <div class="complement-section" style="margin-top: 40px; border-top: 2px solid var(--gold-light); padding-top: 25px;">
+            <h3 class="complement-title"><i class="fas fa-plus-circle"></i> Veja mais</h3>
+            <div class="complement-products-grid">
+                ${seeMoreProducts.map(p => renderComplementCard(p)).join('')}
+            </div>
+        </div>
+    ` : '';
+
     const modalHtml = `
             <div class="modal-media-container">
                 <div class="modal-main-media" id="modalMainMedia" style="position: relative;">
@@ -1338,6 +1353,7 @@ function openProductModal(id) {
                 
                 ${upsellHtml}
                 ${complementHtml}
+                ${modalSeeMoreHtml}
             </div>
     `;
 
