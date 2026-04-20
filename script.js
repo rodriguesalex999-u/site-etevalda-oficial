@@ -32,6 +32,16 @@ let currentMediaList = [];
 let currentMediaIndex = 0;
 let complementShownIds = [];
 let isLoadingMoreComplement = false;
+
+// Observer reutilizavel para animacao de entrada de cards
+const _cardAnimObserver = window.IntersectionObserver ? new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+        if (e.isIntersecting) {
+            e.target.classList.add('card-visible');
+            _cardAnimObserver.unobserve(e.target);
+        }
+    });
+}, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' }) : null;
 let productViewers = {};
 let viewerOpenCount = 0;
 
@@ -229,6 +239,17 @@ function renderProducts() {
         </div>
     `;
     }).join('');
+
+    // Activar animacoes de entrada nos cards (pula os 4 primeiros - LCP)
+    if (_cardAnimObserver) {
+        setTimeout(() => {
+            container.querySelectorAll('.product-card').forEach((card, i) => {
+                if (i < 4) return;
+                card.classList.add('card-anim-ready');
+                _cardAnimObserver.observe(card);
+            });
+        }, 0);
+    }
 }
 
 function slugifyCategory(name) {
@@ -1344,6 +1365,18 @@ function openProductModal(id) {
     document.getElementById('modalContainer').innerHTML = modalHtml;
     document.getElementById('productModal').classList.add('active');
     document.body.style.overflow = 'hidden';
+
+    // Contador animado do salesCount
+    const _salesEl = document.querySelector('.social-sales-row');
+    if (_salesEl) {
+        let _cur = 0;
+        const _step = Math.max(1, Math.ceil(salesCount / 22));
+        const _iv = setInterval(() => {
+            _cur = Math.min(_cur + _step, salesCount);
+            _salesEl.textContent = `${_cur} pessoas compraram este mês`;
+            if (_cur >= salesCount) clearInterval(_iv);
+        }, 35);
+    }
     
     // Iniciar incremento inteligente de viewers
     startSmartViewerIncrement(id);
