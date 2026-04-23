@@ -6285,3 +6285,54 @@ backdrop-filter: blur(5px);
     .cart-btn.cart-shake { animation: none !important; }
     .geo-notif-icon { animation: none !important; }
 }
+
+
+/* ============================================================
+   PERFORMANCE — correcao de scroll jank
+   ============================================================ */
+
+/* 1. will-change apenas no hover, nao permanente (evita layer explosion) */
+.product-card {
+    will-change: auto !important;
+    contain: layout style !important;
+}
+.product-card:hover,
+.product-card:focus-within {
+    will-change: transform !important;
+}
+
+/* 2. backdrop-filter: usar versao mais leve para nao travar scroll */
+.header {
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+}
+
+/* 3. Limitar animacoes continuas a elementos fora da area critica de scroll */
+/* Viewers dot: usar opacity-only em vez de box-shadow pulsante (box-shadow e caro) */
+.viewers .dot {
+    animation: pulseDotLite 2s infinite !important;
+    box-shadow: none !important;
+}
+@keyframes pulseDotLite {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .5; transform: scale(.7); }
+}
+
+/* 4. Badge shimmer: pausar enquanto o card nao esta em hover */
+.badge-sold::before {
+    animation-play-state: paused !important;
+}
+.product-card:hover .badge-sold::before {
+    animation-play-state: running !important;
+}
+
+/* 5. Carrossel featured: usar border solida animada em vez de conic-gradient
+   (conic-gradient com @property força recalculo de estilo a cada frame) */
+.carousel-item.featured {
+    background: var(--gold-primary) !important;
+    animation: featuredGlow 2.5s ease-in-out infinite !important;
+}
+@keyframes featuredGlow {
+    0%, 100% { box-shadow: 0 0 12px rgba(212,175,55,.4), 0 0 0 2px rgba(212,175,55,.6) !important; }
+    50% { box-shadow: 0 0 28px rgba(212,175,55,.7), 0 0 0 2.5px var(--gold-primary) !important; }
+}

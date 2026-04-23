@@ -267,7 +267,16 @@ function renderProducts() {
     if (_cardAnimObserver) {
         setTimeout(() => {
             container.querySelectorAll('.product-card').forEach((card, i) => {
-                if (i < 4) return;
+                if (i < 4) {
+                    // Primeiros 4 cards: definir preco diretamente (sem animacao, sao LCP)
+                    const priceEl = card.querySelector('.price-now');
+                    if (priceEl) {
+                        const numEl = priceEl.querySelector('.num');
+                        const target = parseFloat(priceEl.dataset.target);
+                        if (numEl && !isNaN(target)) numEl.textContent = target.toFixed(2).replace('.', ',');
+                    }
+                    return;
+                }
                 card.classList.add('card-anim-ready');
                 _cardAnimObserver.observe(card);
             });
