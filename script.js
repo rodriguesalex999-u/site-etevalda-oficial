@@ -38,6 +38,23 @@ const _cardAnimObserver = window.IntersectionObserver ? new IntersectionObserver
     entries.forEach(e => {
         if (e.isIntersecting) {
             e.target.classList.add('card-visible');
+            // Contador animado de preco
+            const priceEl = e.target.querySelector('.price-now');
+            if (priceEl) {
+                const _target = parseFloat(priceEl.dataset.target);
+                const numEl = priceEl.querySelector('.num');
+                if (numEl && !isNaN(_target)) {
+                    const _start = performance.now();
+                    const _dur = 700;
+                    function _priceTick(t) {
+                        const prog = Math.min(1, (t - _start) / _dur);
+                        const eased = 1 - Math.pow(1 - prog, 3);
+                        numEl.textContent = (_target * eased).toFixed(2).replace('.', ',');
+                        if (prog < 1) requestAnimationFrame(_priceTick);
+                    }
+                    requestAnimationFrame(_priceTick);
+                }
+            }
             _cardAnimObserver.unobserve(e.target);
         }
     });
@@ -185,24 +202,27 @@ function renderProducts() {
         secondaryGrid.innerHTML = shuffled.map(p => {
             const imgs = Array.isArray(p.images) ? p.images : [];
             const hasMulti = imgs.length > 1;
-            const sold = p.sold_today ? '<div class="product-sold-today">Vendido Hoje</div>' : '';
             const views = productViewers[p.id] || 5;
             const markup = 1 + (0.15 + (((p.id * 7) % 16) / 100));
             const oldPr = (p.price * markup).toFixed(2).replace('.', ',');
+            const disc = Math.round((1 - 1/markup) * 100);
             return `
         <div class="product-card sec-card" onclick="window.openProductModal(${p.id})">
             <div class="product-image ${hasMulti ? 'has-hover' : ''}">
+                ${p.sold_today ? '<div class="badge-sold">🔥 Vendido hoje</div>' : ''}
+                <div class="badge-discount"><span>-</span><strong>${disc}%</strong></div>
                 <img src="${imgs[0] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-main" width="180" height="180" loading="lazy" decoding="async">
                 ${hasMulti ? `<img src="${imgs[1] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-hover" width="180" height="180" loading="lazy" decoding="async">` : ''}
-                ${sold}
+                <button class="quick-add" onclick="event.stopPropagation();addToCartFly(event,${p.id})" aria-label="Adicionar ao carrinho">+</button>
             </div>
             <div class="product-info">
-                <h3>${p.name}</h3>
-                <div class="product-price-block">
+                <div class="product-name">${p.name}</div>
+                <div class="product-prices">
                     <span class="price-old">R$ ${oldPr}</span>
-                    <span class="product-price">R$ ${p.price.toFixed(2).replace('.', ',')}</span>
+                    <span class="price-now" data-target="${p.price}"><span class="currency">R$</span><span class="num">0,00</span></span>
                 </div>
-                <div class="product-viewers-badge"><i class="fas fa-eye"></i> ${views}</div>
+                <span class="viewers"><span class="dot"></span>${views} pessoas vendo</span>
+                <div class="tag-free">✓ FRETE GRÁTIS</div>
             </div>
         </div>`;
         }).join('');
@@ -214,27 +234,30 @@ function renderProducts() {
     container.innerHTML = filtered.map((p, index) => {
         const images = Array.isArray(p.images) ? p.images : [];
         const hasMultipleImages = images.length > 1;
-        const soldTodayHtml = p.sold_today ? '<div class="product-sold-today">Vendido Hoje</div>' : '';
         const viewers = productViewers[p.id] || 5;
         const fakeMarkup = 1 + (0.15 + (((p.id * 7) % 16) / 100));
         const oldPrice = (p.price * fakeMarkup).toFixed(2).replace('.', ',');
+        const discPct = Math.round((1 - 1/fakeMarkup) * 100);
         const isPriority = index < 2;
         const imgAttrs = `width="180" height="180" decoding="async" ${isPriority ? 'fetchpriority="high"' : 'loading="lazy"'}`;
         
         return `
         <div class="product-card" onclick="window.openProductModal(${p.id})">
             <div class="product-image ${hasMultipleImages ? 'has-hover' : ''}">
+                ${p.sold_today ? '<div class="badge-sold">🔥 Vendido hoje</div>' : ''}
+                <div class="badge-discount"><span>-</span><strong>${discPct}%</strong></div>
                 <img id="product-img-${p.id}" src="${images[0] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-main" ${imgAttrs}>
                 ${hasMultipleImages ? `<img id="product-img-hover-${p.id}" src="${images[1] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-hover" width="180" height="180" loading="lazy" decoding="async">` : ''}
-                ${soldTodayHtml}
+                <button class="quick-add" onclick="event.stopPropagation();addToCartFly(event,${p.id})" aria-label="Adicionar ao carrinho">+</button>
             </div>
             <div class="product-info">
-                <h3>${p.name}</h3>
-                <div class="product-price-block">
+                <div class="product-name">${p.name}</div>
+                <div class="product-prices">
                     <span class="price-old">R$ ${oldPrice}</span>
-                    <span class="product-price">R$ ${p.price.toFixed(2).replace('.', ',')}</span>
+                    <span class="price-now" data-target="${p.price}"><span class="currency">R$</span><span class="num">0,00</span></span>
                 </div>
-                <div class="product-viewers-badge"><i class="fas fa-eye"></i> ${viewers}</div>
+                <span class="viewers"><span class="dot"></span>${viewers} pessoas vendo</span>
+                <div class="tag-free">✓ FRETE GRÁTIS</div>
             </div>
         </div>
     `;
@@ -555,11 +578,18 @@ function showGeoNotification() {
 
     const notification = document.getElementById('geoNotification');
     const notificationText = document.getElementById('geoNotificationText');
+    const notifBar = document.getElementById('geoNotifBar');
 
     if (notification && notificationText) {
         notificationText.innerHTML = messages[notificationIndex];
-        notification.style.display = 'block';
-        setTimeout(() => notification.style.display = 'none', 8000);
+        if (notifBar) {
+            notifBar.classList.remove('geo-bar-animate');
+            void notifBar.offsetHeight;
+            notifBar.classList.add('geo-bar-animate');
+        }
+        notification.classList.add('geo-show');
+        clearTimeout(notification._geoTimer);
+        notification._geoTimer = setTimeout(() => notification.classList.remove('geo-show'), 6200);
     }
 
     notificationIndex = (notificationIndex + 1) % 4;
@@ -815,17 +845,24 @@ function renderCarousel(carouselId = 'infiniteCarousel', carouselIndex = 1) {
     // Duplica múltiplas vezes para criar efeito verdadeiramente infinito
     const infiniteProducts = [...carouselProducts, ...carouselProducts, ...carouselProducts, ...carouselProducts];
     
-    carousel.innerHTML = infiniteProducts.map(p => {
+    carousel.innerHTML = infiniteProducts.map((p, idx) => {
         const images = Array.isArray(p.images) ? p.images : [];
+        const isFeatured = idx % 5 === 0;
+        const info = `<div class="carousel-item-info"><div class="carousel-item-name">${p.name}</div><div class="carousel-item-price">R$ ${p.price.toFixed(2).replace('.', ',')}</div></div>`;
+        if (isFeatured) {
+            return `
+            <div class="carousel-item featured" onclick="window.openProductModal(${p && p.id ? p.id : 0})">
+                <div class="carousel-item-inner">
+                    <img src="${images[0] || 'https://via.placeholder.com/150'}" alt="${p.name}" loading="lazy">
+                    ${info}
+                </div>
+            </div>`;
+        }
         return `
             <div class="carousel-item" onclick="window.openProductModal(${p && p.id ? p.id : 0})">
                 <img src="${images[0] || 'https://via.placeholder.com/150'}" alt="${p.name}" loading="lazy" style="aspect-ratio: 1/1; object-fit: cover;">
-                <div class="carousel-item-info">
-                    <div class="carousel-item-name">${p.name}</div>
-                    <div class="carousel-item-price">R$ ${p.price.toFixed(2).replace('.', ',')}</div>
-                </div>
-            </div>
-        `;
+                ${info}
+            </div>`;
     }).join('');
     
     // Configura animação infinita contínua
@@ -1570,6 +1607,52 @@ function addToCart(productId) {
     showToast(`${product.name} adicionado ao carrinho!`);
 }
 
+function addToCartFly(event, productId) {
+    const btn = event.currentTarget;
+    const card = btn.closest('.product-card');
+    const img = card ? card.querySelector('.product-img-main') : null;
+    if (img) {
+        _flyToCart(img, productId);
+    } else {
+        addToCart(productId);
+    }
+}
+
+function _flyToCart(srcImg, productId) {
+    const cartBtn = document.getElementById('cartBtn');
+    if (!cartBtn) { addToCart(productId); return; }
+    const r1 = srcImg.getBoundingClientRect();
+    const r2 = cartBtn.getBoundingClientRect();
+    const fly = document.createElement('img');
+    fly.src = srcImg.src;
+    fly.className = 'fly-to-cart';
+    fly.style.left = r1.left + 'px';
+    fly.style.top = r1.top + 'px';
+    fly.style.width = r1.width + 'px';
+    fly.style.height = r1.height + 'px';
+    document.body.appendChild(fly);
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            const dx = r2.left - r1.left + r2.width / 2 - r1.width / 2;
+            const dy = r2.top - r1.top + r2.height / 2 - r1.height / 2;
+            fly.style.transform = `translate(${dx}px,${dy}px) scale(0.12) rotate(360deg)`;
+            fly.style.opacity = '0';
+        });
+    });
+    setTimeout(() => {
+        fly.remove();
+        addToCart(productId);
+        cartBtn.classList.add('cart-shake');
+        setTimeout(() => cartBtn.classList.remove('cart-shake'), 600);
+        const countEl = document.getElementById('cartCount');
+        if (countEl) {
+            countEl.classList.add('cart-count-bump');
+            setTimeout(() => countEl.classList.remove('cart-count-bump'), 350);
+        }
+        if (navigator.vibrate) navigator.vibrate(20);
+    }, 870);
+}
+
 function removeFromCart(productId) {
     cart = cart.filter(item => item.id !== productId);
     localStorage.setItem('etevalda_cart', JSON.stringify(cart));
@@ -1907,6 +1990,12 @@ async function initializeApp() {
             }, { once: true });
         }
         
+        // Header colapsa ao rolar
+        window.addEventListener('scroll', () => {
+            const _hdr = document.querySelector('.header');
+            if (_hdr) _hdr.classList.toggle('header-collapsed', window.scrollY > 60);
+        }, { passive: true });
+
         // Detectar cidade/estado do cliente via IP
         initGeoLocationBackground();
         

@@ -62,9 +62,9 @@ img{max-width:100%;height:auto;display:block;}
 a{text-decoration:none;color:inherit;}
 button{font-family:inherit;cursor:pointer;border:none;background:none;}
 .container-fluid{max-width:1400px;margin:0 auto;padding:0 var(--spacing-md);overflow-x:hidden;width:100%;}
-.header{background:var(--white);box-shadow:var(--shadow-md);position:sticky;top:0;z-index:1000;width:100%;transition:all var(--transition-normal);}
-.header-top{padding:var(--spacing-md) 0;transition:all var(--transition-normal);opacity:1;height:auto;overflow:hidden;}
-.header.header-collapsed .header-top{opacity:0;height:0;padding-top:0;padding-bottom:0;margin:0;}
+.header{background:rgba(10,10,10,.72);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border-bottom:1px solid rgba(212,175,55,.22);position:sticky;top:0;z-index:1000;width:100%;transition:background .35s ease,box-shadow .35s ease;}
+.header-top{padding:var(--spacing-md) 0;transition:max-height .4s ease,opacity .35s ease,padding .35s ease;max-height:120px;opacity:1;overflow:hidden;}
+.header.header-collapsed .header-top{opacity:0;max-height:0;padding-top:0;padding-bottom:0;margin:0;}
 .header,.nav-categories,.nav-categories>.container-fluid,.categories-wrapper,.categories-dropdown,.categories-dropdown .category-list{overflow:visible!important;}
 .nav-categories{background:var(--white);border-top:1px solid var(--gold-light);border-bottom:1px solid var(--gold-light);padding:var(--spacing-xs) 0;overflow:visible;position:relative;transition:all var(--transition-normal);}
 .header-top-content{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-lg);}
@@ -90,9 +90,9 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
 .main-content{padding:var(--spacing-lg) 0;min-height:70vh;overflow-x:hidden;width:100%;}
 .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:var(--spacing-lg);padding:0 12px;}
 @media(min-width:1024px){.products-grid{grid-template-columns:repeat(4,1fr);gap:18px;padding:0 24px;}}
-.product-card{background:var(--bg-card);border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.3);cursor:pointer;border:1px solid var(--border-subtle);position:relative;display:flex;flex-direction:column;align-items:center;}
-.product-image{position:relative;width:100%;height:180px;aspect-ratio:1/1!important;overflow:hidden;flex-shrink:0;background:var(--gray-placeholder);min-height:180px;display:flex;align-items:center;justify-content:center;}
-.product-image img{width:100%!important;height:100%!important;aspect-ratio:1/1!important;object-fit:cover!important;}
+.product-card{background:var(--bg-card);border-radius:12px;overflow:hidden;cursor:pointer;border:1px solid var(--border-subtle);position:relative;display:flex;flex-direction:column;transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s ease,border-color .35s ease;will-change:transform;}
+.product-image{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:#1a1a1a;}
+.product-image img{width:100%!important;height:100%!important;object-fit:cover!important;transition:transform .7s cubic-bezier(.2,.8,.2,1);}
 .product-info{padding:8px 10px;flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:2px;}
 .product-info h3,.product-name{font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:400;color:#EEEEEE;line-height:1.35;margin:0;overflow:hidden;}
 .product-price-block{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
@@ -116,7 +116,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
 </head>
 <body>
 
-    <div id="geoNotification" class="geo-notification"><div class="geo-content"><i class="fas fa-map-marker-alt"></i><div class="geo-text" id="geoNotificationText"></div><button class="geo-close" onclick="this.parentElement.parentElement.style.display='none'"><i class="fas fa-times"></i></button></div></div>
+    <div id="geoNotification" class="geo-notification"><div class="geo-notif-icon"><i class="fas fa-map-marker-alt"></i></div><div class="geo-notif-text" id="geoNotificationText"></div><div class="geo-notif-bar" id="geoNotifBar"></div></div>
     <div class="toast" id="toast"></div>
 
     <header class="header">

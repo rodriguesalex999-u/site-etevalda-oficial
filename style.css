@@ -5938,3 +5938,350 @@ backdrop-filter: blur(5px);
     opacity: 1;
     transform: translateY(0);
 }
+
+
+/* ============================================================
+   PROTOTIPO A — UPGRADE CARDS DE PRODUTO
+   ============================================================ */
+
+/* Card principal */
+.product-card {
+    border-radius: 12px !important;
+    box-shadow: none !important;
+    transition: transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s ease, border-color .35s ease !important;
+    will-change: transform;
+}
+.product-card:hover,
+.product-card:not(.skeleton):active {
+    transform: translateY(-6px) scale(1.02) !important;
+    box-shadow: 0 14px 36px rgba(212,175,55,.28), 0 0 0 1px rgba(212,175,55,.5) !important;
+    border-color: transparent !important;
+}
+.product-card:not(.skeleton):active { transform: translateY(-2px) scale(.99) !important; transition-duration: .15s !important; }
+.product-card.skeleton:hover { transform: none !important; box-shadow: none !important; }
+
+/* Imagem */
+.product-image {
+    height: auto !important;
+    min-height: unset !important;
+    aspect-ratio: 1 / 1 !important;
+    background: #1a1a1a !important;
+}
+.product-image img { transition: transform .7s cubic-bezier(.2,.8,.2,1) !important; will-change: transform; }
+.product-card:not(.skeleton):hover .product-image .product-img-main,
+.product-card:not(.skeleton):active .product-image .product-img-main { transform: scale(1.12) !important; }
+.product-image::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,.55));
+    opacity: 0;
+    transition: opacity .35s;
+    pointer-events: none;
+    z-index: 1;
+}
+.product-card:not(.skeleton):hover .product-image::after { opacity: 1; }
+
+/* Badge Vendido Hoje */
+.badge-sold {
+    position: absolute;
+    top: 8px; left: 8px;
+    z-index: 2;
+    background: linear-gradient(135deg, #E74C3C, #c0392b);
+    color: #fff;
+    font-size: .62rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .5px;
+    padding: 4px 9px; border-radius: 4px;
+    animation: slideDownBadge .5s .2s both;
+    overflow: hidden;
+}
+.badge-sold::before {
+    content: "";
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
+    animation: shimmerBadge 2.5s infinite;
+}
+@keyframes slideDownBadge { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes shimmerBadge { 0% { left: -100%; } 50%, 100% { left: 200%; } }
+
+/* Badge de desconto (circular dourado) */
+.badge-discount {
+    position: absolute;
+    top: 8px; right: 8px;
+    z-index: 2;
+    background: var(--gold-primary);
+    color: #000; font-weight: 800; font-size: .7rem;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    box-shadow: 0 4px 12px rgba(212,175,55,.5);
+    animation: popInBadge .5s .3s both;
+    line-height: 1;
+}
+.badge-discount span { font-size: .52rem; line-height: 1; opacity: .8; }
+.badge-discount strong { font-size: .78rem; line-height: 1; }
+@keyframes popInBadge { from { transform: scale(0) rotate(-180deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+
+/* Botao quick-add (+) */
+.quick-add {
+    position: absolute;
+    bottom: 8px; right: 8px;
+    z-index: 3;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--gold-primary);
+    color: #000; font-size: 1.3rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(212,175,55,.5);
+    transform: translateY(60px); opacity: 0;
+    transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .25s, background .2s;
+    border: none; cursor: pointer; line-height: 1;
+}
+.product-card:hover .quick-add,
+.product-card:active .quick-add { transform: translateY(0); opacity: 1; }
+.quick-add:hover { background: #fff5cc !important; transform: translateY(0) scale(1.15) !important; }
+.quick-add:active { transform: translateY(0) scale(.9) !important; }
+
+/* Preco com contador animado */
+.product-prices { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+.price-now { font-size: 1.05rem; font-weight: 800; color: var(--gold-primary); font-family: 'Poppins', Arial, sans-serif; white-space: nowrap; }
+.price-now .currency { font-size: .7rem; font-weight: 600; margin-right: 1px; }
+
+/* Viewers com bolinha pulsante */
+.viewers {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: .65rem; font-weight: 700;
+    color: #FF6B1A; background: rgba(255,107,26,.1);
+    padding: 3px 8px; border-radius: 10px; white-space: nowrap;
+}
+.viewers .dot {
+    width: 6px; height: 6px; border-radius: 50%; background: #FF3333;
+    box-shadow: 0 0 0 0 rgba(255,51,51,.7);
+    animation: pulseDot 1.6s infinite; flex-shrink: 0;
+}
+@keyframes pulseDot {
+    0% { box-shadow: 0 0 0 0 rgba(255,51,51,.7); }
+    70% { box-shadow: 0 0 0 8px rgba(255,51,51,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,51,51,0); }
+}
+
+/* Tag frete gratis */
+.tag-free {
+    display: inline-block;
+    font-size: .6rem; font-weight: 700;
+    color: #27AE60; background: rgba(39,174,96,.12);
+    padding: 2px 6px; border-radius: 4px;
+    margin-top: 2px; letter-spacing: .3px;
+}
+
+/* Mobile: correcoes para o novo design */
+@media (max-width: 768px) {
+    .product-card { border-radius: 10px !important; }
+    .product-image { height: auto !important; min-height: unset !important; }
+    .badge-discount { width: 32px !important; height: 32px !important; }
+    .badge-discount strong { font-size: .68rem; }
+    .badge-discount span { font-size: .48rem; }
+    .quick-add { display: none; }
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+    .badge-sold, .badge-discount, .viewers .dot { animation: none !important; }
+    .product-card, .product-image img, .quick-add { transition-duration: .01ms !important; }
+}
+
+
+/* ============================================================
+   PROTOTIPO B — HEADER GLASSMORPHISM + CARROSSEL FEATURED
+   ============================================================ */
+
+/* Glassmorphism */
+.header {
+    background: rgba(10,10,10,.72) !important;
+    backdrop-filter: blur(14px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(140%) !important;
+    box-shadow: none !important;
+    border-bottom: 1px solid rgba(212,175,55,.22) !important;
+}
+.header.header-collapsed {
+    background: rgba(10,10,10,.90) !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,.65) !important;
+}
+
+/* Colapso suave com max-height */
+.header-top {
+    max-height: 120px !important;
+    overflow: hidden !important;
+    transition: max-height .4s ease, opacity .35s ease, padding .35s ease !important;
+}
+.header.header-collapsed .header-top {
+    max-height: 0 !important;
+    opacity: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin: 0 !important;
+}
+
+/* Search bar: glow dourado no foco */
+.search-wrapper:focus-within {
+    border-color: var(--gold-primary) !important;
+    box-shadow: 0 0 0 4px rgba(212,175,55,.15), 0 0 22px rgba(212,175,55,.3) !important;
+}
+
+/* Carrossel - borda giratoria dourada (featured) */
+@property --carousel-ang {
+    syntax: '<angle>';
+    initial-value: 0deg;
+    inherits: false;
+}
+.carousel-item.featured {
+    padding: 2.5px !important;
+    background: conic-gradient(from var(--carousel-ang, 0deg), var(--gold-primary), #fff5cc 30%, var(--gold-dark) 60%, var(--gold-primary)) !important;
+    animation: spinCarouselBorder 4s linear infinite !important;
+    border-radius: 14px !important;
+    overflow: hidden;
+    box-shadow: 0 0 18px rgba(212,175,55,.35) !important;
+    flex-shrink: 0;
+}
+@keyframes spinCarouselBorder { to { --carousel-ang: 360deg; } }
+.carousel-item.featured .carousel-item-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #1a1a1a;
+    display: flex;
+    flex-direction: column;
+}
+.carousel-item.featured .carousel-item-inner img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+}
+
+/* Fallback para browsers sem @property (Safari antigo) */
+@supports not (background: conic-gradient(from 0deg, red, blue)) {
+    .carousel-item.featured {
+        border: 2.5px solid var(--gold-primary) !important;
+        box-shadow: 0 0 18px rgba(212,175,55,.5) !important;
+        animation: none !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .carousel-item.featured { animation: none !important; }
+    .header, .header-top { transition-duration: .01ms !important; }
+}
+
+
+/* ============================================================
+   PROTOTIPO C — FLY-TO-CART + CART SHAKE + GEO NOTIFICATION
+   ============================================================ */
+
+/* Imagem voando para o carrinho */
+.fly-to-cart {
+    position: fixed;
+    border-radius: 50%;
+    object-fit: cover;
+    z-index: 9999;
+    pointer-events: none;
+    box-shadow: 0 8px 24px rgba(212,175,55,.6);
+    transition: transform .85s cubic-bezier(.5,-.2,.5,1.2), opacity .85s ease;
+    will-change: transform, opacity;
+}
+
+/* Cart button shake */
+.cart-btn.cart-shake {
+    animation: cartShakeAnim .5s ease !important;
+}
+@keyframes cartShakeAnim {
+    0%, 100% { transform: rotate(0) scale(1); }
+    20% { transform: rotate(-14deg) scale(1.12); }
+    40% { transform: rotate(14deg) scale(1.12); }
+    60% { transform: rotate(-9deg) scale(1.05); }
+    80% { transform: rotate(9deg) scale(1.05); }
+}
+
+/* Badge bump */
+.cart-count {
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1) !important;
+}
+.cart-count.cart-count-bump {
+    transform: scale(1.7) !important;
+}
+
+/* Geo Notification - estilo Prototipo C */
+.geo-notification {
+    position: fixed !important;
+    left: 14px !important;
+    bottom: 90px !important;
+    max-width: 300px !important;
+    background: linear-gradient(135deg, #1a1a1a, #0a0a0a) !important;
+    border: 1px solid rgba(212,175,55,.4) !important;
+    border-radius: 12px !important;
+    padding: 12px 14px !important;
+    box-shadow: 0 12px 32px rgba(0,0,0,.6), 0 0 20px rgba(212,175,55,.15) !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    z-index: 400 !important;
+    transform: translateX(-140%) !important;
+    transition: transform .55s cubic-bezier(.34,1.56,.64,1) !important;
+    overflow: hidden !important;
+    /* anular estilos antigos */
+    top: auto !important;
+    right: auto !important;
+    width: auto !important;
+}
+.geo-notification.geo-show {
+    transform: translateX(0) !important;
+}
+
+.geo-notif-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(212,175,55,.15);
+    color: var(--gold-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    animation: pingGeoIcon 1.5s infinite;
+}
+@keyframes pingGeoIcon {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(212,175,55,.6); }
+    50% { box-shadow: 0 0 0 8px rgba(212,175,55,0); }
+}
+
+.geo-notif-text {
+    font-size: .78rem;
+    line-height: 1.35;
+    color: #eee;
+    flex: 1;
+    min-width: 0;
+}
+.geo-notif-text strong { color: var(--gold-primary); }
+
+.geo-notif-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold-primary));
+    width: 100%;
+    transform-origin: left;
+}
+.geo-notif-bar.geo-bar-animate {
+    animation: geoBarShrinkC 6s linear forwards;
+}
+@keyframes geoBarShrinkC { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+    .fly-to-cart { transition-duration: .01ms !important; }
+    .cart-btn.cart-shake { animation: none !important; }
+    .geo-notif-icon { animation: none !important; }
+}
