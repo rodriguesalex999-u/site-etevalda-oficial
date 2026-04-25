@@ -206,6 +206,7 @@ function renderProducts() {
             const markup = 1 + (0.15 + (((p.id * 7) % 16) / 100));
             const oldPr = (p.price * markup).toFixed(2).replace('.', ',');
             const disc = Math.round((1 - 1/markup) * 100);
+            const currentPriceFormatted = p.price.toFixed(2).replace('.', ',');
             return `
         <div class="product-card sec-card" onclick="window.openProductModal(${p.id})">
             <div class="product-image ${hasMulti ? 'has-hover' : ''}">
@@ -219,10 +220,13 @@ function renderProducts() {
                 <div class="product-name">${p.name}</div>
                 <div class="product-prices">
                     <span class="price-old">R$ ${oldPr}</span>
-                    <span class="price-now" data-target="${p.price}"><span class="currency">R$</span><span class="num">0,00</span></span>
+                    <span class="price-now">
+                        <span class="currency">R$</span>
+                        <span class="num">${currentPriceFormatted}</span>
+                    </span>
                 </div>
                 <span class="viewers"><span class="dot"></span>${views} pessoas vendo</span>
-                <div class="tag-free">✓ FRETE GRÁTIS</div>
+
             </div>
         </div>`;
         }).join('');
@@ -238,8 +242,9 @@ function renderProducts() {
         const fakeMarkup = 1 + (0.15 + (((p.id * 7) % 16) / 100));
         const oldPrice = (p.price * fakeMarkup).toFixed(2).replace('.', ',');
         const discPct = Math.round((1 - 1/fakeMarkup) * 100);
-        const isPriority = index < 2;
+        const isPriority = index < 6;
         const imgAttrs = `width="180" height="180" decoding="async" ${isPriority ? 'fetchpriority="high"' : 'loading="lazy"'}`;
+        const currentPriceFormatted = p.price.toFixed(2).replace('.', ',');
         
         return `
         <div class="product-card" onclick="window.openProductModal(${p.id})">
@@ -254,27 +259,23 @@ function renderProducts() {
                 <div class="product-name">${p.name}</div>
                 <div class="product-prices">
                     <span class="price-old">R$ ${oldPrice}</span>
-                    <span class="price-now" data-target="${p.price}"><span class="currency">R$</span><span class="num">0,00</span></span>
+                    <span class="price-now">
+                        <span class="currency">R$</span>
+                        <span class="num">${currentPriceFormatted}</span>
+                    </span>
                 </div>
                 <span class="viewers"><span class="dot"></span>${viewers} pessoas vendo</span>
-                <div class="tag-free">✓ FRETE GRÁTIS</div>
+
             </div>
         </div>
     `;
     }).join('');
 
-    // Activar animacoes de entrada nos cards (pula os 4 primeiros - LCP)
+    // Activar animacoes de entrada nos cards (apenas para efeito visual, sem interferir no preço)
     if (_cardAnimObserver) {
         setTimeout(() => {
             container.querySelectorAll('.product-card').forEach((card, i) => {
                 if (i < 4) {
-                    // Primeiros 4 cards: definir preco diretamente (sem animacao, sao LCP)
-                    const priceEl = card.querySelector('.price-now');
-                    if (priceEl) {
-                        const numEl = priceEl.querySelector('.num');
-                        const target = parseFloat(priceEl.dataset.target);
-                        if (numEl && !isNaN(target)) numEl.textContent = target.toFixed(2).replace('.', ',');
-                    }
                     return;
                 }
                 card.classList.add('card-anim-ready');
@@ -1252,19 +1253,7 @@ function openProductModal(id) {
     const originalPrice = product.price.toFixed(2).replace('.', ',');
     const pixPrice = _isNoDiscount ? originalPrice : (product.price * 0.95).toFixed(2).replace('.', ',');
     const installmentValue = (product.price / 6).toFixed(2).replace('.', ',');
-    const _shippingMsgs = [
-        '\ud83d\ude9a Frete gr\u00e1tis em compras acima de R$ 379,99',
-        '\ud83d\ude9a Compre agora acima de R$ 379,99 e ganhe frete gr\u00e1tis',
-        '\ud83d\ude9a Aproveite: frete gr\u00e1tis para todo o MT acima de R$ 379,99',
-        '\ud83d\ude9a Somente hoje: frete por nossa conta acima de R$ 379,99',
-        '\ud83d\ude9a Ganhe frete gr\u00e1tis adicionando R$ 379,99 no carrinho',
-        '\ud83d\ude9a Entrega VIP e gratuita em pedidos acima de R$ 379,99',
-        '\ud83d\ude9a Quer frete gr\u00e1tis? Finalize seu pedido acima de R$ 379,99',
-        '\ud83d\ude9a Frete Gr\u00e1tis Liberado para compras a partir de R$ 379,99',
-        '\ud83d\ude9a Seu pedido acima de R$ 379,99 viaja com frete gr\u00e1tis!',
-        '\ud83d\ude9a Promo\u00e7\u00e3o: Frete Zero em todo o site acima de R$ 379,99'
-    ];
-    const shippingMsg = _shippingMsgs[product.id % 10];
+    const shippingMsg = '';
     const hasPixDiscount = product.has_pix_discount !== false;
     let _priceBlock;
     if (!hasPixDiscount) {
@@ -2519,6 +2508,42 @@ window.selectSizeChip = function(btn, size) {
         });
     }
 };
+
+// ========================================
+// PRÉ-CARREGAMENTO INTELIGENTE DE IMAGENS
+// ========================================
+function preloadNearbyImages() {
+    if (!window.IntersectionObserver) return;
+    
+    const preloadObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                const originalSrc = img.getAttribute('data-src');
+                if (originalSrc && !img.src) {
+                    img.src = originalSrc;
+                }
+                preloadObserver.unobserve(img);
+            }
+        });
+    }, {
+        rootMargin: '300px 0px 300px 0px'
+    });
+    
+    document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+        preloadObserver.observe(img);
+    });
+}
+
+// Chamar após cada renderização de produtos de forma segura
+if (typeof window._renderInitialized === 'undefined') {
+    window._renderInitialized = true;
+    const originalRender = renderProducts;
+    window.renderProducts = function() {
+        originalRender();
+        setTimeout(preloadNearbyImages, 100);
+    };
+}
 
 // ========================================
 // FUNÇÕES GLOBAIS (MANTIDAS)
