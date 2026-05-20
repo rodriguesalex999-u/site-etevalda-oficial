@@ -1879,17 +1879,52 @@ document.addEventListener('click', function(e) {
     }
 });
 
+let _activeFaqAudio = null;
+let _activeFaqCard  = null;
+
+function _duckMusicForFaq() {
+    if (bgMusic && musicStarted) bgMusic.volume = 0.15;
+}
+function _restoreMusicAfterFaq() {
+    if (bgMusic && musicStarted && !isVideoPlaying) bgMusic.volume = originalVolume;
+}
+
 window.playFaqAudio = function(card) {
     const audio = card.querySelector('audio');
-    if (audio) {
-        if (audio.paused) {
-            audio.play();
-            card.querySelector('.faq-icon i').className = 'fas fa-stop';
-        } else {
-            audio.pause();
-            audio.currentTime = 0;
-            card.querySelector('.faq-icon i').className = 'fas fa-play';
+    if (!audio) return;
+
+    // Se há outro FAQ tocando → para ele primeiro
+    if (_activeFaqAudio && _activeFaqAudio !== audio) {
+        _activeFaqAudio.pause();
+        _activeFaqAudio.currentTime = 0;
+        if (_activeFaqCard) {
+            const prevIcon = _activeFaqCard.querySelector('.faq-icon i');
+            if (prevIcon) prevIcon.className = 'fas fa-play';
         }
+        _activeFaqAudio = null;
+        _activeFaqCard  = null;
+    }
+
+    if (audio.paused) {
+        audio.play();
+        _activeFaqAudio = audio;
+        _activeFaqCard  = card;
+        card.querySelector('.faq-icon i').className = 'fas fa-stop';
+        _duckMusicForFaq();
+
+        audio.onended = function() {
+            card.querySelector('.faq-icon i').className = 'fas fa-play';
+            _activeFaqAudio = null;
+            _activeFaqCard  = null;
+            _restoreMusicAfterFaq();
+        };
+    } else {
+        audio.pause();
+        audio.currentTime = 0;
+        card.querySelector('.faq-icon i').className = 'fas fa-play';
+        _activeFaqAudio = null;
+        _activeFaqCard  = null;
+        _restoreMusicAfterFaq();
     }
 };
 
