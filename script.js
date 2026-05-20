@@ -398,7 +398,7 @@ function renderSuperZoomMedia() {
 
     const zoomActionsHtml = currentModalProduct ? `
         <div class="super-zoom-actions">
-            <button class="super-zoom-mp" onclick="buyViaMercadoPago(${currentModalProduct.id})">
+            <button class="super-zoom-mp" onclick="handleBuyClick(${currentModalProduct.id})">
                 <i class="fas fa-credit-card"></i> Comprar no Site
             </button>
             <button class="super-zoom-whatsapp" onclick="buyViaWhatsApp(${currentModalProduct.id})">
@@ -1371,7 +1371,7 @@ function openProductModal(id) {
                 ${renderSizeSelectorHtml(product)}
                 <div class="product-rating-large">${renderStars(rating)}</div>
                 <div class="modal-buttons">
-                    <button class="btn-mercadopago-modal" onclick="buyViaMercadoPago(${product.id})" id="mpBtn-${product.id}">
+                    <button class="btn-mercadopago-modal" onclick="handleBuyClick(${product.id})" id="mpBtn-${product.id}">
                         <i class="fas fa-credit-card"></i> Comprar Agora
                     </button>
                     <button class="btn-whatsapp-modal" aria-label="Falar com atendente no WhatsApp sobre este produto" 
@@ -1779,7 +1779,7 @@ function _getGreetingAndCity(input) {
     const norm = _normCity(input.trim());
     if (norm === 'cba' || norm.includes('cuiaba')) return { greeting: 'Oi', city: 'Cuiabá' };
     if (norm === 'vg'  || norm.includes('varzea')) return { greeting: 'Oi', city: 'Várzea Grande' };
-    if (norm === 'roo' || norm.includes('rondon')) return { greeting: 'Oi', city: 'Rondonópolis' };
+    if (norm === 'roo' || norm.includes('rondon') || norm.includes('rodon')) return { greeting: 'Oi', city: 'Rondonópolis' };
     if (norm.includes('sinop'))      return { greeting: 'Oi', city: 'Sinop' };
     if (norm.includes('diamantino')) return { greeting: 'Oi', city: 'Diamantino' };
     return { greeting: 'Olá', city: input.trim() || 'minha cidade' };
@@ -1806,7 +1806,7 @@ function sendWhatsAppMessage(product, city) {
         msg += ` | Numeração/Tamanho: *${window.selectedSize}${genderInfo}*`;
     }
 
-    window.open(`https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}`, '_blank');
+    window.open(`https://api.whatsapp.com/send/?phone=5565981042112&text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 // Função para mostrar o modal de cidade (campo de texto livre)
@@ -1893,8 +1893,70 @@ window.playFaqAudio = function(card) {
     }
 };
 
+// CHECKOUT POPUP — Smart Buy Flow
+function showCheckoutPopup({ icon, title, message, btnOk = 'OK', btnCancel = null }) {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'chk-popup-overlay';
+        const cancelHtml = btnCancel
+            ? `<button class="chk-btn-secondary" data-val="cancel">${btnCancel}</button>`
+            : '';
+        overlay.innerHTML = `
+            <div class="chk-popup-card">
+                <div class="chk-popup-icon">${icon}</div>
+                <div class="chk-popup-title">${title}</div>
+                <div class="chk-popup-msg">${message}</div>
+                <div class="chk-popup-btns">
+                    ${cancelHtml}
+                    <button class="chk-btn-primary" data-val="ok">${btnOk}</button>
+                </div>
+            </div>`;
+        document.body.appendChild(overlay);
+        requestAnimationFrame(() => overlay.classList.add('chk-popup-show'));
+        function close(val) {
+            overlay.classList.remove('chk-popup-show');
+            setTimeout(() => overlay.remove(), 300);
+            resolve(val);
+        }
+        overlay.querySelectorAll('[data-val]').forEach(btn => {
+            btn.addEventListener('click', () => close(btn.dataset.val));
+        });
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) close('cancel'); });
+    });
+}
+
+function showShippingPopup(product, halfPrice = false) {
+    const basePrice = halfPrice ? product.price / 2 : product.price;
+    const total = (basePrice + 14.99).toFixed(2).replace('.', ',');
+    return showCheckoutPopup({
+        icon: '🎁',
+        title: 'Promoção de Frete!',
+        message: `O frete normal para a sua região é <strong><s>R$ 45,00</s></strong>.<br><br>Hoje estamos fazendo por apenas <strong style="color:#d4af37;font-size:1.18em">R$ 14,99</strong>! 🎉<br><br>Valor total com frete: <strong>R$ ${total}</strong>`,
+        btnOk: 'Ótimo! Finalizar Compra 🛒'
+    });
+}
+
+function scrollToSizeSelector() {
+    const modal = document.getElementById('productModal');
+    const selector = modal ? modal.querySelector('.size-selector-wrap') : null;
+    if (!selector) return;
+    selector.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => {
+        const panel = document.getElementById('sizePanel');
+        const chevron = document.getElementById('sizeChevron');
+        if (panel && !panel.classList.contains('size-panel-open')) {
+            panel.classList.add('size-panel-open');
+            if (chevron) chevron.style.transform = 'rotate(180deg)';
+        }
+        selector.classList.remove('size-selector-flash');
+        void selector.offsetWidth;
+        selector.classList.add('size-selector-flash');
+        setTimeout(() => selector.classList.remove('size-selector-flash'), 2300);
+    }, 420);
+}
+
 // MERCADO PAGO - CHECKOUT PRO
-async function buyViaMercadoPago(productId) {
+async function buyViaMercadoPago(productId, priceOverride = null) {
     const product = allProductsLoaded.find(p => p.id === productId);
     if (!product) return;
 
@@ -1923,7 +1985,7 @@ async function buyViaMercadoPago(productId) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 title: product.name,
-                price: product.price + 14.99,
+                price: (priceOverride !== null ? priceOverride : product.price) + 14.99,
                 quantity: 1,
                 category: categoryName,
                 productId: product.id,
@@ -1953,6 +2015,105 @@ async function buyViaMercadoPago(productId) {
             btn.innerHTML = '<i class="fas fa-credit-card"></i> Comprar Agora';
         }
     }
+}
+
+// SMART BUY HANDLER — intercepts "Comprar Agora" with size validation + shipping popup
+async function handleBuyClick(productId) {
+    const product = allProductsLoaded.find(p => p.id === productId) ||
+                    (allProductsCache || []).find(p => p.id === productId);
+    if (!product) return;
+
+    const sizeType = product.size_type || (product.tem_numeracao ? _sizeCategory(product) : null);
+
+    // ── CORRENTE: tamanho único, exibe info e segue ──────────────────────────
+    if (sizeType === 'chain') {
+        const res = await showCheckoutPopup({
+            icon: '⛓️',
+            title: 'A Mais Vendida do Brasil!',
+            message: 'Você vai receber a <strong>Corrente de 70 cm</strong> — nosso tamanho campeão de vendas! ✅<br><br>Clique em <strong>Continuar</strong> para finalizar sua compra.',
+            btnOk: 'Continuar 🛒'
+        });
+        if (res !== 'ok') return;
+        await showShippingPopup(product);
+        buyViaMercadoPago(productId);
+        return;
+    }
+
+    // ── ALIANÇA / ANEL: fluxo inteligente de numeração ───────────────────────
+    if (sizeType === 'ring') {
+        const masc = window.selectedSizeMasc;
+        const fem  = window.selectedSizeFem;
+
+        // Nenhum tamanho selecionado → guia para o seletor
+        if (!masc && !fem) {
+            await showCheckoutPopup({
+                icon: '💍',
+                title: 'Escolha a Numeração Primeiro',
+                message: 'Para garantirmos que você receba o tamanho <strong>perfeito</strong>, selecione a numeração logo abaixo antes de finalizar.<br><br>Nossa equipe também entra em contato antes do envio! 😊',
+                btnOk: 'Escolher Tamanho'
+            });
+            scrollToSizeSelector();
+            return;
+        }
+
+        // Apenas um gênero selecionado → pergunta se quer só 1 aliança
+        if (!masc || !fem) {
+            const selectedLabel = masc
+                ? `Masculino <strong>${masc}</strong>`
+                : `Feminino <strong>${fem}</strong>`;
+            const halfFmt = (product.price / 2).toFixed(2).replace('.', ',');
+            const fullFmt = product.price.toFixed(2).replace('.', ',');
+            const res = await showCheckoutPopup({
+                icon: '💍',
+                title: 'Comprar Só 1 Aliança?',
+                message: `Você selecionou apenas o tamanho ${selectedLabel}.<br><br>
+                    👉 <strong>1 aliança</strong> — valor reduzido: <strong style="color:#d4af37">R$ ${halfFmt}</strong><br>
+                    💑 <strong>Par completo</strong> — selecione também o outro tamanho para o valor cheio de R$ ${fullFmt}`,
+                btnOk: '✅ Só 1 Aliança (R$ ' + halfFmt + ')',
+                btnCancel: '💑 Completar o Par'
+            });
+            if (res === 'ok') {
+                await showShippingPopup(product, true);
+                buyViaMercadoPago(productId, product.price / 2);
+            } else {
+                // Direciona para o gênero ainda não selecionado
+                const targetGender = masc ? 'Feminino' : 'Masculino';
+                scrollToSizeSelector();
+                setTimeout(() => {
+                    document.querySelectorAll('.sz-gender-tab').forEach(t => {
+                        if (t.textContent.includes(targetGender)) t.click();
+                    });
+                }, 500);
+            }
+            return;
+        }
+
+        // Ambos selecionados → popup de frete e compra
+        await showShippingPopup(product);
+        buyViaMercadoPago(productId);
+        return;
+    }
+
+    // ── PULSEIRA: valida tamanho ──────────────────────────────────────────────
+    if (sizeType === 'bracelet') {
+        if (!window.selectedSize) {
+            await showCheckoutPopup({
+                icon: '📿',
+                title: 'Escolha o Tamanho',
+                message: 'Selecione o tamanho da pulseira para garantirmos o ajuste perfeito antes do envio! 😊',
+                btnOk: 'Escolher Tamanho'
+            });
+            scrollToSizeSelector();
+            return;
+        }
+        await showShippingPopup(product);
+        buyViaMercadoPago(productId);
+        return;
+    }
+
+    // ── SEM TAMANHO (outros produtos) → popup de frete direto ────────────────
+    await showShippingPopup(product);
+    buyViaMercadoPago(productId);
 }
 
 // 8. INICIALIZAÇÃO
@@ -2106,7 +2267,7 @@ function setupCartListeners() {
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             message += `\nTotal: R$ ${total.toFixed(2).replace('.', ',')}`;
             
-            window.open(`https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(message)}`, '_blank');
+            window.open(`https://api.whatsapp.com/send/?phone=5565981042112&text=${encodeURIComponent(message)}`, '_blank');
         });
     }
 }
@@ -2480,20 +2641,30 @@ window.selectSizeChip = function(btn, size) {
     const conf = document.getElementById('sizeConfirmMsg');
 
     if (masc && fem) {
-        // Both selected — final message
+        // Both selected — final message + auto-scroll to buy button
         window.selectedSize = `Masc. ${masc} / Fem. ${fem}`;
         document.querySelectorAll('.sz-gender-tab').forEach(t => t.classList.remove('sz-gender-tab-pulse'));
         if (conf) {
-            conf.innerHTML = `✅ Prontinho! Masculino <strong>${masc}</strong> e Feminino <strong>${fem}</strong> selecionados. Agora é só clicar em Comprar — fique tranquilo, nossa equipe entrará em contato com você antes do envio para tirar qualquer dúvida. 😊`;
+            conf.innerHTML = `✅ Prontinho! Masculino <strong>${masc}</strong> e Feminino <strong>${fem}</strong> selecionados. Agora é só clicar em <strong>Comprar Agora</strong>! 🛒`;
             conf.classList.add('size-confirm-show');
         }
+        // Auto-scroll to buy button + pulse it
+        setTimeout(() => {
+            const mpBtn = document.querySelector('.btn-mercadopago-modal');
+            if (mpBtn) {
+                mpBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                mpBtn.classList.remove('mp-btn-glow');
+                void mpBtn.offsetWidth;
+                mpBtn.classList.add('mp-btn-glow');
+                setTimeout(() => mpBtn.classList.remove('mp-btn-glow'), 2000);
+            }
+        }, 600);
     } else {
         // Only one selected — guide to the other
         window.selectedSize = gender === 'Masculino' ? `Masc. ${size}` : `Fem. ${size}`;
-        const otherLabel = gender === 'Masculino' ? 'feminino' : 'masculino';
-        const promptMsg  = gender === 'Masculino'
-            ? `✅ Masculino <strong>${size}</strong> selecionado. Agora clique ao lado e escolha o feminino. 👉`
-            : `✅ Feminino <strong>${size}</strong> selecionado. Agora clique no masculino para escolher. 👈`;
+        const promptMsg = gender === 'Masculino'
+            ? `✅ Masculino <strong>${size}</strong> selecionado. Agora escolha o tamanho <strong>feminino</strong> ao lado! 👉`
+            : `✅ Feminino <strong>${size}</strong> selecionado. Agora escolha o tamanho <strong>masculino</strong> ao lado! 👈`;
         if (conf) {
             conf.innerHTML = promptMsg;
             conf.classList.add('size-confirm-show');
@@ -2502,10 +2673,16 @@ window.selectSizeChip = function(btn, size) {
         document.querySelectorAll('.sz-gender-tab').forEach(t => {
             if (!t.classList.contains('sz-gender-active')) {
                 t.classList.remove('sz-gender-tab-pulse');
-                void t.offsetWidth; // restart animation
+                void t.offsetWidth;
                 t.classList.add('sz-gender-tab-pulse');
             }
         });
+        // Auto-switch to the other gender tab after 1.5s
+        setTimeout(() => {
+            document.querySelectorAll('.sz-gender-tab').forEach(t => {
+                if (!t.classList.contains('sz-gender-active')) t.click();
+            });
+        }, 1500);
     }
 };
 
@@ -2558,6 +2735,7 @@ window.toggleCart = toggleCart;
 window.closeCart = closeCart;
 window.buyViaWhatsApp = buyViaWhatsApp;
 window.buyViaMercadoPago = buyViaMercadoPago;
+window.handleBuyClick = handleBuyClick;
 window.hoverImage = hoverImage;
 window.unhoverImage = unhoverImage;
 window.openSuperZoom = openSuperZoom;

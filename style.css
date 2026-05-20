@@ -6336,3 +6336,97 @@ backdrop-filter: blur(5px);
     0%, 100% { box-shadow: 0 0 12px rgba(212,175,55,.4), 0 0 0 2px rgba(212,175,55,.6) !important; }
     50% { box-shadow: 0 0 28px rgba(212,175,55,.7), 0 0 0 2.5px var(--gold-primary) !important; }
 }
+
+/* ============================================================
+   CHECKOUT POPUP — Smart Buy Flow (handleBuyClick)
+   ============================================================ */
+.chk-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+.chk-popup-overlay.chk-popup-show { opacity: 1; }
+.chk-popup-overlay.chk-popup-show .chk-popup-card {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+.chk-popup-card {
+    background: #141414;
+    border: 1px solid rgba(212,175,55,0.38);
+    border-radius: 20px;
+    padding: 34px 28px 26px;
+    max-width: 390px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 28px 70px rgba(0,0,0,0.65), 0 0 0 1px rgba(212,175,55,0.1);
+    transform: translateY(28px) scale(0.95);
+    opacity: 0;
+    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.25s ease;
+}
+.chk-popup-icon { font-size: 3rem; margin-bottom: 14px; line-height: 1; }
+.chk-popup-title {
+    color: var(--gold-primary, #d4af37);
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: 0.3px;
+}
+.chk-popup-msg {
+    color: #ccc;
+    font-size: 0.94rem;
+    line-height: 1.65;
+    margin-bottom: 24px;
+}
+.chk-popup-btns { display: flex; flex-direction: column; gap: 10px; }
+.chk-btn-primary {
+    background: linear-gradient(135deg, #d4af37 0%, #f5d060 100%);
+    color: #000;
+    border: none;
+    border-radius: 11px;
+    padding: 15px 20px;
+    font-size: 0.98rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    font-family: inherit;
+    box-shadow: 0 4px 18px rgba(212,175,55,0.38);
+    letter-spacing: 0.2px;
+}
+.chk-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 26px rgba(212,175,55,0.48); }
+.chk-btn-secondary {
+    background: transparent;
+    color: #999;
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 11px;
+    padding: 13px 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    font-family: inherit;
+}
+.chk-btn-secondary:hover { background: rgba(255,255,255,0.07); color: #ddd; }
+
+/* Flash + glow on size selector when user needs to select size */
+@keyframes sizeSelectorFlash {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(212,175,55,0); border-color: rgba(212,175,55,0.3); }
+    30%, 70% { box-shadow: 0 0 0 5px rgba(212,175,55,0.35); border-color: var(--gold-primary,#d4af37); }
+    50% { box-shadow: 0 0 0 9px rgba(212,175,55,0); border-color: rgba(212,175,55,0.9); }
+}
+.size-selector-flash { animation: sizeSelectorFlash 0.75s ease 3; }
+
+/* Pulse buy button after both ring sizes selected */
+@keyframes mpBtnPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.7); transform: scale(1); }
+    50% { box-shadow: 0 0 0 10px rgba(212,175,55,0); transform: scale(1.04); }
+}
+.mp-btn-glow { animation: mpBtnPulse 0.65s ease 3; }
