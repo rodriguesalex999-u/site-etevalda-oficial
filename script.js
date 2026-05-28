@@ -34,25 +34,51 @@ let complementShownIds = [];
 let isLoadingMoreComplement = false;
 
 // Observer reutilizavel para animacao de entrada de cards
+// Loop RAF compartilhado para animacoes de preco — evita multiplos RAFs concorrentes
+const _activePriceAnims = new Map();
+let _priceAnimFrameId = null;
+
+function _tickPriceAnims(timestamp) {
+    let hasActive = false;
+    _activePriceAnims.forEach((anim, el) => {
+        const prog = Math.min(1, (timestamp - anim.start) / anim.duration);
+        const eased = 1 - Math.pow(1 - prog, 3);
+        el.textContent = (anim.target * eased).toFixed(2).replace('.', ',');
+        if (prog < 1) {
+            hasActive = true;
+        } else {
+            _activePriceAnims.delete(el);
+        }
+    });
+    if (hasActive) {
+        _priceAnimFrameId = requestAnimationFrame(_tickPriceAnims);
+    } else {
+        _priceAnimFrameId = null;
+    }
+}
+
+function _startPriceAnim(numEl, targetPrice) {
+    numEl.textContent = '0,00';
+    _activePriceAnims.set(numEl, {
+        start: performance.now(),
+        duration: 700,
+        target: targetPrice
+    });
+    if (!_priceAnimFrameId) {
+        _priceAnimFrameId = requestAnimationFrame(_tickPriceAnims);
+    }
+}
+
 const _cardAnimObserver = window.IntersectionObserver ? new IntersectionObserver((entries) => {
     entries.forEach(e => {
         if (e.isIntersecting) {
             e.target.classList.add('card-visible');
-            // Contador animado de preco
             const priceEl = e.target.querySelector('.price-now');
             if (priceEl) {
                 const _target = parseFloat(priceEl.dataset.target);
                 const numEl = priceEl.querySelector('.num');
                 if (numEl && !isNaN(_target)) {
-                    const _start = performance.now();
-                    const _dur = 700;
-                    function _priceTick(t) {
-                        const prog = Math.min(1, (t - _start) / _dur);
-                        const eased = 1 - Math.pow(1 - prog, 3);
-                        numEl.textContent = (_target * eased).toFixed(2).replace('.', ',');
-                        if (prog < 1) requestAnimationFrame(_priceTick);
-                    }
-                    requestAnimationFrame(_priceTick);
+                    _startPriceAnim(numEl, _target);
                 }
             }
             _cardAnimObserver.unobserve(e.target);
@@ -168,30 +194,126 @@ async function loadTeamCarousel() {
     teamCarouselData = data || [];
 }
 
-// 4. FUNÇÕES DE RENDERIZAÇÃO
+// 4. FUNÇÕES DE RENDERIZAÇÃO — LAZY LOADING (renderiza só o que cabe na tela)
+const PRODUCTS_PER_PAGE = 12;
+let _filteredProducts = [];
+let _renderedCount = 0;
+let _lazyObserver = null;
+
+function _buildCardHTML(p, globalIndex) {
+    const images = Array.isArray(p.images) ? p.images : [];
+    const hasMultipleImages = images.length > 1;
+    const viewers = productViewers[p.id] || 5;
+    const fakeMarkup = 1 + (0.15 + (((p.id * 7) % 16) / 100));
+    const oldPrice = (p.price * fakeMarkup).toFixed(2).replace('.', ',');
+    const discPct = Math.round((1 - 1/fakeMarkup) * 100);
+    const isPriority = globalIndex < 12;
+    const imgAttrs = `width="180" height="180" decoding="async" ${isPriority ? 'fetchpriority="high"' : 'loading="lazy"'}`;
+    const currentPriceFormatted = p.price.toFixed(2).replace('.', ',');
+    const cardOverlays = getAdditionalItemsOverlay(p);
+
+    return `
+        <div class="product-card" onclick="window.openProductModal(${p.id})">
+            <div class="product-image ${hasMultipleImages ? 'has-hover' : ''}">
+                ${p.sold_today ? '<div class="badge-sold">🔥 Vendido hoje</div>' : ''}
+                <div class="badge-discount"><span>-</span><strong>${discPct}%</strong></div>
+                <img id="product-img-${p.id}" src="${images[0] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-main" ${imgAttrs}>
+                ${hasMultipleImages ? `<img id="product-img-hover-${p.id}" src="${images[1] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-hover" width="180" height="180" loading="lazy" decoding="async">` : ''}
+                <button class="quick-add" onclick="event.stopPropagation();addToCartFly(event,${p.id})" aria-label="Adicionar ao carrinho">+</button>
+                ${cardOverlays}
+            </div>
+            <div class="product-info">
+                <div class="product-name">${p.name}</div>
+                <div class="product-prices">
+                    <span class="price-old">R$ ${oldPrice}</span>
+                    <span class="price-now">
+                        <span class="currency">R$</span>
+                        <span class="num">${currentPriceFormatted}</span>
+                    </span>
+                </div>
+                <span class="viewers"><span class="dot"></span>${viewers} pessoas vendo</span>
+            </div>
+        </div>`;
+}
+
+function _renderBatch(container) {
+    const fragment = document.createDocumentFragment();
+    const end = Math.min(_renderedCount + PRODUCTS_PER_PAGE, _filteredProducts.length);
+    for (let i = _renderedCount; i < end; i++) {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = _buildCardHTML(_filteredProducts[i], i);
+        fragment.appendChild(wrapper.firstElementChild);
+    }
+    container.appendChild(fragment);
+    _renderedCount = end;
+}
+
+function _observeCards(container, skipFirst) {
+    if (!_cardAnimObserver) return;
+    skipFirst = skipFirst || 4;
+    container.querySelectorAll('.product-card:not(.card-anim-ready)').forEach((card, i) => {
+        if (i < skipFirst) return;
+        card.classList.add('card-anim-ready');
+        _cardAnimObserver.observe(card);
+    });
+}
+
+function _resetLazyLoad() {
+    if (_lazyObserver) { _lazyObserver.disconnect(); _lazyObserver = null; }
+    _renderedCount = 0;
+    _filteredProducts = [];
+}
+
+function _setupLazyLoad(container) {
+    if (_lazyObserver) _lazyObserver.disconnect();
+
+    if (_renderedCount >= _filteredProducts.length) return;
+
+    _lazyObserver = new IntersectionObserver((entries) => {
+        if (!entries[0].isIntersecting) return;
+        _renderBatch(container);
+        _observeCards(container, 0);
+        if (_renderedCount >= _filteredProducts.length) {
+            _lazyObserver.disconnect();
+            _lazyObserver = null;
+        } else {
+            _lazyObserver.unobserve(entries[0].target);
+            const cards = container.querySelectorAll('.product-card');
+            _lazyObserver.observe(cards[cards.length - 1]);
+        }
+    }, { rootMargin: '300px' });
+
+    const cards = container.querySelectorAll('.product-card');
+    if (cards.length > 0) {
+        _lazyObserver.observe(cards[cards.length - 1]);
+    }
+}
+
 function renderProducts() {
     const container = document.getElementById('productsContainer');
     if (!container) return;
 
-    let filtered = allProductsLoaded.filter(p => {
+    _resetLazyLoad();
+
+    _filteredProducts = allProductsLoaded.filter(p => {
         const matchCat = currentCategory === 'all' || String(p.category_id) === String(currentCategory);
         const matchSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase());
         return matchCat && matchSearch;
     });
 
-    if (filtered.length === 0) {
+    if (_filteredProducts.length === 0) {
         container.innerHTML = '<p style="text-align:center; padding:40px;">Nenhum produto encontrado</p>';
         return;
     }
 
-    // Gerar viewers aleatórios para cada produto (consistente enquanto na mesma renderização)
-    filtered.forEach(p => {
+    // Gerar viewers
+    _filteredProducts.forEach(p => {
         if (!productViewers[p.id]) {
             productViewers[p.id] = Math.floor(Math.random() * 38) + 3;
         }
     });
 
-    // Vitrine de continuidade: sempre usa o cache completo (todos os produtos, todas as categorias)
+    // Vitrine de continuidade (inalterada)
     const secondaryGrid = document.getElementById('secondaryProductsGrid');
     const secondarySource = allProductsCache.length > 0 ? allProductsCache : allProductsLoaded;
     if (secondaryGrid && secondarySource.length > 0) {
@@ -228,65 +350,18 @@ function renderProducts() {
                     </span>
                 </div>
                 <span class="viewers"><span class="dot"></span>${views} pessoas vendo</span>
-
             </div>
         </div>`;
         }).join('');
 
-        // Se a seção já estiver visível (troca de categoria), reconfigurar observer imediatamente
         if (secondarySectionsLoaded) setupSecCardObserver();
     }
 
-    container.innerHTML = filtered.map((p, index) => {
-        const images = Array.isArray(p.images) ? p.images : [];
-        const hasMultipleImages = images.length > 1;
-        const viewers = productViewers[p.id] || 5;
-        const fakeMarkup = 1 + (0.15 + (((p.id * 7) % 16) / 100));
-        const oldPrice = (p.price * fakeMarkup).toFixed(2).replace('.', ',');
-        const discPct = Math.round((1 - 1/fakeMarkup) * 100);
-        const isPriority = index < 6;
-        const imgAttrs = `width="180" height="180" decoding="async" ${isPriority ? 'fetchpriority="high"' : 'loading="lazy"'}`;
-        const currentPriceFormatted = p.price.toFixed(2).replace('.', ',');
-        const cardOverlays = getAdditionalItemsOverlay(p);
-        
-        return `
-        <div class="product-card" onclick="window.openProductModal(${p.id})">
-            <div class="product-image ${hasMultipleImages ? 'has-hover' : ''}">
-                ${p.sold_today ? '<div class="badge-sold">🔥 Vendido hoje</div>' : ''}
-                <div class="badge-discount"><span>-</span><strong>${discPct}%</strong></div>
-                <img id="product-img-${p.id}" src="${images[0] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-main" ${imgAttrs}>
-                ${hasMultipleImages ? `<img id="product-img-hover-${p.id}" src="${images[1] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-hover" width="180" height="180" loading="lazy" decoding="async">` : ''}
-                <button class="quick-add" onclick="event.stopPropagation();addToCartFly(event,${p.id})" aria-label="Adicionar ao carrinho">+</button>
-                ${cardOverlays}
-            </div>
-            <div class="product-info">
-                <div class="product-name">${p.name}</div>
-                <div class="product-prices">
-                    <span class="price-old">R$ ${oldPrice}</span>
-                    <span class="price-now">
-                        <span class="currency">R$</span>
-                        <span class="num">${currentPriceFormatted}</span>
-                    </span>
-                </div>
-                <span class="viewers"><span class="dot"></span>${viewers} pessoas vendo</span>
-
-            </div>
-        </div>
-    `;
-    }).join('');
-
-    // Activar animacoes de entrada nos cards (apenas para efeito visual, sem interferir no preço)
-    if (_cardAnimObserver) {
-        setTimeout(() => {
-            container.querySelectorAll('.product-card').forEach((card, i) => {
-                if (i < 4) {
-                    return;
-                }
-                card.classList.add('card-anim-ready');
-                _cardAnimObserver.observe(card);
-            });
-        }, 0);
-    }
+    // Primeiro lote — renderiza só o que cabe na tela
+    container.innerHTML = '';
+    _renderBatch(container);
+    _observeCards(container);
+    _setupLazyLoad(container);
 }
 
 function slugifyCategory(name) {
@@ -656,12 +731,20 @@ function changeModalMedia(index) {
     const product = currentModalProduct;
     const overlaysHtml = product ? getAdditionalItemsOverlay(product) : '';
     const soldTodayHtml = product?.sold_today ? '<div class="product-sold-today">Vendido Hoje</div>' : '';
+    const mediaNavHtml = currentMediaList.length > 1 ? `
+        <button class="modal-nav-btn modal-nav-prev" onclick="event.stopPropagation();changeModalMedia((currentMediaIndex - 1 + currentMediaList.length) % currentMediaList.length)">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="modal-nav-btn modal-nav-next" onclick="event.stopPropagation();changeModalMedia((currentMediaIndex + 1) % currentMediaList.length)">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    ` : '';
     
-    // Atualiza mantendo os overlays em todas as fotos
+    // Atualiza mantendo os overlays e botoes em todas as fotos
     if (currentMediaList[index].type === 'video') {
-        mainMedia.innerHTML = `<video src="${currentMediaList[index].url}" autoplay muted loop playsinline></video>${soldTodayHtml}${overlaysHtml}`;
+        mainMedia.innerHTML = `<video src="${currentMediaList[index].url}" autoplay muted loop playsinline></video>${soldTodayHtml}${overlaysHtml}${mediaNavHtml}`;
     } else {
-        mainMedia.innerHTML = `<img src="${currentMediaList[index].url}" alt="${product?.name || ''}">${soldTodayHtml}${overlaysHtml}`;
+        mainMedia.innerHTML = `<img src="${currentMediaList[index].url}" alt="${product?.name || ''}">${soldTodayHtml}${overlaysHtml}${mediaNavHtml}`;
     }
     
     thumbnails.forEach((thumb, i) => {
@@ -713,29 +796,6 @@ function setupModalVideoAudio(hasAudio) {
             video.muted = true;
         }
     });
-}
-
-function handleNextPhotoClick(e) {
-    e.stopPropagation();
-    e.preventDefault();
-    const nextIndex = (currentMediaIndex + 1) % currentMediaList.length;
-    changeModalMedia(nextIndex);
-}
-
-function setupNextPhotoButton() {
-    const nextBtn = document.getElementById('nextPhotoBtn');
-    if (!nextBtn) return;
-    
-    // Remover listener anterior para evitar duplicação
-    nextBtn.removeEventListener('click', handleNextPhotoClick);
-    
-    if (currentMediaList.length <= 1) {
-        nextBtn.style.display = 'none';
-        return;
-    }
-    
-    nextBtn.style.display = 'flex';
-    nextBtn.addEventListener('click', handleNextPhotoClick);
 }
 
 function renderStars(rating) {
@@ -1376,6 +1436,16 @@ function openProductModal(id) {
 
     const solitarioOverlayHtml = getAdditionalItemsOverlay(product);
 
+    // Botoes de navegacao de fotos no modal
+    const mediaNavHtml = currentMediaList.length > 1 ? `
+        <button class="modal-nav-btn modal-nav-prev" onclick="event.stopPropagation();changeModalMedia((currentMediaIndex - 1 + currentMediaList.length) % currentMediaList.length)">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="modal-nav-btn modal-nav-next" onclick="event.stopPropagation();changeModalMedia((currentMediaIndex + 1) % currentMediaList.length)">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    ` : '';
+
     // Buscar produtos para as seções de recomendação
     const upsellProducts = getUpsellProducts(product, 6);
     const upsellIds = upsellProducts.map(p => p.id);
@@ -1412,6 +1482,7 @@ function openProductModal(id) {
                         : `<img src="${currentMediaList[0]?.url || ''}" alt="${product.name}">`}
                     ${soldTodayHtml}
                     ${solitarioOverlayHtml}
+                    ${mediaNavHtml}
                 </div>
                 <div class="modal-thumbnails">${thumbnailsHtml}</div>
             </div>
@@ -1455,6 +1526,29 @@ function openProductModal(id) {
     document.getElementById('productModal').classList.add('active');
     document.body.style.overflow = 'hidden';
 
+    // JSON-LD Product structured data para o Google
+    const existingLd = document.getElementById('product-ld-json');
+    if (existingLd) existingLd.remove();
+    const ldScript = document.createElement('script');
+    ldScript.id = 'product-ld-json';
+    ldScript.type = 'application/ld+json';
+    ldScript.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'Product',
+        'name': product.name,
+        'image': images.length > 0 ? images : undefined,
+        'description': product.description || product.name,
+        'category': categoryName || undefined,
+        'offers': {
+            '@type': 'Offer',
+            'price': product.price,
+            'priceCurrency': 'BRL',
+            'availability': 'https://schema.org/InStock',
+            'url': 'https://www.etevaldajoias.com/'
+        }
+    });
+    document.head.appendChild(ldScript);
+
     // Contador animado do salesCount
     const _salesEl = document.querySelector('.social-sales-row');
     if (_salesEl) {
@@ -1473,7 +1567,6 @@ function openProductModal(id) {
     // Configurar mídia do modal
     setupModalMediaClick();
     setupModalVideoAudio(product.video_has_audio);
-    setupNextPhotoButton();
     setupComplementInfiniteScroll();
     setupSizeSelector(product);
     
@@ -1501,6 +1594,10 @@ function closeProductModal() {
     });
     // ===== FIM DA PAUSA DOS VÍDEOS =====
     
+    // Remover JSON-LD Product do modal anterior
+    const ldEl = document.getElementById('product-ld-json');
+    if (ldEl) ldEl.remove();
+
     // Limpar estado do modal
     currentModalProduct = null;
     currentMediaList = [];
@@ -1513,10 +1610,6 @@ function closeProductModal() {
     window.selectedGender = 'Masculino';
     window.selectedSizeMasc = null;
     window.selectedSizeFem = null;
-    
-    // Esconder botão de próxima foto
-    const nextBtn = document.getElementById('nextPhotoBtn');
-    if (nextBtn) nextBtn.style.display = 'none';
     
     // Parar viewer increment timer se existir
     if (viewerIncrementTimeout) {

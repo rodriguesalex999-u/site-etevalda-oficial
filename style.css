@@ -4713,35 +4713,33 @@ CARRINHO SIDEBAR
 
 
 
-.next-photo-btn {
+.modal-nav-btn {
 
     position: absolute;
 
     top: 50%;
 
-    right: 16px;
-
     transform: translateY(-50%);
 
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.45);
 
-    color: var(--white);
+    color: #fff;
 
-    border: none;
+    border: 2px solid rgba(212, 175, 55, 0.5);
 
-    width: 40px;
+    width: 38px;
 
-    height: 40px;
+    height: 38px;
 
     border-radius: 50%;
 
-    font-size: 1rem;
+    font-size: 0.9rem;
 
     cursor: pointer;
 
     z-index: 1100;
 
-    transition: all var(--transition-normal);
+    transition: all 0.25s ease;
 
     display: flex;
 
@@ -4749,15 +4747,36 @@ CARRINHO SIDEBAR
 
     justify-content: center;
 
+    backdrop-filter: blur(4px);
+
+    -webkit-backdrop-filter: blur(4px);
+
 }
 
-
-
-.next-photo-btn:hover {
+.modal-nav-btn:hover {
 
     background: var(--gold-primary);
 
+    border-color: var(--gold-primary);
+
+    color: #000;
+
+    transform: translateY(-50%) scale(1.1);
+
 }
+
+.modal-nav-btn:active {
+
+    transform: translateY(-50%) scale(0.95);
+
+}
+
+.modal-nav-prev { left: 10px; }
+
+.modal-nav-next { right: 10px; }
+
+
+
 
 
 
@@ -5554,23 +5573,6 @@ white-space: nowrap;
         border-radius: 50%;
     }
 
-    .next-photo-btn {
-        position: absolute;
-        top: 50%;
-        right: 20px;
-        transform: translateY(-50%);
-        z-index: 1010;
-        background: rgba(0, 0, 0, 0.6);
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        cursor: pointer;
-    }
-
     .modal-container {
         display: flex;
         flex-direction: row;
@@ -5985,8 +5987,7 @@ white-space: nowrap;
 .product-card {
     border-radius: 12px !important;
     box-shadow: none !important;
-    transition: transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s ease, border-color .35s ease !important;
-    will-change: transform;
+    transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease !important;
 }
 .product-card:hover,
 .product-card:not(.skeleton):active {
@@ -6004,7 +6005,8 @@ white-space: nowrap;
     aspect-ratio: 1 / 1 !important;
     background: #1a1a1a !important;
 }
-.product-image img { transition: transform .7s cubic-bezier(.2,.8,.2,1) !important; will-change: transform; }
+.product-image img { transition: transform .5s ease !important; }
+.product-card:hover .product-image img { will-change: transform; }
 .product-card:not(.skeleton):hover .product-image .product-img-main,
 .product-card:not(.skeleton):active .product-image .product-img-main { transform: scale(1.12) !important; }
 .product-image::after {

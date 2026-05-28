@@ -23,7 +23,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="description" content="Grupo Etevalda MT - A maior loja de variedades de Mato Grosso">
     <meta name="theme-color" content="#D4AF37">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="apple-touch-icon" href="/favicon.svg">
     <title>Grupo Etevalda MT | Variedades</title>
+
+    <!-- JSON-LD Structured Data (Organization) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Grupo Etevalda MT",
+        "url": "https://www.etevaldajoias.com/",
+        "logo": "https://i.postimg.cc/8kxprj3W/etevalda.webp",
+        "description": "A maior loja de variedades de Mato Grosso — Joias, alian\u00e7as, semijoias e acess\u00f3rios.",
+        "areaServed": ["Cuiab\u00e1", "V\u00e1rzea Grande", "Rondon\u00f3polis", "Mato Grosso"],
+        "contactPoint": {
+            "@type": "ContactPoint",
+            "telephone": "+55-65-98104-2112",
+            "contactType": "customer service",
+            "areaServed": "BR-MT"
+        },
+        "sameAs": [
+            "https://www.instagram.com/grupoetevalda/"
+        ]
+    }
+    </script>
 
     <!-- Open Graph / Facebook / WhatsApp / Instagram -->
     <meta property="og:type" content="website">
@@ -90,7 +115,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
 .main-content{padding:var(--spacing-lg) 0;min-height:70vh;overflow-x:hidden;width:100%;}
 .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:var(--spacing-lg);padding:0 12px;}
 @media(min-width:1024px){.products-grid{grid-template-columns:repeat(4,1fr);gap:18px;padding:0 24px;}}
-.product-card{background:var(--bg-card);border-radius:12px;overflow:hidden;cursor:pointer;border:1px solid var(--border-subtle);position:relative;display:flex;flex-direction:column;transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s ease,border-color .35s ease;will-change:transform;}
+.product-card{background:var(--bg-card);border-radius:12px;overflow:hidden;cursor:pointer;border:1px solid var(--border-subtle);position:relative;display:flex;flex-direction:column;transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease;}
 .product-image{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:#1a1a1a;}
 .product-image img{width:100%!important;height:100%!important;object-fit:cover!important;transition:transform .7s cubic-bezier(.2,.8,.2,1);}
 .product-info{padding:8px 10px;flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:2px;}
@@ -271,7 +296,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
                 <div id="modalOverlay" class="modal-overlay"></div>
                 <div class="modal-content">
                     <button id="modalCloseBtn" class="modal-close-btn"><i class="fas fa-times"></i></button>
-                    <button id="nextPhotoBtn" class="next-photo-btn" style="display: none;"><i class="fas fa-chevron-right"></i></button>
                     <div id="modalContainer" class="modal-container"></div>
                 </div>
             </div>
@@ -531,5 +555,14 @@ setTimeout(function(){
         <p style="color: #666; text-align: center; margin-top: 12px; font-size: 0.78rem;">Você será direcionado ao nosso atendimento</p>
     </div>
 </div>
+
+<!-- Service Worker (PWA) -->
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(function(err) {
+        console.warn('SW registration failed:', err);
+    });
+}
+</script>
 </body>
 </html>
