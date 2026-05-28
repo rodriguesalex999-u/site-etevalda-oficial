@@ -803,6 +803,16 @@ button {
 
 }
 
+.search-view-all {
+    border-top: 1px solid var(--gold-light);
+    margin-top: 4px;
+    justify-content: center;
+}
+.search-view-all:hover {
+    background: var(--gold-light) !important;
+    border-left-color: var(--gold-primary) !important;
+}
+
 /* Header Actions */
 
 .header-actions {
@@ -4179,9 +4189,9 @@ MODAL - SEÇÃO "COMPLEMENTE SEU ESTILO" (PRODUTOS COMPLEMENTARES)
 
         grid-template-columns: repeat(2, 1fr) !important;
 
-        gap: 6px !important; /* Espaçamento profissional */
+        gap: 3px !important;
 
-        padding: 6px !important;
+        padding: 2px 3px !important;
 
     }
 
@@ -4371,6 +4381,34 @@ MODAL - SEÇÃO "COMPLEMENTE SEU ESTILO" (PRODUTOS COMPLEMENTARES)
 
     }
 
+    /* Search dropdown mobile */
+    .search-dropdown {
+        position: fixed !important;
+        top: 54px !important;
+        left: 8px !important;
+        right: 8px !important;
+        max-height: 55vh !important;
+        border-radius: 12px !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,.7) !important;
+        border: 1px solid var(--gold-primary) !important;
+    }
+    .search-result-item {
+        padding: 8px 10px !important;
+        gap: 8px !important;
+    }
+    .search-result-item img {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    .search-result-name {
+        font-size: .82rem !important;
+    }
+    .search-result-price {
+        font-size: .8rem !important;
+    }
+    .search-view-all {
+        border-top: 1px solid rgba(212,175,55,.2) !important;
+    }
 }
 
 
@@ -6117,11 +6155,10 @@ white-space: nowrap;
 
 /* Mobile: correcoes para o novo design */
 @media (max-width: 768px) {
-    .product-card { border-radius: 10px !important; }
-    .product-image { height: auto !important; min-height: unset !important; }
-    .badge-discount { width: 32px !important; height: 32px !important; }
-    .badge-discount strong { font-size: .68rem; }
-    .badge-discount span { font-size: .48rem; }
+    .product-card { border-radius: 8px !important; }
+    .badge-discount { width: 30px !important; height: 30px !important; }
+    .badge-discount strong { font-size: .65rem; }
+    .badge-discount span { font-size: .45rem; }
     .quick-add { display: none; }
 }
 
