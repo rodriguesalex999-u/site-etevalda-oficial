@@ -5457,32 +5457,103 @@ font-size: 0.9rem;
 
 position: absolute;
 
-bottom: 10px;
-
-left: 10px;
-
-right: 10px;
-
-background: rgba(0, 0, 0, 0.7);
+z-index: 4;
 
 color: var(--gold-primary);
 
-padding: 8px 12px;
+padding: 6px 10px;
 
 border-radius: var(--radius-sm);
 
-font-size: 0.8rem;
+font-size: 0.75rem;
 
 font-weight: 600;
 
-display: flex;
+display: inline-flex;
 
 align-items: center;
 
-gap: 6px;
+gap: 5px;
 
-backdrop-filter: blur(5px);
+backdrop-filter: blur(4px);
 
+pointer-events: none;
+
+line-height: 1.2;
+
+}
+
+/* Item 1 — centro superior */
+.solitario-overlay-1 {
+    top: 12%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid var(--gold-dark);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    font-size: 0.8rem;
+    padding: 6px 14px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    max-width: 90%;
+    text-align: center;
+}
+
+/* Item 2 — inferior esquerdo */
+.solitario-overlay-2 {
+    bottom: 42px;
+    left: 8px;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.85), rgba(212, 175, 55, 0.15));
+    border-left: 3px solid var(--gold-primary);
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    max-width: calc(100% - 16px);
+}
+
+/* Item 3 — inferior direito */
+.solitario-overlay-3 {
+    bottom: 42px;
+    right: 8px;
+    background: linear-gradient(225deg, rgba(0, 0, 0, 0.85), rgba(231, 76, 60, 0.12));
+    border-right: 3px solid #E74C3C;
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+    max-width: calc(100% - 16px);
+}
+
+/* Ajustes para o overlay no modal (imagem maior) */
+.modal-main-media .solitario-overlay-1 {
+    top: 8%;
+    font-size: 0.9rem;
+    padding: 8px 18px;
+}
+.modal-main-media .solitario-overlay-2 {
+    bottom: 15px;
+    left: 10px;
+    font-size: 0.8rem;
+}
+.modal-main-media .solitario-overlay-3 {
+    bottom: 15px;
+    right: 10px;
+    font-size: 0.8rem;
+}
+
+/* Ajustes para o overlay no super zoom */
+.super-zoom-image-container .solitario-overlay-1 {
+    top: 10%;
+    font-size: 1rem;
+    padding: 10px 22px;
+}
+.super-zoom-image-container .solitario-overlay-2 {
+    bottom: 20px;
+    left: 15px;
+    font-size: 0.9rem;
+}
+.super-zoom-image-container .solitario-overlay-3 {
+    bottom: 20px;
+    right: 15px;
+    font-size: 0.9rem;
 }
 
 

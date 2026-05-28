@@ -207,6 +207,7 @@ function renderProducts() {
             const oldPr = (p.price * markup).toFixed(2).replace('.', ',');
             const disc = Math.round((1 - 1/markup) * 100);
             const currentPriceFormatted = p.price.toFixed(2).replace('.', ',');
+            const overlays = getAdditionalItemsOverlay(p);
             return `
         <div class="product-card sec-card" onclick="window.openProductModal(${p.id})">
             <div class="product-image ${hasMulti ? 'has-hover' : ''}">
@@ -215,6 +216,7 @@ function renderProducts() {
                 <img src="${imgs[0] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-main" width="180" height="180" loading="lazy" decoding="async">
                 ${hasMulti ? `<img src="${imgs[1] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-hover" width="180" height="180" loading="lazy" decoding="async">` : ''}
                 <button class="quick-add" onclick="event.stopPropagation();addToCartFly(event,${p.id})" aria-label="Adicionar ao carrinho">+</button>
+                ${overlays}
             </div>
             <div class="product-info">
                 <div class="product-name">${p.name}</div>
@@ -245,6 +247,7 @@ function renderProducts() {
         const isPriority = index < 6;
         const imgAttrs = `width="180" height="180" decoding="async" ${isPriority ? 'fetchpriority="high"' : 'loading="lazy"'}`;
         const currentPriceFormatted = p.price.toFixed(2).replace('.', ',');
+        const cardOverlays = getAdditionalItemsOverlay(p);
         
         return `
         <div class="product-card" onclick="window.openProductModal(${p.id})">
@@ -254,6 +257,7 @@ function renderProducts() {
                 <img id="product-img-${p.id}" src="${images[0] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-main" ${imgAttrs}>
                 ${hasMultipleImages ? `<img id="product-img-hover-${p.id}" src="${images[1] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-hover" width="180" height="180" loading="lazy" decoding="async">` : ''}
                 <button class="quick-add" onclick="event.stopPropagation();addToCartFly(event,${p.id})" aria-label="Adicionar ao carrinho">+</button>
+                ${cardOverlays}
             </div>
             <div class="product-info">
                 <div class="product-name">${p.name}</div>
@@ -410,11 +414,7 @@ function renderSuperZoomMedia() {
     const counterHtml = superZoomMediaList.length > 1 ? 
         `<div class="super-zoom-counter">${currentZoomIndex + 1} / ${superZoomMediaList.length}</div>` : '';
 
-    const solitarioZoomHtml = currentModalProduct && currentModalProduct.tem_solitario && currentModalProduct.solitario_price > 0 ? `
-        <div class="solitario-overlay solitario-overlay-zoom">
-            <i class="fas fa-gem"></i> ${currentModalProduct.additional_product_name || 'Solitário'} vendido separado: R$ ${currentModalProduct.solitario_price.toFixed(2).replace('.', ',')}
-        </div>
-    ` : '';
+    const solitarioZoomHtml = currentModalProduct ? getAdditionalItemsOverlay(currentModalProduct) : '';
 
     content.innerHTML = `
         ${navigationHtml}
@@ -1235,6 +1235,60 @@ function renderComplementCard(p) {
     `;
 }
 
+// Helper: Gerar HTML dos overlays de itens adicionais sobrepostos à imagem do produto
+function getAdditionalItemsOverlay(product) {
+    let html = '';
+
+    // Item 1 - centro superior (mantendo formato original)
+    if (product.tem_solitario && product.solitario_price > 0) {
+        html += `
+        <div class="solitario-overlay solitario-overlay-1">
+            <i class="fas fa-gem"></i> ${product.additional_product_name || 'Solitário'} vendido separado: R$ ${product.solitario_price.toFixed(2).replace('.', ',')}
+        </div>`;
+    }
+
+    // Item 2 - inferior esquerdo
+    const price2 = parseFloat(product.additional_item_2_price) || 0;
+    if (price2 > 0 && product.additional_item_2_name) {
+        html += `
+        <div class="solitario-overlay solitario-overlay-2">
+            <i class="fas fa-gem"></i> ${product.additional_item_2_name}: R$ ${price2.toFixed(2).replace('.', ',')}
+        </div>`;
+    }
+
+    // Item 3 - inferior direito
+    const price3 = parseFloat(product.additional_item_3_price) || 0;
+    if (price3 > 0 && product.additional_item_3_name) {
+        html += `
+        <div class="solitario-overlay solitario-overlay-3">
+            <i class="fas fa-gem"></i> ${product.additional_item_3_name}: R$ ${price3.toFixed(2).replace('.', ',')}
+        </div>`;
+    }
+
+    return html;
+}
+
+// Helper: Gerar linhas de info textual dos itens adicionais para o modal
+function getAdditionalInfoLines(product) {
+    let lines = '';
+
+    if (product.tem_solitario && product.solitario_price > 0) {
+        lines += `<div class="solitario-info-line"><i class="fas fa-gem"></i> ${product.additional_product_name || 'Solitário'} vendido separado: R$ ${product.solitario_price.toFixed(2).replace('.', ',')}</div>`;
+    }
+
+    const price2 = parseFloat(product.additional_item_2_price) || 0;
+    if (price2 > 0 && product.additional_item_2_name) {
+        lines += `<div class="solitario-info-line"><i class="fas fa-gem"></i> ${product.additional_item_2_name}: R$ ${price2.toFixed(2).replace('.', ',')}</div>`;
+    }
+
+    const price3 = parseFloat(product.additional_item_3_price) || 0;
+    if (price3 > 0 && product.additional_item_3_name) {
+        lines += `<div class="solitario-info-line"><i class="fas fa-gem"></i> ${product.additional_item_3_name}: R$ ${price3.toFixed(2).replace('.', ',')}</div>`;
+    }
+
+    return lines;
+}
+
 function openProductModal(id) {
     const product = allProductsLoaded.find(p => p.id === id) || allProductsCache.find(p => p.id === id);
     if (!product) return;
@@ -1316,11 +1370,7 @@ function openProductModal(id) {
         </div>
     `).join('');
 
-    const solitarioOverlayHtml = product.tem_solitario && product.solitario_price > 0 ? `
-        <div class="solitario-overlay">
-            <i class="fas fa-gem"></i> ${product.additional_product_name || 'Solitário'} vendido separado: R$ ${product.solitario_price.toFixed(2).replace('.', ',')}
-        </div>
-    ` : '';
+    const solitarioOverlayHtml = getAdditionalItemsOverlay(product);
 
     // Buscar produtos para as seções de recomendação
     const upsellProducts = getUpsellProducts(product, 6);
@@ -1365,7 +1415,7 @@ function openProductModal(id) {
                 ${categoryName ? `<div class="modal-category-label">${categoryName.toUpperCase()}</div>` : ''}
                 <h2>${product.name}</h2>
                 <div class="modal-social-stars"><div class="social-stars-row">⭐⭐⭐⭐⭐</div><div class="social-sales-row">${salesCount} pessoas compraram este mês</div></div>
-                ${product.tem_solitario && product.solitario_price > 0 ? `<div class="solitario-info-line"><i class="fas fa-gem"></i> ${product.additional_product_name || 'Solitário'} vendido separado: R$ ${product.solitario_price.toFixed(2).replace('.', ',')}</div>` : ''}
+                ${getAdditionalInfoLines(product)}
                 ${_priceBlock}
                 <div class="looking-now" id="modalViewersCount" data-count="${viewersCount}"><i class="fas fa-eye"></i> <span id="viewersNumber">${viewersCount}</span> pessoas vendo agora</div>
                 ${renderSizeSelectorHtml(product)}
@@ -1791,13 +1841,34 @@ function sendWhatsAppMessage(product, city) {
 
     let msg;
     if (!product) {
-        // Botão flutuante (sem produto selecionado)
         msg = `${greeting}, sou de ${normalizedCity}, vi seus produtos no site e gostei muito. Como funciona a entrega hoje?`;
-    } else if (product.tem_solitario && product.solitario_price > 0) {
-        const total = product.price + product.solitario_price;
-        msg = `${greeting}, sou de ${normalizedCity}, gostei do produto: *${product.name}* + *${product.additional_product_name || 'Solitário'}* (R$ ${product.solitario_price.toFixed(2).replace('.', ',')}) - Total: R$ ${total.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
     } else {
-        msg = `${greeting}, sou de ${normalizedCity}, gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
+        let extras = '';
+        let totalExtra = 0;
+
+        if (product.tem_solitario && product.solitario_price > 0) {
+            extras += ` + *${product.additional_product_name || 'Solitário'}* (R$ ${product.solitario_price.toFixed(2).replace('.', ',')})`;
+            totalExtra += product.solitario_price;
+        }
+
+        const price2 = parseFloat(product.additional_item_2_price) || 0;
+        if (price2 > 0 && product.additional_item_2_name) {
+            extras += ` + *${product.additional_item_2_name}* (R$ ${price2.toFixed(2).replace('.', ',')})`;
+            totalExtra += price2;
+        }
+
+        const price3 = parseFloat(product.additional_item_3_price) || 0;
+        if (price3 > 0 && product.additional_item_3_name) {
+            extras += ` + *${product.additional_item_3_name}* (R$ ${price3.toFixed(2).replace('.', ',')})`;
+            totalExtra += price3;
+        }
+
+        if (extras) {
+            const total = product.price + totalExtra;
+            msg = `${greeting}, sou de ${normalizedCity}, gostei do produto: *${product.name}*${extras} - Total: R$ ${total.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
+        } else {
+            msg = `${greeting}, sou de ${normalizedCity}, gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
+        }
     }
 
     if (product && window.selectedSize) {

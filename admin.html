@@ -789,12 +789,28 @@
                         <input type="text" id="productPrice" required placeholder="299,99 ou 299.99">
                     </div>
                     <div class="form-group">
-                        <label><i class="fas fa-gem"></i> Preço do Item Adicional (R$)</label>
+                        <label><i class="fas fa-gem"></i> Preço Item Adicional 1 (R$) <span style="font-size:11px;color:#999;">— centro superior</span></label>
                         <input type="text" id="solitarioPrice" placeholder="99,99 (deixe vazio se não houver)">
                     </div>
                     <div class="form-group">
-                        <label><i class="fas fa-tag"></i> Nome do Item Adicional</label>
+                        <label><i class="fas fa-tag"></i> Nome Item Adicional 1</label>
                         <input type="text" id="additionalProductName" placeholder="Ex: Solitário, Pulseira, Corrente...">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-gem"></i> Preço Item Adicional 2 (R$) <span style="font-size:11px;color:#999;">— inferior esquerdo</span></label>
+                        <input type="text" id="additionalItem2Price" placeholder="99,99 (deixe vazio se não houver)">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Nome Item Adicional 2</label>
+                        <input type="text" id="additionalItem2Name" placeholder="Ex: Pulseira, Corrente...">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-gem"></i> Preço Item Adicional 3 (R$) <span style="font-size:11px;color:#999;">— inferior direito</span></label>
+                        <input type="text" id="additionalItem3Price" placeholder="99,99 (deixe vazio se não houver)">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Nome Item Adicional 3</label>
+                        <input type="text" id="additionalItem3Name" placeholder="Ex: Anel, Brinco...">
                     </div>
                     <div class="form-group">
                         <label><i class="fas fa-list"></i> Categoria *</label>
@@ -913,7 +929,9 @@
                             <th>Imagem</th>
                             <th>Nome</th>
                             <th>Preço</th>
-                            <th>Solitário</th>
+                            <th>Item 1</th>
+                            <th>Item 2</th>
+                            <th>Item 3</th>
                             <th>Categoria</th>
                             <th>Vendido Hoje</th>
                             <th>Upsell</th>
@@ -922,7 +940,7 @@
                         </tr>
                     </thead>
                     <tbody id="productsTableBody">
-                        <tr><td colspan="10" style="text-align:center; padding:40px;">
+                        <tr><td colspan="12" style="text-align:center; padding:40px;">
                             <i class="fas fa-spinner fa-spin fa-3x" style="color:var(--gold-primary);"></i>
                             <p style="margin-top:15px;">Carregando produtos...</p>
                         </td></tr>
@@ -1249,15 +1267,37 @@
                     <input type="text" id="editProductPrice" required>
                 </div>
                 <div class="form-group">
-                    <label>Preço do Item Adicional (R$)</label>
+                    <label>Preço Item Adicional 1 (R$) <span style="font-size:11px;color:#999;">— centro superior</span></label>
                     <input type="text" id="editSolitarioPrice" placeholder="deixe vazio se não houver">
                 </div>
             </div>
             
             <div class="form-grid">
                 <div class="form-group">
-                    <label>Nome do Item Adicional</label>
+                    <label>Nome Item Adicional 1</label>
                     <input type="text" id="editAdditionalProductName" placeholder="Ex: Solitário, Pulseira, Corrente...">
+                </div>
+                <div class="form-group">
+                    <label>Preço Item Adicional 2 (R$) <span style="font-size:11px;color:#999;">— inferior esquerdo</span></label>
+                    <input type="text" id="editAdditionalItem2Price" placeholder="deixe vazio se não houver">
+                </div>
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nome Item Adicional 2</label>
+                    <input type="text" id="editAdditionalItem2Name" placeholder="Ex: Pulseira, Corrente...">
+                </div>
+                <div class="form-group">
+                    <label>Preço Item Adicional 3 (R$) <span style="font-size:11px;color:#999;">— inferior direito</span></label>
+                    <input type="text" id="editAdditionalItem3Price" placeholder="deixe vazio se não houver">
+                </div>
+            </div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Nome Item Adicional 3</label>
+                    <input type="text" id="editAdditionalItem3Name" placeholder="Ex: Anel, Brinco...">
                 </div>
                 <div class="form-group">
                     <label>Categoria *</label>
@@ -1781,7 +1821,7 @@
 
         if (!productsToShow || productsToShow.length === 0) {
             console.log('📭 Nenhum produto para exibir');
-            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:40px;">
+            tbody.innerHTML = `<tr><td colspan="12" style="text-align:center; padding:40px;">
                 <i class="fas fa-box-open fa-3x" style="color:var(--medium-gray);"></i>
                 <p>Nenhum produto encontrado</p>
             </td></tr>`;
@@ -1794,6 +1834,12 @@
             const priceFormatted = parseFloat(p.price).toFixed(2).replace('.', ',');
             const solitarioFormatted = p.solitario_price && p.solitario_price > 0
                 ? `R$ ${parseFloat(p.solitario_price).toFixed(2).replace('.', ',')}`
+                : '—';
+            const item2Formatted = p.additional_item_2_price && parseFloat(p.additional_item_2_price) > 0
+                ? `R$ ${parseFloat(p.additional_item_2_price).toFixed(2).replace('.', ',')}`
+                : '—';
+            const item3Formatted = p.additional_item_3_price && parseFloat(p.additional_item_3_price) > 0
+                ? `R$ ${parseFloat(p.additional_item_3_price).toFixed(2).replace('.', ',')}`
                 : '—';
             const categoryName = p.categories?.name || 'Sem categoria';
             const upsellCategory = p.upsell_category || '—';
@@ -1810,6 +1856,8 @@
                 <td>${p.name}</td>
                 <td><strong>R$ ${priceFormatted}</strong></td>
                 <td>${solitarioFormatted}</td>
+                <td>${item2Formatted}</td>
+                <td>${item3Formatted}</td>
                 <td>${categoryName}</td>
                 <td>${soldToday}</td>
                 <td>${upsellCategory}</td>
@@ -1865,6 +1913,10 @@
         document.getElementById('editProductPrice').value = product.price ? product.price.toFixed(2).replace('.', ',') : '';
         document.getElementById('editSolitarioPrice').value = product.solitario_price ? product.solitario_price.toFixed(2).replace('.', ',') : '';
         document.getElementById('editAdditionalProductName').value = product.additional_product_name || '';
+        document.getElementById('editAdditionalItem2Price').value = product.additional_item_2_price ? parseFloat(product.additional_item_2_price).toFixed(2).replace('.', ',') : '';
+        document.getElementById('editAdditionalItem2Name').value = product.additional_item_2_name || '';
+        document.getElementById('editAdditionalItem3Price').value = product.additional_item_3_price ? parseFloat(product.additional_item_3_price).toFixed(2).replace('.', ',') : '';
+        document.getElementById('editAdditionalItem3Name').value = product.additional_item_3_name || '';
         document.getElementById('editSizeType').value = product.size_type || '';
         document.getElementById('editProductCategory').value = product.category_id || '';
         document.getElementById('editBadgeText').value = product.badge_text || '';
@@ -1901,6 +1953,10 @@
         const priceRaw = document.getElementById('editProductPrice').value.trim();
         const solitarioRaw = document.getElementById('editSolitarioPrice').value.trim();
         const additionalProductName = document.getElementById('editAdditionalProductName').value.trim() || null;
+        const additionalItem2PriceRaw = document.getElementById('editAdditionalItem2Price').value.trim();
+        const additionalItem2Name = document.getElementById('editAdditionalItem2Name').value.trim() || null;
+        const additionalItem3PriceRaw = document.getElementById('editAdditionalItem3Price').value.trim();
+        const additionalItem3Name = document.getElementById('editAdditionalItem3Name').value.trim() || null;
         const sizeType = document.getElementById('editSizeType').value || null;
         const categoryId = parseInt(document.getElementById('editProductCategory').value);
         const badgeText = document.getElementById('editBadgeText').value.trim() || null;
@@ -1933,12 +1989,18 @@
 
         const solitarioPrice = solitarioRaw ? parseCurrency(solitarioRaw) : 0;
         const temSolitario = solitarioPrice > 0;
+        const additionalItem2Price = additionalItem2PriceRaw ? parseCurrency(additionalItem2PriceRaw) : 0;
+        const additionalItem3Price = additionalItem3PriceRaw ? parseCurrency(additionalItem3PriceRaw) : 0;
 
         const productData = {
             name,
             price,
             solitario_price: solitarioPrice,
             additional_product_name: temSolitario ? (additionalProductName || 'Solitário') : null,
+            additional_item_2_price: additionalItem2Price > 0 ? additionalItem2Price : null,
+            additional_item_2_name: additionalItem2Price > 0 && additionalItem2Name ? additionalItem2Name : null,
+            additional_item_3_price: additionalItem3Price > 0 ? additionalItem3Price : null,
+            additional_item_3_name: additionalItem3Price > 0 && additionalItem3Name ? additionalItem3Name : null,
             category_id: categoryId,
             tem_solitario: temSolitario,
             tem_numeracao: !!sizeType,
@@ -1981,6 +2043,10 @@
         const priceRaw = document.getElementById('productPrice').value.trim();
         const solitarioRaw = document.getElementById('solitarioPrice').value.trim();
         const additionalProductName = document.getElementById('additionalProductName').value.trim() || null;
+        const additionalItem2PriceRaw = document.getElementById('additionalItem2Price').value.trim();
+        const additionalItem2Name = document.getElementById('additionalItem2Name').value.trim() || null;
+        const additionalItem3PriceRaw = document.getElementById('additionalItem3Price').value.trim();
+        const additionalItem3Name = document.getElementById('additionalItem3Name').value.trim() || null;
         const sizeType = document.getElementById('sizeType').value || null;
         const categoryId = parseInt(document.getElementById('productCategory').value);
         const badgeText = document.getElementById('badgeSelect').value.trim() || null;
@@ -2014,12 +2080,18 @@
 
         const solitarioPrice = solitarioRaw ? parseCurrency(solitarioRaw) : 0;
         const temSolitario = solitarioPrice > 0;
+        const additionalItem2Price = additionalItem2PriceRaw ? parseCurrency(additionalItem2PriceRaw) : 0;
+        const additionalItem3Price = additionalItem3PriceRaw ? parseCurrency(additionalItem3PriceRaw) : 0;
 
         const productData = {
             name,
             price,
             solitario_price: solitarioPrice,
             additional_product_name: temSolitario ? (additionalProductName || 'Solitário') : null,
+            additional_item_2_price: additionalItem2Price > 0 ? additionalItem2Price : null,
+            additional_item_2_name: additionalItem2Price > 0 && additionalItem2Name ? additionalItem2Name : null,
+            additional_item_3_price: additionalItem3Price > 0 ? additionalItem3Price : null,
+            additional_item_3_name: additionalItem3Price > 0 && additionalItem3Name ? additionalItem3Name : null,
             category_id: categoryId,
             tem_solitario: temSolitario,
             tem_numeracao: !!sizeType,
