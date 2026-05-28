@@ -653,11 +653,15 @@ function changeModalMedia(index) {
     
     if (!mainMedia || !currentMediaList[index]) return;
     
-    // Atualiza a foto ou vídeo sem destruir os sensores de movimento do dedo
+    const product = currentModalProduct;
+    const overlaysHtml = product ? getAdditionalItemsOverlay(product) : '';
+    const soldTodayHtml = product?.sold_today ? '<div class="product-sold-today">Vendido Hoje</div>' : '';
+    
+    // Atualiza mantendo os overlays em todas as fotos
     if (currentMediaList[index].type === 'video') {
-        mainMedia.innerHTML = `<video src="${currentMediaList[index].url}" autoplay muted loop playsinline></video>`;
+        mainMedia.innerHTML = `<video src="${currentMediaList[index].url}" autoplay muted loop playsinline></video>${soldTodayHtml}${overlaysHtml}`;
     } else {
-        mainMedia.innerHTML = `<img src="${currentMediaList[index].url}" alt="${currentModalProduct?.name}">`;
+        mainMedia.innerHTML = `<img src="${currentMediaList[index].url}" alt="${product?.name || ''}">${soldTodayHtml}${overlaysHtml}`;
     }
     
     thumbnails.forEach((thumb, i) => {

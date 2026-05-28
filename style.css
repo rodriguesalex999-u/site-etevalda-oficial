@@ -5459,102 +5459,68 @@ position: absolute;
 
 z-index: 4;
 
+left: 8px;
+
+right: 8px;
+
 color: var(--gold-primary);
 
-padding: 6px 10px;
+padding: 3px 8px;
 
-border-radius: var(--radius-sm);
+border-radius: 5px;
 
-font-size: 0.75rem;
+font-size: 0.7rem;
 
-font-weight: 600;
+font-weight: 650;
 
-display: inline-flex;
+display: flex;
 
 align-items: center;
 
-gap: 5px;
+justify-content: center;
 
-backdrop-filter: blur(4px);
+gap: 4px;
+
+backdrop-filter: blur(3px);
+
+-webkit-backdrop-filter: blur(3px);
 
 pointer-events: none;
 
-line-height: 1.2;
+line-height: 1.25;
+
+white-space: nowrap;
 
 }
 
-/* Item 1 — centro superior */
-.solitario-overlay-1 {
-    top: 12%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.8);
-    border: 1px solid var(--gold-dark);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-    font-size: 0.8rem;
-    padding: 6px 14px;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-    max-width: 90%;
-    text-align: center;
-}
+/* Todos os itens alinhados na parte inferior, centralizados */
+.solitario-overlay-1 { bottom: 32px; background: rgba(0, 0, 0, 0.4); }
+.solitario-overlay-2 { bottom: 58px; background: rgba(0, 0, 0, 0.3); }
+.solitario-overlay-3 { bottom: 84px; background: rgba(0, 0, 0, 0.2); }
 
-/* Item 2 — inferior esquerdo */
-.solitario-overlay-2 {
-    bottom: 42px;
-    left: 8px;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.85), rgba(212, 175, 55, 0.15));
-    border-left: 3px solid var(--gold-primary);
-    font-size: 0.7rem;
-    padding: 4px 10px;
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-    max-width: calc(100% - 16px);
+/* Ajustes para o modal */
+.modal-main-media .solitario-overlay {
+    left: 12px;
+    right: 12px;
+    font-size: 0.85rem;
+    padding: 6px 16px;
 }
+.modal-main-media .solitario-overlay-1 { bottom: 48px; background: rgba(0, 0, 0, 0.4); }
+.modal-main-media .solitario-overlay-2 { bottom: 78px; background: rgba(0, 0, 0, 0.3); }
+.modal-main-media .solitario-overlay-3 { bottom: 108px; background: rgba(0, 0, 0, 0.2); }
 
-/* Item 3 — inferior direito */
-.solitario-overlay-3 {
-    bottom: 42px;
-    right: 8px;
-    background: linear-gradient(225deg, rgba(0, 0, 0, 0.85), rgba(231, 76, 60, 0.12));
-    border-right: 3px solid #E74C3C;
-    font-size: 0.7rem;
-    padding: 4px 10px;
-    border-radius: var(--radius-sm) 0 0 var(--radius-sm);
-    max-width: calc(100% - 16px);
-}
-
-/* Ajustes para o overlay no modal (imagem maior) */
-.modal-main-media .solitario-overlay-1 {
-    top: 8%;
-    font-size: 0.9rem;
-    padding: 8px 18px;
-}
-.modal-main-media .solitario-overlay-2 {
-    bottom: 15px;
-    left: 10px;
-    font-size: 0.8rem;
-}
-.modal-main-media .solitario-overlay-3 {
-    bottom: 15px;
-    right: 10px;
-    font-size: 0.8rem;
-}
-
-/* Ajustes para o overlay no super zoom */
-.super-zoom-image-container .solitario-overlay-1 {
-    top: 10%;
-    font-size: 1rem;
-    padding: 10px 22px;
-}
-.super-zoom-image-container .solitario-overlay-2 {
-    bottom: 20px;
+/* Ajustes para o super zoom — ainda mais discreto */
+.super-zoom-image-container .solitario-overlay {
     left: 15px;
-    font-size: 0.9rem;
-}
-.super-zoom-image-container .solitario-overlay-3 {
-    bottom: 20px;
     right: 15px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    padding: 5px 18px;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
 }
+.super-zoom-image-container .solitario-overlay-1 { bottom: 60px; background: rgba(0, 0, 0, 0.25); }
+.super-zoom-image-container .solitario-overlay-2 { bottom: 90px; background: rgba(0, 0, 0, 0.18); }
+.super-zoom-image-container .solitario-overlay-3 { bottom: 120px; background: rgba(0, 0, 0, 0.12); }
 
 
 
