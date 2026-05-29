@@ -141,7 +141,24 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
 </head>
 <body>
 
-    <div id="geoNotification" class="geo-notification"><div class="geo-notif-icon"><i class="fas fa-map-marker-alt"></i></div><div class="geo-notif-text" id="geoNotificationText"></div><div class="geo-notif-bar" id="geoNotifBar"></div></div>
+    <div id="geoNotification" class="geo-notification">
+        <div class="geo-notif-header"><i class="fas fa-shopping-bag"></i> <span>Compra recente</span></div>
+        <div class="geo-notif-body">
+            <div class="geo-notif-img" id="geoNotifImg"><img src="" alt=""></div>
+            <div class="geo-notif-info">
+                <div class="geo-notif-name" id="geoNotifName"></div>
+                <div class="geo-notif-location" id="geoNotifLocation"><i class="fas fa-map-marker-alt"></i> <span></span></div>
+                <div class="geo-notif-comment" id="geoNotifComment"></div>
+                <div class="geo-notif-product" id="geoNotifProduct"></div>
+            </div>
+        </div>
+        <div class="geo-notif-bar" id="geoNotifBar"></div>
+    </div>
+    <div id="floatingReview" class="floating-review">
+        <div class="floating-review-stars" id="floatingReviewStars"></div>
+        <div class="floating-review-text" id="floatingReviewText"></div>
+        <div class="floating-review-author" id="floatingReviewAuthor"></div>
+    </div>
     <div class="toast" id="toast"></div>
 
     <header class="header">
@@ -229,6 +246,14 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
                 <div id="infiniteCarousel" class="infinite-carousel"></div>
             </section>
 
+            <!-- AVALIAÇÕES DOS CLIENTES -->
+            <section class="reviews-carousel-section" id="reviewsSection" style="opacity:0; height:0; overflow:hidden;">
+                <div class="section-header">
+                    <h2 class="section-title reviews-carousel-title" id="reviewsSectionTitle"><i class="fas fa-star"></i> <span id="reviewsTitleText">O que nossos clientes dizem</span></h2>
+                </div>
+                <div id="reviewsContainer" class="reviews-carousel"></div>
+            </section>
+
             <!-- PROVA SOCIAL -->
             <section class="social-proof-section" id="socialProofSection" style="opacity:0; height:0; overflow:hidden;">
                 <div class="section-header"><h2 class="section-title">Quem Confia, Recomenda</h2><p class="section-subtitle">Clientes em todo Mato Grosso</p></div>
@@ -281,14 +306,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
                     </div>
                 </div>
                 <div class="team-carousel-dots" id="teamCarouselDots"></div>
-            </section>
-
-            <!-- AVALIAÇÕES DOS CLIENTES -->
-            <section class="reviews-carousel-section" id="reviewsSection" style="opacity:0; height:0; overflow:hidden;">
-                <div class="section-header">
-                    <h2 class="section-title reviews-carousel-title"><i class="fas fa-star"></i> O que nossos clientes dizem</h2>
-                </div>
-                <div id="reviewsContainer" class="reviews-carousel"></div>
             </section>
 
             <!-- MODAL PRODUTO -->

@@ -19,6 +19,7 @@ let allProductsLoaded = [];
 let faqs = [];
 let socialProofImages = [];
 let reviews = [];
+let siteSettings = { reviews_title: 'O que nossos clientes dizem' };
 let teamCarouselData = [];
 let teamCarouselIndex = 0;
 let teamCarouselAutoInterval = null;
@@ -175,6 +176,17 @@ async function loadSocialProof() {
     socialProofImages = (data || []).filter(item => {
         return item.image_url && item.image_url.trim() !== '';
     });
+}
+
+async function loadSiteSettings() {
+    try {
+        const { data } = await _supabase.from('site_settings').select('data').eq('id', 1).single();
+        if (data && data.data) siteSettings = { ...siteSettings, ...data.data };
+    } catch (e) {
+        // Tabela pode não existir ainda; usar defaults
+    }
+    const titleEl = document.getElementById('reviewsTitleText');
+    if (titleEl) titleEl.textContent = siteSettings.reviews_title;
 }
 
 async function loadReviews() {
@@ -649,40 +661,111 @@ function playViewerSound() {
     }
 }
 
+let _realReviewIndex = 0;
+
 function showGeoNotification() {
     const detectedCity = detectedLocation.city;
-    const neighborhood = detectedLocation.neighborhoods[Math.floor(Math.random() * detectedLocation.neighborhoods.length)];
-    const customerName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
+    const neighborhoods = detectedLocation.neighborhoods;
+    const neighborhood = neighborhoods[Math.floor(Math.random() * neighborhoods.length)];
 
-    const messages = [
-        `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> acabou de comprar!`,
-        `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> mandou mensagem no WhatsApp!`,
-        `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> está fechando a compra!`,
-        `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> avaliou positivo o atendimento!`
-    ];
+    // Escolher nome aleatório ou real de review
+    const availableReviews = reviews.filter(r => r.comment);
+    let customerName, commentText;
 
-    const notification = document.getElementById('geoNotification');
-    const notificationText = document.getElementById('geoNotificationText');
-    const notifBar = document.getElementById('geoNotifBar');
-
-    if (notification && notificationText) {
-        notificationText.innerHTML = messages[notificationIndex];
-        if (notifBar) {
-            notifBar.classList.remove('geo-bar-animate');
-            void notifBar.offsetHeight;
-            notifBar.classList.add('geo-bar-animate');
-        }
-        notification.classList.add('geo-show');
-        clearTimeout(notification._geoTimer);
-        notification._geoTimer = setTimeout(() => notification.classList.remove('geo-show'), 6200);
+    if (availableReviews.length > 0 && Math.random() > 0.3) {
+        const r = availableReviews[_realReviewIndex % availableReviews.length];
+        customerName = r.customer_name || r.name || CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
+        commentText = r.comment.length > 60 ? r.comment.substring(0, 57) + '...' : r.comment;
+        _realReviewIndex++;
+    } else {
+        customerName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
+        const fallbacks = ['Adorei!', 'Entrega rápida!', 'Atendimento excelente!', 'Produto lindo!', 'Recomendo!'];
+        commentText = fallbacks[Math.floor(Math.random() * fallbacks.length)];
     }
 
-    notificationIndex = (notificationIndex + 1) % 4;
+    // Escolher produto aleatório dos disponíveis
+    let productImage = '';
+    let productName = '';
+    if (products.length > 0) {
+        const p = products[Math.floor(Math.random() * products.length)];
+        const images = Array.isArray(p.images) ? p.images : [];
+        productImage = images.length > 0 ? images[0] : '';
+        productName = p.name || '';
+    }
+
+    const notif = document.getElementById('geoNotification');
+    const imgEl = document.getElementById('geoNotifImg');
+    const nameEl = document.getElementById('geoNotifName');
+    const locEl = document.getElementById('geoNotifLocation');
+    const commentEl = document.getElementById('geoNotifComment');
+    const productEl = document.getElementById('geoNotifProduct');
+    const barEl = document.getElementById('geoNotifBar');
+
+    if (!notif || !nameEl) return;
+
+    if (imgEl) {
+        imgEl.innerHTML = productImage
+            ? `<img src="${productImage}" alt="${productName}" loading="lazy">`
+            : `<div class="geo-noimg"><i class="fas fa-gem"></i></div>`;
+    }
+    if (nameEl) nameEl.textContent = customerName;
+    if (locEl) {
+        const locSpan = locEl.querySelector('span');
+        if (locSpan) locSpan.textContent = `${detectedCity} — ${neighborhood}`;
+    }
+    if (commentEl) commentEl.textContent = `"${commentText}"`;
+    if (productEl) productEl.textContent = `🛒 ${productName || 'Joia'}`;
+
+    if (barEl) {
+        barEl.classList.remove('geo-bar-animate');
+        void barEl.offsetHeight;
+        barEl.classList.add('geo-bar-animate');
+    }
+
+    notif.classList.add('geo-show');
+    clearTimeout(notif._geoTimer);
+    notif._geoTimer = setTimeout(() => notif.classList.remove('geo-show'), 7000);
 }
 
 function startGeoNotifications() {
-    setTimeout(showGeoNotification, 60000);  // Primeira notificação após 1 minuto (60000ms)
-    setInterval(showGeoNotification, 60000); // Próximas a cada 1 minuto
+    setTimeout(showGeoNotification, 45000);  // Primeira após 45s
+    setInterval(showGeoNotification, 55000); // Próximas a cada 55s
+}
+
+// Review flutuante: aparece quando o cliente já está navegando (momento de decisão)
+let _floatingReviewTimer = null;
+let _floatingReviewInterval = null;
+
+function startFloatingReviews() {
+    // Primeira aparição após 18 segundos (cliente já viu produtos, está decidindo)
+    _floatingReviewTimer = setTimeout(showFloatingReview, 18000);
+    // Depois aparece a cada 50s
+    _floatingReviewInterval = setInterval(showFloatingReview, 50000);
+}
+
+let _frIndex = 0;
+
+function showFloatingReview() {
+    const el = document.getElementById('floatingReview');
+    if (!el) return;
+
+    const valid = reviews.filter(r => r.comment && (r.customer_name || r.name));
+    if (valid.length === 0) return;
+
+    const r = valid[_frIndex % valid.length];
+    _frIndex++;
+
+    const customerName = r.customer_name || r.name || 'Cliente';
+    const rating = r.rating || 5;
+    const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+
+    document.getElementById('floatingReviewStars').textContent = stars;
+    document.getElementById('floatingReviewText').textContent = `"${r.comment.length > 80 ? r.comment.substring(0, 77) + '...' : r.comment}"`;
+    document.getElementById('floatingReviewAuthor').textContent = `— ${customerName}`;
+
+    el.classList.add('fr-show');
+    clearTimeout(el._frTimer);
+    el._frTimer = setTimeout(() => el.classList.remove('fr-show'), 8000);
 }
 
 async function initGeoLocationBackground() {
@@ -1044,20 +1127,24 @@ function renderReviews() {
         return;
     }
 
+    const titleEl = document.getElementById('reviewsTitleText');
+    if (titleEl) titleEl.textContent = siteSettings.reviews_title || 'O que nossos clientes dizem';
+
     container.innerHTML = visibleReviews.map(r => {
+        const customerName = r.customer_name || r.name || 'Cliente';
         const rating = r.rating || 5;
         const starsHtml = Array.from({ length: 5 }, (_, i) =>
             `<i class="fas fa-star" style="color:${i < rating ? '#ff9500' : '#444'}"></i>`
         ).join('');
         const avatarHtml = r.image_url
-            ? `<img src="${r.image_url}" alt="${r.name}" class="review-carousel-avatar" loading="lazy">`
-            : `<div class="review-carousel-avatar" style="display:flex;align-items:center;justify-content:center;background:var(--gold-light);color:var(--gold-primary);font-weight:700;font-size:1.1rem;">${(r.name || '?').charAt(0).toUpperCase()}</div>`;
+            ? `<img src="${r.image_url}" alt="${customerName}" class="review-carousel-avatar" loading="lazy">`
+            : `<div class="review-carousel-avatar" style="display:flex;align-items:center;justify-content:center;background:var(--gold-light);color:var(--gold-primary);font-weight:700;font-size:1.1rem;">${customerName.charAt(0).toUpperCase()}</div>`;
         return `
             <div class="review-carousel-card">
                 <div class="review-carousel-header">
                     ${avatarHtml}
                     <div>
-                        <div class="review-carousel-name">${r.name}</div>
+                        <div class="review-carousel-name">${customerName}</div>
                         <div class="review-carousel-stars">${starsHtml}</div>
                     </div>
                 </div>
@@ -1170,8 +1257,13 @@ function updateSectionVisibility(category) {
     // secondaryProductsSection: sempre visível (todas as categorias)
     show(document.getElementById('secondaryProductsSection'));
 
-    // reviewsSection: sempre visível
-    show(document.getElementById('reviewsSection'));
+    // reviewsSection: visível apenas se houver reviews
+    const revSec = document.getElementById('reviewsSection');
+    if (reviews && reviews.length > 0) {
+        show(revSec);
+    } else {
+        hide(revSec);
+    }
 
     // carrossel 1: visível apenas em 'all' (em categorias específicas, a sequência é: prova social → FAQ → Veja mais)
     isAll ? show(document.getElementById('carouselSection')) : hide(document.getElementById('carouselSection'));
@@ -2341,8 +2433,7 @@ async function initializeApp() {
 
         // Seções secundárias: carregadas após o evento 'load' (não bloqueia LCP/FCP)
         const loadSecondary = async () => {
-            // allSettled garante que showSecondarySections roda mesmo se uma chamada falhar (ex: rede lenta no celular)
-            await Promise.allSettled([loadFaqs(), loadSocialProof(), loadReviews(), loadTeamCarousel()]);
+            await Promise.allSettled([loadSiteSettings(), loadFaqs(), loadSocialProof(), loadReviews(), loadTeamCarousel()]);
             showSecondarySections();
         };
 
@@ -2369,6 +2460,9 @@ async function initializeApp() {
         
         // Iniciar notificações geo-localizadas
         startGeoNotifications();
+
+        // Iniciar reviews flutuantes (aparecem quando cliente está decidindo)
+        startFloatingReviews();
 
         setTimeout(() => {
             const whatsappBtn = document.querySelector('.whatsapp-float');
