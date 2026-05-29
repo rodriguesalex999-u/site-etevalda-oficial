@@ -2118,12 +2118,29 @@ document.addEventListener('click', function(e) {
 
 let _activeFaqAudio = null;
 let _activeFaqCard  = null;
+let _faqFadeInterval = null;
 
 function _duckMusicForFaq() {
-    if (bgMusic && musicStarted) bgMusic.volume = 0.15;
+    if (_faqFadeInterval) { clearInterval(_faqFadeInterval); _faqFadeInterval = null; }
+    if (bgMusic && musicStarted) bgMusic.volume = 0.01;
 }
+
 function _restoreMusicAfterFaq() {
-    if (bgMusic && musicStarted && !isVideoPlaying) bgMusic.volume = originalVolume;
+    if (!bgMusic || !musicStarted || isVideoPlaying) return;
+    if (_faqFadeInterval) return;
+    const target = originalVolume;
+    _faqFadeInterval = setInterval(() => {
+        const current = bgMusic.volume;
+        if (current >= target - 0.005) {
+            bgMusic.volume = target;
+            clearInterval(_faqFadeInterval);
+            _faqFadeInterval = null;
+            return;
+        }
+        // Incremento progressivo: rápido no início, suave no fim
+        const step = Math.max(0.008, (target - current) * 0.12);
+        bgMusic.volume = Math.min(target, current + step);
+    }, 60);
 }
 
 window.playFaqAudio = function(card) {
