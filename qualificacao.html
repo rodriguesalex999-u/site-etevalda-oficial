@@ -11,7 +11,6 @@
 :root{--gold:#d4af37;--gold-l:#f5d060;--bg:#0a0a0a;--card:#141414;--card2:#1c1c1c;--border:rgba(212,175,55,.22);--text:#e0e0e0;--muted:#888;--r:18px}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:60px}
-/* HEADER */
 .ph{text-align:center;padding:34px 20px 26px;background:linear-gradient(180deg,#0f0f0f,var(--bg));border-bottom:1px solid var(--border)}
 .logo{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--gold);letter-spacing:3px;text-transform:uppercase}
 .logo-s{font-size:.73rem;color:var(--muted);letter-spacing:1.5px;margin-top:3px}
@@ -19,83 +18,54 @@ body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-he
 .pt span{color:var(--gold)}
 .ptag{font-size:.87rem;color:var(--muted);margin-top:9px;max-width:340px;margin-left:auto;margin-right:auto;line-height:1.6}
 .stars{color:var(--gold);font-size:1.1rem;letter-spacing:3px;margin-top:12px}
-/* WALL */
-.ws{padding:24px 16px 0;max-width:640px;margin:0 auto}
-.sl{font-size:.69rem;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase;margin-bottom:13px;display:flex;align-items:center;gap:10px}
-.sl::after{content:'';flex:1;height:1px;background:var(--border)}
-.wg{display:flex;flex-direction:column;gap:10px;max-height:290px;overflow-y:auto;padding-right:3px}
-.wg::-webkit-scrollbar{width:3px}
-.wg::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-.tc{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:12px 14px;display:flex;gap:11px;align-items:flex-start;animation:fu .4s ease}
-.av{width:41px;height:41px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);flex-shrink:0}
-.ini{width:41px;height:41px;border-radius:50%;background:var(--card2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700;font-size:.97rem;flex-shrink:0}
-.tb{flex:1;min-width:0}
-.tn{font-weight:700;font-size:.86rem;color:#fff}
-.tt{font-size:.69rem;color:var(--gold);margin-top:2px}
-.ts{color:var(--gold);font-size:.67rem;margin-top:3px}
-.tx{font-size:.82rem;color:var(--text);margin-top:5px;line-height:1.55}
-.we{text-align:center;padding:22px;color:var(--muted);font-size:.84rem}
-/* LOADING */
-.ld{display:flex;gap:5px;justify-content:center;padding:22px 0}
-.ldot{width:7px;height:7px;border-radius:50%;background:var(--gold);animation:db 1.2s infinite}
-.ldot:nth-child(2){animation-delay:.2s}.ldot:nth-child(3){animation-delay:.4s}
-/* FORM CARD */
 .fs{max-width:520px;margin:22px auto 0;padding:0 16px}
 .fc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:24px 20px;box-shadow:0 22px 60px rgba(0,0,0,.45)}
-/* PROGRESS */
 .pd{display:flex;gap:6px;justify-content:center;margin-bottom:20px}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .35s}
 .dot.on{background:var(--gold);width:20px;border-radius:3px}
-/* STEPS */
 .step{display:none}
 .step.active{display:block;animation:fu .35s ease}
 .sb{font-size:.67rem;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:13px;display:flex;align-items:center;gap:8px}
 .sb::before{content:'';display:inline-block;width:15px;height:2px;background:var(--gold)}
 .st{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:#fff;margin-bottom:17px;line-height:1.3}
-/* BANNER */
-.bn{background:linear-gradient(135deg,rgba(212,175,55,.1),rgba(212,175,55,.04));border:1px solid rgba(212,175,55,.22);border-radius:12px;padding:12px 14px;display:flex;align-items:flex-start;gap:11px;margin-bottom:18px;font-size:.82rem;color:var(--text);line-height:1.55}
-.bn i{color:var(--gold);font-size:1.15rem;flex-shrink:0;margin-top:1px}
-/* CHIPS */
-.cw{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
-.chip{background:var(--card2);border:1.5px solid var(--border);border-radius:30px;padding:8px 15px;font-size:.85rem;cursor:pointer;transition:all .2s;color:var(--text);display:flex;align-items:center;gap:5px;user-select:none}
+.cw{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.subt{font-size:.74rem;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px;letter-spacing:.3px}
+.chip{background:var(--card2);border:1.5px solid var(--border);border-radius:30px;padding:8px 15px;font-size:.82rem;cursor:pointer;transition:all .2s;color:var(--text);display:flex;align-items:center;gap:5px;user-select:none}
 .chip:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-1px)}
 .chip.sel{background:rgba(212,175,55,.12);border-color:var(--gold);color:var(--gold);font-weight:700}
-/* INPUTS */
 .fl{font-size:.79rem;color:var(--muted);margin-bottom:6px;display:block}
 .fi,.ft{width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;color:#fff;font-family:'Lato',sans-serif;font-size:.92rem;outline:none;transition:border-color .2s;margin-bottom:13px}
 .fi:focus,.ft:focus{border-color:var(--gold)}
 .fi::placeholder,.ft::placeholder{color:var(--muted)}
-.ft{resize:none;height:106px}
+.ft{resize:none;min-height:100px}
 .cc{text-align:right;font-size:.69rem;color:var(--muted);margin-top:-9px;margin-bottom:13px}
 .div{height:1px;background:var(--border);margin:17px 0}
-/* BUTTONS */
+.pulse-focus{animation:pf 2s ease-in-out infinite}
+@keyframes pf{0%,100%{border-color:var(--gold);box-shadow:0 0 0 0 rgba(212,175,55,.2)}50%{border-color:var(--gold-l);box-shadow:0 0 0 6px rgba(212,175,55,0)}}
 .bg{width:100%;background:linear-gradient(135deg,#d4af37,#f5d060);color:#000;border:none;border-radius:12px;padding:14px;font-size:.96rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Lato',sans-serif}
 .bg:hover{transform:translateY(-2px);box-shadow:0 7px 20px rgba(212,175,55,.35)}
 .bg:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
 .bgh{width:100%;background:transparent;color:var(--muted);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;padding:12px;font-size:.87rem;cursor:pointer;transition:all .2s;font-family:'Lato',sans-serif;margin-top:9px}
 .bgh:hover{background:rgba(255,255,255,.05);color:#ddd}
-/* PHOTO */
-.po{display:flex;gap:10px;margin-bottom:15px}
-.popt{flex:1;background:var(--card2);border:1.5px solid var(--border);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;transition:all .2s}
-.popt:hover,.popt.on{border-color:var(--gold);background:rgba(212,175,55,.07)}
-.popt i{font-size:1.45rem;color:var(--gold);display:block;margin-bottom:5px}
-.popt span{font-size:.76rem;color:var(--text)}
-.pp{width:100%;border-radius:10px;overflow:hidden;display:none;margin-bottom:13px}
-.pp img{width:100%;max-height:185px;object-fit:cover;display:block}
-/* PROGRESS BAR */
-.prw{display:none;margin:11px 0}
-.prt{background:var(--card2);border-radius:6px;height:5px;overflow:hidden}
-.prf{height:100%;background:linear-gradient(90deg,#d4af37,#f5d060);width:0%;transition:width .3s}
-.prl{font-size:.71rem;color:var(--muted);text-align:center;margin-top:5px}
-/* SUCCESS */
-.si{font-size:3.6rem;text-align:center;margin-bottom:13px}
-.stit{font-family:'Cormorant Garamond',serif;font-size:1.85rem;color:#fff;text-align:center;margin-bottom:9px}
-.sm{font-size:.86rem;color:var(--muted);text-align:center;line-height:1.7;margin-bottom:24px}
 @keyframes ctap{0%,100%{box-shadow:0 0 0 0 rgba(212,175,55,.6);transform:scale(1)}50%{box-shadow:0 0 0 13px rgba(212,175,55,0);transform:scale(1.025)}}
 .bcta{display:block;width:100%;background:linear-gradient(135deg,#d4af37,#f5d060);color:#000;border:none;border-radius:12px;padding:15px;font-size:.97rem;font-weight:700;font-family:'Lato',sans-serif;text-decoration:none;text-align:center;animation:ctap 1.7s ease-in-out infinite}
+.ws{padding:0 16px;max-width:640px;margin:0 auto}
+.sl{font-size:.69rem;letter-spacing:2.5px;color:var(--muted);text-transform:uppercase;margin-bottom:13px;display:flex;align-items:center;gap:10px}
+.sl::after{content:'';flex:1;height:1px;background:var(--border)}
+.wg{display:flex;flex-direction:column;gap:10px;padding-right:3px;margin-bottom:20px}
+.tc{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:12px 14px;display:flex;gap:11px;align-items:flex-start;animation:fu .4s ease}
+.av{width:41px;height:41px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);flex-shrink:0}
+.ini{width:41px;height:41px;border-radius:50%;background:var(--card2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:700;font-size:.97rem;flex-shrink:0}
+.tb{flex:1;min-width:0}
+.tn{font-weight:700;font-size:.86rem;color:#fff}
+.ts{color:var(--gold);font-size:.67rem;margin-top:3px}
+.tx{font-size:.82rem;color:var(--text);margin-top:5px;line-height:1.55}
+.we{text-align:center;padding:22px;color:var(--muted);font-size:.84rem}
+.ld{display:flex;gap:5px;justify-content:center;padding:22px 0}
+.ldot{width:7px;height:7px;border-radius:50%;background:var(--gold);animation:db 1.2s infinite}
+.ldot:nth-child(2){animation-delay:.2s}.ldot:nth-child(3){animation-delay:.4s}
 .sf{text-align:center;margin-top:18px}
 .sf small{font-size:.69rem;color:var(--muted)}
-/* ANIMATIONS */
 @keyframes fu{from{opacity:0;transform:translateY(13px)}to{opacity:1;transform:translateY(0)}}
 @keyframes db{0%,80%,100%{transform:scale(.5);opacity:.4}40%{transform:scale(1);opacity:1}}
 @keyframes shk{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
@@ -108,16 +78,9 @@ body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-he
   <div class="logo">✦ Grupo Etevalda MT ✦</div>
   <div class="logo-s">A maior loja de variedades de MT</div>
   <h1 class="pt">Avalie o nosso<br><span>atendimento</span></h1>
-  <p class="ptag">Sua opinião inspira outros clientes e nos ajuda a melhorar cada dia mais! 💛</p>
+  <p class="ptag">Sua opinião nos ajuda a melhorar cada dia mais! 💛</p>
   <div class="stars">★★★★★</div>
 </header>
-
-<section class="ws">
-  <div class="sl"><i class="fas fa-heart" style="color:var(--gold);font-size:.67rem;"></i> O que nossos clientes estão dizendo</div>
-  <div class="wg" id="wallGrid">
-    <div class="ld"><div class="ldot"></div><div class="ldot"></div><div class="ldot"></div></div>
-  </div>
-</section>
 
 <section class="fs">
  <div class="fc">
@@ -125,14 +88,19 @@ body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-he
   <div class="pd">
     <div class="dot on" id="d1"></div>
     <div class="dot" id="d2"></div>
-    <div class="dot" id="d3"></div>
   </div>
 
   <!-- STEP 1 -->
   <div class="step active" id="step1">
-    <div class="bn"><i class="fas fa-shield-check"></i><span>Avaliações reais de clientes reais! A sua opinião aparece no nosso site e ajuda quem está decidindo. 💍</span></div>
-    <div class="sb">Passo 1 de 3</div>
-    <h2 class="st">Sobre qual produto você conversou com nossa atendente?</h2>
+    <h2 class="st">O que você achou do atendimento?</h2>
+
+    <label class="fl">Sua avaliação</label>
+    <textarea id="custComment" class="ft pulse-focus" placeholder="Escreva aqui o que você achou..." maxlength="280" oninput="onCI(this)" onfocus="this.classList.remove('pulse-focus')"></textarea>
+    <div class="cc" id="cc">0 / 280</div>
+
+    <div class="div"></div>
+
+    <div class="subt"><i class="fas fa-tag" style="color:var(--gold);font-size:.6rem;"></i> Sobre qual produto você conversou com nossa atendente?</div>
     <div class="cw">
       <div class="chip sel" data-type="alianca_anel" onclick="pickChip(this)">💍 Aliança / Anel</div>
       <div class="chip" data-type="corrente"         onclick="pickChip(this)">⛓️ Corrente</div>
@@ -141,40 +109,42 @@ body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-he
       <div class="chip" data-type="pingente"         onclick="pickChip(this)">🔮 Pingente</div>
       <div class="chip" data-type="outros"           onclick="pickChip(this)">✨ Outros</div>
     </div>
+
     <div class="div"></div>
-    <div class="sb">Passo 2 de 3</div>
-    <h2 class="st">O que você achou do nosso atendimento?</h2>
-    <label class="fl">Seu nome *</label>
+
+    <label class="fl" style="font-size:.72rem;color:var(--muted)">Seu nome <span style="font-size:.62rem;">(opcional)</span></label>
     <input type="text" id="custName" class="fi" placeholder="Ex: Maria Silva" maxlength="40" autocomplete="given-name">
-    <label class="fl">Sua avaliação * <span style="font-size:.67rem;">(mín. 15 caracteres)</span></label>
-    <textarea id="custComment" class="ft" placeholder="Fui muito bem atendida! A Bruna foi super atenciosa e me ajudou a escolher a aliança perfeita..." maxlength="280" oninput="onCI(this)"></textarea>
-    <div class="cc" id="cc">0 / 280</div>
+
     <button class="bg" id="btnSend" onclick="submitStep1()"><i class="fas fa-paper-plane" style="margin-right:6px"></i> Enviar Avaliação</button>
   </div>
 
-  <!-- STEP 2 -->
+  <!-- STEP 2 (success) -->
   <div class="step" id="step2">
-    <div class="sb">Passo 3 de 3 — Opcional</div>
-    <h2 class="st">Quer adicionar uma foto? 📸</h2>
-    <p style="font-size:.85rem;color:var(--muted);margin-bottom:17px;line-height:1.65;">Avaliações com foto aparecem em <strong style="color:#fff">destaque</strong>! Adicione <strong style="color:#fff">sua foto</strong> ou a foto de uma <strong style="color:#fff">joia que você ama</strong>.</p>
-    <div class="po">
-      <div class="popt on" id="optA" onclick="setPhOpt('profile')"><i class="fas fa-user-circle"></i><span>Minha foto</span></div>
-      <div class="popt"    id="optB" onclick="setPhOpt('product')"><i class="fas fa-gem"></i><span>Foto da joia</span></div>
+    <div style="text-align:center;margin-bottom:18px;">
+      <div style="font-size:2.2rem;margin-bottom:6px;">✨</div>
+      <p style="font-size:.85rem;color:var(--muted);line-height:1.6;margin-bottom:15px;">Continue navegando e confira as <strong style="color:#fff">novas joias</strong> que chegaram!</p>
+      <a href="https://www.etevaldajoias.com/" class="bcta"><i class="fas fa-gem" style="margin-right:8px"></i> Ver as Novas Joias ✨</a>
     </div>
-    <div class="pp" id="prevWrap"><img id="prevImg" src="" alt="Preview"></div>
-    <input type="file" id="photoFile" accept="image/*" style="display:none" onchange="onPhSel(this)">
-    <button class="bg" id="btnChoose" onclick="document.getElementById('photoFile').click()"><i class="fas fa-camera" style="margin-right:6px"></i><span id="chooseL">Escolher Foto</span></button>
-    <div class="prw" id="prw"><div class="prt"><div class="prf" id="prf"></div></div><div class="prl">Enviando sua foto...</div></div>
-    <button class="bg" id="btnConfirm" style="margin-top:9px;display:none" onclick="doUpload()"><i class="fas fa-check" style="margin-right:6px"></i> Confirmar e Finalizar</button>
-    <button class="bgh" onclick="finalize()">Continuar sem foto</button>
-  </div>
 
-  <!-- STEP 3 -->
-  <div class="step" id="step3">
-    <div class="si">🏆</div>
-    <h2 class="stit">Obrigado, <span id="sname" style="color:var(--gold)">cliente</span>!</h2>
-    <p class="sm">Sua avaliação foi registrada com sucesso e em breve estará visível para outros clientes que amam joias! 💎<br><br>Continue navegando e confira as <strong style="color:#fff">novas joias</strong> que chegaram!</p>
-    <a href="https://www.etevaldajoias.com/" class="bcta"><i class="fas fa-gem" style="margin-right:8px"></i> Ver as Novas Joias ✨</a>
+    <div class="div"></div>
+
+    <div class="sb">Sua avaliação</div>
+    <div id="userReview" style="background:var(--card2);border:1px solid var(--border);border-radius:13px;padding:14px;margin-bottom:18px;">
+      <div style="display:flex;gap:11px;align-items:flex-start;">
+        <div class="ini" id="usrIni">C</div>
+        <div class="tb">
+          <div class="tn" id="usrName">Cliente</div>
+          <div class="ts">★★★★★</div>
+          <div class="tx" id="usrComment"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sl"><i class="fas fa-heart" style="color:var(--gold);font-size:.67rem;"></i> Outros clientes avaliaram</div>
+    <div class="wg" id="wallGrid">
+      <div class="ld"><div class="ldot"></div><div class="ldot"></div><div class="ldot"></div></div>
+    </div>
+
     <div class="sf"><small>Grupo Etevalda MT — A maior loja de variedades de Mato Grosso</small></div>
   </div>
 
@@ -188,19 +158,17 @@ const _sb = supabase.createClient(
     'sb_publishable_xGLDFQarl-DhshRW0932FQ_asug0TUK'
 );
 
-let productType='alianca_anel', photoOption='profile', savedId=null, pendingFile=null, allCats=[];
+let productType='alianca_anel', savedId=null, allCats=[];
 
 const KW={alianca_anel:['alian','anel','solitari'],corrente:['corrent'],pulseira:['pulsei'],relogio:['relogi'],pingente:['pingent','pendent'],outros:[]};
-const LB={alianca_anel:'💍 Aliança/Anel',corrente:'⛓️ Corrente',pulseira:'📿 Pulseira',relogio:'⌚ Relógio',pingente:'🔮 Pingente',outros:'✨ Outros'};
 
 function setStep(n){
     document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
     document.getElementById('step'+n).classList.add('active');
-    ['d1','d2','d3'].forEach((id,i)=>document.getElementById(id).classList.toggle('on',i<n));
+    ['d1','d2'].forEach((id,i)=>document.getElementById(id).classList.toggle('on',i<n));
     window.scrollTo({top:0,behavior:'smooth'});
 }
 function pickChip(el){document.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');productType=el.dataset.type;}
-function setPhOpt(o){photoOption=o;document.getElementById('optA').classList.toggle('on',o==='profile');document.getElementById('optB').classList.toggle('on',o==='product');}
 function onCI(el){document.getElementById('cc').textContent=`${el.value.length} / 280`;}
 function shake(id){const el=document.getElementById(id);el.classList.add('shake');setTimeout(()=>el.classList.remove('shake'),500);}
 
@@ -244,48 +212,23 @@ async function loadWall(){
 async function submitStep1(){
     const name=document.getElementById('custName').value.trim();
     const comment=document.getElementById('custComment').value.trim();
-    if(!name){shake('custName');return;}
-    if(comment.length<15){shake('custComment');return;}
+    if(!comment){shake('custComment');return;}
     const btn=document.getElementById('btnSend');
     btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin" style="margin-right:6px"></i> Salvando...';
     const catIds=getCatIds(productType);
     const order=await getNextOrder();
-    const caption=`${name}@@${comment}`;
+    const displayName=name||'Cliente';
+    const caption=`${displayName}@@${comment}`;
     const{data,error}=await _sb.from('social_proof').insert([{caption,image_url:'',is_active:true,display_order:order,category_ids:catIds}]).select().single();
     btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane" style="margin-right:6px"></i> Enviar Avaliação';
     if(error){alert('Ops! Erro ao salvar. Tente novamente.');console.error(error);return;}
     savedId=data.id;
-    document.getElementById('sname').textContent=name.split(' ')[0];
+    document.getElementById('usrName').textContent=displayName;
+    document.getElementById('usrIni').textContent=displayName.charAt(0).toUpperCase();
+    document.getElementById('usrComment').textContent=`"${comment}"`;
+    await loadWall();
     setStep(2);
 }
-
-function onPhSel(inp){
-    if(!inp.files||!inp.files[0])return;
-    pendingFile=inp.files[0];
-    document.getElementById('prevImg').src=URL.createObjectURL(pendingFile);
-    document.getElementById('prevWrap').style.display='block';
-    document.getElementById('chooseL').textContent='Trocar Foto';
-    document.getElementById('btnConfirm').style.display='block';
-}
-
-async function doUpload(){
-    if(!pendingFile||!savedId)return;
-    const btn=document.getElementById('btnConfirm');
-    btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin" style="margin-right:6px"></i> Enviando...';
-    document.getElementById('prw').style.display='block';
-    document.getElementById('prf').style.width='35%';
-    const ext=pendingFile.name.split('.').pop()||'jpg';
-    const path=`testimonials/${savedId}_${Date.now()}.${ext}`;
-    const{error}=await _sb.storage.from('testimonials').upload(path,pendingFile,{cacheControl:'3600',upsert:false});
-    document.getElementById('prf').style.width='100%';
-    if(!error){
-        const{data:ud}=_sb.storage.from('testimonials').getPublicUrl(path);
-        await _sb.from('social_proof').update({image_url:ud.publicUrl}).eq('id',savedId);
-    }
-    finalize();
-}
-
-function finalize(){setStep(3);loadWall();}
 
 (async()=>{await Promise.all([loadCats(),loadWall()])})();
 </script>
