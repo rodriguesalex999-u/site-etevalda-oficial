@@ -414,6 +414,12 @@ function renderCategories() {
             
             loadProducts(true);
             updateSectionVisibility(currentCategory);
+            if (secondarySectionsLoaded) {
+                renderSocialProof();
+                renderFaqs();
+                renderReviews();
+                renderTeamCarousel();
+            }
         });
     });
 }
@@ -661,111 +667,45 @@ function playViewerSound() {
     }
 }
 
-let _realReviewIndex = 0;
-
 function showGeoNotification() {
     const detectedCity = detectedLocation.city;
-    const neighborhoods = detectedLocation.neighborhoods;
-    const neighborhood = neighborhoods[Math.floor(Math.random() * neighborhoods.length)];
+    const neighborhood = detectedLocation.neighborhoods[Math.floor(Math.random() * detectedLocation.neighborhoods.length)];
+    const customerName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
 
-    // Escolher nome aleatório ou real de review
-    const availableReviews = reviews.filter(r => r.comment);
-    let customerName, commentText;
+    const messages = [
+        `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> acabou de comprar!`,
+        `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> mandou mensagem no WhatsApp!`,
+        `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> está fechando a compra!`,
+        `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> avaliou positivo o atendimento!`
+    ];
 
-    if (availableReviews.length > 0 && Math.random() > 0.3) {
-        const r = availableReviews[_realReviewIndex % availableReviews.length];
-        customerName = r.customer_name || r.name || CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
-        commentText = r.comment.length > 60 ? r.comment.substring(0, 57) + '...' : r.comment;
-        _realReviewIndex++;
-    } else {
-        customerName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
-        const fallbacks = ['Adorei!', 'Entrega rápida!', 'Atendimento excelente!', 'Produto lindo!', 'Recomendo!'];
-        commentText = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+    const notification = document.getElementById('geoNotification');
+    const notificationText = document.getElementById('geoNotificationText');
+    const notifBar = document.getElementById('geoNotifBar');
+
+    if (notification && notificationText) {
+        notificationText.innerHTML = messages[notificationIndex];
+        if (notifBar) {
+            notifBar.classList.remove('geo-bar-animate');
+            void notifBar.offsetHeight;
+            notifBar.classList.add('geo-bar-animate');
+        }
+        notification.classList.add('geo-show');
+        clearTimeout(notification._geoTimer);
+        notification._geoTimer = setTimeout(() => notification.classList.remove('geo-show'), 6200);
     }
 
-    // Escolher produto aleatório dos disponíveis
-    let productImage = '';
-    let productName = '';
-    if (products.length > 0) {
-        const p = products[Math.floor(Math.random() * products.length)];
-        const images = Array.isArray(p.images) ? p.images : [];
-        productImage = images.length > 0 ? images[0] : '';
-        productName = p.name || '';
-    }
+    notificationIndex = (notificationIndex + 1) % 4;
+}
 
-    const notif = document.getElementById('geoNotification');
-    const imgEl = document.getElementById('geoNotifImg');
-    const nameEl = document.getElementById('geoNotifName');
-    const locEl = document.getElementById('geoNotifLocation');
-    const commentEl = document.getElementById('geoNotifComment');
-    const productEl = document.getElementById('geoNotifProduct');
-    const barEl = document.getElementById('geoNotifBar');
-
-    if (!notif || !nameEl) return;
-
-    if (imgEl) {
-        imgEl.innerHTML = productImage
-            ? `<img src="${productImage}" alt="${productName}" loading="lazy">`
-            : `<div class="geo-noimg"><i class="fas fa-gem"></i></div>`;
-    }
-    if (nameEl) nameEl.textContent = customerName;
-    if (locEl) {
-        const locSpan = locEl.querySelector('span');
-        if (locSpan) locSpan.textContent = `${detectedCity} — ${neighborhood}`;
-    }
-    if (commentEl) commentEl.textContent = `"${commentText}"`;
-    if (productEl) productEl.textContent = `🛒 ${productName || 'Joia'}`;
-
-    if (barEl) {
-        barEl.classList.remove('geo-bar-animate');
-        void barEl.offsetHeight;
-        barEl.classList.add('geo-bar-animate');
-    }
-
-    notif.classList.add('geo-show');
-    clearTimeout(notif._geoTimer);
-    notif._geoTimer = setTimeout(() => notif.classList.remove('geo-show'), 7000);
+function startGeoNotifications() {
+    setTimeout(showGeoNotification, 60000);  // Primeira notificação após 1 minuto (60000ms)
+    setInterval(showGeoNotification, 60000); // Próximas a cada 1 minuto
 }
 
 function startGeoNotifications() {
     setTimeout(showGeoNotification, 45000);  // Primeira após 45s
     setInterval(showGeoNotification, 55000); // Próximas a cada 55s
-}
-
-// Review flutuante: aparece quando o cliente já está navegando (momento de decisão)
-let _floatingReviewTimer = null;
-let _floatingReviewInterval = null;
-
-function startFloatingReviews() {
-    // Primeira aparição após 18 segundos (cliente já viu produtos, está decidindo)
-    _floatingReviewTimer = setTimeout(showFloatingReview, 18000);
-    // Depois aparece a cada 50s
-    _floatingReviewInterval = setInterval(showFloatingReview, 50000);
-}
-
-let _frIndex = 0;
-
-function showFloatingReview() {
-    const el = document.getElementById('floatingReview');
-    if (!el) return;
-
-    const valid = reviews.filter(r => r.comment && (r.customer_name || r.name));
-    if (valid.length === 0) return;
-
-    const r = valid[_frIndex % valid.length];
-    _frIndex++;
-
-    const customerName = r.customer_name || r.name || 'Cliente';
-    const rating = r.rating || 5;
-    const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
-
-    document.getElementById('floatingReviewStars').textContent = stars;
-    document.getElementById('floatingReviewText').textContent = `"${r.comment.length > 80 ? r.comment.substring(0, 77) + '...' : r.comment}"`;
-    document.getElementById('floatingReviewAuthor').textContent = `— ${customerName}`;
-
-    el.classList.add('fr-show');
-    clearTimeout(el._frTimer);
-    el._frTimer = setTimeout(() => el.classList.remove('fr-show'), 8000);
 }
 
 async function initGeoLocationBackground() {
@@ -1034,6 +974,24 @@ function renderAllCarousels() {
     renderCarousel('infiniteCarousel5', 5);
 }
 
+function _shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function _getSeenProofIds() {
+    try { return JSON.parse(localStorage.getItem('sp_seen') || '[]'); } catch { return []; }
+}
+
+function _addSeenProofIds(ids) {
+    const seen = _getSeenProofIds();
+    ids.forEach(id => { if (!seen.includes(id)) seen.push(id); });
+    try { localStorage.setItem('sp_seen', JSON.stringify(seen)); } catch {}
+}
+
 function renderSocialProof() {
     const grid = document.getElementById('socialProofGrid');
     if (!grid) return;
@@ -1054,7 +1012,20 @@ function renderSocialProof() {
         return;
     }
 
-    grid.innerHTML = visibleImages.map(item => {
+    // --- Sistema Inteligente: evitar repetir fotos já vistas ---
+    const seenIds = _getSeenProofIds();
+    const unseen = visibleImages.filter(item => !seenIds.includes(item.id));
+    const chosen = unseen.length > 0 ? _shuffleArray([...unseen]) : _shuffleArray([...visibleImages]);
+
+    // Marcar as escolhidas como vistas
+    _addSeenProofIds(chosen.map(i => i.id));
+
+    // Se já viu todas e tem mais de 6 fotos, reseta o histórico
+    if (unseen.length === 0 && visibleImages.length > 6) {
+        try { localStorage.setItem('sp_seen', JSON.stringify([])); } catch {}
+    }
+
+    grid.innerHTML = chosen.map(item => {
         const parts   = (item.caption || '').split('@@');
         const hasAt   = parts.length > 1;
         const spName  = hasAt ? parts[0].trim() : '';
@@ -2460,9 +2431,6 @@ async function initializeApp() {
         
         // Iniciar notificações geo-localizadas
         startGeoNotifications();
-
-        // Iniciar reviews flutuantes (aparecem quando cliente está decidindo)
-        startFloatingReviews();
 
         setTimeout(() => {
             const whatsappBtn = document.querySelector('.whatsapp-float');

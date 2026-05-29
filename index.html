@@ -141,24 +141,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
 </head>
 <body>
 
-    <div id="geoNotification" class="geo-notification">
-        <div class="geo-notif-header"><i class="fas fa-shopping-bag"></i> <span>Compra recente</span></div>
-        <div class="geo-notif-body">
-            <div class="geo-notif-img" id="geoNotifImg"><img src="" alt=""></div>
-            <div class="geo-notif-info">
-                <div class="geo-notif-name" id="geoNotifName"></div>
-                <div class="geo-notif-location" id="geoNotifLocation"><i class="fas fa-map-marker-alt"></i> <span></span></div>
-                <div class="geo-notif-comment" id="geoNotifComment"></div>
-                <div class="geo-notif-product" id="geoNotifProduct"></div>
-            </div>
-        </div>
-        <div class="geo-notif-bar" id="geoNotifBar"></div>
-    </div>
-    <div id="floatingReview" class="floating-review">
-        <div class="floating-review-stars" id="floatingReviewStars"></div>
-        <div class="floating-review-text" id="floatingReviewText"></div>
-        <div class="floating-review-author" id="floatingReviewAuthor"></div>
-    </div>
+    <div id="geoNotification" class="geo-notification"><div class="geo-notif-icon"><i class="fas fa-map-marker-alt"></i></div><div class="geo-notif-text" id="geoNotificationText"></div><div class="geo-notif-bar" id="geoNotifBar"></div></div>
     <div class="toast" id="toast"></div>
 
     <header class="header">
@@ -396,7 +379,7 @@ setTimeout(function(){
         s1.setAttribute('crossorigin','*');
         s0.parentNode.insertBefore(s1,s0);
     })();
-}, 75000);
+}, 240000);
 </script>
 <!--End of Tawk.to Script-->
         </div>
