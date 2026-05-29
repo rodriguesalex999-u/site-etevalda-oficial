@@ -28,11 +28,7 @@ body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-he
 .sb{font-size:.67rem;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:13px;display:flex;align-items:center;gap:8px}
 .sb::before{content:'';display:inline-block;width:15px;height:2px;background:var(--gold)}
 .st{font-family:'Cormorant Garamond',serif;font-size:1.4rem;color:#fff;margin-bottom:17px;line-height:1.3}
-.cw{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
-.subt{font-size:.74rem;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:6px;letter-spacing:.3px}
-.chip{background:var(--card2);border:1.5px solid var(--border);border-radius:30px;padding:8px 15px;font-size:.82rem;cursor:pointer;transition:all .2s;color:var(--text);display:flex;align-items:center;gap:5px;user-select:none}
-.chip:hover{border-color:var(--gold);color:var(--gold);transform:translateY(-1px)}
-.chip.sel{background:rgba(212,175,55,.12);border-color:var(--gold);color:var(--gold);font-weight:700}
+
 .fl{font-size:.79rem;color:var(--muted);margin-bottom:6px;display:block}
 .fi,.ft{width:100%;background:var(--card2);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;color:#fff;font-family:'Lato',sans-serif;font-size:.92rem;outline:none;transition:border-color .2s;margin-bottom:13px}
 .fi:focus,.ft:focus{border-color:var(--gold)}
@@ -45,6 +41,8 @@ body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-he
 .bg{width:100%;background:linear-gradient(135deg,#d4af37,#f5d060);color:#000;border:none;border-radius:12px;padding:14px;font-size:.96rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Lato',sans-serif}
 .bg:hover{transform:translateY(-2px);box-shadow:0 7px 20px rgba(212,175,55,.35)}
 .bg:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.bg-pulse{animation:bp 1.6s ease-in-out infinite}
+@keyframes bp{0%,100%{box-shadow:0 0 0 0 rgba(212,175,55,.5);transform:translateY(0)}50%{box-shadow:0 0 0 10px rgba(212,175,55,0);transform:translateY(-1px)}}
 .bgh{width:100%;background:transparent;color:var(--muted);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;padding:12px;font-size:.87rem;cursor:pointer;transition:all .2s;font-family:'Lato',sans-serif;margin-top:9px}
 .bgh:hover{background:rgba(255,255,255,.05);color:#ddd}
 @keyframes ctap{0%,100%{box-shadow:0 0 0 0 rgba(212,175,55,.6);transform:scale(1)}50%{box-shadow:0 0 0 13px rgba(212,175,55,0);transform:scale(1.025)}}
@@ -100,19 +98,7 @@ body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-he
 
     <div class="div"></div>
 
-    <div class="subt"><i class="fas fa-tag" style="color:var(--gold);font-size:.6rem;"></i> Sobre qual produto você conversou com nossa atendente?</div>
-    <div class="cw">
-      <div class="chip sel" data-type="alianca_anel" onclick="pickChip(this)">💍 Aliança / Anel</div>
-      <div class="chip" data-type="corrente"         onclick="pickChip(this)">⛓️ Corrente</div>
-      <div class="chip" data-type="pulseira"         onclick="pickChip(this)">📿 Pulseira</div>
-      <div class="chip" data-type="relogio"          onclick="pickChip(this)">⌚ Relógio</div>
-      <div class="chip" data-type="pingente"         onclick="pickChip(this)">🔮 Pingente</div>
-      <div class="chip" data-type="outros"           onclick="pickChip(this)">✨ Outros</div>
-    </div>
-
-    <div class="div"></div>
-
-    <label class="fl" style="font-size:.72rem;color:var(--muted)">Seu nome <span style="font-size:.62rem;">(opcional)</span></label>
+    <label class="fl" style="font-size:.72rem;color:var(--muted)">Seu nome</label>
     <input type="text" id="custName" class="fi" placeholder="Ex: Maria Silva" maxlength="40" autocomplete="given-name">
 
     <button class="bg" id="btnSend" onclick="submitStep1()"><i class="fas fa-paper-plane" style="margin-right:6px"></i> Enviar Avaliação</button>
@@ -158,9 +144,7 @@ const _sb = supabase.createClient(
     'sb_publishable_xGLDFQarl-DhshRW0932FQ_asug0TUK'
 );
 
-let productType='alianca_anel', savedId=null, allCats=[];
-
-const KW={alianca_anel:['alian','anel','solitari'],corrente:['corrent'],pulseira:['pulsei'],relogio:['relogi'],pingente:['pingent','pendent'],outros:[]};
+let savedId=null;
 
 function setStep(n){
     document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
@@ -168,27 +152,16 @@ function setStep(n){
     ['d1','d2'].forEach((id,i)=>document.getElementById(id).classList.toggle('on',i<n));
     window.scrollTo({top:0,behavior:'smooth'});
 }
-function pickChip(el){document.querySelectorAll('.chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');productType=el.dataset.type;}
-function onCI(el){document.getElementById('cc').textContent=`${el.value.length} / 280`;}
-function shake(id){const el=document.getElementById(id);el.classList.add('shake');setTimeout(()=>el.classList.remove('shake'),500);}
-
-function getCatIds(type){
-    const kws=KW[type]||[];
-    if(!kws.length)return'';
-    return allCats.filter(c=>{
-        const n=(c.name||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-        return kws.some(k=>n.includes(k));
-    }).map(c=>c.id).join(',');
+function onCI(el){
+    document.getElementById('cc').textContent=`${el.value.length} / 280`;
+    const btn=document.getElementById('btnSend');
+    if(el.value.trim()){btn.classList.add('bg-pulse')}else{btn.classList.remove('bg-pulse')}
 }
+function shake(id){const el=document.getElementById(id);el.classList.add('shake');setTimeout(()=>el.classList.remove('shake'),500);}
 
 async function getNextOrder(){
     const{data}=await _sb.from('social_proof').select('display_order').order('display_order',{ascending:false}).limit(1);
     return data&&data.length?(data[0].display_order||0)+1:1;
-}
-
-async function loadCats(){
-    const{data}=await _sb.from('categories').select('id,name');
-    allCats=data||[];
 }
 
 async function loadWall(){
@@ -215,11 +188,10 @@ async function submitStep1(){
     if(!comment){shake('custComment');return;}
     const btn=document.getElementById('btnSend');
     btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin" style="margin-right:6px"></i> Salvando...';
-    const catIds=getCatIds(productType);
     const order=await getNextOrder();
     const displayName=name||'Cliente';
     const caption=`${displayName}@@${comment}`;
-    const{data,error}=await _sb.from('social_proof').insert([{caption,image_url:'',is_active:true,display_order:order,category_ids:catIds}]).select().single();
+    const{data,error}=await _sb.from('social_proof').insert([{caption,image_url:'',is_active:true,display_order:order}]).select().single();
     btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane" style="margin-right:6px"></i> Enviar Avaliação';
     if(error){alert('Ops! Erro ao salvar. Tente novamente.');console.error(error);return;}
     savedId=data.id;
@@ -230,7 +202,7 @@ async function submitStep1(){
     setStep(2);
 }
 
-(async()=>{await Promise.all([loadCats(),loadWall()])})();
+loadWall();
 </script>
 </body>
 </html>
