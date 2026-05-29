@@ -971,16 +971,22 @@ function renderSocialProof() {
         return;
     }
 
-    grid.innerHTML = visibleImages.map(item => `
+    grid.innerHTML = visibleImages.map(item => {
+        const parts   = (item.caption || '').split('@@');
+        const hasAt   = parts.length > 1;
+        const spName  = hasAt ? parts[0].trim() : '';
+        const spText  = hasAt ? parts[1].trim() : (item.caption || 'Cliente satisfeito');
+        const hasPic  = item.image_url && item.image_url.trim();
+        const imgHtml = hasPic
+            ? `<img src="${item.image_url}" alt="Prova Social" loading="lazy" style="aspect-ratio:1/1;object-fit:cover;">`
+            : `<div style="width:100%;aspect-ratio:1/1;background:linear-gradient(135deg,#1c1c1c,#141414);display:flex;align-items:center;justify-content:center;font-size:2rem;color:#d4af37;">${spName ? spName.charAt(0).toUpperCase() : '★'}</div>`;
+        const nameHtml = spName ? `<span class="social-proof-name">${spName}</span>` : '';
+        return `
         <div class="social-proof-card">
-            <div class="social-proof-image">
-                <img src="${item.image_url}" alt="Prova Social" loading="lazy" style="aspect-ratio: 1/1; object-fit: cover;">
-            </div>
-            <div class="social-proof-overlay">
-                <p class="social-proof-text">${item.caption || 'Cliente satisfeito'}</p>
-            </div>
-        </div>
-    `).join('');
+            <div class="social-proof-image">${imgHtml}</div>
+            <div class="social-proof-overlay">${nameHtml}<p class="social-proof-text">${spText}</p></div>
+        </div>`;
+    }).join('');
 }
 
 function renderFaqs() {

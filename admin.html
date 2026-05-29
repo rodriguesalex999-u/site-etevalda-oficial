@@ -2278,11 +2278,20 @@
         }
 
         data.forEach(item => { window._adminCache[`proof_${item.id}`] = item; });
-        tbody.innerHTML = data.map(item => `
+        tbody.innerHTML = data.map(item => {
+            const pts = (item.caption || '').split('@@');
+            const hasAt = pts.length > 1;
+            const dName = hasAt ? `<strong>${pts[0].trim()}</strong><br>` : '';
+            const dText = hasAt ? pts[1].trim() : (item.caption || '—');
+            const badge = hasAt ? `<span class="badge badge-true" style="font-size:10px;padding:2px 6px;margin-left:4px;">Via Qual.</span>` : '';
+            const hasPh = item.image_url && item.image_url.trim();
+            const imgSrc = hasPh ? item.image_url : 'https://via.placeholder.com/60';
+            const caption = `${dName}${dText.substring(0,60)}${dText.length>60?'...':''}${badge}`;
+            return `
             <tr>
                 <td><strong>#${item.id}</strong></td>
-                <td><img src="${item.image_url}" class="prod-img" onerror="this.src='https://via.placeholder.com/60'"></td>
-                <td>${item.caption || '—'}</td>
+                <td><img src="${imgSrc}" class="prod-img" onerror="this.src='https://via.placeholder.com/60'"${!hasPh?' style="opacity:.25;filter:grayscale(1)"':''}></td>
+                <td>${caption}</td>
                 <td>${catLabel(item.category_ids)}</td>
                 <td>${item.display_order}</td>
                 <td><span class="badge ${item.is_active ? 'badge-true' : 'badge-false'}">${item.is_active ? 'Ativo' : 'Inativo'}</span></td>
@@ -2290,7 +2299,8 @@
                     <button class="btn-secondary" onclick="editSocialProof(${item.id})" title="Editar"><i class="fas fa-edit"></i></button>
                     <button class="btn-danger" onclick="confirmDelete('social_proof',${item.id})"><i class="fas fa-trash"></i></button>
                 </td>
-            </tr>`).join('');
+            </tr>`;
+        }).join('');
     }
     window.editSocialProof = function(id) {
         const item = window._adminCache[`proof_${id}`];
