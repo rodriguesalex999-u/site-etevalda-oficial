@@ -102,6 +102,12 @@ body{font-family:'Lato',sans-serif;background:var(--bg);color:var(--text);min-he
     <input type="text" id="custName" class="fi" placeholder="Ex: Maria Silva" maxlength="40" autocomplete="given-name">
 
     <button class="bg" id="btnSend" onclick="submitStep1()"><i class="fas fa-paper-plane" style="margin-right:6px"></i> Enviar Avaliação</button>
+
+    <div class="div" style="margin-top:26px"></div>
+    <div class="sl"><i class="fas fa-heart" style="color:var(--gold);font-size:.67rem;"></i> O que outros clientes estão dizendo</div>
+    <div class="wg" id="wallGridStep1">
+      <div class="ld"><div class="ldot"></div><div class="ldot"></div><div class="ldot"></div></div>
+    </div>
   </div>
 
   <!-- STEP 2 (success) -->
@@ -146,6 +152,20 @@ const _sb = supabase.createClient(
 
 let savedId=null;
 
+const FALLBACK_NAMES=[
+    'Maria Silva','João Santos','Ana Oliveira','Pedro Costa','Carla Souza',
+    'Lucas Pereira','Juliana Lima','Rafael Almeida','Fernanda Rodrigues','Gustavo Nascimento',
+    'Amanda Barbosa','Felipe Araújo','Mariana Cardoso','Eduardo Carvalho','Letícia Gomes',
+    'Thiago Martins','Vanessa Ribeiro','Rodrigo Moreira','Patrícia Alves','Murilo Fernandes',
+    'Bianca Rocha','Leonardo Dias','Sabrina Teixeira','Diego Azevedo','Camila Jesus',
+    'Bruno Correia','Isabela Campos','Gabriel Melo','Larissa Freitas','Vinícius Barros',
+    'Jéssica Novaes','Matheus Cunha','Aline Pimenta','Daniel Viana','Tainá Batista',
+    'Renan Porto','Luana Assis','Caio Farias','Monique Lopes','Igor Fonseca',
+    'Kátia Neves','Yuri Santana','Raquel Macedo','Samuel Vargas','Andressa Rezende',
+    'Arthur Pessoa','Tábata Branco','Augusto Tavares','Gabriela Muniz','Henrique Castro',
+    'Elisa Dantas','Leandro Aguiar','Sofia Guimarães','Cauê Pires','Manuela Caldeira'
+];
+
 function setStep(n){
     document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
     document.getElementById('step'+n).classList.add('active');
@@ -164,22 +184,37 @@ async function getNextOrder(){
     return data&&data.length?(data[0].display_order||0)+1:1;
 }
 
+function getDisplayName(item){
+    const pts=(item.caption||'').split('@@');
+    const name=pts[0]?pts[0].trim():'';
+    if(name&&name!=='Cliente') return name;
+    return FALLBACK_NAMES[item.id%FALLBACK_NAMES.length];
+}
+
 async function loadWall(){
     const{data}=await _sb.from('social_proof').select('id,image_url,caption,display_order').eq('is_active',true).order('display_order');
     const g=document.getElementById('wallGrid');
-    if(!data||!data.length){g.innerHTML='<div class="we"><i class="fas fa-heart" style="color:var(--muted);font-size:1.3rem;display:block;margin-bottom:7px"></i>Seja o primeiro a avaliar! 💛</div>';return;}
+    const g1=document.getElementById('wallGridStep1');
+    if(!data||!data.length){
+        const msg='<div class="we"><i class="fas fa-heart" style="color:var(--muted);font-size:1.3rem;display:block;margin-bottom:7px"></i>Seja o primeiro a avaliar! 💛</div>';
+        if(g) g.innerHTML=msg;
+        if(g1) g1.innerHTML=msg;
+        return;
+    }
     const sorted=[...data].sort((a,b)=>{
         const ah=a.image_url&&a.image_url.trim()?1:0,bh=b.image_url&&b.image_url.trim()?1:0;
         return bh-ah||a.display_order-b.display_order;
     });
-    g.innerHTML=sorted.map(item=>{
+    const html=sorted.map(item=>{
+        const name=getDisplayName(item);
         const pts=(item.caption||'').split('@@');
-        const name=pts[0]?pts[0].trim():'Cliente';
         const text=pts[1]?pts[1].trim():(item.caption||'Atendimento excelente!');
         const hasPh=item.image_url&&item.image_url.trim();
         const ini=name.charAt(0).toUpperCase();
         return`<div class="tc">${hasPh?`<img class="av" src="${item.image_url}" alt="${name}" onerror="this.style.display='none'">`:`<div class="ini">${ini}</div>`}<div class="tb"><div class="tn">${name}</div><div class="ts">★★★★★</div><div class="tx">"${text}"</div></div></div>`;
     }).join('');
+    if(g) g.innerHTML=html;
+    if(g1) g1.innerHTML=html;
 }
 
 async function submitStep1(){
@@ -189,12 +224,13 @@ async function submitStep1(){
     const btn=document.getElementById('btnSend');
     btn.disabled=true;btn.innerHTML='<i class="fas fa-spinner fa-spin" style="margin-right:6px"></i> Salvando...';
     const order=await getNextOrder();
-    const displayName=name||'Cliente';
-    const caption=`${displayName}@@${comment}`;
+    const rawName=name||'Cliente';
+    const caption=`${rawName}@@${comment}`;
     const{data,error}=await _sb.from('social_proof').insert([{caption,image_url:'',is_active:true,display_order:order}]).select().single();
     btn.disabled=false;btn.innerHTML='<i class="fas fa-paper-plane" style="margin-right:6px"></i> Enviar Avaliação';
     if(error){alert('Ops! Erro ao salvar. Tente novamente.');console.error(error);return;}
     savedId=data.id;
+    const displayName=rawName!=='Cliente'?rawName:FALLBACK_NAMES[data.id%FALLBACK_NAMES.length];
     document.getElementById('usrName').textContent=displayName;
     document.getElementById('usrIni').textContent=displayName.charAt(0).toUpperCase();
     document.getElementById('usrComment').textContent=`"${comment}"`;
