@@ -2043,7 +2043,7 @@ function sendWhatsAppMessage(product, city) {
         msg += ` | Numeração/Tamanho: *${window.selectedSize}${genderInfo}*`;
     }
 
-    window.open(`https://api.whatsapp.com/send/?phone=5565981042112&text=${encodeURIComponent(msg)}`, '_blank');
+    window.open(`https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 // Função para mostrar o modal de cidade (campo de texto livre)
@@ -2555,7 +2555,7 @@ function setupCartListeners() {
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             message += `\nTotal: R$ ${total.toFixed(2).replace('.', ',')}`;
             
-            window.open(`https://api.whatsapp.com/send/?phone=5565981042112&text=${encodeURIComponent(message)}`, '_blank');
+            window.open(`https://api.whatsapp.com/send/?phone=5565993337205&text=${encodeURIComponent(message)}`, '_blank');
         });
     }
 }
