@@ -4193,15 +4193,21 @@ MODAL - SEÇÃO "COMPLEMENTE SEU ESTILO" (PRODUTOS COMPLEMENTARES)
 
 @media (max-width: 768px) {
 
+    /* REMOVE AS BORDAS PRETAS LATERAIS NO CELULAR */
+    .container-fluid {
+        padding: 0 !important;
+    }
+
     /* Grid profissional para 6 produtos visíveis */
 
     .products-grid {
 
         grid-template-columns: repeat(2, 1fr) !important;
 
-        gap: 3px !important;
+        gap: 2px !important;
 
-        padding: 2px 3px !important;
+        padding: 0 !important;
+        margin: 0 !important;
 
     }
 
