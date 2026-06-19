@@ -85,7 +85,7 @@ const _cardAnimObserver = window.IntersectionObserver ? new IntersectionObserver
             _cardAnimObserver.unobserve(e.target);
         }
     });
-}, { threshold: 0.08, rootMargin: '0px 0px -20px 0px' }) : null;
+}, { threshold: 0.08, rootMargin: '0px 0px 100px 0px' }) : null;
 let productViewers = {};
 let viewerOpenCount = 0;
 
@@ -276,6 +276,15 @@ function _resetLazyLoad() {
     _filteredProducts = [];
 }
 
+function _prefetchNextBatch() {
+    const start = _renderedCount;
+    const end = Math.min(start + PRODUCTS_PER_PAGE, _filteredProducts.length);
+    for (let i = start; i < end; i++) {
+        const imgs = Array.isArray(_filteredProducts[i].images) ? _filteredProducts[i].images : [];
+        imgs.slice(0, 2).forEach(src => { if (src) { const pi = new Image(); pi.src = src; } });
+    }
+}
+
 function _setupLazyLoad(container) {
     if (_lazyObserver) _lazyObserver.disconnect();
 
@@ -284,6 +293,7 @@ function _setupLazyLoad(container) {
     _lazyObserver = new IntersectionObserver((entries) => {
         if (!entries[0].isIntersecting) return;
         _renderBatch(container);
+        _prefetchNextBatch();
         _observeCards(container, 0);
         if (_renderedCount >= _filteredProducts.length) {
             _lazyObserver.disconnect();
@@ -293,7 +303,7 @@ function _setupLazyLoad(container) {
             const cards = container.querySelectorAll('.product-card');
             _lazyObserver.observe(cards[cards.length - 1]);
         }
-    }, { rootMargin: '300px' });
+    }, { rootMargin: '1200px' });
 
     const cards = container.querySelectorAll('.product-card');
     if (cards.length > 0) {
@@ -372,6 +382,7 @@ function renderProducts() {
     // Primeiro lote — renderiza só o que cabe na tela
     container.innerHTML = '';
     _renderBatch(container);
+    _prefetchNextBatch();
     _observeCards(container);
     _setupLazyLoad(container);
 }
