@@ -102,6 +102,25 @@ let detectedLocation = { city: 'Cuiabá', neighborhoods: NEIGHBORHOODS['Cuiabá'
 let detectedState = 'MT';
 let notificationIndex = 0;
 
+// Helper: detecta se uma URL é de vídeo
+function isVideoUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    const lower = url.toLowerCase().trim();
+    // Extensões de vídeo diretas
+    if (/\.(mp4|webm|mov|avi|mkv|m4v|3gp|ogv)(\?|$)/i.test(lower)) return true;
+    // YouTube
+    if (/youtu(\.be\/|be\.com\/)/i.test(lower)) return true;
+    // Vimeo
+    if (/vimeo\.com\//i.test(lower)) return true;
+    // Instagram Reels
+    if (/instagram\.com\/reel/i.test(lower)) return true;
+    // TikTok
+    if (/tiktok\.com\//i.test(lower)) return true;
+    // Cloudinary com tipo de recurso video
+    if (/res\.cloudinary\.com\/.*\/video\//i.test(lower)) return true;
+    return false;
+}
+
 // 3. FUNÇÕES DE CARREGAMENTO
 // Inicializar listener do popstate uma vez no carregamento da página
 document.addEventListener('DOMContentLoaded', () => {
@@ -215,6 +234,7 @@ let _lazyObserver = null;
 function _buildCardHTML(p, globalIndex) {
     const images = Array.isArray(p.images) ? p.images : [];
     const hasMultipleImages = images.length > 1;
+    const hasVideoFirst = images.length > 0 && isVideoUrl(images[0]);
     const viewers = productViewers[p.id] || 5;
     const fakeMarkup = 1 + (0.15 + (((p.id * 7) % 16) / 100));
     const oldPrice = (p.price * fakeMarkup).toFixed(2).replace('.', ',');
@@ -223,11 +243,13 @@ function _buildCardHTML(p, globalIndex) {
     const imgAttrs = `width="180" height="180" decoding="async" ${isPriority ? 'fetchpriority="high"' : 'loading="lazy"'}`;
     const currentPriceFormatted = p.price.toFixed(2).replace('.', ',');
     const cardOverlays = getAdditionalItemsOverlay(p);
+    const videoPlayBadge = hasVideoFirst ? '<div class="badge-video"><i class="fas fa-play-circle"></i></div>' : '';
 
     return `
         <div class="product-card" onclick="window.openProductModal(${p.id})">
             <div class="product-image ${hasMultipleImages ? 'has-hover' : ''}">
                 ${p.sold_today ? '<div class="badge-sold">🔥 Vendido hoje</div>' : ''}
+                ${videoPlayBadge}
                 <div class="badge-discount"><span>-</span><strong>${discPct}%</strong></div>
                 <img id="product-img-${p.id}" src="${images[0] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-main" ${imgAttrs}>
                 ${hasMultipleImages ? `<img id="product-img-hover-${p.id}" src="${images[1] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-hover" width="180" height="180" loading="lazy" decoding="async">` : ''}
@@ -346,6 +368,7 @@ function renderProducts() {
         secondaryGrid.innerHTML = sorted.map(p => {
             const imgs = Array.isArray(p.images) ? p.images : [];
             const hasMulti = imgs.length > 1;
+            const hasVideoFirst = imgs.length > 0 && isVideoUrl(imgs[0]);
             const views = productViewers[p.id] || 5;
             const markup = 1 + (0.15 + (((p.id * 7) % 16) / 100));
             const oldPr = (p.price * markup).toFixed(2).replace('.', ',');
@@ -356,6 +379,7 @@ function renderProducts() {
         <div class="product-card sec-card" onclick="window.openProductModal(${p.id})">
             <div class="product-image ${hasMulti ? 'has-hover' : ''}">
                 ${p.sold_today ? '<div class="badge-sold">🔥 Vendido hoje</div>' : ''}
+                ${hasVideoFirst ? '<div class="badge-video"><i class="fas fa-play-circle"></i></div>' : ''}
                 <div class="badge-discount"><span>-</span><strong>${disc}%</strong></div>
                 <img src="${imgs[0] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-main" width="180" height="180" loading="lazy" decoding="async">
                 ${hasMulti ? `<img src="${imgs[1] || 'https://via.placeholder.com/200'}" alt="${p.name}" class="product-img-hover" width="180" height="180" loading="lazy" decoding="async">` : ''}
@@ -1350,10 +1374,12 @@ function getComplementaryProducts(product, excludeIds = [], maxItems = 10) {
 function renderUpsellCard(p) {
     const images = Array.isArray(p.images) ? p.images : [];
     const img = images[0] || 'https://via.placeholder.com/150';
+    const hasVideoFirst = images.length > 0 && isVideoUrl(images[0]);
     return `
         <div class="upsell-product-card" onclick="openProductModal(${p.id})">
             <div class="upsell-product-image">
                 <img src="${img}" alt="${p.name}" loading="lazy">
+                ${hasVideoFirst ? '<div class="badge-video" style="width:30px;height:30px;font-size:1rem;"><i class="fas fa-play-circle"></i></div>' : ''}
             </div>
             <div class="upsell-product-name">${p.name}</div>
             <div class="upsell-product-price">R$ ${p.price.toFixed(2).replace('.', ',')}</div>
@@ -1365,10 +1391,12 @@ function renderUpsellCard(p) {
 function renderComplementCard(p) {
     const images = Array.isArray(p.images) ? p.images : [];
     const img = images[0] || 'https://via.placeholder.com/300';
+    const hasVideoFirst = images.length > 0 && isVideoUrl(images[0]);
     return `
         <div class="complement-product-card" onclick="openProductModal(${p.id})">
             <div class="complement-product-image">
                 <img src="${img}" alt="${p.name}" loading="lazy">
+                ${hasVideoFirst ? '<div class="badge-video" style="width:34px;height:34px;font-size:1.1rem;"><i class="fas fa-play-circle"></i></div>' : ''}
             </div>
             <div class="complement-product-name">${p.name}</div>
             <div class="complement-product-price">
@@ -1489,21 +1517,29 @@ function openProductModal(id) {
     // ===== FIM DA ADIÇÃO =====
 
     // Criar lista de mídia para o modal
+    // Detecta automaticamente URLs de vídeo dentro do array images
     currentMediaList = images.map((img, index) => ({
-        type: 'image',
+        type: isVideoUrl(img) ? 'video' : 'image',
         url: img,
         thumbnail: img,
         index: index
     }));
 
-    // Adicionar vídeos se existirem
+    // Adicionar vídeo do campo video_url se existir e não estiver já no array
     if (product.video_url) {
-        currentMediaList.unshift({
-            type: 'video',
-            url: product.video_url,
-            thumbnail: product.video_thumbnail || images[0] || 'https://via.placeholder.com/400',
-            index: -1
-        });
+        const alreadyInList = currentMediaList.some(m => m.url === product.video_url);
+        if (!alreadyInList) {
+            currentMediaList.unshift({
+                type: 'video',
+                url: product.video_url,
+                thumbnail: product.video_thumbnail || images[0] || 'https://via.placeholder.com/400',
+                index: -1
+            });
+        } else {
+            // Garantir que o item existente tenha type 'video'
+            const existingItem = currentMediaList.find(m => m.url === product.video_url);
+            if (existingItem) existingItem.type = 'video';
+        }
     }
 
     // Thumbnails para navegação
