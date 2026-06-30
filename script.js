@@ -2605,6 +2605,10 @@ function setupCartListeners() {
             
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             message += `\nTotal: R$ ${total.toFixed(2).replace('.', ',')}`;
+
+            if (typeof fbq !== 'undefined') {
+                fbq('track', 'Contact', { content_name: 'WhatsApp - Carrinho' });
+            }
             
             window.open(`https://api.whatsapp.com/send/?phone=5565993475496&text=${encodeURIComponent(message)}`, '_blank');
         });
