@@ -108,8 +108,8 @@ function isVideoUrl(url) {
     const lower = url.toLowerCase().trim();
     // Extensões de vídeo diretas
     if (/\.(mp4|webm|mov|avi|mkv|m4v|3gp|ogv)(\?|$)/i.test(lower)) return true;
-    // YouTube
-    if (/youtu(\.be\/|be\.com\/)/i.test(lower)) return true;
+    // YouTube (watch, youtu.be, shorts, embed)
+    if (/youtu(\.be\/|be\.com\/|\.com\/)/i.test(lower)) return true;
     // Vimeo
     if (/vimeo\.com\//i.test(lower)) return true;
     // Instagram Reels
@@ -125,8 +125,8 @@ function isVideoUrl(url) {
 function isExternalVideoUrl(url) {
     if (!url || typeof url !== 'string') return false;
     const lower = url.toLowerCase().trim();
-    // YouTube
-    if (/youtu(\.be\/|be\.com\/)/i.test(lower)) return true;
+    // YouTube (watch, youtu.be, shorts, embed)
+    if (/youtu(\.be\/|be\.com\/|\.com\/)/i.test(lower)) return true;
     // Vimeo
     if (/vimeo\.com\//i.test(lower)) return true;
     // Instagram Reels
@@ -141,10 +141,19 @@ function getVideoEmbedUrl(url) {
     if (!url || typeof url !== 'string') return url;
     const lower = url.toLowerCase().trim();
 
-    // YouTube: https://youtu.be/ID ou https://www.youtube.com/watch?v=ID
-    const ytMatch = lower.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&?/]+)/i);
+    // YouTube: todas as variantes (watch, youtu.be, shorts, embed)
+    // youtu.be/ID
+    let ytMatch = lower.match(/youtu\.be\/([^&?/]+)/i);
+    // youtube.com/watch?v=ID
+    if (!ytMatch) ytMatch = lower.match(/youtube\.com\/watch\?v=([^&]+)/i);
+    // youtube.com/shorts/ID
+    if (!ytMatch) ytMatch = lower.match(/youtube\.com\/shorts\/([^&?/]+)/i);
+    // youtube.com/embed/ID
+    if (!ytMatch) ytMatch = lower.match(/youtube\.com\/embed\/([^&?/]+)/i);
+
     if (ytMatch) {
-        return `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&mute=1&loop=1&playlist=${ytMatch[1]}`;
+        const videoId = ytMatch[1];
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}`;
     }
 
     // Vimeo: https://vimeo.com/ID
