@@ -121,6 +121,67 @@ function isVideoUrl(url) {
     return false;
 }
 
+// Helper: verifica se é vídeo de plataforma externa (YouTube, Vimeo, etc.) que precisa de iframe
+function isExternalVideoUrl(url) {
+    if (!url || typeof url !== 'string') return false;
+    const lower = url.toLowerCase().trim();
+    // YouTube
+    if (/youtu(\.be\/|be\.com\/)/i.test(lower)) return true;
+    // Vimeo
+    if (/vimeo\.com\//i.test(lower)) return true;
+    // Instagram Reels
+    if (/instagram\.com\/reel/i.test(lower)) return true;
+    // TikTok
+    if (/tiktok\.com\//i.test(lower)) return true;
+    return false;
+}
+
+// Helper: converte URL de vídeo externo para URL de embed
+function getVideoEmbedUrl(url) {
+    if (!url || typeof url !== 'string') return url;
+    const lower = url.toLowerCase().trim();
+
+    // YouTube: https://youtu.be/ID ou https://www.youtube.com/watch?v=ID
+    const ytMatch = lower.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&?/]+)/i);
+    if (ytMatch) {
+        return `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&mute=1&loop=1&playlist=${ytMatch[1]}`;
+    }
+
+    // Vimeo: https://vimeo.com/ID
+    const vimeoMatch = lower.match(/vimeo\.com\/(\d+)/i);
+    if (vimeoMatch) {
+        return `https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1&muted=1&loop=1`;
+    }
+
+    // Instagram Reels - retorna URL original (iframe funciona diretamente)
+    if (/instagram\.com\/reel/i.test(lower)) {
+        return url;
+    }
+
+    // TikTok - retorna URL original (iframe funciona diretamente)
+    if (/tiktok\.com\//i.test(lower)) {
+        return url;
+    }
+
+    return url;
+}
+
+// Helper: renderiza mídia de vídeo corretamente (iframe para plataformas externas, video tag para direto)
+function renderVideoMedia(url, autoplay = true, muted = true, loop = true, playsinline = true) {
+    if (isExternalVideoUrl(url)) {
+        const embedUrl = getVideoEmbedUrl(url);
+        const allowAttrs = autoplay ? 'autoplay; encrypted-media; picture-in-picture' : 'encrypted-media; picture-in-picture';
+        return `<iframe src="${embedUrl}" frameborder="0" allow="${allowAttrs}" allowfullscreen style="width:100%;height:100%;position:absolute;top:0;left:0;"></iframe>`;
+    }
+    const attrs = [
+        autoplay ? 'autoplay' : '',
+        muted ? 'muted' : '',
+        loop ? 'loop' : '',
+        playsinline ? 'playsinline' : ''
+    ].filter(Boolean).join(' ');
+    return `<video src="${url}" ${attrs}></video>`;
+}
+
 // 3. FUNÇÕES DE CARREGAMENTO
 // Inicializar listener do popstate uma vez no carregamento da página
 document.addEventListener('DOMContentLoaded', () => {
@@ -800,7 +861,7 @@ function changeModalMedia(index) {
     
     // Atualiza mantendo os overlays e botoes em todas as fotos
     if (currentMediaList[index].type === 'video') {
-        mainMedia.innerHTML = `<video src="${currentMediaList[index].url}" autoplay muted loop playsinline></video>${soldTodayHtml}${overlaysHtml}${mediaNavHtml}`;
+        mainMedia.innerHTML = `${renderVideoMedia(currentMediaList[index].url)}${soldTodayHtml}${overlaysHtml}${mediaNavHtml}`;
     } else {
         mainMedia.innerHTML = `<img src="${currentMediaList[index].url}" alt="${product?.name || ''}">${soldTodayHtml}${overlaysHtml}${mediaNavHtml}`;
     }
@@ -846,12 +907,23 @@ function setupModalMediaClick() {
 }
 
 function setupModalVideoAudio(hasAudio) {
+    // Vídeos nativos (<video>)
     const videos = document.querySelectorAll('#modalMainMedia video');
     videos.forEach(video => {
-        if (hasAudio) {
-            video.muted = false;
-        } else {
-            video.muted = true;
+        video.muted = !hasAudio;
+    });
+    // Vídeos em iframes (YouTube, Vimeo) - envia comando de mute/unmute via postMessage
+    const iframes = document.querySelectorAll('#modalMainMedia iframe');
+    iframes.forEach(iframe => {
+        try {
+            // YouTube: setVolume 0-100
+            const ytVolume = hasAudio ? 100 : 0;
+            iframe.contentWindow.postMessage(`{"event":"command","func":"setVolume","args":[${ytVolume}]}`, '*');
+            // Vimeo: setVolume 0-1
+            const vimeoVolume = hasAudio ? 1 : 0;
+            iframe.contentWindow.postMessage(`{"method":"setVolume","value":${vimeoVolume}}`, '*');
+        } catch (e) {
+            // Ignorar erros de cross-origin
         }
     });
 }
@@ -1594,7 +1666,7 @@ function openProductModal(id) {
             <div class="modal-media-container">
                 <div class="modal-main-media" id="modalMainMedia" style="position: relative;">
                     ${currentMediaList[0]?.type === 'video'
-                        ? `<video src="${currentMediaList[0].url}" autoplay muted loop playsinline></video>`
+                        ? renderVideoMedia(currentMediaList[0].url)
                         : `<img src="${currentMediaList[0]?.url || ''}" alt="${product.name}">`}
                     ${soldTodayHtml}
                     ${solitarioOverlayHtml}
@@ -1700,12 +1772,24 @@ function closeProductModal() {
     modal.classList.remove('active');
     document.body.style.overflow = '';
     // ===== PARAR TODOS OS VÍDEOS DO MODAL =====
+    // Parar vídeos nativos (<video>)
     const videos = document.querySelectorAll('#modalMainMedia video, .modal-main-media video');
     videos.forEach(video => {
         if (video) {
             video.pause();
-            // Resetar o tempo do vídeo para o início
             video.currentTime = 0;
+        }
+    });
+    // Parar vídeos em iframes (YouTube, Vimeo, etc.) via postMessage
+    const iframes = document.querySelectorAll('#modalMainMedia iframe, .modal-main-media iframe');
+    iframes.forEach(iframe => {
+        try {
+            // YouTube
+            iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+            // Vimeo
+            iframe.contentWindow.postMessage('{"method":"pause"}', '*');
+        } catch (e) {
+            // Ignorar erros de cross-origin
         }
     });
     // ===== FIM DA PAUSA DOS VÍDEOS =====
