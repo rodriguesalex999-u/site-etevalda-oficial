@@ -91,16 +91,27 @@ let viewerOpenCount = 0;
 
 // Dicionários para notificações geo-localizadas
 const NEIGHBORHOODS = {
-    'Cuiabá': ['Centro', 'Alvorada', 'Porto', 'Duque de Caxias', 'Popular', 'Goiaba'],
-    'Várzea Grande': ['Centro', 'Jardim América', 'Morada do Ouro', 'Santa Izabel', 'Planalto'],
-    'Rondonópolis': ['Centro', 'Ouro Branco', 'Jardim dos Girassóis'],
-    'Barra do Bugres': ['Centro', 'Setor Sul', 'Vila Operária']
+    'Cuiabá': ['Dom Aquino', 'Pedra 90', 'CPA 2', 'Coophamil', 'Cristo Rei', 'Tijucal', 'Osmar Cabral', 'Jardim Leblon', 'Dr Fábio', 'Bosque da Saúde', 'Verdão'],
+    'Rondonópolis': ['Vila Aurora', 'Cidade Alta', 'Jardim Atlântico', 'Parque Universitário', 'Santa Cruz', 'Jardim Ipanema', 'Jardim Tropical'],
+    'Sinop': ['Setor Comercial', 'Jardim Jacarandás', 'Jardim Primaveras', 'Jardim das Palmeiras', 'Jardim Imperial', 'Jardim Itália', 'Jardim Umuarama'],
+    'Várzea Grande': ['Centro', 'Jardim América', 'Morada do Ouro', 'Santa Izabel', 'Planalto', 'São Simão', 'Cristo Rei', 'Alameda', 'Ipase', 'Marechal Rondon', 'Vila Arthur'],
+    'Barra do Bugres': ['Centro', 'Setor Sul', 'Vila Operária', 'São João', 'Cohab'],
+    'Diamantino': ['Centro', 'Bairro Novo', 'São João', 'Lagoa Azul'],
+    'Tangará da Serra': ['Centro', 'Jardim Europa', 'Vila Horizonte', 'Cidade Alta'],
+    'Primavera do Leste': ['Centro', 'Parque Vera Cruz', 'Jardim Primavera', 'Vila Nova']
 };
 
 const CUSTOMER_NAMES = ['Ana', 'Maria', 'João', 'Pedro', 'Carla', 'Lucas', 'Fernanda', 'Carlos'];
 let detectedLocation = { city: 'Cuiabá', neighborhoods: NEIGHBORHOODS['Cuiabá'] };
 let detectedState = 'MT';
-let notificationIndex = 0;
+// Retorna cidade conhecida com alta confiança: 1º localStorage, 2º IP detection
+function _getKnownCity() {
+    const saved = localStorage.getItem('user_city');
+    if (saved && NEIGHBORHOODS[saved]) return saved;
+    const detected = window.detectedCitySuggestion;
+    if (detected && NEIGHBORHOODS[detected]) return detected;
+    return null;
+}
 
 // Helper: detecta se uma URL é de vídeo
 function isVideoUrl(url) {
@@ -772,10 +783,34 @@ function playViewerSound() {
     }
 }
 
+let _neighborhoodSeqIdx = 0;
+let _geoIntervalId = null;
+let _lastNeighborhoodCity = null;
+
 function showGeoNotification() {
     const detectedCity = detectedLocation.city;
-    const neighborhood = detectedLocation.neighborhoods[Math.floor(Math.random() * detectedLocation.neighborhoods.length)];
+    const neighborhoods = detectedLocation.neighborhoods;
+
+    // Se a cidade mudou, reinicia o índice para zero
+    if (_lastNeighborhoodCity !== detectedCity) {
+        _neighborhoodSeqIdx = 0;
+        _lastNeighborhoodCity = detectedCity;
+    }
+
+    // Se já mostrou todos os bairros, para as notificações
+    if (_neighborhoodSeqIdx >= neighborhoods.length) {
+        if (_geoIntervalId) {
+            clearInterval(_geoIntervalId);
+            _geoIntervalId = null;
+        }
+        return;
+    }
+
+    const neighborhood = neighborhoods[_neighborhoodSeqIdx];
+    _neighborhoodSeqIdx++;
+
     const customerName = CUSTOMER_NAMES[Math.floor(Math.random() * CUSTOMER_NAMES.length)];
+    const msgIdx = (_neighborhoodSeqIdx - 1) % 4;
 
     const messages = [
         `<strong>${customerName}</strong> de <strong>${detectedCity}</strong> - <strong>${neighborhood}</strong> acabou de comprar!`,
@@ -789,7 +824,7 @@ function showGeoNotification() {
     const notifBar = document.getElementById('geoNotifBar');
 
     if (notification && notificationText) {
-        notificationText.innerHTML = messages[notificationIndex];
+        notificationText.innerHTML = messages[msgIdx];
         if (notifBar) {
             notifBar.classList.remove('geo-bar-animate');
             void notifBar.offsetHeight;
@@ -799,19 +834,56 @@ function showGeoNotification() {
         clearTimeout(notification._geoTimer);
         notification._geoTimer = setTimeout(() => notification.classList.remove('geo-show'), 6200);
     }
-
-    notificationIndex = (notificationIndex + 1) % 4;
 }
 
 function startGeoNotifications() {
-    setTimeout(showGeoNotification, 60000);  // Primeira notificação após 1 minuto (60000ms)
-    setInterval(showGeoNotification, 60000); // Próximas a cada 1 minuto
+    _neighborhoodSeqIdx = 0;
+    _lastNeighborhoodCity = null;
+    setTimeout(showGeoNotification, 45000);
+    _geoIntervalId = setInterval(showGeoNotification, 55000);
 }
 
-function startGeoNotifications() {
-    setTimeout(showGeoNotification, 45000);  // Primeira após 45s
-    setInterval(showGeoNotification, 55000); // Próximas a cada 55s
+// --- CONTADOR DE VISITAS RECORRENTES ---
+function _initVisitCounter() {
+    const today = new Date().toDateString();
+    const savedDate = localStorage.getItem('_visit_date');
+    const savedCount = parseInt(localStorage.getItem('_visit_count') || '0', 10);
+
+    if (savedDate === today) {
+        const newCount = savedCount + 1;
+        localStorage.setItem('_visit_count', newCount.toString());
+        return newCount;
+    } else {
+        localStorage.setItem('_visit_date', today);
+        localStorage.setItem('_visit_count', '1');
+        return 1;
+    }
 }
+
+function _showVisitToast(visitCount) {
+    const notif = document.getElementById('visitNotification');
+    const text = document.getElementById('visitNotificationText');
+    const bar = document.getElementById('visitNotifBar');
+    if (!notif || !text) return false;
+
+    const ordMap = { 2: '2ª', 3: '3ª', 4: '4ª', 5: '5ª', 6: '6ª', 7: '7ª', 8: '8ª', 9: '9ª', 10: '10ª' };
+    const ordinal = ordMap[visitCount] || `${visitCount}ª`;
+
+    text.innerHTML = `👋 <strong>Bem-vindo de volta!</strong> Esta é a sua <strong>${ordinal} visita</strong> hoje. Direcionando...`;
+
+    if (bar) {
+        bar.classList.remove('visit-bar-animate');
+        void bar.offsetHeight;
+        bar.classList.add('visit-bar-animate');
+    }
+
+    notif.classList.add('visit-show');
+    clearTimeout(notif._visitTimer);
+    notif._visitTimer = setTimeout(() => notif.classList.remove('visit-show'), 4200);
+
+    return true;
+}
+// --- FIM DO CONTADOR ---
 
 async function initGeoLocationBackground() {
     try {
@@ -830,6 +902,8 @@ async function initGeoLocationBackground() {
         
         if (NEIGHBORHOODS[detectedCity]) {
             detectedLocation = { city: detectedCity, neighborhoods: NEIGHBORHOODS[detectedCity] };
+            // Auto-salva cidades conhecidas para evitar esperar IP em próximas visitas
+            localStorage.setItem('user_city', detectedCity);
         } else {
             detectedLocation.city = detectedCity;
         }
@@ -2111,18 +2185,43 @@ function showToast(message) {
     }, 3000);
 }
 
+function _proceedToWhatsApp(hasProduct) {
+    const knownCity = _getKnownCity();
+    if (knownCity) {
+        if (hasProduct) {
+            sendWhatsAppMessage(window.currentWhatsAppProduct, knownCity);
+        } else {
+            sendWhatsAppMessage(null, knownCity);
+        }
+        return;
+    }
+    showCityConfirmModal();
+}
+
 function handleFloatingWhatsApp() {
     window.currentWhatsAppProduct = null;
-    showCityConfirmModal();
+    const visitCount = window._dailyVisitCount || 1;
+    if (visitCount > 1) {
+        _showVisitToast(visitCount);
+        setTimeout(() => _proceedToWhatsApp(false), 1800);
+        return;
+    }
+    _proceedToWhatsApp(false);
 }
 
 function buyViaWhatsApp(productId) {
     const product = allProductsLoaded.find(p => p.id === productId) ||
                     (allProductsCache || []).find(p => p.id === productId);
     if (!product) return;
-    
     window.currentWhatsAppProduct = product;
-    showCityConfirmModal();
+
+    const visitCount = window._dailyVisitCount || 1;
+    if (visitCount > 1) {
+        _showVisitToast(visitCount);
+        setTimeout(() => _proceedToWhatsApp(true), 1800);
+        return;
+    }
+    _proceedToWhatsApp(true);
 }
 
 // Remove acentos e converte para minúsculas para normalização de cidade
@@ -2195,7 +2294,10 @@ function showCityConfirmModal() {
     const modal = document.getElementById('cityConfirmModal');
     const cityTextInput = document.getElementById('cityTextInput');
     
-    if (cityTextInput) cityTextInput.value = '';
+    if (cityTextInput) {
+        // Pré-preenche com sugestão do IP (cidade detectada mas não confirmada)
+        cityTextInput.value = window.detectedCitySuggestion || '';
+    }
     
     if (modal) {
         modal.style.display = 'flex';
@@ -2592,6 +2694,9 @@ async function initializeApp() {
         
         // Iniciar notificações geo-localizadas
         startGeoNotifications();
+
+        // Contar visitas do dia (para toast de cliente recorrente)
+        window._dailyVisitCount = _initVisitCounter();
 
         setTimeout(() => {
             const whatsappBtn = document.querySelector('.whatsapp-float');
