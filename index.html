@@ -90,30 +90,15 @@ a{text-decoration:none;color:inherit;}
 button{font-family:inherit;cursor:pointer;border:none;background:none;}
 .container-fluid{max-width:1400px;margin:0 auto;padding:0 var(--spacing-md);overflow-x:hidden;width:100%;}
 .header{background:rgba(10,10,10,.72);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border-bottom:1px solid rgba(212,175,55,.22);position:sticky;top:0;z-index:1000;width:100%;transition:background .35s ease,box-shadow .35s ease;}
-.header-top{padding:var(--spacing-md) 0;transition:max-height .4s ease,opacity .35s ease,padding .35s ease;max-height:120px;opacity:1;overflow:hidden;}
-.header.header-collapsed .header-top{opacity:0;max-height:0;padding-top:0;padding-bottom:0;margin:0;}
-.header,.nav-categories,.nav-categories>.container-fluid,.categories-wrapper,.categories-dropdown,.categories-dropdown .category-list{overflow:visible!important;}
-.nav-categories{background:var(--white);border-top:1px solid var(--gold-light);border-bottom:1px solid var(--gold-light);padding:var(--spacing-xs) 0;overflow:visible;position:relative;transition:all var(--transition-normal);}
-.header-top-content{display:flex;align-items:center;justify-content:space-between;gap:var(--spacing-lg);}
-.header-logo{flex-shrink:0;}
-.logo-link{display:flex;align-items:center;gap:var(--spacing-xs);}
-.logo-link i{font-size:2.2rem;color:var(--gold-primary);}
-.logo-text{display:flex;flex-direction:column;line-height:1.1;}
-.logo-text span{font-family:var(--font-display);font-size:1.6rem;font-weight:800;color:var(--gold-dark);letter-spacing:2px;}
-.logo-text small{font-size:.7rem;color:var(--gray-medium);letter-spacing:1px;}
-.header-search{flex:1;max-width:500px;transition:all var(--transition-normal);}
+.header-top{padding:var(--spacing-sm) 0;transition:all var(--transition-normal);}
+.header-top-content{display:flex;align-items:center;justify-content:center;gap:var(--spacing-lg);}
+.header-search{flex:1;max-width:600px;transition:all var(--transition-normal);}
 .search-wrapper{position:relative;display:flex;align-items:center;background:var(--white);border:2px solid var(--gold-light);border-radius:var(--radius-full);padding:0 var(--spacing-sm);box-shadow:var(--shadow-sm);}
 .search-input{flex:1;border:none;outline:none;padding:var(--spacing-sm) 0;font-size:.95rem;background:transparent;color:var(--black-soft);}
 .search-btn{background:var(--gold-primary);color:var(--white);width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
 .header-actions{display:flex;align-items:center;gap:var(--spacing-md);}
 .cart-btn{position:relative;background:var(--gold-primary);color:var(--white);width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;box-shadow:var(--shadow-md);}
 .cart-count{position:absolute;top:-5px;right:-5px;background:#E74C3C;color:var(--white);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;}
-.categories-wrapper{position:static;display:inline-block;padding:var(--spacing-xs) 0;}
-.categories-toggle-btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--gold-primary),var(--gold-dark));color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:.88rem;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(212,175,55,.35);}
-.categories-chevron{font-size:.72rem;transition:transform .25s ease;}
-.categories-chevron.rotated{transform:rotate(180deg);}
-.categories-dropdown{display:none;position:absolute;top:100%;left:0;right:0;width:100%;z-index:900;background:var(--white);border-top:2px solid var(--gold-primary);}
-.categories-dropdown.open{display:block;}
 .main-content{padding:var(--spacing-lg) 0;min-height:70vh;overflow-x:hidden;width:100%;}
 .products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:var(--spacing-lg);padding:0 12px;}
 @media(min-width:1024px){.products-grid{grid-template-columns:repeat(4,1fr);gap:18px;padding:0 24px;}}
@@ -151,17 +136,14 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
         <div class="header-top">
             <div class="container-fluid">
                 <div class="header-top-content">
-                    <div class="header-logo">
-                        <a href="/" class="logo-link">
-                            <i class="fas fa-crown"></i>
-                            <h1 class="logo-text"><span>GRUPO ETEVALDA</span><small>MT</small></h1>
-                        </a>
-                    </div>
                     <div class="header-search">
                         <div class="search-wrapper">
                             <input type="text" id="searchInput" class="search-input" placeholder="Buscar joias..." autocomplete="off">
                             <button id="searchBtn" class="search-btn"><i class="fas fa-search"></i></button>
-                            <div id="searchDropdown" class="search-dropdown"><div id="searchResults" class="search-results"></div></div>
+                            <div id="searchDropdown" class="search-dropdown">
+                                <div id="searchResults" class="search-results"></div>
+                                <div id="searchCategoryList" class="search-category-list"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="header-actions">
@@ -170,44 +152,6 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
                 </div>
             </div>
         </div>
-        <nav class="nav-categories">
-            <div class="container-fluid">
-                <div class="categories-wrapper">
-                    <button id="categoriesToggleBtn" class="categories-toggle-btn" type="button">
-                        <i class="fas fa-th-list"></i>
-                        <span>Todas as Categorias</span>
-                        <i class="fas fa-chevron-down categories-chevron" id="catChevron"></i>
-                    </button>
-                    <div id="categoriesDropdown" class="categories-dropdown">
-                        <ul id="categoryList" class="category-list"><li class="active" data-category="all">Todos</li></ul>
-                    </div>
-                </div>
-            </div>
-        </nav>
-        <script>
-        (function() {
-            var btn = document.getElementById('categoriesToggleBtn');
-            var dd  = document.getElementById('categoriesDropdown');
-            var chv = document.getElementById('catChevron');
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                dd.classList.toggle('open');
-                chv.classList.toggle('rotated');
-            });
-            dd.addEventListener('click', function(e) {
-                if (e.target.tagName === 'LI') {
-                    dd.classList.remove('open');
-                    chv.classList.remove('rotated');
-                }
-            });
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.categories-wrapper')) {
-                    dd.classList.remove('open');
-                    chv.classList.remove('rotated');
-                }
-            });
-        })();
-        </script>
     </header>
 
     <main class="main-content">
@@ -372,160 +316,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
         </div>
     </main>
 
-    <!-- Botão Flutuante "Todas Categorias" (aparece após header sumir) -->
-<div id="floatingCategoriesBtn" style="position: fixed; top: 10px; left: 10px; z-index: 999; display: none;">
-    <button id="floatingCategoriesToggle" class="categories-toggle-btn" style="background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark)); color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-family: 'Inter', 'Poppins', sans-serif; font-size: 0.85rem; font-weight: 600; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px;">
-        <i class="fas fa-th-list"></i>
-        <span>Todas Categorias</span>
-        <i class="fas fa-chevron-down" style="font-size: 0.7rem;"></i>
-    </button>
-</div>
 
-<style>
-    #floatingCategoriesBtn {
-        transition: opacity 0.3s ease;
-    }
-    #floatingCategoriesBtn.show {
-        display: block;
-        animation: fadeInUp 0.3s ease;
-    }
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>
-
-<script>
-    // Botão flutuante "Todas Categorias"
-    (function() {
-        const floatingBtn = document.getElementById('floatingCategoriesBtn');
-        const originalBtn = document.getElementById('categoriesToggleBtn');
-        const dropdown = document.getElementById('categoriesDropdown');
-        const chevron = document.getElementById('catChevron');
-        let headerCollapsed = false;
-        let timeoutId = null;
-        
-        // Função para mostrar o botão flutuante
-        function showFloatingButton() {
-            if (floatingBtn && !floatingBtn.classList.contains('show')) {
-                floatingBtn.classList.add('show');
-                floatingBtn.style.display = 'block';
-            }
-        }
-        
-        // Função para esconder o botão flutuante
-        function hideFloatingButton() {
-            if (floatingBtn && floatingBtn.classList.contains('show')) {
-                floatingBtn.classList.remove('show');
-                floatingBtn.style.display = 'none';
-            }
-        }
-        
-        // Verificar se o header está colapsado
-        function checkHeaderCollapsed() {
-            const header = document.querySelector('.header');
-            if (header) {
-                const isCollapsed = header.classList.contains('header-collapsed');
-                
-                if (isCollapsed && !headerCollapsed) {
-                    // Header acabou de sumir - aguardar 5 segundos e mostrar botão
-                    headerCollapsed = true;
-                    if (timeoutId) clearTimeout(timeoutId);
-                    timeoutId = setTimeout(() => {
-                        if (headerCollapsed) {
-                            showFloatingButton();
-                        }
-                    }, 5000);
-                } else if (!isCollapsed && headerCollapsed) {
-                    // Header voltou a aparecer - esconder botão imediatamente
-                    headerCollapsed = false;
-                    hideFloatingButton();
-                    if (timeoutId) {
-                        clearTimeout(timeoutId);
-                        timeoutId = null;
-                    }
-                }
-            }
-        }
-        
-        // Configurar o botão flutuante para abrir o dropdown
-        if (floatingBtn) {
-            const floatingToggle = document.getElementById('floatingCategoriesToggle');
-            if (floatingToggle) {
-                floatingToggle.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    if (dropdown) {
-                        dropdown.classList.toggle('open');
-                        const floatingChevron = floatingToggle.querySelector('.fa-chevron-down');
-                        if (floatingChevron) {
-                            floatingChevron.classList.toggle('rotated');
-                        }
-                    }
-                });
-            }
-        }
-        
-        // Fechar dropdown ao clicar fora
-        document.addEventListener('click', function(e) {
-            if (floatingBtn && dropdown && !e.target.closest('#floatingCategoriesBtn') && !e.target.closest('.categories-wrapper')) {
-                dropdown.classList.remove('open');
-                const floatingChevron = floatingBtn.querySelector('.fa-chevron-down');
-                if (floatingChevron) {
-                    floatingChevron.classList.remove('rotated');
-                }
-            }
-        });
-        
-        // Monitorar o header para saber quando ele colapsa
-        const header = document.querySelector('.header');
-        if (header) {
-            const observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.attributeName === 'class') {
-                        checkHeaderCollapsed();
-                    }
-                });
-            });
-            observer.observe(header, { attributes: true });
-            
-            // Verificar estado inicial
-            checkHeaderCollapsed();
-        }
-        
-        // Também monitorar scroll para detectar quando o header colapsa
-        let lastScrollTop = 0;
-        window.addEventListener('scroll', function() {
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            if (scrollTop > 100 && !headerCollapsed) {
-                // Se já passou de 100px e header não está colapsado, verificar
-                checkHeaderCollapsed();
-            } else if (scrollTop < 50 && headerCollapsed) {
-                // Se voltou ao topo, verificar
-                checkHeaderCollapsed();
-            }
-            lastScrollTop = scrollTop;
-        });
-        
-        // Fechar dropdown quando clicar em uma categoria (no botão flutuante também)
-        if (dropdown) {
-            dropdown.addEventListener('click', function(e) {
-                if (e.target.tagName === 'LI') {
-                    dropdown.classList.remove('open');
-                    const floatingChevron = floatingBtn?.querySelector('.fa-chevron-down');
-                    if (floatingChevron) {
-                        floatingChevron.classList.remove('rotated');
-                    }
-                }
-            });
-        }
-    })();
-</script>
 <!-- MODAL DE CONFIRMAÇÃO DE CIDADE -->
 <div id="cityConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; justify-content: center; align-items: center;">
     <div style="background: #111; border-radius: 16px; max-width: 360px; width: 90%; padding: 28px 24px; border: 1px solid var(--gold-primary); box-shadow: 0 0 40px rgba(212,175,55,0.2);">

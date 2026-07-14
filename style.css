@@ -180,14 +180,9 @@ VERSÃO OTIMIZADA PARA COREWEBVITALS
 
 }
 
-/* Cadeia do dropdown de categorias — overflow visível para não cortar o painel */
+/* Header — overflow visível para dropdowns */
 
-.header,
-.nav-categories,
-.nav-categories > .container-fluid,
-.categories-wrapper,
-.categories-dropdown,
-.categories-dropdown .category-list {
+.header {
     overflow: visible !important;
 }
 
@@ -383,11 +378,11 @@ button {
 
 
 
-/* HEADER TOP - Logo e Carrinho (desaparece no scroll) */
+/* HEADER TOP - Apenas busca fixa */
 
 .header-top {
 
-    padding: var(--spacing-md) 0;
+    padding: var(--spacing-sm) 0;
 
     transition: all var(--transition-normal);
 
@@ -395,65 +390,7 @@ button {
 
     height: auto;
 
-    overflow: hidden;
-
-}
-
-
-
-/* Quando o header estiver colapsado, esconde a parte superior */
-
-.header.header-collapsed .header-top {
-
-    opacity: 0;
-
-    height: 0;
-
-    padding-top: 0;
-
-    padding-bottom: 0;
-
-    margin: 0;
-
-}
-
-
-
-/* Navegação de Categorias - SEMPRE VISÍVEL */
-
-.nav-categories {
-
-    background: var(--white);
-
-    border-top: 1px solid var(--gold-light);
-
-    border-bottom: 1px solid var(--gold-light);
-
-    padding: var(--spacing-xs) 0;
-
     overflow: visible;
-
-    position: relative;
-
-    transition: all var(--transition-normal);
-
-}
-
-
-
-.nav-categories::-webkit-scrollbar {
-
-    display: none;
-
-}
-
-
-
-/* Garantir que a busca também fique sempre visível */
-
-.header-search {
-
-    transition: all var(--transition-normal);
 
 }
 
@@ -465,95 +402,9 @@ button {
 
     align-items: center;
 
-    justify-content: space-between;
+    justify-content: center;
 
     gap: var(--spacing-lg);
-
-}
-
-/* Logo Premium */
-
-.header-logo {
-
-    flex-shrink: 0;
-
-}
-
-.logo-link {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: var(--spacing-xs);
-
-}
-
-.logo-link i {
-
-    font-size: 2.2rem;
-
-    color: var(--gold-primary);
-
-    transform: rotate(-10deg);
-
-    transition: transform var(--transition-normal);
-
-}
-
-.logo-link:hover i {
-
-    transform: rotate(0deg) scale(1.1);
-
-}
-
-.logo-text {
-
-    display: flex;
-
-    flex-direction: column;
-
-    line-height: 1.1;
-
-}
-
-.logo-text span {
-
-    font-family: var(--font-display);
-
-    font-size: 1.6rem;
-
-    font-weight: 800;
-
-    color: var(--gold-dark);
-
-    letter-spacing: 2px;
-
-}
-
-.logo-text small {
-
-    font-size: 0.7rem;
-
-    font-weight: 400;
-
-    color: var(--gray-medium);
-
-    letter-spacing: 1px;
-
-}
-
-.logo-tagline {
-
-    font-size: 0.7rem;
-
-    color: var(--gray-medium);
-
-    margin-top: 4px;
-
-    text-transform: uppercase;
-
-    letter-spacing: 1px;
 
 }
 
@@ -563,7 +414,7 @@ button {
 
     flex: 1;
 
-    max-width: 500px;
+    max-width: 600px;
 
 }
 
@@ -685,7 +536,7 @@ button {
 
     margin-top: var(--spacing-xs);
 
-    max-height: 400px;
+    max-height: 70vh;
 
     overflow-y: auto;
 
@@ -813,6 +664,51 @@ button {
     border-left-color: var(--gold-primary) !important;
 }
 
+/* Lista de Categorias no Dropdown de Busca */
+
+.search-category-list {
+    padding: var(--spacing-xs) 0;
+}
+
+.search-category-list.has-results {
+    border-top: 1px solid var(--gold-light);
+}
+
+.search-category-list .category-header {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--gray-medium);
+    font-weight: 600;
+}
+
+.search-category-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border-left: 3px solid transparent;
+    font-size: 0.9rem;
+    color: var(--black-soft);
+}
+
+.search-category-item:hover,
+.search-category-item.active {
+    background: var(--gold-light);
+    border-left-color: var(--gold-primary);
+    color: var(--gold-primary);
+}
+
+.search-category-item i {
+    width: 20px;
+    color: var(--gold-primary);
+    font-size: 0.85rem;
+}
+
 /* Header Actions */
 
 .header-actions {
@@ -925,173 +821,9 @@ button {
 
 }
 
-/* Navegação de Categorias */
 
-.nav-categories {
 
-    background: var(--white);
 
-    border-top: 1px solid var(--gold-light);
-
-    border-bottom: 1px solid var(--gold-light);
-
-    padding: var(--spacing-xs) 0;
-
-    overflow: visible;
-
-}
-
-.category-list {
-
-    display: flex;
-
-    gap: var(--spacing-sm);
-
-    list-style: none;
-
-    padding: 0;
-
-    margin: 0;
-
-}
-
-.category-list li {
-
-    padding: var(--spacing-sm) var(--spacing-md);
-
-    cursor: pointer;
-
-    font-weight: 600;
-
-    color: var(--gray-medium);
-
-    text-transform: uppercase;
-
-    font-size: 0.85rem;
-
-    letter-spacing: 1px;
-
-    transition: all var(--transition-normal);
-
-    border-bottom: 3px solid transparent;
-
-    white-space: nowrap;
-
-}
-
-.category-list li:hover {
-
-    color: var(--gold-primary);
-
-}
-
-.categories-wrapper {
-    position: static;
-    display: inline-block;
-    padding: var(--spacing-xs) 0;
-}
-
-.categories-toggle-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    padding: 9px 18px;
-    font-family: 'Inter', 'Poppins', sans-serif;
-    font-size: 0.88rem;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 8px rgba(212, 175, 55, 0.35);
-    white-space: nowrap;
-}
-
-.categories-toggle-btn:hover {
-    background: linear-gradient(135deg, var(--gold-dark), var(--gold-primary));
-    transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(212, 175, 55, 0.45);
-}
-
-.categories-chevron {
-    font-size: 0.72rem;
-    transition: transform 0.25s ease;
-}
-
-.categories-chevron.rotated {
-    transform: rotate(180deg);
-}
-
-.categories-dropdown {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    width: 100%;
-    z-index: 900;
-    background: var(--white);
-    border-top: 2px solid var(--gold-primary);
-    border-bottom: 1px solid var(--gold-light);
-    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.15);
-}
-
-.categories-dropdown.open {
-    display: block;
-    animation: catDropIn 0.2s ease;
-}
-
-@keyframes catDropIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-.categories-dropdown .category-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 4px;
-    padding: 16px;
-}
-
-.categories-dropdown .category-list li {
-    padding: 16px 12px;
-    border-bottom: none;
-    letter-spacing: 0.4px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    white-space: normal;
-    border-radius: 8px;
-    text-align: center;
-    border: 1px solid var(--gold-light);
-    color: var(--gray-medium);
-    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-}
-
-.categories-dropdown .category-list li:hover {
-    background: var(--gold-light);
-    color: var(--gold-dark);
-    border-color: var(--gold-primary);
-}
-
-.categories-dropdown .category-list li.active {
-    background: linear-gradient(135deg, var(--gold-primary), var(--gold-dark));
-    color: #fff;
-    border-color: var(--gold-dark);
-}
-
-@media (max-width: 480px) {
-    .categories-dropdown .category-list {
-        grid-template-columns: repeat(2, 1fr);
-        padding: 12px;
-    }
-    .categories-dropdown .category-list li {
-        padding: 14px 8px;
-        font-size: 0.88rem;
-    }
-}
 
 /* ========================================
 4. HERO BANNER
@@ -1247,7 +979,7 @@ button {
 
     position: sticky;
 
-    top: 114px;
+    top: 70px;
 
     z-index: 90;
 
@@ -3251,47 +2983,7 @@ CARROSSEL DA EQUIPE (NOVA SEÇÃO)
 
 
 
-/* ========================================
 
-HEADER COLLAPSIBLE
-
-======================================== */
-
-.header-collapsed .header-top {
-
-    opacity: 0;
-
-    height: 0;
-
-    padding: 0;
-
-    margin: 0;
-
-    overflow: hidden;
-
-    transition: all 0.3s ease;
-
-}
-
-
-
-.header-collapsed {
-
-    position: fixed;
-
-    top: 0;
-
-    left: 0;
-
-    right: 0;
-
-    z-index: 1000;
-
-    background: var(--white);
-
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-
-}
 
 
 
@@ -4365,18 +4057,6 @@ MODAL - SEÇÃO "COMPLEMENTE SEU ESTILO" (PRODUTOS COMPLEMENTARES)
 
     }
 
-    .header-logo i {
-
-        font-size: 1.2rem !important; /* Diminui o ícone da coroa */
-
-    }
-
-    .logo-text span {
-
-        font-size: 1rem !important; /* Diminui o texto GRUPO ETEVALDA */
-
-    }
-
     .search-wrapper {
 
         height: 28px !important;
@@ -4400,7 +4080,7 @@ MODAL - SEÇÃO "COMPLEMENTE SEU ESTILO" (PRODUTOS COMPLEMENTARES)
     /* Search dropdown mobile */
     .search-dropdown {
         position: fixed !important;
-        top: 54px !important;
+        top: 60px !important;
         left: 8px !important;
         right: 8px !important;
         max-height: 55vh !important;
@@ -6215,24 +5895,7 @@ white-space: nowrap;
     box-shadow: none !important;
     border-bottom: 1px solid rgba(212,175,55,.22) !important;
 }
-.header.header-collapsed {
-    background: rgba(10,10,10,.90) !important;
-    box-shadow: 0 8px 30px rgba(0,0,0,.65) !important;
-}
 
-/* Colapso suave com max-height */
-.header-top {
-    max-height: 120px !important;
-    overflow: hidden !important;
-    transition: max-height .4s ease, opacity .35s ease, padding .35s ease !important;
-}
-.header.header-collapsed .header-top {
-    max-height: 0 !important;
-    opacity: 0 !important;
-    padding-top: 0 !important;
-    padding-bottom: 0 !important;
-    margin: 0 !important;
-}
 
 /* Search bar: glow dourado no foco */
 .search-wrapper:focus-within {

@@ -500,34 +500,66 @@ function slugifyCategory(name) {
 }
 
 function renderCategories() {
-    const list = document.getElementById('categoryList');
+    const list = document.getElementById('searchCategoryList');
     if (!list) return;
 
-    list.innerHTML = '<li class="active" data-category="all" data-slug="all">Todos</li>';
+    renderSearchCategories('');
+}
 
-    categories.forEach(cat => {
-        list.innerHTML += `<li data-category="${cat.id}" data-slug="${slugifyCategory(cat.name)}">${cat.name}</li>`;
+function renderSearchCategories(filter) {
+    const container = document.getElementById('searchCategoryList');
+    if (!container) return;
+
+    const q = filter.trim().toLowerCase();
+    let filtered = categories;
+    if (q.length > 0) {
+        filtered = categories.filter(cat =>
+            cat.name.toLowerCase().includes(q)
+        );
+    }
+
+    let html = '<div class="category-header"><i class="fas fa-th-list"></i> Categorias</div>';
+
+    html += `<div class="search-category-item" data-category="all" data-slug="all">
+        <i class="fas fa-th-large"></i>
+        <span>Todos</span>
+    </div>`;
+
+    filtered.forEach(cat => {
+        const slug = slugifyCategory(cat.name);
+        html += `<div class="search-category-item" data-category="${cat.id}" data-slug="${slug}">
+            <i class="fas fa-tag"></i>
+            <span>${cat.name}</span>
+        </div>`;
     });
 
-    list.querySelectorAll('li').forEach(button => {
-        button.addEventListener('click', () => {
-            list.querySelectorAll('li').forEach(el => el.classList.remove('active'));
-            button.classList.add('active');
-            
-            currentCategory = button.dataset.category;
+    container.innerHTML = html;
+
+    container.querySelectorAll('.search-category-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const category = item.dataset.category;
+            const slug = item.dataset.slug;
+
+            const si = document.getElementById('searchInput');
+            const sd = document.getElementById('searchDropdown');
+            if (si) si.value = '';
+            if (sd) sd.style.display = 'none';
+            searchQuery = '';
+
+            currentCategory = category;
             allProductsLoaded = [];
             productViewers = {};
-            
-            const slug = button.dataset.slug;
+
             if (slug === 'all') {
                 history.replaceState(null, '', window.location.pathname);
             } else {
                 window.location.hash = slug;
             }
-            
+
             const container = document.getElementById('productsContainer');
             if (container) container.innerHTML = '';
-            
+
             loadProducts(true);
             updateSectionVisibility(currentCategory);
             if (secondarySectionsLoaded) {
@@ -543,9 +575,9 @@ function renderCategories() {
 function applyHashCategory() {
     const hash = window.location.hash.slice(1);
     if (!hash || hash === 'all') return;
-    const list = document.getElementById('categoryList');
+    const list = document.getElementById('searchCategoryList');
     if (!list) return;
-    const match = list.querySelector(`li[data-slug="${hash}"]`);
+    const match = list.querySelector(`[data-slug="${hash}"]`);
     if (match) match.click();
 }
 
@@ -2683,11 +2715,7 @@ async function initializeApp() {
             }, { once: true });
         }
         
-        // Header colapsa ao rolar
-        window.addEventListener('scroll', () => {
-            const _hdr = document.querySelector('.header');
-            if (_hdr) _hdr.classList.toggle('header-collapsed', window.scrollY > 60);
-        }, { passive: true });
+        // Header fixo — sem colapso
 
         // Detectar cidade/estado do cliente via IP
         initGeoLocationBackground();
@@ -2828,17 +2856,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const performSearch = () => {
             searchQuery = searchInput.value.trim();
             
-            // Se tiver busca ativa, mostra TODOS os produtos e filtra pelo nome
             if (searchQuery.length > 0) {
                 currentCategory = 'all';
-                // Remove destaque das categorias
-                document.querySelectorAll('#categoryList li').forEach(li => li.classList.remove('active'));
-                const allCategoryBtn = document.querySelector('[data-category="all"]');
-                if (allCategoryBtn) allCategoryBtn.classList.add('active');
                 updateSectionVisibility('all');
             }
             
-            // Recarrega produtos com a busca
             loadProducts(true);
         };
 
@@ -2856,8 +2878,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // ===== SUGESTÕES DE BUSCA (AUTOCOMPLETE) =====
         const searchDropdown = document.getElementById('searchDropdown');
         const searchResults = document.getElementById('searchResults');
+        const searchCategoryList = document.getElementById('searchCategoryList');
 
-        if (searchDropdown && searchResults) {
+        if (searchDropdown && searchResults && searchCategoryList) {
             let suggestionIndex = -1;
 
             function getProductSource() {
@@ -2866,14 +2889,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             function renderSuggestions(query) {
                 const q = query.trim().toLowerCase();
+
+                // Always show categories when dropdown is open
+                renderSearchCategories(q);
+
                 if (q.length < 1) {
-                    searchDropdown.style.display = 'none';
+                    searchResults.innerHTML = '';
+                    searchCategoryList.classList.remove('has-results');
+                    searchDropdown.style.display = 'block';
                     return;
                 }
 
                 const source = getProductSource();
                 if (source.length === 0) {
-                    searchDropdown.style.display = 'none';
+                    searchCategoryList.classList.remove('has-results');
+                    searchDropdown.style.display = 'block';
                     return;
                 }
 
@@ -2881,12 +2911,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     p.name.toLowerCase().includes(q)
                 ).slice(0, 5);
 
+                suggestionIndex = -1;
+
                 if (matches.length === 0) {
-                    searchDropdown.style.display = 'none';
+                    searchResults.innerHTML = '<div class="search-no-results">Nenhum produto encontrado</div>';
+                    searchCategoryList.classList.remove('has-results');
+                    searchDropdown.style.display = 'block';
                     return;
                 }
 
-                suggestionIndex = -1;
+                searchCategoryList.classList.add('has-results');
+
                 const escapedQ = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
                 const regex = new RegExp(`(${escapedQ})`, 'gi');
 
@@ -2937,9 +2972,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     searchInput.value = query;
                     searchQuery = query;
                     currentCategory = 'all';
-                    document.querySelectorAll('#categoryList li').forEach(li => li.classList.remove('active'));
-                    const allCat = document.querySelector('[data-category="all"]');
-                    if (allCat) allCat.classList.add('active');
                     updateSectionVisibility('all');
                     loadProducts(true);
                 }
@@ -2986,11 +3018,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 200);
             });
 
-            // Mostrar ao focar se já tem texto
+            // Mostrar categorias ao focar (mesmo sem texto)
             searchInput.addEventListener('focus', () => {
-                if (searchInput.value.trim().length >= 1) {
-                    renderSuggestions(searchInput.value);
-                }
+                renderSuggestions(searchInput.value);
             });
 
             // Fechar ao clicar fora
