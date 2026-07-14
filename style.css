@@ -186,6 +186,10 @@ VERSÃO OTIMIZADA PARA COREWEBVITALS
     overflow: visible !important;
 }
 
+.header.header-hidden {
+    display: none !important;
+}
+
 html {
 
     scroll-behavior: smooth;

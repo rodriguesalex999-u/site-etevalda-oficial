@@ -1828,6 +1828,7 @@ function openProductModal(id) {
     document.getElementById('modalContainer').innerHTML = modalHtml;
     document.getElementById('productModal').classList.add('active');
     document.body.style.overflow = 'hidden';
+    document.querySelector('.header')?.classList.add('header-hidden');
 
     // JSON-LD Product structured data para o Google
     const existingLd = document.getElementById('product-ld-json');
@@ -1886,6 +1887,7 @@ function closeProductModal() {
     const modal = document.getElementById('productModal');
     modal.classList.remove('active');
     document.body.style.overflow = '';
+    document.querySelector('.header')?.classList.remove('header-hidden');
     // ===== PARAR TODOS OS VÍDEOS DO MODAL =====
     // Parar vídeos nativos (<video>)
     const videos = document.querySelectorAll('#modalMainMedia video, .modal-main-media video');
