@@ -442,6 +442,8 @@ button {
 
     transition: all var(--transition-normal);
 
+    overflow: visible !important;
+
 }
 
 .search-wrapper:focus-within {
@@ -711,6 +713,23 @@ button {
     width: 20px;
     color: var(--gold-primary);
     font-size: 0.85rem;
+}
+
+/* Backdrop do dropdown de busca */
+.search-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 999;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+.search-overlay.active {
+    display: block;
 }
 
 /* Header Actions */

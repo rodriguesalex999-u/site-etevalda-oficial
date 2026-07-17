@@ -2881,6 +2881,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchDropdown = document.getElementById('searchDropdown');
         const searchResults = document.getElementById('searchResults');
         const searchCategoryList = document.getElementById('searchCategoryList');
+        const searchOverlay = document.getElementById('searchOverlay');
+
+        function toggleSearchOverlay(show) {
+            if (searchOverlay) {
+                searchOverlay.classList.toggle('active', show);
+            }
+        }
 
         if (searchDropdown && searchResults && searchCategoryList) {
             let suggestionIndex = -1;
@@ -2899,6 +2906,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     searchResults.innerHTML = '';
                     searchCategoryList.classList.remove('has-results');
                     searchDropdown.style.display = 'block';
+                    toggleSearchOverlay(true);
                     return;
                 }
 
@@ -2906,6 +2914,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (source.length === 0) {
                     searchCategoryList.classList.remove('has-results');
                     searchDropdown.style.display = 'block';
+                    toggleSearchOverlay(true);
                     return;
                 }
 
@@ -2919,6 +2928,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     searchResults.innerHTML = '<div class="search-no-results">Nenhum produto encontrado</div>';
                     searchCategoryList.classList.remove('has-results');
                     searchDropdown.style.display = 'block';
+                    toggleSearchOverlay(true);
                     return;
                 }
 
@@ -2953,6 +2963,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 searchResults.innerHTML = html;
                 searchDropdown.style.display = 'block';
+                toggleSearchOverlay(true);
             }
 
             // Click delegation nos resultados
@@ -2964,6 +2975,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (id) {
                     searchInput.value = '';
                     searchDropdown.style.display = 'none';
+                    toggleSearchOverlay(false);
                     window.openProductModal(parseInt(id));
                     return;
                 }
@@ -2971,6 +2983,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const query = item.dataset.query;
                 if (query) {
                     searchDropdown.style.display = 'none';
+                    toggleSearchOverlay(false);
                     searchInput.value = query;
                     searchQuery = query;
                     currentCategory = 'all';
@@ -2996,6 +3009,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (e.key === 'Enter') {
                     e.preventDefault();
                     searchDropdown.style.display = 'none';
+                    toggleSearchOverlay(false);
                     if (suggestionIndex >= 0 && items[suggestionIndex]) {
                         items[suggestionIndex].click();
                     } else {
@@ -3017,6 +3031,7 @@ document.addEventListener('DOMContentLoaded', () => {
             searchInput.addEventListener('blur', () => {
                 setTimeout(() => {
                     searchDropdown.style.display = 'none';
+                    toggleSearchOverlay(false);
                 }, 200);
             });
 
@@ -3029,8 +3044,18 @@ document.addEventListener('DOMContentLoaded', () => {
             document.addEventListener('click', (e) => {
                 if (!e.target.closest('.header-search')) {
                     searchDropdown.style.display = 'none';
+                    toggleSearchOverlay(false);
                 }
             });
+
+            // Fechar ao clicar no backdrop
+            if (searchOverlay) {
+                searchOverlay.addEventListener('click', () => {
+                    searchDropdown.style.display = 'none';
+                    toggleSearchOverlay(false);
+                    searchInput.value = '';
+                });
+            }
         }
     }
     // ===== FIM DA ATIVAÇÃO DA BUSCA =====
