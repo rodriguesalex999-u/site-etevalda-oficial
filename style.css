@@ -5904,18 +5904,18 @@ white-space: nowrap;
 /* ============================================================
    ANIMACOES DE ENTRADA DOS CARDS
    ============================================================ */
+/* ANIMAÇÕES DE ENTRADA — DESATIVADAS para carregamento instantâneo */
 .product-card.card-anim-ready,
 .sec-card.card-anim-ready,
 .complement-product-card.card-anim-ready {
-    opacity: 0;
-    transform: translateY(24px);
-    transition: opacity 0.42s ease, transform 0.42s ease;
+    opacity: 1;
+    transform: none;
 }
 .product-card.card-anim-ready.card-visible,
 .sec-card.card-anim-ready.card-visible,
 .complement-product-card.card-anim-ready.card-visible {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
 }
 
 

@@ -366,7 +366,7 @@ async function loadTeamCarousel() {
 }
 
 // 4. FUNÇÕES DE RENDERIZAÇÃO — LAZY LOADING (renderiza só o que cabe na tela)
-const PRODUCTS_PER_PAGE = 12;
+const PRODUCTS_PER_PAGE = 24;
 let _filteredProducts = [];
 let _renderedCount = 0;
 let _lazyObserver = null;
