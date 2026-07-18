@@ -969,6 +969,18 @@
                         <label><i class="fas fa-quote-right"></i> Subtítulo</label>
                         <input type="text" id="categorySubtitle" placeholder="VOCÊ SÓ PAGA NA ENTREGA">
                     </div>
+                    <div class="form-group full-width">
+                        <label><i class="fas fa-image"></i> URL do Banner (Foto ou Vídeo)</label>
+                        <input type="url" id="categoryBannerUrl" placeholder="https://i.postimg.cc/... (foto) ou https://youtube.com/... (vídeo)">
+                        <small style="color:var(--medium-gray);font-size:0.75rem;">Cole o link da imagem (.jpg, .png, .webp) ou vídeo (YouTube, Vimeo, .mp4). Deixe vazio para usar o banner padrão.</small>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-globe"></i> Banner em todas categorias?</label>
+                        <select id="categoryBannerAll">
+                            <option value="false">Não - apenas esta categoria</option>
+                            <option value="true">Sim - aparecer em todas</option>
+                        </select>
+                    </div>
                 </div>
                 <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Salvar Categoria</button>
             </form>
@@ -982,7 +994,7 @@
                             <th>ID</th>
                             <th>Nome</th>
                             <th>Título</th>
-                            <th>Subtítulo</th>
+                            <th>Banner</th>
                             <th>Ações</th>
                         </tr>
                     </thead>
@@ -1742,7 +1754,7 @@
                         <td><strong>#${c.id}</strong></td>
                         <td>${c.name}</td>
                         <td>${c.hero_title || '—'}</td>
-                        <td>${c.hero_subtitle || '—'}</td>
+                        <td>${c.banner_url ? '<span style="color:var(--success);"><i class="fas fa-check-circle"></i> Configurado</span>' : '<span style="color:var(--medium-gray);">Não definido</span>'}${c.banner_all ? ' <small style="color:var(--info);">(Todas)</small>' : ''}</td>
                         <td><button class="btn-danger" onclick="confirmDelete('category', ${c.id})"><i class="fas fa-trash"></i></button></td>
                     </tr>
                 `).join('');
@@ -1788,6 +1800,8 @@
         const name = document.getElementById('categoryName').value.trim().toLowerCase();
         const heroTitle = document.getElementById('categoryTitle').value.trim() || null;
         const heroSubtitle = document.getElementById('categorySubtitle').value.trim() || null;
+        const bannerUrl = document.getElementById('categoryBannerUrl').value.trim() || null;
+        const bannerAll = document.getElementById('categoryBannerAll').value === 'true';
 
         if (!name) {
             showToast('Digite o nome da categoria!', 'error');
@@ -1796,7 +1810,7 @@
 
         const { error } = await _supabase
             .from('categories')
-            .insert([{ id: Math.max(...(categoriesList.map(c => c.id) || [4])) + 1, name, hero_title: heroTitle, hero_subtitle: heroSubtitle }]);
+            .insert([{ id: Math.max(...(categoriesList.map(c => c.id) || [4])) + 1, name, hero_title: heroTitle, hero_subtitle: heroSubtitle, banner_url: bannerUrl, banner_all: bannerAll }]);
 
         if (!error) {
             showToast('✅ Categoria criada!');

@@ -259,6 +259,65 @@ async function loadProducts(reset = false) {
 async function loadCategories() {
     const { data } = await _supabase.from('categories').select('*').order('id');
     categories = data || [];
+    renderCategoryBar();
+}
+
+function renderCategoryBar() {
+    const bar = document.getElementById('categoryBar');
+    if (!bar) return;
+
+    let html = `<button class="category-pill active" data-category="all">Todos</button>`;
+    categories.forEach(cat => {
+        const slug = slugifyCategory(cat.name);
+        html += `<button class="category-pill" data-category="${cat.id}" data-slug="${slug}">${cat.name}</button>`;
+    });
+    bar.innerHTML = html;
+
+    bar.querySelectorAll('.category-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+            bar.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+
+            const category = pill.dataset.category;
+            const slug = pill.dataset.slug;
+
+            currentCategory = category;
+            allProductsLoaded = [];
+            productViewers = {};
+
+            if (slug === 'all' || category === 'all') {
+                history.replaceState(null, '', window.location.pathname);
+            } else {
+                window.location.hash = slug;
+            }
+
+            const container = document.getElementById('productsContainer');
+            if (container) container.innerHTML = '';
+
+            loadProducts(true);
+            updateSectionVisibility(currentCategory);
+            if (secondarySectionsLoaded) {
+                renderSocialProof();
+                renderFaqs();
+                renderReviews();
+                renderTeamCarousel();
+            }
+
+            // Atualizar pill ativo na barra de busca (se existir)
+            document.querySelectorAll('.search-category-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.category === category);
+            });
+        });
+    });
+}
+
+function applyHashCategoryBar() {
+    const hash = window.location.hash.slice(1);
+    if (!hash || hash === 'all') return;
+    const bar = document.getElementById('categoryBar');
+    if (!bar) return;
+    const match = bar.querySelector(`[data-slug="${hash}"]`);
+    if (match) match.click();
 }
 
 async function loadFaqs() {
@@ -575,6 +634,13 @@ function renderSearchCategories(filter) {
 function applyHashCategory() {
     const hash = window.location.hash.slice(1);
     if (!hash || hash === 'all') return;
+    // Tenta sincronizar via barra de categorias (prioridade)
+    const bar = document.getElementById('categoryBar');
+    if (bar) {
+        const matchBar = bar.querySelector(`[data-slug="${hash}"]`);
+        if (matchBar) { matchBar.click(); return; }
+    }
+    // Fallback: busca no dropdown de categorias
     const list = document.getElementById('searchCategoryList');
     if (!list) return;
     const match = list.querySelector(`[data-slug="${hash}"]`);
@@ -1769,11 +1835,11 @@ function openProductModal(id) {
 
     const complementHtml = `
         <div class="complement-section">
-            <h3 class="complement-title"><i class="fas fa-infinity"></i> Complemente seu Estilo</h3>
-            <div class="complement-products-grid" id="complementGrid">
+            <h3 class="complement-title"><i class="fas fa-infinity"></i> Complemente seu Estilo <span class="complement-scroll-hint">← deslize para ver mais</span></h3>
+            <div class="complement-products-scroll" id="complementGrid">
                 ${complementProducts.map(p => renderComplementCard(p)).join('')}
             </div>
-            <div id="complementLoader" class="complement-loader" style="display:none; text-align:center; padding:15px;"><i class="fas fa-spinner fa-spin"></i> Carregando...</div>
+            <div id="complementLoader" class="complement-loader" style="display:none; text-align:center; padding:10px;"><i class="fas fa-spinner fa-spin"></i></div>
         </div>
     `;
 
@@ -1814,12 +1880,18 @@ function openProductModal(id) {
                 </div>
                 <div class="modal-delivery-urgency">${shippingMsg}</div>
                 <div class="modal-buttons-share">
-                    <button class="btn-share" onclick="shareProduct(${product.id})">
-                        <i class="fas fa-share-alt"></i> <span>COMPARTILHE COM SEU AMOR</span>
-                    </button>
+                    <div class="share-label"><i class="fas fa-share-alt"></i> Compartilhe</div>
+                    <div class="share-buttons-row">
+                        <a href="https://wa.me/?text=${encodeURIComponent(product.name + ' - R$ ' + originalPrice + ' | Etevalda Joias')}" target="_blank" class="share-btn share-whatsapp" aria-label="Compartilhar no WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent('https://www.etevaldajoias.com')}" target="_blank" class="share-btn share-facebook" aria-label="Compartilhar no Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <button class="share-btn share-copy" onclick="copyProductLink(${product.id})" aria-label="Copiar link"><i class="fas fa-link"></i></button>
+                    </div>
                 </div>
                 <div class="modal-description">${product.description || ''}</div>
-                
+            </div>
+
+            <!-- RECOMENDAÇÕES - Largura total (fora do info) -->
+            <div class="modal-recommendations">
                 ${upsellHtml}
                 ${complementHtml}
             </div>
@@ -1969,17 +2041,14 @@ function handleMobileBack(event) {
     // Se não for nenhum dos dois, deixar o comportamento normal do navegador
 }
 
-// FUNÇÃO INFINITA PARA COMPLEMENTE SEU ESTILO
+// FUNÇÃO INFINITA PARA COMPLEMENTE SEU ESTILO (scroll horizontal)
 function setupComplementInfiniteScroll() {
-    // O elemento que realmente scrolla é .modal-content (overflow-y: auto), não #productModal
-    const modal = document.getElementById('productModal');
-    if (!modal) return;
-    const scrollableEl = modal.querySelector('.modal-content');
-    if (!scrollableEl) return;
-    
-    // Remover listener anterior se existir (evita duplicação)
-    scrollableEl.removeEventListener('scroll', handleComplementScroll);
-    scrollableEl.addEventListener('scroll', handleComplementScroll);
+    const complementGrid = document.getElementById('complementGrid');
+    if (!complementGrid) return;
+
+    // Remove listener anterior
+    complementGrid.removeEventListener('scroll', handleComplementScroll);
+    complementGrid.addEventListener('scroll', handleComplementScroll);
 }
 
 let complementScrollTimeout;
@@ -1991,17 +2060,13 @@ function handleComplementScroll() {
 }
 
 function checkAndLoadMoreComplement() {
-    const modal = document.getElementById('productModal');
-    if (!modal) return;
-    const scrollableEl = modal.querySelector('.modal-content');
     const complementGrid = document.getElementById('complementGrid');
-    
-    if (!scrollableEl || !complementGrid || isLoadingMoreComplement) return;
-    
-    // Verificar se está próximo ao final (últimos 300px)
-    const distanceFromBottom = scrollableEl.scrollHeight - (scrollableEl.scrollTop + scrollableEl.clientHeight);
-    
-    if (distanceFromBottom < 300) {
+    if (!complementGrid || isLoadingMoreComplement) return;
+
+    // Scroll horizontal: detecta quando está próximo ao final
+    const distanceFromEnd = complementGrid.scrollWidth - (complementGrid.scrollLeft + complementGrid.clientWidth);
+
+    if (distanceFromEnd < 200) {
         loadMoreComplementProducts();
     }
 }
@@ -2009,25 +2074,27 @@ function checkAndLoadMoreComplement() {
 function loadMoreComplementProducts() {
     if (isLoadingMoreComplement) return;
     isLoadingMoreComplement = true;
-    
+
     const complementGrid = document.getElementById('complementGrid');
     const loader = document.getElementById('complementLoader');
-    
+
     if (loader) loader.style.display = 'block';
-    
-    // Buscar produtos aleatórios de TODAS as categorias que ainda não foram mostrados
-    const availableProducts = allProductsLoaded.filter(p => !complementShownIds.includes(p.id));
-    
+
+    // Buscar produtos disponíveis que ainda não foram mostrados
+    let availableProducts = allProductsLoaded.filter(p => !complementShownIds.includes(p.id));
+
+    // LOOP: Se não há mais, reseta e começa de novo (como a página principal)
+    if (availableProducts.length === 0) {
+        complementShownIds = complementShownIds.slice(0, 10); // Mantém só os 10 primeiros
+        availableProducts = allProductsLoaded.filter(p => !complementShownIds.includes(p.id));
+    }
+
     // Embaralhar e pegar 8 produtos por vez
     const shuffled = availableProducts.sort(() => Math.random() - 0.5);
     const newProducts = shuffled.slice(0, 8);
-    
+
     if (newProducts.length === 0) {
-        // Não há mais produtos para mostrar
-        if (loader) {
-            loader.innerHTML = '<i class="fas fa-check"></i> Você já viu todos os produtos!';
-            setTimeout(() => loader.style.display = 'none', 2000);
-        }
+        if (loader) loader.style.display = 'none';
         isLoadingMoreComplement = false;
         return;
     }
@@ -2696,6 +2763,7 @@ async function initializeApp() {
 
         renderCategories();
         applyHashCategory();
+        applyHashCategoryBar();
         renderProducts();
         loadCartFromStorage();
 
