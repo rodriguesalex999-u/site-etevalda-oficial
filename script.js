@@ -1901,6 +1901,24 @@ function openProductModal(id) {
             <div class="modal-recommendations">
                 ${upsellHtml}
                 ${complementHtml}
+
+                <!-- VER MAIS - Continuar navegando -->
+                <div class="modal-see-more">
+                    <div class="see-more-divider">
+                        <span class="see-more-line"></span>
+                        <span class="see-more-text"><i class="fas fa-th-large"></i> Veja mais produtos</span>
+                        <span class="see-more-line"></span>
+                    </div>
+                    <div class="see-more-products" id="seeMoreGrid"></div>
+                    <div id="seeMoreLoader" style="text-align:center; padding:15px; display:none;">
+                        <i class="fas fa-spinner fa-spin" style="color:var(--gold-primary);"></i>
+                    </div>
+                    <div class="see-more-btn-wrap">
+                        <button class="btn-see-more" onclick="loadMoreSeeMoreProducts()">
+                            <i class="fas fa-plus-circle"></i> Carregar mais produtos
+                        </button>
+                    </div>
+                </div>
             </div>
     `;
 
@@ -2117,6 +2135,60 @@ function loadMoreComplementProducts() {
         if (loader) loader.style.display = 'none';
         isLoadingMoreComplement = false;
     }, 500); // Pequeno delay para efeito de carregamento
+}
+
+// VER MAIS - No final do modal
+let seeMoreShownIds = [];
+let seeMorePage = 0;
+
+function loadMoreSeeMoreProducts() {
+    const grid = document.getElementById('seeMoreGrid');
+    const loader = document.getElementById('seeMoreLoader');
+    if (!grid) return;
+
+    if (loader) loader.style.display = 'block';
+
+    // Buscar produtos que ainda não foram mostrados nesta seção
+    let available = allProductsLoaded.filter(p => !seeMoreShownIds.includes(p.id));
+
+    // LOOP: se acabou, reseta
+    if (available.length === 0) {
+        seeMoreShownIds = [];
+        seeMorePage = 0;
+        available = [...allProductsLoaded];
+    }
+
+    // Embaralhar e pegar 6 produtos
+    const shuffled = available.sort(() => Math.random() - 0.5);
+    const batch = shuffled.slice(0, 6);
+
+    setTimeout(() => {
+        const html = batch.map(p => {
+            const imgs = Array.isArray(p.images) ? p.images : [];
+            const img = imgs[0] || 'https://via.placeholder.com/150';
+            const price = p.price.toFixed(2).replace('.', ',');
+            return `
+                <div class="see-more-card" onclick="closeModal(); setTimeout(() => openProductModal(${p.id}), 300);">
+                    <img src="${img}" alt="${p.name}" loading="lazy">
+                    <div class="see-more-card-info">
+                        <div class="see-more-card-name">${p.name}</div>
+                        <div class="see-more-card-price">R$ ${price}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        grid.insertAdjacentHTML('beforeend', html);
+        seeMoreShownIds.push(...batch.map(p => p.id));
+        seeMorePage++;
+
+        if (loader) loader.style.display = 'none';
+    }, 400);
+}
+
+function closeModal() {
+    document.getElementById('productModal')?.classList.remove('active');
+    document.body.style.overflow = '';
 }
 
 // 6. FUNÇÕES DO CARRINHO

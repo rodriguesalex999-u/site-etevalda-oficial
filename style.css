@@ -7720,3 +7720,130 @@ HERBANNER - Foto/Vídeo por Categoria (16:9 YouTube)
         padding: 40px 16px 16px;
     }
 }
+
+/* ========================================
+VER MAIS - No final do modal
+======================================== */
+
+.modal-see-more {
+    width: 100%;
+    padding: 20px 16px;
+    border-top: 1px solid var(--border-subtle);
+    background: var(--white);
+}
+
+.see-more-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.see-more-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-primary), transparent);
+}
+
+.see-more-text {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gold-primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.see-more-products {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.see-more-card {
+    background: var(--bg-card);
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid var(--border-subtle);
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.see-more-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--gold-primary);
+}
+
+.see-more-card img {
+    width: 100%;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+}
+
+.see-more-card-info {
+    padding: 6px 8px;
+}
+
+.see-more-card-name {
+    font-size: 0.7rem;
+    color: var(--black-soft);
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.see-more-card-price {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--gold-primary);
+    margin-top: 2px;
+}
+
+.see-more-btn-wrap {
+    text-align: center;
+}
+
+.btn-see-more {
+    background: transparent;
+    border: 2px solid var(--gold-primary);
+    color: var(--gold-primary);
+    padding: 10px 24px;
+    border-radius: 25px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-see-more:hover {
+    background: var(--gold-primary);
+    color: var(--white);
+    transform: scale(1.02);
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .see-more-products {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+    }
+
+    .see-more-card-name {
+        font-size: 0.65rem;
+    }
+
+    .see-more-card-price {
+        font-size: 0.7rem;
+    }
+
+    .btn-see-more {
+        padding: 8px 18px;
+        font-size: 0.8rem;
+    }
+}
