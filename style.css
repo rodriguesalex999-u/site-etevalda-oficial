@@ -5366,7 +5366,7 @@ white-space: nowrap;
         height: 90vh;
         border-radius: 20px;
         padding: 0;
-        overflow: hidden;
+        overflow: auto;
         background: var(--white);
     }
 
@@ -5658,6 +5658,14 @@ white-space: nowrap;
     .modal-thumbnails { gap: 5px; }
     .modal-thumb { min-width: 45px; height: 45px; }
     .modal-social-proof { margin: 15px 0; padding: 10px; }
+
+    /* MODAL CONTAINER - Mobile */
+    .modal-container {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        overflow-y: visible;
+    }
 
     /* RECOMENDAÇÕES - Mobile */
     .modal-recommendations {
