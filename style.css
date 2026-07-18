@@ -910,19 +910,7 @@ button {
 4. HERO BANNER
 ======================================== */
 
-.hero-banner {
-
-    background: var(--white);
-
-    padding: var(--spacing-md) 0;
-
-}
-
-.hero-banner-xl {
-
-    padding: var(--spacing-xl) 0;
-
-}
+/* hero-banner antigo removido - usando o novo em style.css linha 7659 */
 
 .hero-image-container {
 
