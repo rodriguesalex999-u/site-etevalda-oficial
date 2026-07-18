@@ -1755,7 +1755,10 @@
                         <td>${c.name}</td>
                         <td>${c.hero_title || '—'}</td>
                         <td>${c.banner_url ? '<span style="color:var(--success);"><i class="fas fa-check-circle"></i> Configurado</span>' : '<span style="color:var(--medium-gray);">Não definido</span>'}${c.banner_all ? ' <small style="color:var(--info);">(Todas)</small>' : ''}</td>
-                        <td><button class="btn-danger" onclick="confirmDelete('category', ${c.id})"><i class="fas fa-trash"></i></button></td>
+                        <td>
+                            <button class="btn-primary" onclick='editCategory(${JSON.stringify(c).replace(/'/g, "&#39;")})' style="margin-right:6px;"><i class="fas fa-edit"></i></button>
+                            <button class="btn-danger" onclick="confirmDelete('category', ${c.id})"><i class="fas fa-trash"></i></button>
+                        </td>
                     </tr>
                 `).join('');
             }
@@ -1795,6 +1798,38 @@
         }
     }
 
+    // ========================================
+    // EDITAR CATEGORIA
+    // ========================================
+    let editingCategoryId = null;
+
+    function editCategory(cat) {
+        editingCategoryId = cat.id;
+        document.getElementById('categoryName').value = cat.name || '';
+        document.getElementById('categoryTitle').value = cat.hero_title || '';
+        document.getElementById('categorySubtitle').value = cat.hero_subtitle || '';
+        document.getElementById('categoryBannerUrl').value = cat.banner_url || '';
+        document.getElementById('categoryBannerAll').value = cat.banner_all ? 'true' : 'false';
+
+        // Mudar botão pra "Atualizar"
+        const form = document.getElementById('categoryForm');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Atualizar Categoria';
+        submitBtn.style.background = 'var(--info)';
+
+        // Rolar pro formulário
+        form.scrollIntoView({ behavior: 'smooth' });
+        showToast('Editando: ' + cat.name, 'info');
+    }
+
+    function cancelEditCategory() {
+        editingCategoryId = null;
+        document.getElementById('categoryForm').reset();
+        const submitBtn = document.querySelector('#categoryForm button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Salvar Categoria';
+        submitBtn.style.background = '';
+    }
+
     document.getElementById('categoryForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const name = document.getElementById('categoryName').value.trim().toLowerCase();
@@ -1808,13 +1843,30 @@
             return;
         }
 
-        const { error } = await _supabase
-            .from('categories')
-            .insert([{ id: Math.max(...(categoriesList.map(c => c.id) || [4])) + 1, name, hero_title: heroTitle, hero_subtitle: heroSubtitle, banner_url: bannerUrl, banner_all: bannerAll }]);
+        let error;
+        if (editingCategoryId) {
+            // MODO EDIÇÃO
+            const { error: updateError } = await _supabase
+                .from('categories')
+                .update({ name, hero_title: heroTitle, hero_subtitle: heroSubtitle, banner_url: bannerUrl, banner_all: bannerAll })
+                .eq('id', editingCategoryId);
+            error = updateError;
+            if (!error) showToast('✅ Categoria atualizada!');
+        } else {
+            // MODO CRIAÇÃO
+            const { error: insertError } = await _supabase
+                .from('categories')
+                .insert([{ id: Math.max(...(categoriesList.map(c => c.id) || [4])) + 1, name, hero_title: heroTitle, hero_subtitle: heroSubtitle, banner_url: bannerUrl, banner_all: bannerAll }]);
+            error = insertError;
+            if (!error) showToast('✅ Categoria criada!');
+        }
 
         if (!error) {
-            showToast('✅ Categoria criada!');
+            editingCategoryId = null;
             e.target.reset();
+            const submitBtn = document.querySelector('#categoryForm button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-save"></i> Salvar Categoria';
+            submitBtn.style.background = '';
             await loadCategories();
             updateStats();
         } else {
