@@ -1544,7 +1544,7 @@ function showSecondarySections() {
             section.style.overflow = 'visible';
         }
     });
-    
+
     renderAllCarousels();
     renderSocialProof();
     renderFaqs();
@@ -1556,6 +1556,13 @@ function showSecondarySections() {
 
     // Configurar observer APÓS a seção estar visível (corrige comportamento em mobile)
     setupSecCardObserver();
+
+    // GARANTIA: forçar visibilidade dos cards após 500ms (caso o observer não dispare)
+    setTimeout(() => {
+        document.querySelectorAll('.sec-card:not(.sec-card--visible)').forEach(card => {
+            card.classList.add('sec-card--visible');
+        });
+    }, 500);
 }
 
 // 5. FUNÇÕES DO MODAL

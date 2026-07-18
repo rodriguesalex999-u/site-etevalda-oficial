@@ -6719,16 +6719,8 @@ MELHORIAS PREMIUM v2.0 - NIVEL IA PAGA
 }
 
 /* --- 11. SCROLL REVEAL PARA CARDS --- */
-.product-card {
-    opacity: 0;
-    transform: translateY(20px);
-    transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
-}
-
-.product-card.card-visible {
-    opacity: 1;
-    transform: translateY(0);
-}
+/* REMOVIDO: conflitava com o sistema original card-anim-ready */
+/* Os cards já usam opacity:0 via .card-anim-ready e ficam visíveis com .card-visible */
 
 /* --- 12. SEARCH INPUT FOCUS GLOW --- */
 .search-wrapper:focus-within {
