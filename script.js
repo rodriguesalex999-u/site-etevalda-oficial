@@ -2539,7 +2539,7 @@ function sendWhatsAppMessage(product, city) {
 
     trackEvent('Contact', { content_name: 'WhatsApp' });
 
-    window.open(`https://api.whatsapp.com/send/?phone=5565993475496&text=${encodeURIComponent(msg)}`, '_blank');
+    window.open(`https://api.whatsapp.com/send/?phone=5565981042112&text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 // Modal de cidade removido — WhatsApp agora vai direto
@@ -2983,7 +2983,7 @@ function setupCartListeners() {
 
             trackEvent('Contact', { content_name: 'WhatsApp - Carrinho' });
             
-            window.open(`https://api.whatsapp.com/send/?phone=5565993475496&text=${encodeURIComponent(message)}`, '_blank');
+            window.open(`https://api.whatsapp.com/send/?phone=5565981042112&text=${encodeURIComponent(message)}`, '_blank');
         });
     }
 }
