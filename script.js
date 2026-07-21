@@ -8,7 +8,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_xGLDFQarl-DhshRW0932FQ_asug0TUK';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // 1.1 CONFIGURAÇÃO DO FACEBOOK PIXEL & CONVERSIONS API
-const FB_PIXEL_ID = '1710477863187476';
+const FB_PIXEL_ID = '1002683195582228';
 
 // Função para gerar event_id único para desduplicação
 function generateEventId() {

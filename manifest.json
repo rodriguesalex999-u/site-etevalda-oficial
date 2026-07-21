@@ -1,0 +1,19 @@
+{
+  "name": "Grupo Etevalda MT",
+  "short_name": "Etevalda",
+  "description": "A maior loja de variedades de Mato Grosso — Joias, alianças e muito mais",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#D4AF37",
+  "orientation": "any",
+  "categories": ["shopping", "jewelry"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
