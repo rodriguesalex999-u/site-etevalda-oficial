@@ -5957,17 +5957,7 @@ white-space: nowrap;
 .product-card:hover .product-image img { will-change: transform; }
 .product-card:not(.skeleton):hover .product-image .product-img-main,
 .product-card:not(.skeleton):active .product-image .product-img-main { transform: scale(1.12) !important; }
-.product-image::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,.55));
-    opacity: 0;
-    transition: opacity .35s;
-    pointer-events: none;
-    z-index: 1;
-}
-.product-card:not(.skeleton):hover .product-image::after { opacity: 1; }
+/* Overlay removido - imagem sempre com cor normal */
 
 /* Badge Vendido Hoje */
 .badge-sold {
@@ -6982,34 +6972,7 @@ header.scrolled .header-top {
     border: none;
 }
 
-/* --- 26. IMAGE SHINE - Brilho nas imagens ao hover --- */
-.product-image {
-    position: relative;
-    overflow: hidden;
-}
-
-.product-image::after {
-    content: "";
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(
-        45deg,
-        transparent 40%,
-        rgba(255, 255, 255, 0.08) 50%,
-        transparent 60%
-    );
-    transform: translateX(-100%) rotate(25deg);
-    transition: transform 0.8s ease;
-    pointer-events: none;
-    z-index: 2;
-}
-
-.product-card:hover .product-image::after {
-    transform: translateX(100%) rotate(25deg);
-}
+/* Image shine removido - imagem sempre com cor normal */
 
 /* --- 27. BADGE PULSE - Badge de urgência pulsante --- */
 .product-badge {

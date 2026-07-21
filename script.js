@@ -2235,9 +2235,9 @@ function loadMoreSeeMoreProducts() {
         available = [...allProductsLoaded];
     }
 
-    // Embaralhar e pegar 6 produtos
+    // Embaralhar e pegar 24 produtos
     const shuffled = available.sort(() => Math.random() - 0.5);
-    const batch = shuffled.slice(0, 6);
+    const batch = shuffled.slice(0, 24);
 
     setTimeout(() => {
         const html = batch.map(p => {
