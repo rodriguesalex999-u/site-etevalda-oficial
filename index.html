@@ -157,12 +157,6 @@ header.scrolled .header-top{padding:4px 0!important;}
     <!-- CURSOR GLOW - Brilho dourado seguindo o mouse -->
     <div class="cursor-glow" id="cursorGlow"></div>
 
-    <!-- COOKIE CONSENT - LGPD -->
-    <div id="cookieConsent" style="position:fixed;bottom:0;left:0;right:0;background:rgba(17,17,17,0.97);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid rgba(212,175,55,0.3);padding:16px 20px;z-index:99999;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;animation:slideUp 0.5s ease;">
-        <p style="color:#ccc;font-size:0.82rem;margin:0;max-width:600px;line-height:1.5;">Este site usa cookies para melhorar sua experiência de compra. Ao continuar navegando, você aceita nossa <a href="#" style="color:var(--gold-primary);text-decoration:underline;">política de privacidade</a>.</p>
-        <button onclick="acceptCookies()" style="background:var(--gold-primary);color:#fff;border:none;padding:10px 24px;border-radius:25px;font-weight:600;font-size:0.82rem;cursor:pointer;white-space:nowrap;transition:all 0.3s ease;">Aceitar e Continuar</button>
-    </div>
-
     <div id="geoNotification" class="geo-notification"><div class="geo-notif-icon"><i class="fas fa-map-marker-alt"></i></div><div class="geo-notif-text" id="geoNotificationText"></div><div class="geo-notif-bar" id="geoNotifBar"></div></div>
     <div id="visitNotification" class="visit-notification"><div class="visit-notif-icon"><i class="fas fa-history"></i></div><div class="visit-notif-text" id="visitNotificationText"></div><div class="visit-notif-bar" id="visitNotifBar"></div></div>
     <div class="toast" id="toast"></div>
@@ -380,14 +374,6 @@ header.scrolled .header-top{padding:4px 0!important;}
             (function() {
                 'use strict';
 
-                // 0. COOKIE CONSENT
-                if (!localStorage.getItem('cookiesAccepted')) {
-                    document.getElementById('cookieConsent').style.display = 'flex';
-                } else {
-                    var cc = document.getElementById('cookieConsent');
-                    if (cc) cc.style.display = 'none';
-                }
-
                 // 1. SCROLL PROGRESS BAR - Barra dourada no topo
                 const progressBar = document.getElementById('scrollProgress');
                 if (progressBar) {
@@ -589,34 +575,12 @@ header.scrolled .header-top{padding:4px 0!important;}
     </main>
 
 
-<!-- MODAL DE CONFIRMAÇÃO DE CIDADE -->
-<div id="cityConfirmModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; justify-content: center; align-items: center;">
-    <div style="background: #111; border-radius: 16px; max-width: 360px; width: 90%; padding: 28px 24px; border: 1px solid var(--gold-primary); box-shadow: 0 0 40px rgba(212,175,55,0.2);">
-        <div style="text-align: center; margin-bottom: 14px;">
-            <i class="fab fa-whatsapp" style="font-size: 44px; color: #25D366;"></i>
-        </div>
-        <h3 style="color: var(--gold-primary); text-align: center; margin-bottom: 10px; font-size: 1.15rem;">Falar no WhatsApp</h3>
-        <p style="color: #ccc; text-align: center; margin-bottom: 20px; font-size: 0.92rem; line-height: 1.5;">Digite sua cidade (e estado se quiser) e te atendemos agora pelo WhatsApp 👇</p>
-        <input type="text" id="cityTextInput" placeholder="Ex: São Paulo, Cuiabá, Fortaleza..." autocomplete="off"
-            style="width: 100%; padding: 13px 14px; border-radius: 8px; background: #222; color: #fff; border: 1px solid var(--gold-primary); margin-bottom: 14px; font-size: 1rem; box-sizing: border-box; outline: none;">
-        <button id="saveCityBtn" style="width: 100%; background: #25D366; color: #fff; padding: 13px; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
-            <i class="fab fa-whatsapp" style="font-size: 1.2rem;"></i> Ir para o WhatsApp
-        </button>
-        <p style="color: #666; text-align: center; margin-top: 12px; font-size: 0.78rem;">Você será direcionado ao nosso atendimento</p>
-    </div>
-</div>
-
 <!-- Service Worker (PWA) -->
 <script>
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(function(err) {
         console.warn('SW registration failed:', err);
     });
-}
-function acceptCookies() {
-    localStorage.setItem('cookiesAccepted', 'true');
-    var cc = document.getElementById('cookieConsent');
-    if (cc) { cc.style.transform = 'translateY(100%)'; cc.style.opacity = '0'; setTimeout(function(){ cc.style.display = 'none'; }, 400); }
 }
 function copyProductLink(id) {
     var url = 'https://www.etevaldajoias.com/#produto-' + id;

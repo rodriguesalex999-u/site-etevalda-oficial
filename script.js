@@ -7,6 +7,86 @@ const SUPABASE_URL = 'https://vnrfmsyanrvqqhmqyixk.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_xGLDFQarl-DhshRW0932FQ_asug0TUK';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// 1.1 CONFIGURAÇÃO DO FACEBOOK PIXEL & CONVERSIONS API
+const FB_PIXEL_ID = '1710477863187476';
+
+// Função para gerar event_id único para desduplicação
+function generateEventId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+}
+
+// Função para coletar dados do usuário para a Conversions API
+function collectUserData() {
+    const getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+        return null;
+    };
+
+    return {
+        em: null,
+        ph: null,
+        fn: null,
+        ln: null,
+        ct: detectedLocation?.city || null,
+        st: detectedState || null,
+        zp: null,
+        client_ip_address: null,
+        client_user_agent: navigator.userAgent,
+        fbc: getCookie('_fbc'),
+        fbp: getCookie('_fbp')
+    };
+}
+
+// Função para enviar evento para a Conversions API (servidor)
+async function sendToConversionsAPI(eventName, customData, userData = null, eventId = null) {
+    const eventIdFinal = eventId || generateEventId();
+    const userDataFinal = userData || collectUserData();
+
+    try {
+        const response = await fetch('/api/facebook-conversions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                event_name: eventName,
+                event_id: eventIdFinal,
+                event_time: Math.floor(Date.now() / 1000),
+                user_data: userDataFinal,
+                custom_data: customData,
+                action_source: 'website'
+            })
+        });
+
+        if (response.ok) {
+            console.log(`✅ Conversions API: ${eventName} enviado com event_id ${eventIdFinal}`);
+            return eventIdFinal;
+        } else {
+            console.error(`❌ Erro Conversions API: ${eventName}`);
+            return null;
+        }
+    } catch (error) {
+        console.error(`❌ Erro ao enviar para Conversions API: ${eventName}`, error);
+        return null;
+    }
+}
+
+// Função unificada de rastreamento com desduplicação
+function trackEvent(eventName, customData, userData = null) {
+    const eventId = generateEventId();
+
+    // 1. Envia via Pixel (navegador)
+    if (typeof fbq !== 'undefined') {
+        fbq('track', eventName, customData, { eventID: eventId });
+        console.log(`📊 Pixel: ${eventName} com event_id ${eventId}`);
+    }
+
+    // 2. Envia via Conversions API (servidor) - assíncrono com o MESMO event_id
+    sendToConversionsAPI(eventName, customData, userData, eventId);
+
+    return eventId;
+}
+
 // 2. ESTADO DA APLICAÇÃO
 let products = [];
 let categories = [];
@@ -366,7 +446,7 @@ async function loadTeamCarousel() {
 }
 
 // 4. FUNÇÕES DE RENDERIZAÇÃO — LAZY LOADING (renderiza só o que cabe na tela)
-const PRODUCTS_PER_PAGE = 24;
+const PRODUCTS_PER_PAGE = 12;
 let _filteredProducts = [];
 let _renderedCount = 0;
 let _lazyObserver = null;
@@ -1762,18 +1842,15 @@ function openProductModal(id) {
            </div>`;
     }
 
-    // ===== ADICIONADO: EVENTO DE VISUALIZAÇÃO DE PRODUTO (ViewContent) =====
-    if (typeof fbq !== 'undefined') {
-        fbq('track', 'ViewContent', {
-            content_name: product.name,
-            content_category: categoryName,
-            content_ids: [product.id],
-            content_type: 'product',
-            value: product.price,
-            currency: 'BRL'
-        });
-        console.log('📊 Pixel disparado: ViewContent -', product.name);
-    }
+    // ===== EVENTO DE VISUALIZAÇÃO DE PRODUTO (ViewContent) =====
+    trackEvent('ViewContent', {
+        content_name: product.name,
+        content_category: categoryName,
+        content_ids: [product.id],
+        content_type: 'product',
+        value: product.price,
+        currency: 'BRL'
+    });
     // ===== FIM DA ADIÇÃO =====
 
     // Criar lista de mídia para o modal
@@ -2366,16 +2443,13 @@ function showToast(message) {
 }
 
 function _proceedToWhatsApp(hasProduct) {
-    const knownCity = _getKnownCity();
-    if (knownCity) {
-        if (hasProduct) {
-            sendWhatsAppMessage(window.currentWhatsAppProduct, knownCity);
-        } else {
-            sendWhatsAppMessage(null, knownCity);
-        }
-        return;
+    // Vai direto pro WhatsApp — sem modal de cidade
+    const knownCity = _getKnownCity() || detectedLocation.city || '';
+    if (hasProduct) {
+        sendWhatsAppMessage(window.currentWhatsAppProduct, knownCity);
+    } else {
+        sendWhatsAppMessage(null, knownCity);
     }
-    showCityConfirmModal();
 }
 
 function handleFloatingWhatsApp() {
@@ -2420,13 +2494,14 @@ function _getGreetingAndCity(input) {
     return { greeting: 'Olá', city: input.trim() || 'minha cidade' };
 }
 
-// Função para enviar a mensagem do WhatsApp
+// Função para enviar a mensagem do WhatsApp (sem necessidade de cidade do cliente)
 function sendWhatsAppMessage(product, city) {
-    const { greeting, city: normalizedCity } = _getGreetingAndCity(city);
+    const cityInfo = city ? _getGreetingAndCity(city) : { greeting: 'Olá', city: '' };
+    const { greeting } = cityInfo;
 
     let msg;
     if (!product) {
-        msg = `${greeting}, sou de ${normalizedCity}, vi seus produtos no site e gostei muito. Como funciona a entrega hoje?`;
+        msg = `${greeting}, vi seus produtos no site e gostei muito. Como funciona a entrega?`;
     } else {
         let extras = '';
         let totalExtra = 0;
@@ -2450,9 +2525,9 @@ function sendWhatsAppMessage(product, city) {
 
         if (extras) {
             const total = product.price + totalExtra;
-            msg = `${greeting}, sou de ${normalizedCity}, gostei do produto: *${product.name}*${extras} - Total: R$ ${total.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
+            msg = `${greeting}, gostei do produto: *${product.name}*${extras} - Total: R$ ${total.toFixed(2).replace('.', ',')}. Consegue me entregar?`;
         } else {
-            msg = `${greeting}, sou de ${normalizedCity}, gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}. Consegue me entregar hoje?`;
+            msg = `${greeting}, gostei do produto: *${product.name}* - R$ ${product.price.toFixed(2).replace('.', ',')}. Consegue me entregar?`;
         }
     }
 
@@ -2462,85 +2537,12 @@ function sendWhatsAppMessage(product, city) {
         msg += ` | Numeração/Tamanho: *${window.selectedSize}${genderInfo}*`;
     }
 
-    if (typeof fbq !== 'undefined') {
-        fbq('track', 'Contact', { content_name: 'WhatsApp' });
-    }
+    trackEvent('Contact', { content_name: 'WhatsApp' });
 
     window.open(`https://api.whatsapp.com/send/?phone=5565993475496&text=${encodeURIComponent(msg)}`, '_blank');
 }
 
-// Função para mostrar o modal de cidade (campo de texto livre)
-function showCityConfirmModal() {
-    const modal = document.getElementById('cityConfirmModal');
-    const cityTextInput = document.getElementById('cityTextInput');
-    
-    if (cityTextInput) {
-        // Pré-preenche com sugestão do IP (cidade detectada mas não confirmada)
-        cityTextInput.value = window.detectedCitySuggestion || '';
-    }
-    
-    if (modal) {
-        modal.style.display = 'flex';
-        window._cityModalOpenTime = Date.now();
-        setTimeout(() => { if (cityTextInput) cityTextInput.focus(); }, 100);
-    }
-    
-    setupCityModalButtons();
-}
-
-// Configura o botão "Ir para o WhatsApp" do modal de cidade
-function setupCityModalButtons() {
-    const saveCityBtn = document.getElementById('saveCityBtn');
-    const modal = document.getElementById('cityConfirmModal');
-    const cityTextInput = document.getElementById('cityTextInput');
-    
-    if (!saveCityBtn) return;
-    
-    const newSaveBtn = saveCityBtn.cloneNode(true);
-    saveCityBtn.parentNode.replaceChild(newSaveBtn, saveCityBtn);
-    
-    const doSend = () => {
-        const cityTextEl = document.getElementById('cityTextInput');
-        const chosenCity = cityTextEl ? cityTextEl.value.trim() : '';
-        if (!chosenCity) {
-            cityTextEl && (cityTextEl.style.borderColor = '#e53e3e');
-            setTimeout(() => { if (cityTextEl) cityTextEl.style.borderColor = 'var(--gold-primary)'; }, 1500);
-            return;
-        }
-        localStorage.setItem('user_city', chosenCity);
-        detectedLocation.city = chosenCity;
-        if (modal) modal.style.display = 'none';
-        // Sempre chama sendWhatsAppMessage; produto null = botão flutuante
-        sendWhatsAppMessage(window.currentWhatsAppProduct ?? null, chosenCity);
-    };
-    
-    newSaveBtn.addEventListener('click', doSend);
-    
-    // Permitir Enter no campo de texto
-    const newInput = document.getElementById('cityTextInput');
-    if (newInput) {
-        newInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') doSend(); });
-    }
-}
-
-// Função para fechar o modal (opcional)
-function closeCityModal() {
-    const modal = document.getElementById('cityConfirmModal');
-    if (modal) modal.style.display = 'none';
-}
-
-// Adicionar evento para fechar ao clicar fora
-document.addEventListener('click', function(e) {
-    const modal = document.getElementById('cityConfirmModal');
-    if (modal && modal.style.display === 'flex') {
-        // Ignorar o mesmo click que abriu o modal (evita fechar imediatamente por bubbling)
-        if (window._cityModalOpenTime && Date.now() - window._cityModalOpenTime < 300) return;
-        const modalContent = modal.querySelector('div > div');
-        if (modalContent && !modalContent.contains(e.target) && !e.target.closest('#cityConfirmModal div')) {
-            modal.style.display = 'none';
-        }
-    }
-});
+// Modal de cidade removido — WhatsApp agora vai direto
 
 let _activeFaqAudio = null;
 let _activeFaqCard  = null;
@@ -2685,14 +2687,12 @@ async function buyViaMercadoPago(productId, priceOverride = null) {
     const images = Array.isArray(product.images) ? product.images : [];
 
     // Facebook Pixel - Rastrear início de checkout
-    if (typeof fbq !== 'undefined') {
-        fbq('track', 'InitiateCheckout', {
-            content_name: product.name,
-            content_category: categoryName,
-            value: product.price,
-            currency: 'BRL'
-        });
-    }
+    trackEvent('InitiateCheckout', {
+        content_name: product.name,
+        content_category: categoryName,
+        value: product.price,
+        currency: 'BRL'
+    });
 
     try {
         const response = await fetch('/api/create-preference', {
@@ -2981,9 +2981,7 @@ function setupCartListeners() {
             const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             message += `\nTotal: R$ ${total.toFixed(2).replace('.', ',')}`;
 
-            if (typeof fbq !== 'undefined') {
-                fbq('track', 'Contact', { content_name: 'WhatsApp - Carrinho' });
-            }
+            trackEvent('Contact', { content_name: 'WhatsApp - Carrinho' });
             
             window.open(`https://api.whatsapp.com/send/?phone=5565993475496&text=${encodeURIComponent(message)}`, '_blank');
         });
@@ -3636,9 +3634,8 @@ window.closeSuperZoom = closeSuperZoom;
 window.changeZoom = changeZoom;
 window.changeModalMedia = changeModalMedia;
 window.shareProduct = shareProduct;
+window.trackEvent = trackEvent;
 
-// Exportar funções para uso global (localização)
+// Exportar funções para uso global
 window.handleFloatingWhatsApp = handleFloatingWhatsApp;
 window.sendWhatsAppMessage = sendWhatsAppMessage;
-window.showCityConfirmModal = showCityConfirmModal;
-window.closeCityModal = closeCityModal;
