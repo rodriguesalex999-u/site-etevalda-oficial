@@ -110,7 +110,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;}
 .product-image{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:#1a1a1a;}
 .product-image img{width:100%!important;height:100%!important;object-fit:cover!important;transition:transform .7s cubic-bezier(.2,.8,.2,1);}
 .product-info{padding:8px 10px;flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:2px;}
-.product-info h3,.product-name{font-family:Arial,Helvetica,sans-serif;font-size:12px;font-weight:400;color:#EEEEEE;line-height:1.35;margin:0;overflow:hidden;}
+.product-info h3,.product-name{font-family:'Poppins',sans-serif;font-size:12px;font-weight:400;color:#EEEEEE;line-height:1.35;margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
 .product-price-block{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .price-old{font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#999;text-decoration:line-through;white-space:nowrap;}
 .product-price{font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:var(--gold-primary);white-space:nowrap;}
@@ -140,6 +140,35 @@ header.scrolled .header-top{padding:4px 0!important;}
 .reveal{opacity:0;transform:translateY(35px);transition:.8s cubic-bezier(.2,.8,.2,1);}
 .reveal.show{opacity:1;transform:none;}
 @keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.logo{flex-shrink:0;display:flex;align-items:center;}
+.logo img{max-height:46px;width:auto;height:auto;}
+.header-actions{position:relative;}
+.mega-menu{position:absolute;top:100%;left:0;width:100%;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:0 0 var(--radius-sm) var(--radius-sm);box-shadow:var(--shadow-md);padding:var(--spacing-md);display:none;z-index:1001;}
+.mega-menu.active{display:block;}
+.mega-menu-content{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--spacing-md);}
+.mega-menu-category{display:flex;flex-direction:column;gap:var(--spacing-xs);}
+.mega-menu-category h4{font-family:'Poppins',sans-serif;font-size:1rem;font-weight:600;color:var(--gold-primary);margin-bottom:var(--spacing-xs);}
+.mega-menu-category a{padding:var(--spacing-xs) 0;color:var(--gray-medium);transition:color .2s ease;cursor:pointer;font-size:.9rem;}
+.mega-menu-category a:hover{color:var(--gold-primary);}
+.mini-cart{position:absolute;top:calc(100% + 10px);right:0;width:320px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);padding:var(--spacing-sm);display:none;z-index:1001;}
+.mini-cart.active{display:block;}
+.mini-cart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--spacing-sm);}
+.mini-cart-header h4{font-family:'Poppins',sans-serif;font-size:.95rem;font-weight:600;color:var(--text-primary);margin:0;}
+.close-mini-cart-btn{color:var(--gray-medium);font-size:1rem;transition:color .2s ease;}
+.close-mini-cart-btn:hover{color:var(--gold-primary);}
+.mini-cart-items{display:flex;flex-direction:column;gap:var(--spacing-xs);max-height:300px;overflow-y:auto;}
+.mini-cart-item{display:flex;gap:var(--spacing-xs);padding:var(--spacing-xs) 0;border-bottom:1px solid var(--border-subtle);}
+.mini-cart-item img{width:50px;height:50px;object-fit:cover;border-radius:var(--radius-sm);}
+.mini-cart-item-info{flex:1;display:flex;flex-direction:column;justify-content:center;}
+.mini-cart-item-name{font-size:.85rem;font-weight:500;color:var(--text-primary);}
+.mini-cart-item-price{font-size:.8rem;color:var(--gold-primary);font-weight:600;}
+.mini-cart-footer{display:flex;flex-direction:column;gap:var(--spacing-xs);margin-top:var(--spacing-sm);}
+.mini-cart-total{display:flex;justify-content:space-between;font-size:1rem;font-weight:600;}
+.btn-whatsapp-mini-cart{background:#25D366;color:var(--white);padding:var(--spacing-xs) var(--spacing-sm);border-radius:var(--radius-sm);text-align:center;font-weight:600;transition:background .2s ease;}
+.btn-whatsapp-mini-cart:hover{background:#128C7E;}
+.btn-view-full-cart{background:transparent;color:var(--gold-primary);border:1px solid var(--gold-dark);padding:var(--spacing-xs) var(--spacing-sm);border-radius:var(--radius-sm);text-align:center;font-weight:600;font-size:.85rem;transition:all .2s ease;}
+.btn-view-full-cart:hover{background:rgba(212,175,55,.12);}
+@media (max-width:768px){.logo img{max-height:32px;}.mini-cart{width:min(320px,calc(100vw - 24px));right:0;}.mega-menu{left:0;right:0;width:auto;}}
     </style>
 
     <!-- style.css: carregamento assíncrono -->
@@ -165,6 +194,13 @@ header.scrolled .header-top{padding:4px 0!important;}
         <div class="header-top">
             <div class="container-fluid">
                 <div class="header-top-content">
+                    <!-- Logo -->
+                    <div class="logo">
+                        <a href="#" id="logoLink" aria-label="Grupo Etevalda MT - Início">
+                            <img src="https://i.postimg.cc/8kxprj3W/etevalda.webp" alt="Grupo Etevalda MT" width="120" height="40" style="object-fit: contain;">
+                        </a>
+                    </div>
+
                     <div class="header-search" role="search" aria-label="Buscar produtos">
                         <div id="searchOverlay" class="search-overlay" aria-hidden="true"></div>
                         <div class="search-wrapper">
@@ -178,19 +214,46 @@ header.scrolled .header-top{padding:4px 0!important;}
                     </div>
                     <div class="header-actions" role="navigation" aria-label="Ações do usuário">
                         <button id="cartBtn" class="cart-btn" aria-label="Carrinho de compras"><i class="fas fa-shopping-bag"></i><span id="cartCount" class="cart-count" aria-live="polite">0</span></button>
+                        <!-- Mini Carrinho -->
+                        <div class="mini-cart" id="miniCart">
+                            <div class="mini-cart-header">
+                                <h4>Seu Carrinho</h4>
+                                <button id="closeMiniCart" class="close-mini-cart-btn" aria-label="Fechar carrinho"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div id="miniCartItems" class="mini-cart-items">
+                                <p style="text-align:center; color:var(--gray-medium); padding:10px 0;">Seu carrinho está vazio.</p>
+                            </div>
+                            <div class="mini-cart-footer">
+                                <div class="mini-cart-total">
+                                    <span>Total:</span>
+                                    <strong id="miniCartTotal">R$ 0,00</strong>
+                                </div>
+                                <button id="miniCartCheckout" class="btn-whatsapp-mini-cart"><i class="fab fa-whatsapp"></i> Finalizar Pedido</button>
+                                <button id="miniCartViewFull" class="btn-view-full-cart">Ver carrinho completo</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Mega Menu -->
+        <div class="mega-menu" id="megaMenu">
+            <div id="megaMenuContent" class="mega-menu-content">
+                <!-- Populado dinamicamente com as categorias do Supabase -->
             </div>
         </div>
     </header>
 
     <main class="main-content">
         <!-- HERO BANNER - Foto ou Vídeo por categoria -->
-        <div class="hero-banner" id="heroBanner" style="display:none;">
-            <div class="hero-banner-media" id="heroBannerMedia"></div>
+        <div class="hero-banner" id="heroBanner">
+            <div class="hero-banner-media" id="heroBannerMedia">
+                <img src="https://i.postimg.cc/8kxprj3W/etevalda.webp" alt="Grupo Etevalda MT" loading="eager" fetchpriority="high">
+            </div>
             <div class="hero-banner-overlay">
-                <h2 class="hero-banner-title" id="heroBannerTitle"></h2>
-                <p class="hero-banner-subtitle" id="heroBannerSubtitle"></p>
+                <h2 class="hero-banner-title" id="heroBannerTitle">Joias e Variedades em Mato Grosso</h2>
+                <p class="hero-banner-subtitle" id="heroBannerSubtitle">Entregamos em Cuiabá e Várzea Grande com pagamento na entrega.</p>
             </div>
         </div>
 
@@ -203,10 +266,10 @@ header.scrolled .header-top{padding:4px 0!important;}
 
         <!-- TRUST BAR - Confianca persistente -->
         <div class="trust-bar">
-            <div class="trust-bar-item"><i class="fas fa-shield-alt"></i> Compra Segura</div>
-            <div class="trust-bar-item"><i class="fas fa-truck"></i> Entrega Rapida</div>
+            <div class="trust-bar-item"><i class="fas fa-shield-alt"></i> Compra 100% Segura</div>
+            <div class="trust-bar-item"><i class="fas fa-truck"></i> Entrega Rápida em MT</div>
             <div class="trust-bar-item"><i class="fas fa-money-bill-wave"></i> Pague na Entrega</div>
-            <div class="trust-bar-item"><i class="fas fa-headset"></i> Suporte WhatsApp</div>
+            <div class="trust-bar-item"><i class="fas fa-headset"></i> Suporte via WhatsApp</div>
         </div>
 
         <div class="container-fluid">
@@ -513,7 +576,7 @@ header.scrolled .header-top{padding:4px 0!important;}
                 }
 
                 function renderHeroBanner(bannerUrl, title, subtitle) {
-                    if (!bannerUrl) { heroBanner.style.display = 'none'; return; }
+                    if (!bannerUrl) { resetHeroToDefault(); return; }
                     heroBanner.style.display = 'block';
                     heroTitle.textContent = title || '';
                     heroSubtitle.textContent = subtitle || '';
@@ -560,8 +623,15 @@ header.scrolled .header-top{padding:4px 0!important;}
                     if (banner && banner.banner_url) {
                         renderHeroBanner(banner.banner_url, banner.hero_title, banner.hero_subtitle);
                     } else {
-                        heroBanner.style.display = 'none';
+                        resetHeroToDefault();
                     }
+                }
+
+                function resetHeroToDefault() {
+                    heroBanner.style.display = 'block';
+                    heroMedia.innerHTML = '<img src="https://i.postimg.cc/8kxprj3W/etevalda.webp" alt="Grupo Etevalda MT" loading="eager" fetchpriority="high">';
+                    heroTitle.textContent = 'Joias e Variedades em Mato Grosso';
+                    heroSubtitle.textContent = 'Entregamos em Cuiabá e Várzea Grande com pagamento na entrega.';
                 }
 
                 window.addEventListener('hashchange', () => setTimeout(loadHeroBanner, 300));

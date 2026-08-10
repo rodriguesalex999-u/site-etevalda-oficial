@@ -340,7 +340,189 @@ async function loadCategories() {
     const { data } = await _supabase.from('categories').select('*').order('id');
     categories = data || [];
     renderCategoryBar();
+    renderMegaMenu();
 }
+
+// ========================================
+// MEGA MENU - Categorias do Supabase no dropdown do logo
+// ========================================
+function renderMegaMenu() {
+    const container = document.getElementById('megaMenuContent');
+    if (!container) return;
+
+    let html = '<div class="mega-menu-category"><h4>Categorias</h4>';
+    categories.forEach(cat => {
+        const slug = slugifyCategory(cat.name);
+        html += `<a data-category="${cat.id}" data-slug="${slug}" onclick="selectMegaCategory('${cat.id}','${slug}')">${cat.name}</a>`;
+    });
+    html += '</div>';
+    html += '<div class="mega-menu-footer"><a onclick="selectMegaCategory(\'all\',\'all\')">Ver todos os produtos <i class="fas fa-arrow-right"></i></a></div>';
+
+    container.innerHTML = html;
+}
+
+function selectMegaCategory(categoryId, slug) {
+    const bar = document.getElementById('categoryBar');
+    const target = bar ? bar.querySelector(`[data-category="${categoryId}"]`) : null;
+    if (target) {
+        target.click();
+    } else if (categoryId === 'all') {
+        currentCategory = 'all';
+        window.location.hash = '';
+        loadProducts(true);
+    }
+    closeMegaMenu();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function openMegaMenu() {
+    const megaMenu = document.getElementById('megaMenu');
+    if (megaMenu) megaMenu.classList.add('active');
+}
+
+function closeMegaMenu() {
+    const megaMenu = document.getElementById('megaMenu');
+    if (megaMenu) megaMenu.classList.remove('active');
+}
+
+// ========================================
+// MINI CARRINHO - Dropdown no botão do carrinho
+// ========================================
+function toggleMiniCart(forceShow) {
+    const miniCart = document.getElementById('miniCart');
+    if (!miniCart) return;
+
+    const willShow = typeof forceShow === 'boolean' ? forceShow : !miniCart.classList.contains('active');
+    miniCart.classList.toggle('active', willShow);
+    renderMiniCart();
+}
+
+function renderMiniCart() {
+    const itemsContainer = document.getElementById('miniCartItems');
+    const totalEl = document.getElementById('miniCartTotal');
+    if (!itemsContainer || !totalEl) return;
+
+    if (!cart || cart.length === 0) {
+        itemsContainer.innerHTML = '<p style="text-align:center; color:var(--gray-medium); padding:10px 0;">Seu carrinho está vazio.</p>';
+        totalEl.textContent = 'R$ 0,00';
+        return;
+    }
+
+    itemsContainer.innerHTML = cart.map(item => `
+        <div class="mini-cart-item">
+            <img src="${item.image}" alt="${item.name}" loading="lazy">
+            <div class="mini-cart-item-info">
+                <span class="mini-cart-item-name">${item.name}</span>
+                <span class="mini-cart-item-qty">Qtd: ${item.quantity}</span>
+                <span class="mini-cart-item-price">R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}</span>
+            </div>
+        </div>
+    `).join('');
+
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    totalEl.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+}
+
+function _buildCartWhatsAppMessage() {
+    let message = 'Olá! Gostaria de finalizar meu pedido:\n\n';
+    cart.forEach(item => {
+        message += `• ${item.name} - R$ ${item.price.toFixed(2).replace('.', ',')} (Qtd: ${item.quantity})\n`;
+    });
+    const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    message += `\nTotal: R$ ${total.toFixed(2).replace('.', ',')}`;
+    return message;
+}
+
+function setupMiniCartListeners() {
+    // Botão do carrinho abre o dropdown do mini carrinho
+    const cartBtnEl = document.getElementById('cartBtn');
+    if (cartBtnEl) {
+        cartBtnEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeMegaMenu();
+            toggleMiniCart();
+        });
+    }
+
+    const closeMiniCartBtn = document.getElementById('closeMiniCart');
+    if (closeMiniCartBtn) {
+        closeMiniCartBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMiniCart(false);
+        });
+    }
+
+    // Fechar ao clicar fora
+    document.addEventListener('click', (e) => {
+        const miniCart = document.getElementById('miniCart');
+        if (miniCart && miniCart.classList.contains('active')) {
+            if (!miniCart.contains(e.target) && e.target.id !== 'cartBtn') {
+                miniCart.classList.remove('active');
+            }
+        }
+        const megaMenu = document.getElementById('megaMenu');
+        if (megaMenu && megaMenu.classList.contains('active')) {
+            if (!megaMenu.contains(e.target) && !e.target.closest('.logo')) {
+                megaMenu.classList.remove('active');
+            }
+        }
+    });
+
+    // Fechar com ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            toggleMiniCart(false);
+            closeMegaMenu();
+        }
+    });
+
+    // Finalizar pedido pelo mini carrinho
+    const miniCheckout = document.getElementById('miniCartCheckout');
+    if (miniCheckout) {
+        miniCheckout.addEventListener('click', () => {
+            if (!cart || cart.length === 0) {
+                showToast('Carrinho vazio!');
+                return;
+            }
+            trackEvent('Contact', { content_name: 'WhatsApp - Mini Carrinho' });
+            window.open(`https://api.whatsapp.com/send/?phone=5565981042112&text=${encodeURIComponent(_buildCartWhatsAppMessage())}`, '_blank');
+        });
+    }
+
+    // Ver carrinho completo (abre o sidebar com quantidades)
+    const viewFull = document.getElementById('miniCartViewFull');
+    if (viewFull) {
+        viewFull.addEventListener('click', () => {
+            toggleMiniCart(false);
+            toggleCart();
+        });
+    }
+
+    // Mega Menu: hover no logo (desktop) + clique (mobile)
+    const logoLink = document.getElementById('logoLink');
+    const megaMenu = document.getElementById('megaMenu');
+    if (logoLink && megaMenu) {
+        logoLink.addEventListener('mouseenter', () => {
+            closeMiniCartDrop();
+            openMegaMenu();
+        });
+        megaMenu.addEventListener('mouseleave', () => closeMegaMenu());
+        logoLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            closeMiniCartDrop();
+            megaMenu.classList.contains('active') ? closeMegaMenu() : openMegaMenu();
+        });
+    }
+}
+
+function closeMiniCartDrop() {
+    const miniCart = document.getElementById('miniCart');
+    if (miniCart) miniCart.classList.remove('active');
+}
+
+window.selectMegaCategory = selectMegaCategory;
+window.toggleMiniCart = toggleMiniCart;
 
 function renderCategoryBar() {
     const bar = document.getElementById('categoryBar');
@@ -2374,6 +2556,7 @@ function updateCartUI() {
         cartItems.innerHTML = '<p style="text-align:center; padding:20px;">Carrinho vazio</p>';
         cartCount.textContent = '0';
         cartTotal.textContent = 'R$ 0,00';
+        renderMiniCart();
         return;
     }
 
@@ -2398,6 +2581,8 @@ function updateCartUI() {
     
     cartCount.textContent = itemCount;
     cartTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+
+    renderMiniCart();
 }
 
 function loadCartFromStorage() {
@@ -2892,6 +3077,7 @@ async function initializeApp() {
     // Event Listeners para modais e carrinho
     setupModalListeners();
     setupCartListeners();
+    setupMiniCartListeners();
 }
 
 function setupModalListeners() {
@@ -2930,12 +3116,7 @@ function setupModalListeners() {
 }
 
 function setupCartListeners() {
-    // Botões do carrinho
-    const cartBtn = document.getElementById('cartBtn');
-    if (cartBtn) {
-        cartBtn.addEventListener('click', toggleCart);
-    }
-    
+    // Botão do carrinho abre o MINI CARRINHO (dropdown) — ver setupMiniCartListeners
     const closeCartBtn = document.getElementById('closeCart');
     if (closeCartBtn) {
         closeCartBtn.addEventListener('click', () => {
