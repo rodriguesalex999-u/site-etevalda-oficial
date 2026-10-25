@@ -1,665 +1,420 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <!-- Meta Pixel Code -->
-    <script>
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '1002683195582228');
-    fbq('track', 'PageView');
-    </script>
-    <noscript><img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id=1002683195582228&ev=PageView&noscript=1"
-    /></noscript>
-    <!-- End Meta Pixel Code -->
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+	<meta name="theme-color" content="#F7F3EA">
+	<link rel="icon" href="assets/favicon.ico">
+	<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 
-        <!-- PRELOAD DA IMAGEM PRIORITÁRIA (LCP) -->
-    <link rel="preload" as="image" href="https://i.postimg.cc/8kxprj3W/etevalda.webp" fetchpriority="high">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <meta name="description" content="Grupo Etevalda MT - A maior loja de variedades de Mato Grosso. Joias, alianças, semijoias e acessórios com pagamento na entrega.">
-    <meta name="theme-color" content="#D4AF37">
-    <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://www.etevaldajoias.com/">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-    <link rel="apple-touch-icon" href="/favicon.svg">
-    <title>Grupo Etevalda MT | Joias e Variedades em Mato Grosso</title>
+	<title>Grupo Etevalda MT — Alianças com entrega no mesmo dia e pagamento na entrega</title>
+	<meta name="description" content="Escolha a sua aliança e receba ainda hoje em Cuiabá, Rondonópolis e Sinop. O pagamento só acontece quando a peça chegar na sua mão.">
 
-    <!-- JSON-LD Structured Data (Organization) -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "Grupo Etevalda MT",
-        "url": "https://www.etevaldajoias.com/",
-        "logo": "https://i.postimg.cc/8kxprj3W/etevalda.webp",
-        "description": "A maior loja de variedades de Mato Grosso — Joias, alian\u00e7as, semijoias e acess\u00f3rios.",
-        "areaServed": ["Cuiab\u00e1", "V\u00e1rzea Grande", "Rondon\u00f3polis", "Mato Grosso"],
-        "contactPoint": {
-            "@type": "ContactPoint",
-            "telephone": "+55-65-93475-496",
-            "contactType": "customer service",
-            "areaServed": "BR-MT"
-        },
-        "sameAs": [
-            "https://www.instagram.com/grupoetevalda/"
-        ]
-    }
-    </script>
+	<meta property="og:type" content="website">
+	<meta property="og:site_name" content="Grupo Etevalda MT">
+	<meta property="og:title" content="Grupo Etevalda MT — Alianças com entrega no mesmo dia">
+	<meta property="og:description" content="Você escolhe, recebe hoje e só paga quando a peça estiver na sua mão. Cuiabá, Rondonópolis e Sinop.">
+	<meta property="og:url" content="https://site-etevalda-oficial.vercel.app/">
+	<meta property="og:image" content="https://site-etevalda-oficial.vercel.app/assets/og-image.png">
+	<meta property="og:image:type" content="image/png">
+	<meta property="og:image:width" content="1200">
+	<meta property="og:image:height" content="630">
+	<meta property="og:image:alt" content="Grupo Etevalda MT — alianças com entrega no mesmo dia">
+	<meta property="og:locale" content="pt_BR">
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:image" content="https://site-etevalda-oficial.vercel.app/assets/og-image.png">
 
-    <!-- Open Graph / Facebook / WhatsApp / Instagram -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://www.etevaldajoias.com/">
-    <meta property="og:title" content="Grupo Etevalda MT - A maior loja de variedades de Mato Grosso">
-    <meta property="og:description" content="Joias, alianças e variedades em Cuiabá e Várzea Grande. Pague na entrega!">
-    <meta property="og:image" content="https://i.postimg.cc/8kxprj3W/etevalda.webp">
-    <link rel="image_src" href="https://i.postimg.cc/8kxprj3W/etevalda.webp">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Grupo Etevalda MT">
-    <meta name="twitter:description" content="Joias e variedades em MT. Pague na entrega!">
-    <meta name="twitter:image" content="https://i.postimg.cc/8kxprj3W/etevalda.webp">
+	<!-- Meta Pixel -->
+	<script>
+		!function(f,b,e,v,n,t,s)
+		{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+		n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+		if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+		n.queue=[];t=b.createElement(e);t.async=!0;
+		t.src=v;s=b.getElementsByTagName(e)[0];
+		s.parentNode.insertBefore(t,s)}(window,document,'script',
+		'https://connect.facebook.net/en_US/fbevents.js');
+		fbq('init', '1002683195582228');
+		fbq('track', 'PageView');
+	</script>
+	<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1002683195582228&ev=PageView&noscript=1" alt=""></noscript>
 
-    <!-- PRIORIDADE LCP -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://vnrfmsyanrvqqhmqyixk.supabase.co">
-    <link rel="preconnect" href="https://i.postimg.cc" crossorigin>
-    <link rel="dns-prefetch" href="https://i.postimg.cc">
-
-    <!-- Fontes: preload não-bloqueante -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&family=Inter:wght@400;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;600&family=Inter:wght@400;700&display=swap"></noscript>
-
-    <!-- CSS CRÍTICO: header + grid + skeletons (above the fold) -->
-    <style>
-:root{--gold-primary:#D4AF37;--gold-dark:#B8860B;--gold-light:#3a3218;--white:#111111;--black:#FFFFFF;--black-soft:#EEEEEE;--gray-medium:#aaaaaa;--gray-light:#1e1e1e;--gray-placeholder:#1a1a1a;--text-primary:#FFFFFF;--bg-page:#000000;--bg-card:#111111;--border-subtle:#222222;--font-display:'Playfair Display',serif;--shadow-md:0 4px 20px rgba(0,0,0,.12);--shadow-sm:0 2px 8px rgba(0,0,0,.08);--radius-sm:8px;--radius-full:999px;--spacing-xs:.5rem;--spacing-sm:1rem;--spacing-md:1.5rem;--spacing-lg:2rem;--transition-normal:.3s ease;}
-*{margin:0;padding:0;box-sizing:border-box;}
-html{scroll-behavior:smooth;font-size:16px;overflow-x:hidden;width:100%;}
-body{font-family:Arial,Helvetica,sans-serif;line-height:1.6;color:var(--text-primary);background:var(--bg-page);margin:0;padding:0;overflow-x:hidden;width:100%;max-width:100vw;}
-img{max-width:100%;height:auto;display:block;}
-a{text-decoration:none;color:inherit;}
-button{font-family:inherit;cursor:pointer;border:none;background:none;}
-.container-fluid{max-width:1400px;margin:0 auto;padding:0 var(--spacing-md);overflow-x:hidden;width:100%;}
-.header{background:rgba(10,10,10,.72);backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);border-bottom:1px solid rgba(212,175,55,.22);position:sticky;top:0;z-index:1000;width:100%;transition:background .35s ease,box-shadow .35s ease;}
-.header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(212,175,55,.5),transparent);}
-.header-top{padding:var(--spacing-sm) 0;transition:all var(--transition-normal);}
-.header-top-content{display:flex;align-items:center;justify-content:center;gap:var(--spacing-lg);}
-.header-search{flex:1;max-width:600px;transition:all var(--transition-normal);}
-.search-wrapper{position:relative;display:flex;align-items:center;background:var(--white);border:2px solid var(--gold-light);border-radius:var(--radius-full);padding:0 var(--spacing-sm);box-shadow:var(--shadow-sm);transform:scale(1);transition:all .3s ease;}
-.search-input{flex:1;border:none;outline:none;padding:var(--spacing-sm) 0;font-size:.95rem;background:transparent;color:var(--black-soft);}
-.search-wrapper:focus-within{border-color:var(--gold-primary);box-shadow:0 0 0 3px rgba(212,175,55,.15),0 4px 20px rgba(0,0,0,.12);transform:scale(1.01);}
-.search-btn{background:var(--gold-primary);color:var(--white);width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;}
-.header-actions{display:flex;align-items:center;gap:var(--spacing-md);}
-.cart-btn{position:relative;background:var(--gold-primary);color:var(--white);width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;box-shadow:var(--shadow-md);}
-.cart-count{position:absolute;top:-5px;right:-5px;background:#E74C3C;color:var(--white);width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;}
-.main-content{padding:var(--spacing-lg) 0;min-height:70vh;overflow-x:hidden;width:100%;}
-.products-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:0;padding:0 12px;}
-@media(min-width:1024px){.products-grid{grid-template-columns:repeat(4,1fr);gap:18px;padding:0 24px;}}
-.product-card{background:var(--bg-card);border-radius:12px;overflow:hidden;cursor:pointer;border:1px solid var(--border-subtle);position:relative;display:flex;flex-direction:column;transition:transform .3s ease,box-shadow .3s ease,border-color .3s ease;}
-.product-image{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;background:#1a1a1a;}
-.product-image img{width:100%!important;height:100%!important;object-fit:cover!important;transition:transform .7s cubic-bezier(.2,.8,.2,1);}
-.product-info{padding:8px 10px;flex:1;display:flex;flex-direction:column;align-items:flex-start;gap:2px;}
-.product-info h3,.product-name{font-family:'Poppins',sans-serif;font-size:12px;font-weight:400;color:#EEEEEE;line-height:1.35;margin:0;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
-.product-price-block{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
-.price-old{font-family:Arial,Helvetica,sans-serif;font-size:11px;color:#999;text-decoration:line-through;white-space:nowrap;}
-.product-price{font-family:Arial,Helvetica,sans-serif;font-size:15px;font-weight:700;color:var(--gold-primary);white-space:nowrap;}
-.product-viewers-badge{display:flex;align-items:center;gap:3px;font-size:.65rem;font-weight:700;color:#FF4500;background:rgba(255,69,0,.08);padding:2px 6px;border-radius:10px;white-space:nowrap;}
-.product-card.skeleton{cursor:default;pointer-events:none;background:var(--white);}
-.skeleton-image{background:linear-gradient(90deg,var(--gray-light) 25%,#252525 50%,var(--gray-light) 75%);background-size:200% 100%;animation:skeletonLoading 1.5s infinite;height:180px;width:100%;aspect-ratio:1/1;}
-.skeleton-text{background:linear-gradient(90deg,var(--gray-light) 25%,#252525 50%,var(--gray-light) 75%);background-size:200% 100%;animation:skeletonLoading 1.5s infinite;border-radius:var(--radius-sm);margin-bottom:var(--spacing-xs);}
-.skeleton-title{height:14px;width:90%;}
-.skeleton-price{height:12px;width:50%;}
-@keyframes skeletonLoading{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.category-bar{background:var(--bg-page);border-bottom:1px solid var(--border-subtle);padding:10px 0;overflow:hidden;}
-.category-bar-inner{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:0 12px;}
-.category-bar-inner::-webkit-scrollbar{display:none;}
-.category-pill{flex-shrink:0;padding:8px 18px;border-radius:var(--radius-full);border:1px solid var(--border-subtle);background:var(--bg-card);color:var(--gray-medium);font-size:.82rem;font-weight:500;cursor:pointer;transition:all .25s ease;white-space:nowrap;}
-.category-pill:hover{border-color:var(--gold-primary);color:var(--gold-primary);}
-.category-pill.active{background:var(--gold-primary);color:var(--white);border-color:var(--gold-primary);font-weight:600;box-shadow:0 2px 10px rgba(212,175,55,.3);}
-.trust-bar{display:flex;justify-content:center;gap:16px;padding:8px 12px;background:rgba(212,175,55,.08);border-bottom:1px solid rgba(212,175,55,.15);flex-wrap:wrap;}
-.trust-bar-item{display:flex;align-items:center;gap:6px;font-size:.7rem;font-weight:600;color:var(--gold-primary);white-space:nowrap;}
-.trust-bar-item i{font-size:.75rem;}
-.cursor-glow{position:fixed;width:350px;height:350px;border-radius:50%;pointer-events:none;background:radial-gradient(circle,rgba(212,175,55,.10),transparent 70%);filter:blur(25px);transform:translate(-50%,-50%);z-index:0;opacity:0;transition:opacity .3s ease;}
-.cursor-glow.active{opacity:1;}
-header.scrolled{backdrop-filter:blur(24px) saturate(160%)!important;-webkit-backdrop-filter:blur(24px) saturate(160%)!important;background:rgba(10,10,10,.88)!important;border-bottom:1px solid rgba(212,175,55,.18)!important;box-shadow:0 15px 40px rgba(0,0,0,.5)!important;}
-header.scrolled .header-top{padding:4px 0!important;}
-.back-to-top{position:fixed;bottom:90px;right:20px;width:44px;height:44px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border-subtle);color:var(--gold-primary);font-size:1.1rem;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transform:translateY(20px);transition:all .3s ease;z-index:9998;pointer-events:none;box-shadow:0 4px 15px rgba(0,0,0,.3);}
-.back-to-top.visible{opacity:1;transform:translateY(0);pointer-events:auto;}
-.back-to-top:hover{background:var(--gold-primary);color:var(--white);border-color:var(--gold-primary);}
-.reveal{opacity:0;transform:translateY(35px);transition:.8s cubic-bezier(.2,.8,.2,1);}
-.reveal.show{opacity:1;transform:none;}
-@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
-.logo{flex-shrink:0;display:flex;align-items:center;}
-.logo img{max-height:46px;width:auto;height:auto;}
-.header-actions{position:relative;}
-.mega-menu{position:absolute;top:100%;left:0;width:100%;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:0 0 var(--radius-sm) var(--radius-sm);box-shadow:var(--shadow-md);padding:var(--spacing-md);display:none;z-index:1001;}
-.mega-menu.active{display:block;}
-.mega-menu-content{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--spacing-md);}
-.mega-menu-category{display:flex;flex-direction:column;gap:var(--spacing-xs);}
-.mega-menu-category h4{font-family:'Poppins',sans-serif;font-size:1rem;font-weight:600;color:var(--gold-primary);margin-bottom:var(--spacing-xs);}
-.mega-menu-category a{padding:var(--spacing-xs) 0;color:var(--gray-medium);transition:color .2s ease;cursor:pointer;font-size:.9rem;}
-.mega-menu-category a:hover{color:var(--gold-primary);}
-.mini-cart{position:absolute;top:calc(100% + 10px);right:0;width:320px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);padding:var(--spacing-sm);display:none;z-index:1001;}
-.mini-cart.active{display:block;}
-.mini-cart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--spacing-sm);}
-.mini-cart-header h4{font-family:'Poppins',sans-serif;font-size:.95rem;font-weight:600;color:var(--text-primary);margin:0;}
-.close-mini-cart-btn{color:var(--gray-medium);font-size:1rem;transition:color .2s ease;}
-.close-mini-cart-btn:hover{color:var(--gold-primary);}
-.mini-cart-items{display:flex;flex-direction:column;gap:var(--spacing-xs);max-height:300px;overflow-y:auto;}
-.mini-cart-item{display:flex;gap:var(--spacing-xs);padding:var(--spacing-xs) 0;border-bottom:1px solid var(--border-subtle);}
-.mini-cart-item img{width:50px;height:50px;object-fit:cover;border-radius:var(--radius-sm);}
-.mini-cart-item-info{flex:1;display:flex;flex-direction:column;justify-content:center;}
-.mini-cart-item-name{font-size:.85rem;font-weight:500;color:var(--text-primary);}
-.mini-cart-item-price{font-size:.8rem;color:var(--gold-primary);font-weight:600;}
-.mini-cart-footer{display:flex;flex-direction:column;gap:var(--spacing-xs);margin-top:var(--spacing-sm);}
-.mini-cart-total{display:flex;justify-content:space-between;font-size:1rem;font-weight:600;}
-.btn-whatsapp-mini-cart{background:#25D366;color:var(--white);padding:var(--spacing-xs) var(--spacing-sm);border-radius:var(--radius-sm);text-align:center;font-weight:600;transition:background .2s ease;}
-.btn-whatsapp-mini-cart:hover{background:#128C7E;}
-.btn-view-full-cart{background:transparent;color:var(--gold-primary);border:1px solid var(--gold-dark);padding:var(--spacing-xs) var(--spacing-sm);border-radius:var(--radius-sm);text-align:center;font-weight:600;font-size:.85rem;transition:all .2s ease;}
-.btn-view-full-cart:hover{background:rgba(212,175,55,.12);}
-@media (max-width:768px){.logo img{max-height:32px;}.mini-cart{width:min(320px,calc(100vw - 24px));right:0;}.mega-menu{left:0;right:0;width:auto;}}
-    </style>
-
-    <!-- style.css: carregamento assíncrono -->
-    <link rel="preload" href="style.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="style.css"></noscript>
-
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-title" content="Etevalda MT">
+	<link rel="canonical" href="https://site-etevalda-oficial.vercel.app/">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+	<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="styles.css">
 </head>
 <body>
+	<div class="ev-root">
+		<div class="ev-glow" aria-hidden="true"></div>
+		<div class="ev-texture" aria-hidden="true"></div>
 
-    <!-- SCROLL PROGRESS - Barra dourada no topo -->
-    <div class="scroll-progress" id="scrollProgress"></div>
+		<!-- ------------------------------------------------------- faixa topo -->
+		<header class="ev-top">
+			<div class="ev-top-inner">
+				<div class="ev-brand">
+					<svg class="ev-brand-mark" viewBox="0 0 64 64" aria-hidden="true" focusable="false" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<defs>
+							<linearGradient id="evm" x1="10" y1="12" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+								<stop offset="0%" stop-color="#127056"></stop>
+								<stop offset="52%" stop-color="#0e5c46"></stop>
+								<stop offset="100%" stop-color="#b4703c"></stop>
+							</linearGradient>
+							<linearGradient id="evm2" x1="22" y1="26" x2="42" y2="50" gradientUnits="userSpaceOnUse">
+								<stop offset="0%" stop-color="#1c8d6c"></stop>
+								<stop offset="100%" stop-color="#a8683a"></stop>
+							</linearGradient>
+						</defs>
 
-    <!-- CURSOR GLOW - Brilho dourado seguindo o mouse -->
-    <div class="cursor-glow" id="cursorGlow"></div>
+						<!-- contorno da pedra -->
+						<path d="M20 14h24l10 12-22 30L10 26 20 14Z" stroke="url(#evm)" stroke-width="2.2" stroke-linejoin="round"></path>
 
-    <div id="geoNotification" class="geo-notification"><div class="geo-notif-icon"><i class="fas fa-map-marker-alt"></i></div><div class="geo-notif-text" id="geoNotificationText"></div><div class="geo-notif-bar" id="geoNotifBar"></div></div>
-    <div id="visitNotification" class="visit-notification"><div class="visit-notif-icon"><i class="fas fa-history"></i></div><div class="visit-notif-text" id="visitNotificationText"></div><div class="visit-notif-bar" id="visitNotifBar"></div></div>
-    <div class="toast" id="toast"></div>
+						<!-- facetas -->
+						<path d="M20 14l12 12M44 14L32 26M10 26h44M32 26v30M20 14 10 26M44 14l10 12" stroke="url(#evm2)" stroke-width="1.35" stroke-linecap="round" opacity="0.9"></path>
+					</svg>
+					<span class="ev-brand-text">
+						<span class="ev-brand-name">Grupo Etevalda MT</span>
+						<span class="ev-brand-sub">Alianças &middot; Semijoias</span>
+					</span>
+				</div>
 
-    <header class="header" role="banner">
-        <div class="header-top">
-            <div class="container-fluid">
-                <div class="header-top-content">
-                    <!-- Logo -->
-                    <div class="logo">
-                        <a href="#" id="logoLink" aria-label="Grupo Etevalda MT - Início">
-                            <img src="https://i.postimg.cc/8kxprj3W/etevalda.webp" alt="Grupo Etevalda MT" width="120" height="40" style="object-fit: contain;">
-                        </a>
-                    </div>
+				<a class="ev-top-link" href="#catalogo">Catálogo</a>
 
-                    <div class="header-search" role="search" aria-label="Buscar produtos">
-                        <div id="searchOverlay" class="search-overlay" aria-hidden="true"></div>
-                        <div class="search-wrapper">
-                            <input type="text" id="searchInput" class="search-input" placeholder="Buscar joias..." autocomplete="off" aria-label="Buscar joias, alianças e acessórios">
-                            <button id="searchBtn" class="search-btn" aria-label="Buscar"><i class="fas fa-search"></i></button>
-                            <div id="searchDropdown" class="search-dropdown">
-                                <div id="searchResults" class="search-results"></div>
-                                <div id="searchCategoryList" class="search-category-list"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="header-actions" role="navigation" aria-label="Ações do usuário">
-                        <button id="cartBtn" class="cart-btn" aria-label="Carrinho de compras"><i class="fas fa-shopping-bag"></i><span id="cartCount" class="cart-count" aria-live="polite">0</span></button>
-                        <!-- Mini Carrinho -->
-                        <div class="mini-cart" id="miniCart">
-                            <div class="mini-cart-header">
-                                <h4>Seu Carrinho</h4>
-                                <button id="closeMiniCart" class="close-mini-cart-btn" aria-label="Fechar carrinho"><i class="fas fa-times"></i></button>
-                            </div>
-                            <div id="miniCartItems" class="mini-cart-items">
-                                <p style="text-align:center; color:var(--gray-medium); padding:10px 0;">Seu carrinho está vazio.</p>
-                            </div>
-                            <div class="mini-cart-footer">
-                                <div class="mini-cart-total">
-                                    <span>Total:</span>
-                                    <strong id="miniCartTotal">R$ 0,00</strong>
-                                </div>
-                                <button id="miniCartCheckout" class="btn-whatsapp-mini-cart"><i class="fab fa-whatsapp"></i> Finalizar Pedido</button>
-                                <button id="miniCartViewFull" class="btn-view-full-cart">Ver carrinho completo</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+				<span class="ev-top-badge">
+					<span class="ev-pulse" aria-hidden="true"></span>
+					Atendendo agora
+				</span>
+			</div>
+		</header>
 
-        <!-- Mega Menu -->
-        <div class="mega-menu" id="megaMenu">
-            <div id="megaMenuContent" class="mega-menu-content">
-                <!-- Populado dinamicamente com as categorias do Supabase -->
-            </div>
-        </div>
-    </header>
+		<div class="ev-shell">
+			<main>
+				<!-- ------------------------------------------------- foto principal -->
+				<figure class="ev-hero-photo">
+					<img src="assets/images/etevalda-loja.png" alt="Dona do Grupo Etevalda MT no atendimento, com o nome da empresa ao fundo" width="1280" height="450" decoding="async" fetchpriority="high">
+				</figure>
 
-    <main class="main-content">
-        <!-- HERO BANNER - Foto ou Vídeo por categoria -->
-        <div class="hero-banner" id="heroBanner">
-            <div class="hero-banner-media" id="heroBannerMedia">
-                <img src="https://i.postimg.cc/8kxprj3W/etevalda.webp" alt="Grupo Etevalda MT" loading="eager" fetchpriority="high">
-            </div>
-            <div class="hero-banner-overlay">
-                <h2 class="hero-banner-title" id="heroBannerTitle">Joias e Variedades em Mato Grosso</h2>
-                <p class="hero-banner-subtitle" id="heroBannerSubtitle">Entregamos HOJE em Cuiabá, VG, Rondonópolis e Sinop. Você só paga na hora da entrega.</p>
-            </div>
-        </div>
+				<!-- ---------------------------------------------------------- categorias -->
+				<section class="ev-cats" id="catalogo">
+					<span class="ev-shop-tag">Catálogo</span>
+					<h2 class="ev-cats-title">Veja as alianças por categoria</h2>
+					<p class="ev-cats-sub">
+						Cada categoria abre o catálogo completo, com foto, modelo e valor de cada peça.
+					</p>
 
-        <!-- BARRA DE CATEGORIAS -->
-        <div class="category-bar">
-            <div class="category-bar-inner" id="categoryBar">
-                <button class="category-pill active" data-category="all">Todos</button>
-            </div>
-        </div>
+					<div class="ev-cat-grid">
+						<a class="ev-cat" href="catalogo-banhadas.html">
+							<span class="ev-cat-shot">
+								<img src="assets/images/catalogo/banhadas/par-alianca-tradicional-3mm.webp" alt="Par de alianças banhadas a ouro dentro do estojo" width="800" height="800" loading="lazy" decoding="async">
+								<span class="ev-cat-count">12 modelos</span>
+							</span>
+							<span class="ev-cat-body">
+								<span class="ev-cat-name">Banhadas a ouro</span>
+								<span class="ev-cat-desc">Tradicional, chanfrada, quadrada e friso lateral, de 3 a 10mm.</span>
+								<span class="ev-cat-link">
+									Abrir catálogo
+									<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><path d="M4 10h11M11 5.5 15.5 10 11 14.5"></path></svg>
+								</span>
+							</span>
+						</a>
 
-        <!-- TRUST BAR - Confianca persistente -->
-        <div class="trust-bar">
-            <div class="trust-bar-item"><i class="fas fa-shield-alt"></i> Compra 100% Segura</div>
-            <div class="trust-bar-item"><i class="fas fa-truck"></i> Entrega Rápida em MT</div>
-            <div class="trust-bar-item"><i class="fas fa-money-bill-wave"></i> Pague na Entrega</div>
-            <div class="trust-bar-item"><i class="fas fa-headset"></i> Suporte via WhatsApp</div>
-        </div>
+						<a class="ev-cat" href="catalogo-moeda-antiga.html">
+							<span class="ev-cat-shot">
+								<img src="assets/images/catalogo/moeda-antiga/par-alianca-chanfrada-4mm.webp" alt="Par de alianças de moeda antiga dentro do estojo" width="800" height="800" loading="lazy" decoding="async">
+								<span class="ev-cat-count">6 modelos</span>
+							</span>
+							<span class="ev-cat-body">
+								<span class="ev-cat-name">Moeda antiga</span>
+								<span class="ev-cat-desc">Acabamento artesanal, modelos de 4 a 8mm, com pedra e forro interno.</span>
+								<span class="ev-cat-link">
+									Abrir catálogo
+									<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><path d="M4 10h11M11 5.5 15.5 10 11 14.5"></path></svg>
+								</span>
+							</span>
+						</a>
 
-        <div class="container-fluid">
-            <!-- VITRINE -->
-            <section class="products-section">
-                <div id="productsContainer" class="products-grid">
-                    <!-- 6 Skeletons para estabilidade de layout -->
-                    <div class="product-card skeleton"><div class="skeleton-image"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div></div></div>
-                    <div class="product-card skeleton"><div class="skeleton-image"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div></div></div>
-                    <div class="product-card skeleton"><div class="skeleton-image"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div></div></div>
-                    <div class="product-card skeleton"><div class="skeleton-image"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div></div></div>
-                    <div class="product-card skeleton"><div class="skeleton-image"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div></div></div>
-                    <div class="product-card skeleton"><div class="skeleton-image"></div><div class="product-info"><div class="skeleton-text skeleton-title"></div><div class="skeleton-text skeleton-price"></div></div></div>
-                </div>
-                <!-- Trigger para Infinite Scroll -->
-                <div id="infinite-scroll-trigger"></div>
-            </section>
+						<a class="ev-cat" href="catalogo-prata.html">
+							<span class="ev-cat-shot">
+								<img src="assets/images/catalogo/prata/par-alianca-quadrada-4mm.webp" alt="Casal de mãos usando alianças cor prata" width="800" height="800" loading="lazy" decoding="async">
+								<span class="ev-cat-count">2 modelos</span>
+							</span>
+							<span class="ev-cat-body">
+								<span class="ev-cat-name">Cor prata</span>
+								<span class="ev-cat-desc">Chanfrada e quadrada de 4mm, no tom prata, com entrega no mesmo dia.</span>
+								<span class="ev-cat-link">
+									Abrir catálogo
+									<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><path d="M4 10h11M11 5.5 15.5 10 11 14.5"></path></svg>
+								</span>
+							</span>
+						</a>
+					</div>
+				</section>
 
-            <!-- CARROSSEL 1 -->
-            <section class="carousel-section" id="carouselSection" style="opacity:0; height:0; overflow:hidden;">
-                <div id="infiniteCarousel" class="infinite-carousel"></div>
-            </section>
+				<!-- -------------------------------------------------------- topo -->
+				<section class="ev-hero">
+					<div class="ev-hero-text">
+						<span class="ev-chip ev-reveal ev-d1">
+							<span>Cuiabá &middot; Rondonópolis &middot; Sinop</span>
+						</span>
 
-            <!-- AVALIAÇÕES DOS CLIENTES -->
-            <section class="reviews-carousel-section" id="reviewsSection" style="opacity:0; height:0; overflow:hidden;">
-                <div class="section-header">
-                    <h2 class="section-title reviews-carousel-title" id="reviewsSectionTitle"><i class="fas fa-star"></i> <span id="reviewsTitleText">O que nossos clientes dizem</span></h2>
-                </div>
-                <div id="reviewsContainer" class="reviews-carousel"></div>
-            </section>
+						<h1 class="ev-h1 ev-reveal ev-d2">
+							Escolha a sua aliança
+							<em>e receba ainda hoje</em>
+						</h1>
 
-            <!-- PROVA SOCIAL -->
-            <section class="social-proof-section" id="socialProofSection" style="opacity:0; height:0; overflow:hidden;">
-                <div class="section-header"><h2 class="section-title">Quem Confia, Recomenda</h2><p class="section-subtitle">Clientes em todo Mato Grosso</p></div>
-                <div id="socialProofGrid" class="social-proof-grid"></div>
-            </section>
+						<p class="ev-lead ev-reveal ev-d3">
+							Chame no WhatsApp, veja os modelos e faça o seu pedido. Sem cadastro, sem
+							burocracia e sem adiantar nenhum centavo antes de ter a peça na mão.
+						</p>
 
-            <!-- FAQ -->
-            <section class="faq-section" id="faqSection" style="opacity:0; height:0; overflow:hidden;">
-                <div class="section-header"><h2 class="section-title">Perguntas Frequentes</h2></div>
-                <div id="faqGrid" class="faq-grid"></div>
-            </section>
+						<p class="ev-note ev-reveal ev-d3">
+							<svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+								<circle cx="12" cy="12" r="9"></circle>
+								<path d="M12 7.4V12l3.1 1.9"></path>
+							</svg>
+							Atendimento de gente para gente: do outro lado tem uma pessoa, não um robô.
+						</p>
 
-            <!-- VITRINE DE CONTINUIDADE -->
-            <section class="secondary-products-section" id="secondaryProductsSection" style="opacity:0; height:0; overflow:hidden;">
-                <div class="section-header">
-                    <h2 class="section-title">Veja mais</h2>
-                </div>
-                <div id="secondaryProductsGrid" class="products-grid"></div>
-            </section>
+						<div class="ev-cta ev-reveal ev-d4">
+							<a class="ev-cta-btn" href="https://wa.me/556593475496?text=Ol%C3%A1!%20Quero%20conhecer%20suas%20alian%C3%A7as" target="_blank" rel="noopener noreferrer" aria-label="Conversar no WhatsApp pelo número (65) 9347-5496">
+								<span class="ev-cta-ico">
+									<svg class="h-[21px] w-[21px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+										<path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.64-2.05-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.68-1.62-.93-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.46 0 1.45 1.06 2.85 1.21 3.05.15.2 2.09 3.19 5.06 4.47.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.71 2-1.4.25-.69.25-1.28.17-1.4-.07-.13-.27-.2-.57-.35Z"></path>
+										<path d="M12.04 2.02c-5.5 0-9.97 4.46-9.97 9.96 0 1.76.46 3.48 1.34 5L2 22.02l5.2-1.36a9.96 9.96 0 0 0 4.83 1.24h.01c5.5 0 9.97-4.47 9.97-9.97a9.9 9.9 0 0 0-2.92-7.05 9.9 9.9 0 0 0-7.05-2.86Zm0 18.2h-.01a8.3 8.3 0 0 1-4.22-1.16l-.3-.18-3.13.82.84-3.05-.2-.32a8.26 8.26 0 0 1-1.27-4.4c0-4.57 3.72-8.28 8.3-8.28a8.22 8.22 0 0 1 5.86 2.43 8.24 8.24 0 0 1 2.42 5.86c0 4.57-3.72 8.28-8.29 8.28Z"></path>
+									</svg>
+								</span>
+								<span class="ev-cta-txt">
+									<span class="ev-cta-k">Toque para conversar</span>
+									<span class="ev-cta-n">(65) 9347-5496</span>
+								</span>
+								<svg class="ev-cta-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+									<path d="M4 10h11M11 5.5 15.5 10 11 14.5"></path>
+								</svg>
+							</a>
+							<a class="ev-cta-btn" href="https://wa.me/556581042112?text=Ol%C3%A1!%20Quero%20conhecer%20suas%20alian%C3%A7as" target="_blank" rel="noopener noreferrer" aria-label="Conversar no WhatsApp pelo número (65) 8104-2112">
+								<span class="ev-cta-ico">
+									<svg class="h-[21px] w-[21px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+										<path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.64-2.05-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.68-1.62-.93-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.46 0 1.45 1.06 2.85 1.21 3.05.15.2 2.09 3.19 5.06 4.47.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.71 2-1.4.25-.69.25-1.28.17-1.4-.07-.13-.27-.2-.57-.35Z"></path>
+										<path d="M12.04 2.02c-5.5 0-9.97 4.46-9.97 9.96 0 1.76.46 3.48 1.34 5L2 22.02l5.2-1.36a9.96 9.96 0 0 0 4.83 1.24h.01c5.5 0 9.97-4.47 9.97-9.97a9.9 9.9 0 0 0-2.92-7.05 9.9 9.9 0 0 0-7.05-2.86Zm0 18.2h-.01a8.3 8.3 0 0 1-4.22-1.16l-.3-.18-3.13.82.84-3.05-.2-.32a8.26 8.26 0 0 1-1.27-4.4c0-4.57 3.72-8.28 8.3-8.28a8.22 8.22 0 0 1 5.86 2.43 8.24 8.24 0 0 1 2.42 5.86c0 4.57-3.72 8.28-8.29 8.28Z"></path>
+									</svg>
+								</span>
+								<span class="ev-cta-txt">
+									<span class="ev-cta-k">Toque para conversar</span>
+									<span class="ev-cta-n">(65) 8104-2112</span>
+								</span>
+								<svg class="ev-cta-arrow" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+									<path d="M4 10h11M11 5.5 15.5 10 11 14.5"></path>
+								</svg>
+							</a>
+						</div>
+					</div>
 
-            <!-- CARROSSEL 2 -->
-            <section class="carousel-section" id="carouselSection2" style="opacity:0; height:0; overflow:hidden;">
-                <div id="infiniteCarousel2" class="infinite-carousel"></div>
-            </section>
+					<!-- selo girando (só em telas grandes) -->
+					<div class="ev-hero-aside ev-reveal ev-d4" aria-hidden="true">
+						<div class="ev-seal">
+							<svg class="ev-seal-ring" viewBox="0 0 100 100">
+								<defs>
+									<path id="ev-seal-path" d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0"></path>
+								</defs>
+								<text>
+									<textPath href="#ev-seal-path" startOffset="0" textLength="238.7" lengthAdjust="spacing">
+										ENTREGA NO MESMO DIA &bull; PAGAMENTO NA ENTREGA &bull; ENTREGA NO MESMO DIA
+										&bull; PAGAMENTO NA ENTREGA &bull;
+									</textPath>
+								</text>
+							</svg>
 
-            <!-- CARROSSEL 3 -->
-            <section class="carousel-section" id="carouselSection3" style="opacity:0; height:0; overflow:hidden;">
-                <div id="infiniteCarousel3" class="infinite-carousel"></div>
-            </section>
+							<div class="ev-seal-core">
+								<div>
+									<div class="ev-seal-num">Hoje</div>
+									<div class="ev-seal-txt">
+										entrega no
+										<br>mesmo dia
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
 
-            <!-- CARROSSEL 4 -->
-            <section class="carousel-section" id="carouselSection4" style="opacity:0; height:0; overflow:hidden;">
-                <div id="infiniteCarousel4" class="infinite-carousel"></div>
-            </section>
+				<!-- -------------------------------------------------- faixa de provas -->
+				<section class="ev-strip ev-reveal ev-d5">
+					<div class="ev-strip-item">
+						<div class="ev-strip-n">Hoje</div>
+						<p class="ev-strip-t">Pedido feito hoje, peça na sua mão hoje mesmo.</p>
+					</div>
+					<div class="ev-strip-item">
+						<div class="ev-strip-n">R$ 0</div>
+						<p class="ev-strip-t">Nenhum valor adiantado. O pagamento acontece na entrega.</p>
+					</div>
+					<div class="ev-strip-item">
+						<div class="ev-strip-n">Direto</div>
+						<p class="ev-strip-t">Você conversa com uma pessoa de verdade, sem robô e sem fila.</p>
+					</div>
+				</section>
 
-            <!-- CARROSSEL 5 -->
-            <section class="carousel-section" id="carouselSection5" style="opacity:0; height:0; overflow:hidden;">
-                <div id="infiniteCarousel5" class="infinite-carousel"></div>
-            </section>
+				<!-- ---------------------------------------------------- o que nós temos -->
+				<section class="ev-shop ev-reveal ev-d5">
+					<span class="ev-shop-tag">No mostruário</span>
+					<h2 class="ev-shop-title">O que você encontra com a gente</h2>
+					<p class="ev-shop-sub">
+						Chega perto e olha a peça na mão. Sem pressa, sem compromisso e sem pagar nada
+						antes de receber.
+					</p>
 
-            <!-- CARROSSEL DA EQUIPE -->
-            <section id="teamCarouselSection" class="team-carousel-section" style="opacity:0; height:0; overflow:hidden;">
-                <div class="section-header">
-                    <h2 class="section-title">Variedade Imbatível</h2>
-                    <p class="section-subtitle">Nossa equipe pronta para te atender</p>
-                </div>
-                <div class="team-carousel-container">
-                    <div class="team-carousel-track" id="teamCarouselTrack">
-                        <!-- Os itens serão inseridos aqui pelo JavaScript -->
-                    </div>
-                </div>
-                <div class="team-carousel-dots" id="teamCarouselDots"></div>
-            </section>
+					<div class="ev-shop-side">
+						<span class="ev-shop-side-tag">Temos para mostrar</span>
+						<ul class="ev-shop-list">
+							<li>Alianças banhadas a ouro</li>
+							<li>Alianças de moeda antiga</li>
+							<li>Anel solitário</li>
+							<li>Aparadores</li>
+							<li>Correntes</li>
+							<li>Pulseiras</li>
+							<li>Pingentes</li>
+						</ul>
+						<p class="ev-shop-note">
+							Não achou o que queria? Chama no WhatsApp que a gente procura pra você.
+						</p>
+					</div>
+				</section>
 
-            <!-- MODAL PRODUTO -->
-            <div id="productModal" class="modal">
-                <div id="modalOverlay" class="modal-overlay"></div>
-                <div class="modal-content">
-                    <button id="modalCloseBtn" class="modal-close-btn"><i class="fas fa-times"></i></button>
-                    <div id="modalContainer" class="modal-container"></div>
-                </div>
-            </div>
+				<!-- ------------------------------------------------------- como funciona -->
+				<h2 class="ev-steps-title">Como funciona</h2>
+				<p class="ev-steps-sub">São três passos. Nada além disso.</p>
 
-            <!-- ZOOM -->
-            <div id="superZoomOverlay" class="super-zoom-overlay">
-                <button id="superZoomClose" class="super-zoom-close"><i class="fas fa-times"></i></button>
-                <div class="super-zoom-content" id="superZoomContent"></div>
-            </div>
+				<div class="ev-steps">
+					<article class="ev-step">
+						<div class="ev-step-n">1</div>
+						<h3 class="ev-step-t">
+							<svg class="mb-[7px] mr-[8px] inline h-[18px] w-[18px] align-middle text-[var(--ev-copper)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+								<path d="M20.5 12c0 4.1-3.8 7.4-8.5 7.4-.9 0-1.8-.12-2.6-.35L4.5 21l1.3-3.9A7 7 0 0 1 3.5 12C3.5 7.9 7.3 4.6 12 4.6s8.5 3.3 8.5 7.4Z"></path>
+								<path d="M8.6 12h.01M12 12h.01M15.4 12h.01"></path>
+							</svg>
+							Chama no WhatsApp
+						</h3>
+						<p class="ev-step-p">Toque em um dos números e conte o que você está procurando.</p>
+					</article>
+					<article class="ev-step">
+						<div class="ev-step-n">2</div>
+						<h3 class="ev-step-t">
+							<svg class="mb-[7px] mr-[8px] inline h-[18px] w-[18px] align-middle text-[var(--ev-copper)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+								<path d="M2 7.5A1.5 1.5 0 0 1 3.5 6h9A1.5 1.5 0 0 1 14 7.5V16H2V7.5Z"></path>
+								<path d="M14 10h3.6a2 2 0 0 1 1.7.95L21.5 15V16H14v-6Z"></path>
+								<circle cx="6.5" cy="18" r="2"></circle>
+								<circle cx="17.5" cy="18" r="2"></circle>
+								<path d="M8.5 18h7"></path>
+							</svg>
+							Escolhe o modelo
+						</h3>
+						<p class="ev-step-p">A gente mostra as opções e você bate o martelo do jeito que quiser.</p>
+					</article>
+					<article class="ev-step">
+						<div class="ev-step-n">3</div>
+						<h3 class="ev-step-t">
+							<svg class="mb-[7px] mr-[8px] inline h-[18px] w-[18px] align-middle text-[var(--ev-copper)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+								<path d="M12 2.6 4.6 5.4v6.1c0 4.5 3.1 8.6 7.4 9.9 4.3-1.3 7.4-5.4 7.4-9.9V5.4L12 2.6Z"></path>
+								<path d="m8.7 12 2.3 2.3 4.3-4.5"></path>
+							</svg>
+							Recebe e só então paga
+						</h3>
+						<p class="ev-step-p">A peça chega hoje em Cuiabá, Rondonópolis ou Sinop. Você confere na mão e paga depois.</p>
+					</article>
+				</div>
 
-            <!-- CARRINHO -->
-            <div id="cartSidebar" class="cart-sidebar">
-                <div class="cart-header"><h3><i class="fas fa-shopping-bag"></i> Seu Carrinho</h3><button id="closeCart" class="close-cart-btn"><i class="fas fa-times"></i></button></div>
-                <div id="cartItems" class="cart-items"></div>
-                <div class="cart-footer">
-                    <div class="cart-total"><span>Total:</span><strong id="cartTotal">R$ 0,00</strong></div>
-                    <button id="clearCartBtn" class="btn-clear-cart">Limpar Carrinho</button>
-                    <button id="checkoutBtn" class="btn-whatsapp-cart"><i class="fab fa-whatsapp"></i> Finalizar Pedido</button>
-                </div>
-            </div>
-            <div id="cartOverlay" class="cart-overlay"></div>
+				<!-- ---------------------------------------------------------- combinado -->
+				<section class="ev-promise ev-reveal">
+					<div>
+						<span class="ev-promise-tag">O nosso combinado</span>
+						<p class="ev-promise-h">
+							O pagamento só acontece quando a peça estiver <em>na sua mão</em>
+						</p>
+						<p class="ev-promise-p">
+							Nada de adiantar dinheiro e ficar no escuro esperando. Você escolhe, recebe,
+							confere tudo com calma — e só depois acerta o valor.
+						</p>
+					</div>
 
-            <button class="whatsapp-float" onclick="handleFloatingWhatsApp()" aria-label="Fale conosco no WhatsApp"><i class="fab fa-whatsapp"></i></button>
+					<div class="ev-cities">
+						<span class="ev-city">Cuiabá</span>
+						<span class="ev-city">Rondonópolis</span>
+						<span class="ev-city">Sinop</span>
+					</div>
+				</section>
 
-            <!-- FOOTER COMPLETO -->
-            <footer class="footer">
-    <div class="container-fluid">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>Grupo Etevalda MT</h3>
-                <p>CNPJ: 55.347.120/0001-51</p>
-                <p>A maior loja de variedades de MT</p>
-                <div class="trust-badges">
-                    <span class="badge"><i class="fas fa-shield-alt"></i> Site Seguro</span>
-                    <span class="badge"><i class="fas fa-check-circle"></i> Pague na Entrega</span>
-                </div>
-            </div>
-            <div class="footer-section">
-                <h4>Contatos</h4>
-                <p><i class="fas fa-phone"></i> (65) 2129-0640</p>
-                <p><i class="fab fa-whatsapp"></i> (65) 93475-496</p>
-                <a href="https://api.whatsapp.com/send/?phone=556593475496" target="_blank" class="footer-whatsapp-btn" style="display: inline-flex; align-items: center; gap: 6px; background: #25D366; color: #fff; padding: 6px 12px; border-radius: 30px; margin-top: 15px; text-decoration: none; font-weight: 500; font-size: 0.75rem; transition: all 0.3s ease;">
-    <i class="fab fa-whatsapp" style="font-size: 0.8rem;"></i>
-    <span>WhatsApp</span>
-</a>
-<style>
-    .footer-whatsapp-btn:hover {
-        background: #128C7E;
-        transform: scale(1.02);
-    }
-</style>
-            </div>
-        </div>
-        <div class="footer-bottom"><p>&copy; 2025 Grupo Etevalda MT. Todos os direitos reservados.</p></div>
-    </div>
-</footer>
+				<!-- ------------------------------------------------------------- rodapé -->
+				<footer class="ev-footer">
+					<div>
+						<div class="ev-footer-name">Grupo Etevalda MT</div>
+						<div class="ev-footer-cnpj">CNPJ 55.347.120/0001-51</div>
+					</div>
 
-            <section class="seo-footer-area">
-                <div class="container-fluid"><p class="seo-text">Etevalda Joias Cuiabá é referência em joias finas, alianças banhadas a ouro e prata 925 em Mato Grosso. Entregamos em Cuiabá e Várzea Grande com pagamento na entrega.</p></div>
-            </section>
+					<div class="ev-footer-links">
+						<a class="ev-footer-link" href="https://wa.me/556593475496?text=Ol%C3%A1!%20Quero%20conhecer%20suas%20alian%C3%A7as" target="_blank" rel="noopener noreferrer">
+							<svg class="h-[15px] w-[15px] text-[var(--ev-wa)]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+								<path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.64-2.05-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.68-1.62-.93-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.46 0 1.45 1.06 2.85 1.21 3.05.15.2 2.09 3.19 5.06 4.47.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.71 2-1.4.25-.69.25-1.28.17-1.4-.07-.13-.27-.2-.57-.35Z"></path>
+								<path d="M12.04 2.02c-5.5 0-9.97 4.46-9.97 9.96 0 1.76.46 3.48 1.34 5L2 22.02l5.2-1.36a9.96 9.96 0 0 0 4.83 1.24h.01c5.5 0 9.97-4.47 9.97-9.97a9.9 9.9 0 0 0-2.92-7.05 9.9 9.9 0 0 0-7.05-2.86Zm0 18.2h-.01a8.3 8.3 0 0 1-4.22-1.16l-.3-.18-3.13.82.84-3.05-.2-.32a8.26 8.26 0 0 1-1.27-4.4c0-4.57 3.72-8.28 8.3-8.28a8.22 8.22 0 0 1 5.86 2.43 8.24 8.24 0 0 1 2.42 5.86c0 4.57-3.72 8.28-8.29 8.28Z"></path>
+							</svg>
+							(65) 9347-5496
+						</a>
+						<a class="ev-footer-link" href="https://wa.me/556581042112?text=Ol%C3%A1!%20Quero%20conhecer%20suas%20alian%C3%A7as" target="_blank" rel="noopener noreferrer">
+							<svg class="h-[15px] w-[15px] text-[var(--ev-wa)]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+								<path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.64-2.05-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.68-1.62-.93-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.46 0 1.45 1.06 2.85 1.21 3.05.15.2 2.09 3.19 5.06 4.47.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.71 2-1.4.25-.69.25-1.28.17-1.4-.07-.13-.27-.2-.57-.35Z"></path>
+								<path d="M12.04 2.02c-5.5 0-9.97 4.46-9.97 9.96 0 1.76.46 3.48 1.34 5L2 22.02l5.2-1.36a9.96 9.96 0 0 0 4.83 1.24h.01c5.5 0 9.97-4.47 9.97-9.97a9.9 9.9 0 0 0-2.92-7.05 9.9 9.9 0 0 0-7.05-2.86Zm0 18.2h-.01a8.3 8.3 0 0 1-4.22-1.16l-.3-.18-3.13.82.84-3.05-.2-.32a8.26 8.26 0 0 1-1.27-4.4c0-4.57 3.72-8.28 8.3-8.28a8.22 8.22 0 0 1 5.86 2.43 8.24 8.24 0 0 1 2.42 5.86c0 4.57-3.72 8.28-8.29 8.28Z"></path>
+							</svg>
+							(65) 8104-2112
+						</a>
+					</div>
 
-                        <!-- ÁUDIO DE FUNDO (MÚSICA AMBIENTE) -->
-            <audio id="bgMusic" preload="auto" style="display: none;"></audio>
+					<p class="ev-rights">
+						&copy; <span id="ano">2026</span> Grupo Etevalda MT &middot; Entrega no mesmo dia em
+						Cuiabá, Rondonópolis e Sinop.
+					</p>
+				</footer>
+			</main>
+		</div>
 
-            <!-- CARREGAMENTO DE ALTA PERFORMANCE -->
-            <!-- Polyfill: evita 'process.env is not defined' em libs como supabase-js no browser -->
-            <script>window.process = window.process || { env: {} };</script>
-            <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="script.js"></script>
+		<!-- ------------------------------------ atalhos flutuantes do WhatsApp -->
+		<div class="ev-fab-stack">
+			<a class="ev-fab" href="https://wa.me/556593475496?text=Ol%C3%A1!%20Quero%20conhecer%20suas%20alian%C3%A7as" target="_blank" rel="noopener noreferrer" aria-label="Conversar no WhatsApp pelo número (65) 9347-5496">
+				<span class="ev-fab-ico">
+					<svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+						<path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.64-2.05-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.68-1.62-.93-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.46 0 1.45 1.06 2.85 1.21 3.05.15.2 2.09 3.19 5.06 4.47.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.71 2-1.4.25-.69.25-1.28.17-1.4-.07-.13-.27-.2-.57-.35Z"></path>
+						<path d="M12.04 2.02c-5.5 0-9.97 4.46-9.97 9.96 0 1.76.46 3.48 1.34 5L2 22.02l5.2-1.36a9.96 9.96 0 0 0 4.83 1.24h.01c5.5 0 9.97-4.47 9.97-9.97a9.9 9.9 0 0 0-2.92-7.05 9.9 9.9 0 0 0-7.05-2.86Zm0 18.2h-.01a8.3 8.3 0 0 1-4.22-1.16l-.3-.18-3.13.82.84-3.05-.2-.32a8.26 8.26 0 0 1-1.27-4.4c0-4.57 3.72-8.28 8.3-8.28a8.22 8.22 0 0 1 5.86 2.43 8.24 8.24 0 0 1 2.42 5.86c0 4.57-3.72 8.28-8.29 8.28Z"></path>
+					</svg>
+				</span>
+				<span class="ev-fab-txt">
+					<span class="ev-fab-k">Falar agora</span>
+					<span class="ev-fab-n">(65) 9347-5496</span>
+				</span>
+			</a>
+			<a class="ev-fab" href="https://wa.me/556581042112?text=Ol%C3%A1!%20Quero%20conhecer%20suas%20alian%C3%A7as" target="_blank" rel="noopener noreferrer" aria-label="Conversar no WhatsApp pelo número (65) 8104-2112">
+				<span class="ev-fab-ico">
+					<svg class="h-[17px] w-[17px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+						<path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.64-2.05-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.68-1.62-.93-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.46 0 1.45 1.06 2.85 1.21 3.05.15.2 2.09 3.19 5.06 4.47.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.71 2-1.4.25-.69.25-1.28.17-1.4-.07-.13-.27-.2-.57-.35Z"></path>
+						<path d="M12.04 2.02c-5.5 0-9.97 4.46-9.97 9.96 0 1.76.46 3.48 1.34 5L2 22.02l5.2-1.36a9.96 9.96 0 0 0 4.83 1.24h.01c5.5 0 9.97-4.47 9.97-9.97a9.9 9.9 0 0 0-2.92-7.05 9.9 9.9 0 0 0-7.05-2.86Zm0 18.2h-.01a8.3 8.3 0 0 1-4.22-1.16l-.3-.18-3.13.82.84-3.05-.2-.32a8.26 8.26 0 0 1-1.27-4.4c0-4.57 3.72-8.28 8.3-8.28a8.22 8.22 0 0 1 5.86 2.43 8.24 8.24 0 0 1 2.42 5.86c0 4.57-3.72 8.28-8.29 8.28Z"></path>
+					</svg>
+				</span>
+				<span class="ev-fab-txt">
+					<span class="ev-fab-k">Falar agora</span>
+					<span class="ev-fab-n">(65) 8104-2112</span>
+				</span>
+			</a>
+		</div>
+	</div>
 
-            <!-- ========================================
-            PREMIUM LUXURY JS - Efeitos de nível internacional
-            ======================================== -->
-            <script>
-            (function() {
-                'use strict';
+	<script>
+		document.getElementById("ano").textContent = new Date().getFullYear();
+		// Registra o clique no WhatsApp como contato para o Meta Pixel.
+		document.addEventListener("click", function (evento) {
+			var link = evento.target.closest('a[href*="wa.me"]');
+			if (!link || typeof window.fbq !== "function") return;
+			var card = link.closest(".ct-card");
+			var nome = card ? card.querySelector(".ct-name") : null;
+			window.fbq("track", "Contact", nome ? { content_name: nome.textContent.trim() } : {});
+		});
 
-                // 1. SCROLL PROGRESS BAR - Barra dourada no topo
-                const progressBar = document.getElementById('scrollProgress');
-                if (progressBar) {
-                    window.addEventListener('scroll', () => {
-                        const scrollTop = document.documentElement.scrollTop;
-                        const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-                        const progress = (scrollTop / scrollHeight) * 100;
-                        progressBar.style.width = progress + '%';
-                    }, { passive: true });
-                }
-
-                // 2. CURSOR GLOW - Brilho dourado seguindo o mouse
-                const glow = document.getElementById('cursorGlow');
-                if (glow) {
-                    let glowActive = false;
-                    document.addEventListener('mousemove', (e) => {
-                        glow.style.left = e.clientX + 'px';
-                        glow.style.top = e.clientY + 'px';
-                        if (!glowActive) {
-                            glowActive = true;
-                            glow.classList.add('active');
-                        }
-                    });
-                    document.addEventListener('mouseleave', () => {
-                        glow.classList.remove('active');
-                        glowActive = false;
-                    });
-                }
-
-                // 3. 3D CARD TILT - Cards acompanham o mouse
-                function initCardTilt() {
-                    document.querySelectorAll('.product-card:not(.skeleton)').forEach(card => {
-                        if (card._tiltInit) return;
-                        card._tiltInit = true;
-
-                        card.addEventListener('mousemove', (e) => {
-                            const r = card.getBoundingClientRect();
-                            const x = e.clientX - r.left;
-                            const y = e.clientY - r.top;
-                            const rotateY = ((x / r.width) - 0.5) * 10;
-                            const rotateX = ((0.5 - y / r.height)) * 10;
-                            card.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-6px)`;
-                        });
-
-                        card.addEventListener('mouseleave', () => {
-                            card.style.transform = '';
-                        });
-                    });
-                }
-                initCardTilt();
-                const tiltObserver = new MutationObserver(() => initCardTilt());
-                const grid = document.getElementById('productsContainer');
-                if (grid) tiltObserver.observe(grid, { childList: true });
-
-                // 4. HEADER SCROLLED - Refinado ao descer
-                const header = document.querySelector('header');
-                if (header) {
-                    window.addEventListener('scroll', () => {
-                        header.classList.toggle('scrolled', window.scrollY > 40);
-                    }, { passive: true });
-                }
-
-                // 5. SCROLL REVEAL - Entrada elegante
-                const revealObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            entry.target.classList.add('show');
-                            revealObserver.unobserve(entry.target);
-                        }
-                    });
-                }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
-
-                function initReveal() {
-                    document.querySelectorAll('.reveal:not(.show)').forEach(el => {
-                        revealObserver.observe(el);
-                    });
-                }
-                initReveal();
-                if (grid) {
-                    const revealMutObs = new MutationObserver(() => initReveal());
-                    revealMutObs.observe(grid, { childList: true });
-                }
-
-                // 6. CART SPARKLE - Brilho ao adicionar
-                const cartCountEl = document.getElementById('cartCount');
-                if (cartCountEl) {
-                    const origUpdate = window.updateCartUI;
-                    if (typeof origUpdate === 'function') {
-                        window.updateCartUI = function() {
-                            origUpdate.call(this);
-                            cartCountEl.classList.add('sparkle');
-                            setTimeout(() => cartCountEl.classList.remove('sparkle'), 600);
-                        };
-                    }
-                }
-
-                // 7. BACK TO TOP
-                const backBtn = document.createElement('button');
-                backBtn.className = 'back-to-top';
-                backBtn.innerHTML = '<i class="fas fa-arrow-up"></i>';
-                backBtn.setAttribute('aria-label', 'Voltar ao topo');
-                backBtn.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-                document.body.appendChild(backBtn);
-
-                window.addEventListener('scroll', () => {
-                    backBtn.classList.toggle('visible', window.scrollY > 500);
-                }, { passive: true });
-
-                // 8. HERO BANNER INTELIGENTE
-                const heroBanner = document.getElementById('heroBanner');
-                const heroMedia = document.getElementById('heroBannerMedia');
-                const heroTitle = document.getElementById('heroBannerTitle');
-                const heroSubtitle = document.getElementById('heroBannerSubtitle');
-                let currentHeroVideo = null;
-
-                function isVideoUrl(url) {
-                    if (!url) return false;
-                    const lower = url.toLowerCase();
-                    return /\.(mp4|webm|mov|avi)(\?|$)/i.test(lower) ||
-                           /youtu(\.be\/|be\.com\/)/i.test(lower) ||
-                           /vimeo\.com\//i.test(lower);
-                }
-
-                function getVideoEmbedUrl(url) {
-                    const lower = url.toLowerCase();
-                    const ytMatch = lower.match(/youtu\.be\/([^&?/]+)/i) ||
-                                    lower.match(/youtube\.com\/watch\?v=([^&]+)/i) ||
-                                    lower.match(/youtube\.com\/shorts\/([^&?/]+)/i);
-                    if (ytMatch) {
-                        return 'https://www.youtube.com/embed/' + ytMatch[1] + '?autoplay=1&mute=1&loop=1&playlist=' + ytMatch[1] + '&controls=0&modestbranding=1&rel=0';
-                    }
-                    const vimeoMatch = lower.match(/vimeo\.com\/(\d+)/i);
-                    if (vimeoMatch) {
-                        return 'https://player.vimeo.com/video/' + vimeoMatch[1] + '?autoplay=1&muted=1&loop=1';
-                    }
-                    return url;
-                }
-
-                function renderHeroBanner(bannerUrl, title, subtitle) {
-                    if (!bannerUrl) { resetHeroToDefault(); return; }
-                    heroBanner.style.display = 'block';
-                    heroTitle.textContent = title || '';
-                    heroSubtitle.textContent = subtitle || '';
-
-                    if (isVideoUrl(bannerUrl)) {
-                        const embedUrl = getVideoEmbedUrl(bannerUrl);
-                        const isDirectVideo = /\.(mp4|webm|mov)(\?|$)/i.test(bannerUrl);
-                        if (isDirectVideo) {
-                            heroMedia.innerHTML = '<video src="' + bannerUrl + '" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;cursor:pointer;" id="heroVideo"></video>';
-                            currentHeroVideo = document.getElementById('heroVideo');
-                            currentHeroVideo.addEventListener('click', function() { this.currentTime = 0; this.muted = false; this.play(); });
-                        } else {
-                            heroMedia.innerHTML = '<iframe src="' + embedUrl + '" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="width:100%;height:100%;border:none;"></iframe>';
-                        }
-                    } else {
-                        heroMedia.innerHTML = '<img src="' + bannerUrl + '" alt="' + (title || '') + '" loading="eager">';
-                    }
-                }
-
-                if (window.IntersectionObserver) {
-                    const heroObserver = new IntersectionObserver((entries) => {
-                        entries.forEach(entry => {
-                            if (currentHeroVideo) {
-                                entry.isIntersecting ? currentHeroVideo.play().catch(()=>{}) : currentHeroVideo.pause();
-                            }
-                        });
-                    }, { threshold: 0.3 });
-                    if (heroBanner) heroObserver.observe(heroBanner);
-                }
-
-                function loadHeroBanner() {
-                    if (typeof categories === 'undefined' || !categories) return;
-                    const hash = window.location.hash.slice(1);
-                    const currentCat = hash && hash !== 'all' ? hash : null;
-                    let catBanner = null, allCategoryBanner = null;
-
-                    categories.forEach(cat => {
-                        const slug = (cat.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '-');
-                        if (cat.banner_all) allCategoryBanner = cat;
-                        if (currentCat && slug === currentCat) catBanner = cat;
-                    });
-
-                    const banner = catBanner || allCategoryBanner;
-                    if (banner && banner.banner_url) {
-                        renderHeroBanner(banner.banner_url, banner.hero_title, banner.hero_subtitle);
-                    } else {
-                        resetHeroToDefault();
-                    }
-                }
-
-                function resetHeroToDefault() {
-                    heroBanner.style.display = 'block';
-                    heroMedia.innerHTML = '<img src="https://i.postimg.cc/8kxprj3W/etevalda.webp" alt="Grupo Etevalda MT" loading="eager" fetchpriority="high">';
-                    heroTitle.textContent = 'Joias e Variedades em Mato Grosso';
-                    heroSubtitle.textContent = 'Entregamos HOJE em Cuiabá, VG, Rondonópolis e Sinop. Você só paga na hora da entrega.';
-                }
-
-                window.addEventListener('hashchange', () => setTimeout(loadHeroBanner, 300));
-                setTimeout(loadHeroBanner, 2500);
-
-            })();
-            </script>
-
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
-        </div>
-    </main>
-
-
-<!-- Service Worker (PWA) -->
-<script>
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(function(err) {
-        console.warn('SW registration failed:', err);
-    });
-}
-function copyProductLink(id) {
-    var url = 'https://www.etevaldajoias.com/#produto-' + id;
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(url).then(function() {
-            if (typeof showToast === 'function') showToast('Link copiado!');
-        });
-    }
-}
-</script>
+	</script>
 </body>
 </html>

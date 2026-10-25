@@ -1,19 +1,71 @@
 {
   "headers": [
     {
-      "source": "/(.*)\\.(jpg|jpeg|png|webp|mp4|gif|svg|ico)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "source": "/(.*)\\.(jpg|jpeg|png|webp|gif|svg|ico)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     },
     {
       "source": "/(.*)\\.(css|js)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400, must-revalidate" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        }
+      ]
     }
   ],
   "redirects": [
-    { "source": "/pares-de-aliancas", "destination": "/#aliancas", "permanent": true },
-    { "source": "/alianca-moeda-antiga", "destination": "/#alianca-moeda-antiga", "permanent": true },
-    { "source": "/aliancas-pratas", "destination": "/#aliancas-pratas", "permanent": true },
-    { "source": "/relogios-femininos", "destination": "/#relogios-femininos", "permanent": true },
-    { "source": "/relogios-masculinos", "destination": "/#relogios-masculinos", "permanent": true }
+    {
+      "source": "/pares-de-aliancas",
+      "destination": "/#catalogo",
+      "permanent": true
+    },
+    {
+      "source": "/aliancas-banhadas",
+      "destination": "/catalogo-banhadas.html",
+      "permanent": true
+    },
+    {
+      "source": "/alianca-moeda-antiga",
+      "destination": "/catalogo-moeda-antiga.html",
+      "permanent": true
+    },
+    {
+      "source": "/aliancas-pratas",
+      "destination": "/catalogo-prata.html",
+      "permanent": true
+    },
+    {
+      "source": "/relogios-femininos",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/relogios-masculinos",
+      "destination": "/",
+      "permanent": true
+    }
   ]
 }
