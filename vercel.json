@@ -58,6 +58,11 @@
       "permanent": true
     },
     {
+      "source": "/anel-solitario",
+      "destination": "/catalogo-solitario.html",
+      "permanent": true
+    },
+    {
       "source": "/relogios-femininos",
       "destination": "/",
       "permanent": true
